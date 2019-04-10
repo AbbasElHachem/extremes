@@ -158,13 +158,14 @@ def find_simulataneous_events(ppt_thrs_lst, stns_ids_lst,
                             'ppt_val_%0.2f_date_%s_stn_%s_thr_%s.csv'
                             % (val,
                                ix.isoformat().replace(':', '_').replace('T', '_'),
-                               iid, thr)))
+                               iid, thr)),
+                        float_format='%0.2f')
 
             else:
                 print('Station %s, has no data above % 0.1f mm' % (iid, thr))
                 continue
-            break
-        break
+#             break
+#         break
 
 
 if __name__ == '__main__':
