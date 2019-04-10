@@ -158,7 +158,7 @@ def find_simulataneous_events(ppt_thrs_lst, stns_ids_lst,
                 print('Station %s, has no data above % 0.1f mm' % (iid, thr))
                 continue
             break
-        # break
+        break
 
 
 if __name__ == '__main__':
