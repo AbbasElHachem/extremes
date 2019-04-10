@@ -44,6 +44,7 @@ path_to_ppt_hdf_data = (r'X:\exchange\ElHachem'
                         r'\niederschlag_deutschland'
                         r'\1993_2016_5min_merge_nan.h5')
 
+
 out_save_dir = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes')
 
 ppt_thrs = [4, 6, 8, 12, 14, 16, 20]  # 0.1, 1, 2, 4, 6, 8, 10 12, 14,
@@ -92,64 +93,65 @@ def find_simulataneous_events(ppt_thrs_lst, stns_ids_lst,
                     count_all_stns = len(ids2)
 
                     for ii2, iid2 in enumerate(ids2):
-                        if iid != iid2:
-                            print('Second Station ID is: ', iid2,
-                                  ' index is ', ii2,
-                                  ' Count of Stns is :', count_all_stns)
-                            # read second station
-                            try:
-                                idf2 = HDF52.get_pandas_dataframe(ids=[iid2])
-                            except Exception as msg:
-                                print(msg)
-                                continue
 
-                            # select values above threshold and drop nans
-                            stn2_abv_thr = idf2[idf2 >= thr]
-                            stn2_abv_thr.dropna(inplace=True)
+                        print('Second Station ID is: ', iid2,
+                              ' index is ', ii2,
+                              ' Count of Stns is :', count_all_stns)
+                        # read second station
+                        try:
+                            idf2 = HDF52.get_pandas_dataframe(ids=[iid2])
+                        except Exception as msg:
+                            print(msg)
+                            continue
 
-                            if len(stn2_abv_thr.values) > 0:
-                                # check if at the time event at stn2
-                                if ix in stn2_abv_thr.index:
-                                    print('Same time in Station 2', ix)
+                        # select values above threshold and drop nans
+                        stn2_abv_thr = idf2[idf2 >= thr]
+                        stn2_abv_thr.dropna(inplace=True)
 
-                                    val2 = stn2_abv_thr.loc[ix, :].values[0]
+                        if len(stn2_abv_thr.values) > 0:
+                            # check if at the time event at stn2
 
-                                    print(' Ppt at Station 2 is', val2)
-                                    df_result.loc[0, iid2] = val2
+                            if ix in stn2_abv_thr.index:
+                                print('Same time in Station 2', ix)
 
-                                for time_shift in time_shifts_lst:
-                                    print('Shifting time index by +- ',
-                                          time_shift)
+                                val2 = stn2_abv_thr.loc[ix, :].values[0]
 
-                                    # get the shift as float, for index in df
-                                    shift_minutes = (
-                                        time_shift / 60).total_seconds()
+                                print(' Ppt at Station 2 is', val2)
+                                df_result.loc[0, iid2] = val2
 
-                                    ix2_pos = ix + time_shift  # pos shifted
-                                    ix2_neg = ix - time_shift  # neg shifted
+                            for time_shift in time_shifts_lst:
+                                print('Shifting time by +- ', time_shift)
 
-                                    if ix2_pos in stn2_abv_thr.index:
-                                        print('+ shifted idx present', ix2_pos)
+                                # get the shift as float, for index in df
+                                shift_minutes = (
+                                    time_shift / 60).total_seconds()
 
-                                        val2_pos = stn2_abv_thr.loc[
-                                            ix2_pos, :].values[0]
+                                ix2_pos = ix + time_shift  # pos shifted
+                                ix2_neg = ix - time_shift  # neg shifted
 
-                                        df_result.loc[shift_minutes,
-                                                      iid2] = val2_pos
+                                if ix2_pos in stn2_abv_thr.index:
+                                    print('+ shifted idx present', ix2_pos)
 
-                                    if ix2_neg in stn2_abv_thr.index:
-                                        print('- shifted idx present', ix2_neg)
+                                    val2_pos = stn2_abv_thr.loc[
+                                        ix2_pos, :].values[0]
 
-                                        shift_minutes_neg = - shift_minutes
+                                    df_result.loc[shift_minutes,
+                                                  iid2] = val2_pos
 
-                                        val2_neg = stn2_abv_thr.loc[
-                                            ix2_neg, :].values[0]
-                                        df_result.loc[shift_minutes_neg,
-                                                      iid2] = val2_neg
+                                if ix2_neg in stn2_abv_thr.index:
+                                    print('- shifted idx present', ix2_neg)
 
-                            del (idf2, stn2_abv_thr)
+                                    shift_minutes_neg = - shift_minutes
+
+                                    val2_neg = stn2_abv_thr.loc[
+                                        ix2_neg, :].values[0]
+                                    df_result.loc[shift_minutes_neg,
+                                                  iid2] = val2_neg
+
+                        del (idf2, stn2_abv_thr)
                         count_all_stns -= 1
                     df_result.dropna(axis=1, how='all', inplace=True)
+                    # save df for every event
                     df_result.to_csv(
                         os.path.join(
                             out_dir,
@@ -157,7 +159,6 @@ def find_simulataneous_events(ppt_thrs_lst, stns_ids_lst,
                             % (val,
                                ix.isoformat().replace(':', '_').replace('T', '_'),
                                iid, thr)))
-                    # break
 
             else:
                 print('Station %s, has no data above % 0.1f mm' % (iid, thr))
