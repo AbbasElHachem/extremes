@@ -44,6 +44,8 @@ path_to_ppt_hdf_data = (r'X:\exchange\ElHachem'
                         r'\niederschlag_deutschland'
                         r'\1993_2016_5min_merge_nan.h5')
 
+out_save_dir = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes')
+
 ppt_thrs = [4, 6, 8, 12, 14, 16, 20]  # 0.1, 1, 2, 4, 6, 8, 10 12, 14,
 
 time_shifts = [timedelta(minutes=5), timedelta(minutes=10),
@@ -56,7 +58,8 @@ time_shifts_arr_floats = [i for i in np.arange(-60, 61, 5)]
 
 
 def find_simulataneous_events(ppt_thrs_lst, stns_ids_lst,
-                              time_shifts_lst, time_shifts_arr):
+                              time_shifts_lst, time_shifts_arr,
+                              out_dir):
 
     for thr in ppt_thrs_lst:
         print('PPT Threshold is: ', thr, ' mm')
@@ -148,10 +151,12 @@ def find_simulataneous_events(ppt_thrs_lst, stns_ids_lst,
                         count_all_stns -= 1
                     df_result.dropna(axis=1, how='all', inplace=True)
                     df_result.to_csv(
-                        'ppt_val_%0.2f_date_%s_stn_%s_thr_%s.csv'
-                        % (val,
-                           ix.isoformat().replace(':', '_').replace('T', '_'),
-                           iid, thr))
+                        os.path.join(
+                            out_dir,
+                            'ppt_val_%0.2f_date_%s_stn_%s_thr_%s.csv'
+                            % (val,
+                               ix.isoformat().replace(':', '_').replace('T', '_'),
+                               iid, thr)))
                     # break
 
             else:
@@ -173,7 +178,8 @@ if __name__ == '__main__':
     find_simulataneous_events(ppt_thrs_lst=ppt_thrs,
                               stns_ids_lst=ids,
                               time_shifts_lst=time_shifts,
-                              time_shifts_arr=time_shifts_arr_floats)
+                              time_shifts_arr=time_shifts_arr_floats,
+                              out_dir=out_save_dir)
 
     STOP = timeit.default_timer()  # Ending time
     print(('\n****Done with everything on %s.\nTotal run time was'
