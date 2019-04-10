@@ -22,9 +22,7 @@ __email__ = "abbas.el-hachem@iws.uni-stuttgart.de"
 
 # ===================================================
 
-from descartes import PolygonPatch
-from matplotlib.collections import PatchCollection
-from matplotlib.patches import Polygon
+from itertools import cycle
 
 from _02_plot_simultaneous_stns import list_all_full_path
 from _02_plot_simultaneous_stns import get_events_stn_data
@@ -37,7 +35,11 @@ import time
 import shapefile
 import pyproj
 import matplotlib.pyplot as plt
-import numpy as np
+#import numpy as np
+
+cycol = cycle(['blue', 'green', 'orange', 'cyan', 'm',
+               'orange', 'darkblue', 'lime', 'gold', 'maroon',
+               'olive', 'violet', 'tomato'])
 
 path_to_dfs_simultaneous_events = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
 
@@ -69,6 +71,10 @@ def convert_coords_fr_wgs84_to_utm32_(epgs_initial_str, epsg_final_str,
     return x, y
 
 
+#==============================================================================
+#
+#==============================================================================
+
 def plot_coordinates(path_to_events,
                      path_stns_coords,
                      xcoords_name,
@@ -98,13 +104,24 @@ def plot_coordinates(path_to_events,
 
             x0, y0 = convert_coords_fr_wgs84_to_utm32_(wgs82, utm32, lon, lat)
 
-            ax.scatter(x0, y0, marker='.', c='k', alpha=0.5, s=5)
+            ax.scatter(x0, y0, marker='.', c='grey', alpha=0.35, s=2)
 
-        ax.scatter(stn_one_xcoords, stn_one_ycoords, c='r', marker='+',
-                   label=('%s ppt was %0.2f' % (stn_one_id, ppt_stn_one)))
+        ax.scatter(stn_one_xcoords, stn_one_ycoords, c='r', marker='x', s=40,
+                   label=('Stn %s ppt was %0.2f'
+                          % (str(int(stn_one_id)), ppt_stn_one)))
 
-        ax.scatter(stns_2_xcoords, stns_2_ycoords, c='b', marker='D',
-                   label=stns_2_ids)
+        for i, stn2_id in enumerate(stns_2_ids):
+            stn2_xcoord = stns_2_xcoords[i]
+            stn2_ycoord = stns_2_ycoords[i]
+            time_idx_dict = stns_2_ids_vals_dict[stn2_id]
+
+            for _, (idx, val) in enumerate(time_idx_dict.items()):
+                if len(val) > 0:
+                    ax.scatter(stn2_xcoord, stn2_ycoord, c=next(cycol),
+                               marker='8', s=40,
+                               label=('Stn %s ppt was %0.2f at %0.0f min'
+                                      % (str(int(stn2_id)), val[0], idx)))
+
         ax.set_title(event_date)
         ax.legend(loc=0)
         plt.savefig(os.path.join(path_to_dfs_simultaneous_events,
