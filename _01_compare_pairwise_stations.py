@@ -47,7 +47,7 @@ path_to_ppt_hdf_data = (r'X:\exchange\ElHachem'
 
 out_save_dir = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes')
 
-ppt_thrs = [4, 6, 8, 12, 14, 16, 20]  # 0.1, 1, 2, 4, 6, 8, 10 12, 14,
+ppt_thrs = [16, 20]  # 0.1, 1, 2, 4, 6, 8, 10 12, 14,
 
 time_shifts = [timedelta(minutes=5), timedelta(minutes=10),
                timedelta(minutes=15), timedelta(minutes=20),
@@ -58,6 +58,7 @@ time_shifts = [timedelta(minutes=5), timedelta(minutes=10),
 time_shifts_arr_floats = [i for i in np.arange(-60, 61, 5)]
 
 
+# @profile
 def find_simulataneous_events(ppt_thrs_lst, stns_ids_lst,
                               time_shifts_lst, time_shifts_arr,
                               out_dir):
@@ -152,20 +153,21 @@ def find_simulataneous_events(ppt_thrs_lst, stns_ids_lst,
                         count_all_stns -= 1
                     df_result.dropna(axis=1, how='all', inplace=True)
                     # save df for every event
-                    df_result.to_csv(
-                        os.path.join(
-                            out_dir,
-                            'ppt_val_%0.2f_date_%s_stn_%s_thr_%s.csv'
-                            % (val,
-                               ix.isoformat().replace(':', '_').replace('T', '_'),
-                               iid, thr)),
-                        float_format='%0.2f')
+                    if len(df_result.values) > 0:
+                        df_result.to_csv(
+                            os.path.join(
+                                out_dir,
+                                'ppt_val_%0.2f_date_%s_stn_%s_thr_%s.csv'
+                                % (val,
+                                   ix.isoformat().replace(':', '_').replace('T', '_'),
+                                   iid, thr)),
+                            float_format='%0.2f')
 
             else:
                 print('Station %s, has no data above % 0.1f mm' % (iid, thr))
                 continue
 #             break
-#         break
+        break
 
 
 if __name__ == '__main__':
