@@ -47,7 +47,7 @@ path_to_ppt_hdf_data = (r'X:\exchange\ElHachem'
 
 out_save_dir = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes')
 
-ppt_thrs = [16, 20]  # 0.1, 1, 2, 4, 6, 8, 10 12, 14,
+ppt_thrs = [8, 16, 20]  # 0.1, 1, 2, 4, 6, 8, 10 12, 14,
 
 time_shifts = [timedelta(minutes=5), timedelta(minutes=10),
                timedelta(minutes=15), timedelta(minutes=20),
@@ -121,7 +121,7 @@ def find_simulataneous_events(ppt_thrs_lst, stns_ids_lst,
                                 df_result.loc[0, iid2] = val2
 
                             for time_shift in time_shifts_lst:
-                                print('Shifting time by +- ', time_shift)
+                                # print('Shifting time by +- ', time_shift)
 
                                 # get the shift as float, for index in df
                                 shift_minutes = (
@@ -154,6 +154,7 @@ def find_simulataneous_events(ppt_thrs_lst, stns_ids_lst,
                     df_result.dropna(axis=1, how='all', inplace=True)
                     # save df for every event
                     if len(df_result.values) > 0:
+                        print('Saving dataframe')
                         df_result.to_csv(
                             os.path.join(
                                 out_dir,
@@ -167,7 +168,7 @@ def find_simulataneous_events(ppt_thrs_lst, stns_ids_lst,
                 print('Station %s, has no data above % 0.1f mm' % (iid, thr))
                 continue
 #             break
-        break
+#         break
 
 
 if __name__ == '__main__':
