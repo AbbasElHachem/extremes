@@ -36,6 +36,7 @@ import time
 import pandas as pd
 import numpy as np
 
+# TODO: run script only if df does not exist, MAKE ME FASTER
 
 main_dir = Path(os.getcwd())
 os.chdir(main_dir)
@@ -47,7 +48,7 @@ path_to_ppt_hdf_data = (r'X:\exchange\ElHachem'
 
 out_save_dir = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes')
 
-ppt_thrs = [4]  # 0.1, 1, 2, 4, 6, 8, 10 12, 14,
+ppt_thrs = [16]  # 0.1, 1, 2, 4, 6, 8, 10 12, 14,
 
 time_shifts = [timedelta(minutes=5), timedelta(minutes=10),
                timedelta(minutes=15), timedelta(minutes=20),
@@ -81,8 +82,8 @@ def find_simulataneous_events(ppt_thrs_lst, stns_ids_lst,
 
                 # start going through events of station one
                 for ix, val in zip(stn1_abv_thr.index, stn1_abv_thr.values):
-                    print('First time index is:', ix, 'Ppt Station 1 is ', val)
-
+                    print('First time index is:', ix,
+                          'Ppt Station 1 is ', val)
                     # remove the id of the first station from all IDS
                     ids2 = np.array(list(filter(lambda x: x != iid, ids)))
 
@@ -153,7 +154,8 @@ def find_simulataneous_events(ppt_thrs_lst, stns_ids_lst,
                         count_all_stns -= 1
                     df_result.dropna(axis=1, how='all', inplace=True)
                     # save df for every event
-                    if len(df_result.values) > 0:
+                    if df_result.values[0].shape[0] > 0:
+
                         print('Saving dataframe')
                         df_result.to_csv(
                             os.path.join(
@@ -163,6 +165,10 @@ def find_simulataneous_events(ppt_thrs_lst, stns_ids_lst,
                                    ix.isoformat().replace(':', '_').replace('T', '_'),
                                    iid, thr)),
                             float_format='%0.2f')
+                        del df_result
+                    else:
+                        print('df is empty will be deleted')
+                        del df_result
 
             else:
                 print('Station %s, has no data above % 0.1f mm' % (iid, thr))

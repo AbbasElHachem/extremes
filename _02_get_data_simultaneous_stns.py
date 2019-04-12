@@ -4,6 +4,9 @@
 """
 GOAL: get station ids and coordinates for plotting on map
 
+Get for every event the 'main' station and all other 
+station where rainfall was above the threshold, occurring
+with in +-60min, return the result to be used in script _03_
 """
 
 __author__ = "Abbas El Hachem"
@@ -70,7 +73,7 @@ def get_events_stn_data(df_event_file,
                         path_stns_coords,
                         xcoord_name,
                         ycoord_name):
-
+    ''' fct to get simultaneous evetns, at station one and all other stns'''
     stn_ids, df_coords = read_df_stns_coord(path_stns_coords)
     print(df_event_file)
     split_file = df_event_file.split('_')
@@ -78,6 +81,8 @@ def get_events_stn_data(df_event_file,
     stn_one_id = float(split_file[-3])
     assert stn_one_id in stn_ids
 
+    ppt_thr = split_file[-1].replace('.csv', '')
+    # print(split_file)
     ppt_stn_one = float(split_file[3])
 
     stn_one_xcoords = df_coords.loc[stn_one_id, xcoord_name]
@@ -112,11 +117,10 @@ def get_events_stn_data(df_event_file,
             stns_2_ids_vals_dict[stn2_id][shift].append(
                 in_df_event.loc[shift, str(int(stn2_id))])
 
-    return (stn_one_id, ppt_stn_one,
-            stns_2_ids,
+    return (stn_one_id, ppt_stn_one, stns_2_ids,
             stn_one_xcoords, stn_one_ycoords,
             stns_2_xcoords, stns_2_ycoords,
-            event_date, stns_2_ids_vals_dict)
+            event_date, stns_2_ids_vals_dict, ppt_thr)
 
 
 #==============================================================================
