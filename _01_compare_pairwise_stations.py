@@ -47,7 +47,7 @@ path_to_ppt_hdf_data = (r'X:\exchange\ElHachem'
 
 out_save_dir = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes')
 
-ppt_thrs = [8, 16, 20]  # 0.1, 1, 2, 4, 6, 8, 10 12, 14,
+ppt_thrs = [4]  # 0.1, 1, 2, 4, 6, 8, 10 12, 14,
 
 time_shifts = [timedelta(minutes=5), timedelta(minutes=10),
                timedelta(minutes=15), timedelta(minutes=20),

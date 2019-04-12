@@ -1,19 +1,10 @@
 # !/usr/bin/env python.
 # -*- coding: utf-8 -*-
 
-"""Gets and prints the spreadsheet's header columns
-
-Parameters
-----------
-file_loc : str
-    The file location of the spreadsheet
-print_cols : bool, optional
-    A flag used to print the columns to the console (default is False)
-
-Returns
--------
-list
-    a list of strings representing the header columns
+"""
+For every station, and every extreme event plot the station and 
+all other stations where simulatneously (+- 60min) an extreme 
+event was occurring
 """
 
 __author__ = "Abbas El Hachem"
