@@ -211,6 +211,8 @@ def plot_coordinates(path_to_events,
                     texts.append(ax.text(stn2_xcoord,
                                          stn2_ycoord,
                                          val_float_format))
+                    break
+            break
         ppt_stn_one_float_format = '% 0.2f' % ppt_stn_one
         texts.append(ax.text(stn_one_xcoords,
                              stn_one_ycoords,
