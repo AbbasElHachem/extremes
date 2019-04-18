@@ -1,25 +1,35 @@
 # !/usr/bin/env python.
 # -*- coding: utf-8 -*-
 
-"""
-For every station, and every extreme event plot the station and 
-all other stations where simulatneously (+- 60min) an extreme 
-event was occurring
+"""Gets and prints the spreadsheet's header columns
+
+Parameters
+----------
+file_loc : str
+    The file location of the spreadsheet
+print_cols : bool, optional
+    A flag used to print the columns to the console (default is False)
+
+Returns
+-------
+list
+    a list of strings representing the header columns
 """
 
 __author__ = "Abbas El Hachem"
 __copyright__ = 'Institut fuer Wasser- und Umweltsystemmodellierung - IWS'
 __email__ = "abbas.el-hachem@iws.uni-stuttgart.de"
 
-# =============================================================================
-
+# =============================================================
 import os
 import timeit
 import time
 
+
 import shapefile
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy.spatial as spatial
 
 from adjustText import adjust_text
 
@@ -58,8 +68,6 @@ markers = ['o', '.', ',', '2', '+', 'v', '^', '<', '>', 's', 'd', '1', '8',
            '1', 'd', 's', '>', '<', '^', 'v', '+',  '2', ',', '.', 'o']
 
 markers_time_dict = {i: m for i, m in zip(np.arange(-60, 61, 5), markers)}
-
-
 #==============================================================================
 #
 #==============================================================================
@@ -67,11 +75,12 @@ markers_time_dict = {i: m for i, m in zip(np.arange(-60, 61, 5), markers)}
 # Function to map the colors as a list from the input list of x variables
 
 
-def plot_coordinates(path_to_events,
-                     path_stns_coords,
-                     xcoords_name,
-                     ycoords_name,
-                     shp_de):
+def plot_stations_in_convex_hull(path_to_events,
+                                 path_stns_coords,
+                                 xcoords_name,
+                                 ycoords_name,
+                                 shp_de,
+                                 radius=30000):
     '''fct to plot station event data and all other stations within +-60min'''
 
     colrs_dict = pltcolor()  # create dictionary for colors
@@ -91,6 +100,30 @@ def plot_coordinates(path_to_events,
                                         path_stns_coords,
                                         xcoords_name,
                                         ycoords_name)
+
+        coords_tuples = np.array([(x2, y2) for x2, y2
+                                  in zip(stns_2_xcoords,
+                                         stns_2_ycoords)])
+
+        points_tree = spatial.cKDTree(coords_tuples)
+
+        # This finds the index of all points within distance 1 of [1.5,2.5].
+        idxs_neighbours = points_tree.query_ball_point(
+            np.array((stn_one_xcoords, stn_one_ycoords)), radius)
+
+        stns2_ids_in_circle = np.empty(shape=len(idxs_neighbours))
+        stns2_xcoords_in_circle = np.empty(shape=len(idxs_neighbours))
+        stns2_ycoords_in_circle = np.empty(shape=len(idxs_neighbours))
+
+        for i, ix_nbr in enumerate(idxs_neighbours):
+            stns2_ids_in_circle[i] = stns_2_ids[ix_nbr]
+            stns2_xcoords_in_circle[i] = stns_2_xcoords[ix_nbr]
+            stns2_ycoords_in_circle[i] = stns_2_ycoords[ix_nbr]
+
+        stns_2_ids_vals_dict_in_circle = {}
+        for k in stns2_ids_in_circle:
+            if k in stns_2_ids_vals_dict.keys():
+                stns_2_ids_vals_dict_in_circle[k] = stns_2_ids_vals_dict[k]
 
         save_event_time = event_date.replace(
             ':', '_').replace(' ', '_').replace('-', '_')
@@ -121,14 +154,15 @@ def plot_coordinates(path_to_events,
 
             # plot all other simultaneous stations
             texts = []
-            for i, stn2_id in enumerate(stns_2_ids):
-                stn2_xcoord = stns_2_xcoords[i]
-                stn2_ycoord = stns_2_ycoords[i]
-                time_idx_dict = stns_2_ids_vals_dict[stn2_id]
+            for i, stn2_id in enumerate(stns2_ids_in_circle):
+                stn2_xcoord = stns2_xcoords_in_circle[i]
+                stn2_ycoord = stns2_ycoords_in_circle[i]
+                time_idx_dict = stns_2_ids_vals_dict_in_circle[stn2_id]
 
                 for _, (idx, val) in enumerate(time_idx_dict.items()):
 
-                    if len(val) > 0:
+                    if len(val) > 0 and val[0] > 0:
+                        # TODO fix Me
 
                         ax.scatter(stn2_xcoord, stn2_ycoord, c=colrs_dict[idx][0],
                                    marker=markers_time_dict[idx], s=45,
@@ -152,7 +186,7 @@ def plot_coordinates(path_to_events,
             adjust_text(texts, ax=ax,
                         arrowprops=dict(arrowstyle='->', color='red', lw=0.25))
 
-            ax.set_title('Event_at_station_%s_ppt_thr_%smm_at_%s'
+            ax.set_title('Event_at_station_%s_ppt_thr_%smm_at_%s_30km_radius'
                          % (str(int(stn_one_id)), ppt_thr, event_date))
 
             ax.grid(alpha=0.25)
@@ -188,9 +222,10 @@ if __name__ == '__main__':
     print('**** Started on %s ****\n' % time.asctime())
     START = timeit.default_timer()  # to get the runtime of the program
 
-    plot_coordinates(path_to_dfs_simultaneous_events,
-                     path_to_ppt_coords_data, xcoord_name,
-                     ycoord_name, path_to_shpfile)
+    plot_stations_in_convex_hull(path_to_dfs_simultaneous_events,
+                                 path_to_ppt_coords_data, xcoord_name,
+                                 ycoord_name, path_to_shpfile,
+                                 30000)
 
     STOP = timeit.default_timer()  # Ending time
     print(('\n****Done with everything on %s.\nTotal run time was'

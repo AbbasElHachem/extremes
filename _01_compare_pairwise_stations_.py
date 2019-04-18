@@ -23,12 +23,6 @@ __copyright__ = 'Institut fuer Wasser- und Umweltsystemmodellierung - IWS'
 __email__ = "abbas.el-hachem@iws.uni-stuttgart.de"
 
 # ============================================================================
-
-from pathlib import Path
-from datetime import timedelta
-
-from b_get_data import HDF5
-
 import os
 import timeit
 import time
@@ -36,6 +30,10 @@ import time
 import pandas as pd
 import numpy as np
 
+from pathlib import Path
+from datetime import timedelta
+
+from b_get_data import HDF5
 # TODO: run script only if df does not exist, MAKE ME FASTER
 
 main_dir = Path(os.getcwd())
@@ -46,16 +44,13 @@ path_to_ppt_hdf_data = (r'X:\exchange\ElHachem'
                         r'\1993_2016_5min_merge_nan.h5')
 
 
-out_save_dir = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes')
+out_save_dir = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\thr8')
 
-ppt_thrs = [16]  # 0.1, 1, 2, 4, 6, 8, 10 12, 14,
+ppt_thrs = [8]  # 0.1, 1, 2, 4, 6, 8, 10 12, 14,
+ppt_thrs2 = 0
 
-time_shifts = [timedelta(minutes=5), timedelta(minutes=10),
-               timedelta(minutes=15), timedelta(minutes=20),
-               timedelta(minutes=25), timedelta(minutes=30),
-               timedelta(minutes=35), timedelta(minutes=40),
-               timedelta(minutes=45), timedelta(minutes=50),
-               timedelta(minutes=55), timedelta(minutes=60)]
+
+time_shifts = [timedelta(minutes=int(m)) for m in np.arange(5, 61, 5)]
 time_shifts_arr_floats = [i for i in np.arange(-60, 61, 5)]
 
 
@@ -84,6 +79,8 @@ def find_simulataneous_events(ppt_thrs_lst, stns_ids_lst,
                 for ix, val in zip(stn1_abv_thr.index, stn1_abv_thr.values):
                     print('First time index is:', ix,
                           'Ppt Station 1 is ', val)
+
+                    ix_time = ix.isoformat().replace(':', '_').replace('T', '_')
                     # remove the id of the first station from all IDS
                     ids2 = np.array(list(filter(lambda x: x != iid, ids)))
 
@@ -107,7 +104,7 @@ def find_simulataneous_events(ppt_thrs_lst, stns_ids_lst,
                             continue
 
                         # select values above threshold and drop nans
-                        stn2_abv_thr = idf2[idf2 >= thr]
+                        stn2_abv_thr = idf2[idf2 >= ppt_thrs2]
                         stn2_abv_thr.dropna(inplace=True)
 
                         if len(stn2_abv_thr.values) > 0:
@@ -116,7 +113,8 @@ def find_simulataneous_events(ppt_thrs_lst, stns_ids_lst,
                             if ix in stn2_abv_thr.index:
                                 print('Same time in Station 2', ix)
 
-                                val2 = stn2_abv_thr.loc[ix, :].values[0]
+                                val2 = np.round(
+                                    stn2_abv_thr.loc[ix, :].values[0], 2)
 
                                 print(' Ppt at Station 2 is', val2)
                                 df_result.loc[0, iid2] = val2
@@ -138,7 +136,7 @@ def find_simulataneous_events(ppt_thrs_lst, stns_ids_lst,
                                         ix2_pos, :].values[0]
 
                                     df_result.loc[shift_minutes,
-                                                  iid2] = val2_pos
+                                                  iid2] = np.round(val2_pos, 2)
 
                                 if ix2_neg in stn2_abv_thr.index:
                                     print('- shifted idx present', ix2_neg)
@@ -148,7 +146,7 @@ def find_simulataneous_events(ppt_thrs_lst, stns_ids_lst,
                                     val2_neg = stn2_abv_thr.loc[
                                         ix2_neg, :].values[0]
                                     df_result.loc[shift_minutes_neg,
-                                                  iid2] = val2_neg
+                                                  iid2] = np.round(val2_neg, 2)
 
                         del (idf2, stn2_abv_thr)
                         count_all_stns -= 1
@@ -161,9 +159,7 @@ def find_simulataneous_events(ppt_thrs_lst, stns_ids_lst,
                             os.path.join(
                                 out_dir,
                                 'ppt_val_%0.2f_date_%s_stn_%s_thr_%s.csv'
-                                % (val,
-                                   ix.isoformat().replace(':', '_').replace('T', '_'),
-                                   iid, thr)),
+                                % (val, ix_time, iid, thr)),
                             float_format='%0.2f')
                         del df_result
                     else:
@@ -173,8 +169,9 @@ def find_simulataneous_events(ppt_thrs_lst, stns_ids_lst,
             else:
                 print('Station %s, has no data above % 0.1f mm' % (iid, thr))
                 continue
-            break
-        break
+    return
+#             break
+#         break
 
 
 if __name__ == '__main__':
@@ -184,7 +181,7 @@ if __name__ == '__main__':
 
     HDF52 = HDF5(infile=path_to_ppt_hdf_data)
     ids = HDF52.get_all_ids()
-    metadata = HDF52.get_metadata(ids=ids)
+    # metadata = HDF52.get_metadata(ids=ids)
 
     find_simulataneous_events(ppt_thrs_lst=ppt_thrs,
                               stns_ids_lst=ids,

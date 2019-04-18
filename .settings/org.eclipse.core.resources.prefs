@@ -1,4 +1,5 @@
 eclipse.preferences.version=1
-encoding/_01_compare_pairwise_stations.py=utf-8
+encoding/_01_compare_pairwise_stations_.py=utf-8
 encoding/_02_get_data_simultaneous_stns.py=utf-8
 encoding/_03_plot_station_coords_for_events_.py=utf-8
+encoding/_04_plot_simultaneous_events_in_convex_hull.py=utf-8

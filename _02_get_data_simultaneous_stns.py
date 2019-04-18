@@ -13,42 +13,11 @@ __author__ = "Abbas El Hachem"
 __copyright__ = 'Institut fuer Wasser- und Umweltsystemmodellierung - IWS'
 __email__ = "abbas.el-hachem@iws.uni-stuttgart.de"
 
-# ===================================================
+# =============================================================================
 
-from _01_compare_pairwise_stations import time_shifts_arr_floats
+from _01_compare_pairwise_stations_ import time_shifts_arr_floats
 
-import os
-
-import timeit
-import time
-
-import fnmatch
 import pandas as pd
-
-#==============================================================================
-#
-#==============================================================================
-
-
-def list_all_full_path(ext, file_dir):
-    """
-    Purpose: To return full path of files in all dirs of a 
-            given folder with a
-            given extension in ascending order.
-    Description of the arguments:
-        ext (string) = Extension of the files to list
-            e.g. '.txt', '.tif'.
-        file_dir (string) = Full path of the folder in which the files
-            reside.
-    """
-    new_list = []
-    patt = '*' + ext
-    for root, _, files in os.walk(file_dir):
-        for elm in files:
-            if fnmatch.fnmatch(elm, patt):
-                full_path = os.path.join(root, elm)
-                new_list.append(full_path)
-    return(sorted(new_list))
 
 
 #==============================================================================
@@ -121,18 +90,6 @@ def get_events_stn_data(df_event_file,
             stn_one_xcoords, stn_one_ycoords,
             stns_2_xcoords, stns_2_ycoords,
             event_date, stns_2_ids_vals_dict, ppt_thr)
-
-
 #==============================================================================
 #
 #==============================================================================
-
-
-if __name__ == '__main__':
-
-    print('**** Started on %s ****\n' % time.asctime())
-    START = timeit.default_timer()  # to get the runtime of the program
-
-    STOP = timeit.default_timer()  # Ending time
-    print(('\n****Done with everything on %s.\nTotal run time was'
-           ' about %0.4f seconds ***' % (time.asctime(), STOP - START)))
