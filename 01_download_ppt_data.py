@@ -319,8 +319,8 @@ def main(idx):
 if __name__ == '__main__':
     print('\a\a\a\a Started on %s \a\a\a\a\n' % time.asctime())
     START = timeit.default_timer()  # to get the runtime of the program
-    for idx in range(5):
-        main(idx)
+#     for idx in range(2):
+    main(1)
 
     STOP = timeit.default_timer()  # Ending time
     print(('\n\a\a\a Done with everything on %s. Total run time was'
