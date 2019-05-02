@@ -26,8 +26,8 @@ def main(idx):
 
     payload_auth = {
         'grant_type': 'password',
-        'username': 'faizananwar2006@gmail.com',
-        'password': 'n37AT30+B',
+        'username': 'abbas.el-hachem@iws.uni-stuttgart.de',
+        'password': 'Netatmo159',
         'client_id': '59788efd6b0affa5208b480e',
         'client_secret': 'ZtvUyd2q32YIJrV4EC1jGyatm',
         'scope': 'read_station'}
@@ -45,15 +45,16 @@ def main(idx):
     end_date = '2019-03-31'
     in_date_fmt = '%Y-%m-%d'
 
-    scale = '1hour'
+#     scale = '1hour'
+    scale = '5min'
     data_type = 'rain_60min'
-
+#     data_type = 'rain_24h'
     down_events_flag = False
     overwrite_flag = False
 
     min_ppt_thresh = 1.0
 
-    out_dir_daily = 'ppt_bw_grosser_daily'
+    out_dir_daily = 'ppt_bw_grosser_rain5min'
     out_dir_sub_daily = 'ppt_bw_grosser_sub_daily'
 
     out_daily_data_loc = os.path.join(

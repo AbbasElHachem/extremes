@@ -1,19 +1,17 @@
 # !/usr/bin/env python.
 # -*- coding: utf-8 -*-
 
-"""Gets and prints the spreadsheet's header columns
+"""Plot for every extreme event at a station the neighbouring stations
 
 Parameters
 ----------
-file_loc : str
-    The file location of the spreadsheet
-print_cols : bool, optional
-    A flag used to print the columns to the console (default is False)
+Path to where simulatenous events dataframes are present
 
 Returns
--------
-list
-    a list of strings representing the header columns
+---------
+
+Plot for every shifted time (+-5min) what was happening at the 
+center station and surrounding stations (radius = 30Km)
 """
 
 __author__ = "Abbas El Hachem"
