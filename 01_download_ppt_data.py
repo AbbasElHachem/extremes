@@ -44,9 +44,9 @@ def main(idx):
     beg_date = '2009-01-01'
     end_date = '2019-03-31'
     in_date_fmt = '%Y-%m-%d'
-
-#     scale = '1hour'
-    scale = '5min'
+#     scale = '1day'
+    scale = '1hour'
+#     scale = '5min'
     data_type = 'rain_60min'
 #     data_type = 'rain_24h'
     down_events_flag = False
@@ -54,7 +54,7 @@ def main(idx):
 
     min_ppt_thresh = 1.0
 
-    out_dir_daily = 'ppt_bw_grosser_rain5min'
+    out_dir_daily = 'ppt_bw_grosser_%s' % scale
     out_dir_sub_daily = 'ppt_bw_grosser_sub_daily'
 
     out_daily_data_loc = os.path.join(
@@ -149,7 +149,7 @@ def main(idx):
                 'device_id': stn_mac_add,
                 'module_id': module_mac,
                 'scale': scale,
-                'type': gage_type,
+                'type': 'sum_rain',
                 'real_time': 'true',
                 'date_begin': str(curr_beg_date_ts)}
 

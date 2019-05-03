@@ -33,7 +33,7 @@ from matplotlib import rc
 from matplotlib import rcParams
 from matplotlib.ticker import FormatStrFormatter
 from mpl_toolkits.mplot3d import Axes3D
-
+import matplotlib.transforms as mtransforms
 import matplotlib as mpl
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
@@ -873,6 +873,131 @@ def plot_stations_in_convex_hull3(path_to_events,
             plt.close()
 
     return
+#==============================================================================
+#
+#==============================================================================
+
+
+def plot_stations_in_convex_hull4(path_to_events,
+                                  path_stns_coords,
+                                  xcoords_name,
+                                  ycoords_name,
+                                  shp_de,
+                                  radius=30000):
+    '''fct to plot station event data and all other stations within +-60min'''
+
+    # get all events, extracted from script _00_
+    dfs_data_lst = list_all_full_path('.csv', path_to_events)
+
+    shp_de = shapefile.Reader(shp_de)
+
+    for i, event in enumerate(dfs_data_lst):
+
+        (stn_one_id, ppt_stn_one, stns_2_ids,
+         stn_one_xcoords, stn_one_ycoords,
+         stns_2_xcoords, stns_2_ycoords,
+         event_date, stns_2_ids_vals_dict,
+         ppt_thr) = get_events_stn_data(event,
+                                        path_stns_coords,
+                                        xcoords_name,
+                                        ycoords_name)
+
+        coords_tuples = np.array([(x2, y2) for x2, y2
+                                  in zip(stns_2_xcoords,
+                                         stns_2_ycoords)])
+
+        points_tree = spatial.cKDTree(coords_tuples)
+
+        # This finds the index of all points within distance 1 of [1.5,2.5].
+        idxs_neighbours = points_tree.query_ball_point(
+            np.array((stn_one_xcoords, stn_one_ycoords)), radius)
+
+        stns2_ids_in_circle = np.empty(shape=len(idxs_neighbours))
+        stns2_xcoords_in_circle = np.empty(shape=len(idxs_neighbours))
+        stns2_ycoords_in_circle = np.empty(shape=len(idxs_neighbours))
+
+        for i, ix_nbr in enumerate(idxs_neighbours):
+            stns2_ids_in_circle[i] = stns_2_ids[ix_nbr]
+            stns2_xcoords_in_circle[i] = stns_2_xcoords[ix_nbr]
+            stns2_ycoords_in_circle[i] = stns_2_ycoords[ix_nbr]
+
+        stns_2_ids_vals_dict_in_circle = {}
+        for k in stns2_ids_in_circle:
+            if k in stns_2_ids_vals_dict.keys():
+                stns_2_ids_vals_dict_in_circle[k] = stns_2_ids_vals_dict[k]
+
+        save_event_time = event_date.replace(
+            ':', '_').replace(' ', '_').replace('-', '_')
+
+        time_vals = np.arange(-60, 61, 5)
+
+        for timeval in time_vals:
+            print(timeval)
+            # plot all other simultaneous stations
+            fig = plt.figure(figsize=(20, 20), dpi=75)
+            ax = fig.add_subplot(111)
+#             trans_offset = mtransforms.offset_copy(ax.transData, fig=fig,
+#                                                    y=6, units='dots')
+
+            for i, stn2_id in enumerate(stns2_ids_in_circle):
+
+                stn2_xcoord = stns2_xcoords_in_circle[i]
+                stn2_ycoord = stns2_ycoords_in_circle[i]
+                time_idx_val = stns_2_ids_vals_dict_in_circle[stn2_id][timeval]
+
+                if len(time_idx_val) > 0:
+                    #                     circle1 = plt.Circle((stn_one_xcoords,
+                    #                                           stn_one_ycoords), radius * 1.05,
+                    #                                          fill=False)
+
+                    #                     ax = plt.gca()
+                    # ax.cla()  # clear things for fresh plot
+
+                    # key data point that we are encircling
+                    ax.scatter((stn_one_xcoords,),
+                               (stn_one_ycoords,),
+                               color='r', marker='o')
+
+                    ax.text(stn_one_xcoords,
+                            stn_one_ycoords,
+                            'Stn %s Ppt %0.2f mm'
+                            % (str(int(stn_one_id)),
+                               ppt_stn_one))
+                    ax.scatter((stn2_xcoord,),
+                               (stn2_ycoord,),
+                               color='b', marker='+')
+
+                    ax.text(stn2_xcoord,
+                            stn2_ycoord,
+                            'Stn %s Ppt %0.1f at %0.0f min'
+                            % (str(int(stn2_id)),
+                                time_idx_val[0],
+                                timeval),
+                            horizontalalignment='center',
+                            verticalalignment='bottom')
+
+#                     ax.add_artist(circle1)
+            # change default range so that new circles will work
+#             ax.set_xlim((0, radius * 1.05))
+#             ax.set_ylim((0, radius * 1.05))
+
+            ax.set_title('Event_at_station_%s_ppt_thr_%smm_at_%s_at_time_%dmin'
+                         % (str(int(stn_one_id)), ppt_thr, event_date, timeval))
+
+            ax.grid(alpha=0.25)
+
+            plt.tight_layout()
+            plt.savefig(os.path.join(path_to_dfs_simultaneous_events,
+                                     'station_%s_ppt_thr_%smm_at_%s_2_%dmin_2.png'
+                                     % (str(int(stn_one_id)),
+                                         ppt_thr, save_event_time,
+                                         timeval)),
+                        frameon=True, papertype='a4',
+                        bbox_inches='tight', pad_inches=.2)
+            plt.close()
+            break
+        break
+    return
 
 
 if __name__ == '__main__':
@@ -880,7 +1005,7 @@ if __name__ == '__main__':
     print('**** Started on %s ****\n' % time.asctime())
     START = timeit.default_timer()  # to get the runtime of the program
 
-    plot_stations_in_convex_hull3(path_to_dfs_simultaneous_events,
+    plot_stations_in_convex_hull4(path_to_dfs_simultaneous_events,
                                   path_to_ppt_coords_data, xcoord_name,
                                   ycoord_name, path_to_shpfile,
                                   30000)

@@ -23,7 +23,6 @@ CURR_ONE_HOUR_REQ_AT = timeit.default_timer()
 
 
 def get_auth(payload):
-
     '''Get the token to start requesting data'''
 
     try:
@@ -40,7 +39,6 @@ def get_auth(payload):
 
 
 def refresh_auth(payload):
-
     '''Refresh the token'''
 
     try:
@@ -57,7 +55,6 @@ def refresh_auth(payload):
 
 
 def refresh_token(payload_auth, response_auth):
-
     '''Refresh a given token if its time is up'''
 
     global LAST_REFRESH_AUTH_AT, AUTH_EXP_IN
@@ -100,34 +97,33 @@ def refresh_token(payload_auth, response_auth):
 
 
 def check_reqs_limit(payload_auth, response_auth):
-
     '''To limit requests under 50 per 10 secs and 500 in an hour'''
 
     global TEN_SEC_REQ_CTR, ONE_HOUR_REQ_CTR
     global LAST_TEN_SEC_REQ_AT, CURR_TEN_SEC_REQ_AT
     global LAST_ONE_HOUR_REQ_AT, CURR_ONE_HOUR_REQ_AT
 
-    if ((TEN_SEC_REQ_CTR > 40) and
-        ((CURR_TEN_SEC_REQ_AT - LAST_TEN_SEC_REQ_AT) < 8)):
+    if ((TEN_SEC_REQ_CTR > 45) and
+            ((CURR_TEN_SEC_REQ_AT - LAST_TEN_SEC_REQ_AT) < 8)):
 
         TEN_SEC_REQ_CTR = 0
 
         print(
-            'Too many reqs in 10 secs. Waiting for 15 secs. Time is:',
+            'Too many reqs in 10 secs. Waiting for 10 secs. Time is:',
             time.asctime())
 
-        time.sleep(15)
+        time.sleep(10)
         LAST_TEN_SEC_REQ_AT = timeit.default_timer()
 
-    if ((ONE_HOUR_REQ_CTR > 450) and
-        ((CURR_ONE_HOUR_REQ_AT - LAST_ONE_HOUR_REQ_AT) < 3500)):
+    if ((ONE_HOUR_REQ_CTR > 490) and
+            ((CURR_ONE_HOUR_REQ_AT - LAST_ONE_HOUR_REQ_AT) < 3500)):
 
         ONE_HOUR_REQ_CTR = 0
         print(
-            'Too many reqs in 1 hour. Waiting for 1.1 hours. Time is:',
+            'Too many reqs in 1 hour. Waiting for 1. hours. Time is:',
             time.asctime())
 
-        time.sleep(1.1 * 3600)
+        time.sleep(1. * 3600)
         LAST_ONE_HOUR_REQ_AT = timeit.default_timer()
 
     if (CURR_TEN_SEC_REQ_AT - LAST_TEN_SEC_REQ_AT) > 10:
@@ -147,7 +143,6 @@ def check_reqs_limit(payload_auth, response_auth):
 
 
 def get_public_data(public_data_params, payload_auth, response_auth):
-
     '''Get station data within given bounds'''
 
     check_reqs_limit(payload_auth, response_auth)
@@ -169,7 +164,6 @@ def get_public_data(public_data_params, payload_auth, response_auth):
 
 
 def get_measured_data(measure_data_params, payload_auth, response_auth):
-
     '''Get station data for a given parameter'''
 
     check_reqs_limit(payload_auth, response_auth)
@@ -191,7 +185,6 @@ def get_measured_data(measure_data_params, payload_auth, response_auth):
 
 
 def assemble_stn_measure_data(measure_data, stn_id):
-
     '''Convert station data to pandas time series
 
     tested for rainfall data only
