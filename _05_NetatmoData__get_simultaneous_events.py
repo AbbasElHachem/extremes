@@ -13,7 +13,7 @@ Look how often does it happen that extreme values are measured
 First look at exactly the same time (0min)
 
 Second shift the second station with time intervals of +-30min
-(+-30min, +-60min, +-90min)
+(+-60min, +-120min)
 
 Save the result in a dataframe for every extreme event and station
 """
@@ -33,15 +33,17 @@ import numpy as np
 from pathlib import Path
 from datetime import timedelta
 
-from b_get_data import HDF5
-from _00_additional_functions import list_all_full_path
 
+from _00_additional_functions import list_all_full_path
+#==============================================================================
+#
+#==============================================================================
 main_dir = Path(os.getcwd())
 os.chdir(main_dir)
 
 path_to_netatmo_data = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
                         r'\NetAtmo_BW'
-                        r'\ppt_bw_grosser_hourly')
+                        r'\ppt_bw_grosser_1hour')
 print(path_to_netatmo_data)
 assert os.path.exists(path_to_netatmo_data), 'wrong data_df path'
 
@@ -51,20 +53,24 @@ path_to_netatmo_coords_df = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
                              r'\netatmo_bw_ppt_coords_0.csv')
 assert os.path.exists(path_to_netatmo_coords_df), 'wrong coords_df path'
 
-out_save_dir = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\thr24_NetAtmo')
+out_save_dir = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\thr24NetAtmo')
 
 if not os.path.exists(out_save_dir):
     os.mkdir(out_save_dir)
 
 
-ppt_thrs_stn1 = [10]  # 20
+ppt_thrs_stn1 = [24]  # 20
 ppt_thrs_stn2 = 0
 
-ppt_thr_max_val = 80
+ppt_thr_max_val = 60
 
 
-time_shifts = [timedelta(minutes=int(m)) for m in np.arange(30, 91, 30)]
-time_shifts_arr_floats = [i for i in np.arange(-90, 91, 30)]
+time_shifts = [timedelta(minutes=int(m)) for m in np.arange(60, 121, 60)]
+time_shifts_arr_floats = [i for i in np.arange(-120, 121, 60)]
+
+#==============================================================================
+#
+#==============================================================================
 
 
 def get_stns_ids_coords_file(netatmo_coords_df_file):
@@ -74,6 +80,10 @@ def get_stns_ids_coords_file(netatmo_coords_df_file):
     ids_lst_unique = list(set(ids_lst))
     return ids_lst_unique
 # @profile
+
+#==============================================================================
+#
+#==============================================================================
 
 
 def split_df_file_to_get_alls_stn_ids(all_df_files_list):
@@ -89,6 +99,10 @@ def split_df_file_to_get_alls_stn_ids(all_df_files_list):
     stns_ids_unique = list(set(stns_ids))
     return stns_ids_unique
 
+#==============================================================================
+#
+#==============================================================================
+
 
 def split_one_df_file_to_get_stn_id(df_file):
     ''' get stn_id from netatmo file'''
@@ -99,21 +113,33 @@ def split_one_df_file_to_get_stn_id(df_file):
         print(msg)
     return p3
 
+#==============================================================================
+#
+#==============================================================================
+
 
 def ids_list_intersection(lst1, lst2):
-
+    ''' intersect two lists'''
     # Use of hybrid method
     temp = set(lst2)
     lst3 = [value for value in lst1 if value in temp]
     return lst3
 
+#==============================================================================
+#
+#==============================================================================
+
 
 def remove_one_elt_lst(elt, lst):
+    ''' remove a specific element from a list'''
     new_lst = []
     for el in lst:
         if el != elt:
             new_lst.append(el)
     return new_lst
+#==============================================================================
+#
+#==============================================================================
 
 
 def find_simulataneous_Netatmo_events(all_dfs_files,
@@ -143,7 +169,7 @@ def find_simulataneous_Netatmo_events(all_dfs_files,
                 # select values above threshold and drop nans
                 stn1_abv_thr = idf1[(thr <= idf1) & (idf1 < ppt_thr_max)]
                 stn1_abv_thr.dropna(inplace=True)
-    #             print('max ppt at stn1 is', stn1_abv_thr.values.max())
+
                 if len(stn1_abv_thr.values) > 0:
 
                     # start going through events of station one
@@ -151,10 +177,10 @@ def find_simulataneous_Netatmo_events(all_dfs_files,
                         print('First time index is:', ix,
                               'Ppt Station 1 is ', val)
 
-                        ix_time = ix.isoformat().replace(':', '_').replace('T', '_')
+                        ix_time = ix.isoformat().replace(':',
+                                                         '_').replace('T', '_')
 
-                        # remove the file of the first station from all df
-                        # files
+                        # remove the file of the first station from all dfs
                         all_dfs_files_left = remove_one_elt_lst(
                             df_file, all_dfs_files)
 
@@ -176,8 +202,11 @@ def find_simulataneous_Netatmo_events(all_dfs_files,
                                   ' Count of Stns is :', count_all_stns)
                             # read second station
                             try:
-                                idf2 = pd.read_csv(df_file_2, sep=';', index_col=0,
-                                                   parse_dates=True, engine='c')
+                                idf2 = pd.read_csv(df_file_2,
+                                                   sep=';',
+                                                   index_col=0,
+                                                   parse_dates=True,
+                                                   engine='c')
                             except Exception as msg:
                                 print(msg)
                                 continue
@@ -200,7 +229,7 @@ def find_simulataneous_Netatmo_events(all_dfs_files,
                                     df_result.loc[0, iid2] = val2
 
                                 for time_shift in time_shifts_lst:
-                                    # print('Shifting time by +- ', time_shift)
+                                    print('Shifting time by +- ', time_shift)
 
                                     # get the shift as float, for index in df
                                     shift_minutes = (
@@ -215,8 +244,9 @@ def find_simulataneous_Netatmo_events(all_dfs_files,
                                         val2_pos = stn2_abv_thr.loc[
                                             ix2_pos, :].values[0]
 
-                                        df_result.loc[shift_minutes,
-                                                      iid2] = np.round(val2_pos, 2)
+                                        df_result.loc[
+                                            shift_minutes,
+                                            iid2] = np.round(val2_pos, 2)
 
                                     if ix2_neg in stn2_abv_thr.index:
                                         print('- shifted idx present', ix2_neg)
@@ -225,8 +255,9 @@ def find_simulataneous_Netatmo_events(all_dfs_files,
 
                                         val2_neg = stn2_abv_thr.loc[
                                             ix2_neg, :].values[0]
-                                        df_result.loc[shift_minutes_neg,
-                                                      iid2] = np.round(val2_neg, 2)
+                                        df_result.loc[
+                                            shift_minutes_neg,
+                                            iid2] = np.round(val2_neg, 2)
 
                             del (idf2, stn2_abv_thr)
                             count_all_stns -= 1
@@ -245,15 +276,12 @@ def find_simulataneous_Netatmo_events(all_dfs_files,
                         else:
                             print('df is empty will be deleted')
                             del df_result
-
                 else:
                     print('Station %s, has no data above % 0.1f mm' %
                           (stn_id, thr))
                     continue
 
     return
-#             break
-#         break
 
 
 if __name__ == '__main__':
@@ -261,7 +289,7 @@ if __name__ == '__main__':
     print('**** Started on %s ****\n' % time.asctime())
     START = timeit.default_timer()  # to get the runtime of the program
 
-    # get all Netatmo df_files
+    # get all Netatmo df_files and all station ids
     all_netatmo_df_files = list_all_full_path('.csv', path_to_netatmo_data)
 
     stn_ids_df_files = split_df_file_to_get_alls_stn_ids(all_netatmo_df_files)
@@ -269,7 +297,7 @@ if __name__ == '__main__':
 
     stn_ids_in_common = ids_list_intersection(stn_ids_df_files,
                                               stn_ids_coords_file)
-    #
+
     find_simulataneous_Netatmo_events(all_dfs_files=all_netatmo_df_files,
                                       ppt_thrs_lst=ppt_thrs_stn1,
                                       ppt_thrs2=ppt_thrs_stn2,
