@@ -24,8 +24,8 @@ from netatmo_core import (
 
 def main():
 
-    main_dir = os.path.join(os.path.dirname(__file__))
-    print(main_dir)
+    main_dir = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW'
+    os.chdir(main_dir)
 
     # os.chdir(main_dir)
 
@@ -33,49 +33,48 @@ def main():
         'grant_type': 'password',
         # 'username': 'micha.eisele@iws.uni-stuttgart.de',
         # 'password': 'QWEasd123!',
-        'username': 'faizananwar2006@gmail.com',
-        'password': 'n37AT30+B',
-        'client_id':'59788efd6b0affa5208b480e',
+        #         'username': 'faizananwar2006@gmail.com',
+        #         'password': 'n37AT30+B',
+        'username': 'abbas.el-hachem@iws.uni-stuttgart.de',
+        'password': 'Netatmo159',
+        'client_id': '59788efd6b0affa5208b480e',
         'client_secret': 'ZtvUyd2q32YIJrV4EC1jGyatm',
         'scope': 'read_station'}
 
     gauge_type = 'rain'
 
-    # # BW
-    # public_data_params = {
-    #     'lat_ne': '49.847',
-    #     'lon_ne': '10.501',
-    #     'lat_sw': '47.571',
-    #     'lon_sw': '7.494',
-    #     'required_data': gauge_type}
-    #
-    # # load shapefile
-    # location = 'bw'
-    # path_shapefile = r'U:\11_LUBW\10_Feedback\2018_11_29_ETRS89\Landesgrenze_10000_ETRS89.shp'
-
-    # Germany
+    # BW
     public_data_params = {
-        'lat_ne': '55.503750',
-        'lon_ne': '14.633789',
-        'lat_sw': '47.070122',
-        'lon_sw': '5.361328',
+        'lat_ne': '49.847',
+        'lon_ne': '10.501',
+        'lat_sw': '47.571',
+        'lon_sw': '7.494',
         'required_data': gauge_type}
 
     # load shapefile
-    location = 'germany'
-    path_shapefile = r'P:\2017_SYNOPSE_II\02_Import\03_QGIS_project_germany\germany_shape_utm32.shp'
+    location = 'bw'
+    path_shapefile = r'X:\hiwi\ElHachem\GitHub\extremes\Landesgrenze_ETRS89\Landesgrenze_10000_ETRS89.shp'
 
-
-
+#     # Germany
+#     public_data_params = {
+#         'lat_ne': '55.503750',
+#         'lon_ne': '14.633789',
+#         'lat_sw': '47.070122',
+#         'lon_sw': '5.361328',
+#         'required_data': gauge_type}
+#
+#     # load shapefile
+#     location = 'germany'
+#     path_shapefile = r'P:\2017_SYNOPSE_II\02_Import\03_QGIS_project_germany\germany_shape_utm32.shp'
 
     beg_date = '2009-01-01'
     end_date = '2019-03-31'
     in_date_fmt = '%Y-%m-%d'
 
     # temporal scale
-    # temp_scale = '1hour'
+    temp_scale = '1hour'
     # temp_scale = '5min'
-    temp_scale = '1day'
+#     temp_scale = '1day'
 
     scale_type = 'sum_rain'
     data_type = 'rain_60min'
@@ -143,7 +142,8 @@ def main():
 
     for stn_no, stn_meta_data in enumerate(public_data):
         # check if station within shapefile
-        utm_val = utm.from_latlon(stn_meta_data['place']['location'][1], stn_meta_data['place']['location'][0])
+        utm_val = utm.from_latlon(stn_meta_data['place']['location'][1],
+                                  stn_meta_data['place']['location'][0])
         if poly.contains(shg.Point(tuple(utm_val[:2]))) == True:
 
             stn_mac_add = stn_meta_data['_id']
@@ -226,7 +226,8 @@ def main():
                     break
 
             if curr_data_daily_time_ser_list:
-                curr_stn_daily_comb_ser = pd.concat(curr_data_daily_time_ser_list)
+                curr_stn_daily_comb_ser = pd.concat(
+                    curr_data_daily_time_ser_list)
 
                 curr_stn_daily_comb_ser.sort_index(inplace=True)
 
@@ -264,15 +265,11 @@ def main():
                 # [stn_mac_add, curr_lon, curr_lat, curr_elev, module_mac, curr_tz]
                 # ['float', 'float', 'int', 'object', 'object']
 
-
                 f = open(out_coords_loc, 'a')
                 f.write(str('%s; %0.8f; %0.8f; %i; %s; %s') % (stn_mac_add, curr_lon, curr_lat,
                                                                curr_elev, module_mac, curr_tz))
                 f.write('\n')
                 f.close()
-
-
-
 
                 print('Wait 5 secs...')
                 time.sleep(5)
