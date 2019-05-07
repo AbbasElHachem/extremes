@@ -10,7 +10,7 @@ import time
 
 import pandas as pd
 
-from netatmo_core import (
+from netatmo_core_ver_0 import (
     get_auth,
     get_public_data,
     get_measured_data,

@@ -21,6 +21,7 @@ import os
 
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 from b_get_data import HDF5
 # TODO: run script only if df does not exist, MAKE ME FASTER
@@ -44,10 +45,14 @@ aggregation_frequencies = ['10min', '15min', '30min', '60min', '90min',
 #==============================================================================
 
 
-def resampleDf(data_frame, df_sep_,
-               temp_freq,  temp_shift, label_shift,
+def resampleDf(data_frame,
+               temp_freq,
+               temp_shift=0,
+               label_shift=None,
+               df_sep_=None,
                out_save_dir=None,
-               fillnan=False, df_save_name=None):
+               fillnan=False,
+               df_save_name=None):
     ''' sample DF based on freq and time shift and label shift '''
 
     df_ = data_frame.copy()
@@ -57,11 +62,9 @@ def resampleDf(data_frame, df_sep_,
                           loffset=label_shift,
                           base=temp_shift).sum()
     # used to make ppt data same as radolan data UTC
-    df_res.index = df_res.index.tz_localize('UTC').tz_convert('Etc/GMT+1')
-
+#     df_res.index = df_res.index.tz_localize('UTC').tz_convert('Etc/GMT+1')
     if fillnan:
         df_res.fillna(value=0, inplace=True)
-
     if df_save_name is not None and out_save_dir is not None:
         df_res.to_csv(os.path.join(out_save_dir, df_save_name),
                       sep=df_sep_)
@@ -85,36 +88,46 @@ def calculate_probab_ppt_below_thr(ppt_data, ppt_thr):
 #==============================================================================
 
 
-def build_edf_fr_vals(ppt_data, ppt_thr):
+def build_edf_fr_vals(ppt_data):
     # Construct EDF
     ''' construct empirical distribution function given data values '''
-    p0 = calculate_probab_ppt_below_thr(ppt_data, ppt_thr)
-
-    ppt_data_abv_thr = ppt_data[ppt_data > ppt_thr]
-    ppt_data_abv_thr = ppt_data
-    data_sorted = np.sort(ppt_data_abv_thr, axis=0)[::-1]
-
+    data_sorted = np.sort(ppt_data, axis=0)[::-1]
     x0 = np.squeeze(data_sorted)[::-1]
     y0 = (np.arange(data_sorted.size) / len(data_sorted))
-#     np.append(x0, 0)
-    return x0, y0, p0
+    return x0, y0
 
 
 #==============================================================================
 #
 #==============================================================================
-import matplotlib.pyplot as plt
 
 
+def get_cdf_part_abv_thr(ppt_data, ppt_thr):
+    ''' select part of the CDF that is abv ppt thr '''
+
+    p0 = calculate_probab_ppt_below_thr(ppt_data, ppt_thr)
+
+    x0, y0 = build_edf_fr_vals(ppt_data)
+    x_abv_thr = x0[x0 > ppt_thr]
+    y_abv_thr = y0[np.where(x0 > ppt_thr)]
+    assert y_abv_thr[0] == p0, 'something is wrong with probability cal'
+#     x_extremes = np.insert(x_abv_thr, 0, x_abv_thr.min())
+#     y_extremes = np.insert(y_abv_thr, 0, p0)
+    return x_abv_thr, y_abv_thr
+
+
+# def plt_scatter_plot
 def compare_cdf_two_stns(stns_ids):
     for iid in stns_ids:
         try:
             idf1 = HDF52.get_pandas_dataframe(ids=[iid])
             idf1.dropna(axis=0, inplace=True)
+            df_resample = resampleDf(data_frame=idf1,
+                                     temp_freq=aggregation_frequencies[0])
         except Exception as msg:
             print(msg)
             continue
-        x0, y0, p0 = build_edf_fr_vals(idf1.values, 1)
+        x_extremes, y_extremes = get_cdf_part_abv_thr(idf1.values, 1)
         ids2 = np.array(list(filter(lambda x: x != iid, ids)))
         count_all_stns = len(ids2)
 #         for ii2, iid2 in enumerate(ids2):
@@ -129,7 +142,7 @@ def compare_cdf_two_stns(stns_ids):
 #                 print(msg)
 #                 continue
 
-        return idf1, x0, y0, p0
+        return idf1, x_extremes, y_extremes
 
 
 if __name__ == '__main__':
