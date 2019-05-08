@@ -12,11 +12,13 @@ __author__ = "Abbas El Hachem"
 __copyright__ = 'Institut fuer Wasser- und Umweltsystemmodellierung - IWS'
 __email__ = "abbas.el-hachem@iws.uni-stuttgart.de"
 
+import pandas as pd
+import os
+
 from _00_additional_functions import list_all_full_path
 from _05_NetatmoData_get_simultaneous_events import (
     split_one_df_file_to_get_stn_id, split_df_file_to_get_alls_stn_ids)
 
-import pandas as pd
 
 dfs_loc = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\ppt_bw_grosser_1hour'
 
@@ -25,12 +27,15 @@ dfs_list_ppt = list(filter(lambda x: 'coords' not in x, dfs_list))
 
 stn_ids = split_df_file_to_get_alls_stn_ids(dfs_list_ppt)
 
-date_range = pd.date_range('2014-05-01 00:00:00',
-                           '2019-05-06 00:00:00',
+date_range = pd.date_range('2014-04-01 00:00:00',
+                           '2019-05-08 00:00:00',
                            freq='H')
 df_all = pd.DataFrame(index=date_range, columns=stn_ids)
 
+all_dfs_len = len(dfs_list_ppt)
+
 for df_file in dfs_list_ppt:
+    print('Number of files is', all_dfs_len)
     stn_id = split_one_df_file_to_get_stn_id(df_file)
     print(stn_id)
     in_df = pd.read_csv(df_file,
@@ -39,6 +44,10 @@ for df_file in dfs_list_ppt:
                         parse_dates=True,
                         infer_datetime_format=True,
                         engine='c')
-    # FIX ME TO SLOWWWWWW
-    df_all.loc[in_df.index, stn_id] = in_df.values.ravel()
-#     break
+
+    df_all.ix[in_df.index, stn_id] = in_df.values.ravel()
+
+    all_dfs_len -= 1
+
+df_all.to_csv(os.path.join(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW',
+                           r'ppt_all_netatmo_hourly_stns_combined_.csv', sep=';'))

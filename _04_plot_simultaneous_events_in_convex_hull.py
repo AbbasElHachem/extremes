@@ -114,12 +114,12 @@ def direction_lookup(destination_x, origin_x, destination_y, origin_y):
 #==============================================================================
 
 
-def plot_stations_in_convex_hull3(path_to_events,
-                                  path_stns_coords,
-                                  xcoords_name,
-                                  ycoords_name,
-                                  shp_de,
-                                  radius=30000):
+def plot_stations_in_convex_hull(path_to_events,
+                                 path_stns_coords,
+                                 xcoords_name,
+                                 ycoords_name,
+                                 shp_de,
+                                 radius=30000):
     '''fct to plot station event data and all other stations within +-60min'''
     colors_dict = pltcolor()
     # get all events, extracted from script _00_
@@ -139,17 +139,15 @@ def plot_stations_in_convex_hull3(path_to_events,
                                         ycoords_name)
 
         out_path = os.path.join(out_plots_dir, str(int(stn_one_id)))
-        print(out_path)
         if not os.path.exists(out_path):
             os.mkdir(out_path)
-        out_event_path = os.path.join(out_path, str(int(evt_idx)))
-        print(out_event_path)
 
+        out_event_path = os.path.join(out_path, str(int(evt_idx)))
         if not os.path.exists(out_event_path):
             os.mkdir(out_event_path)
+
         coords_tuples = np.array([(x2, y2) for x2, y2
-                                  in zip(stns_2_xcoords,
-                                         stns_2_ycoords)])
+                                  in zip(stns_2_xcoords, stns_2_ycoords)])
 
         points_tree = spatial.cKDTree(coords_tuples)
 
@@ -197,7 +195,8 @@ def plot_stations_in_convex_hull3(path_to_events,
 
                 # plot first station
                 ax.scatter(stn_one_xcoords,
-                           stn_one_ycoords, c='red',
+                           stn_one_ycoords,
+                           c='red',
                            marker='X',
                            s=50,
                            label=('Stn %s Ppt %0.2f mm'
@@ -290,10 +289,10 @@ if __name__ == '__main__':
     print('**** Started on %s ****\n' % time.asctime())
     START = timeit.default_timer()  # to get the runtime of the program
 
-    df_out = plot_stations_in_convex_hull3(path_to_dfs_simultaneous_events,
-                                           path_to_ppt_coords_data, xcoord_name,
-                                           ycoord_name, path_to_shpfile,
-                                           30000)
+    df_out = plot_stations_in_convex_hull(path_to_dfs_simultaneous_events,
+                                          path_to_ppt_coords_data, xcoord_name,
+                                          ycoord_name, path_to_shpfile,
+                                          30000)
 
     STOP = timeit.default_timer()  # Ending time
     print(('\n****Done with everything on %s.\nTotal run time was'
