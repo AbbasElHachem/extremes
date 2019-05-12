@@ -32,15 +32,13 @@ date_range = pd.date_range('2014-04-01 00:00:00',
                            '2019-05-10 00:00:00',
                            freq='H')
 
-df_all = pd.DataFrame(index=date_range,
-                      columns=stn_ids,
-                      data=np.zeros(shape=(date_range.shape[0],
-                                           len(stn_ids))))
+data_mtx = np.zeros(shape=(date_range.shape[0], len(stn_ids))).astype('float')
+data_mtx[data_mtx == 0] = np.nan
+
+df_all = pd.DataFrame(index=date_range, columns=stn_ids,  data=data_mtx)
 
 all_dfs_len = len(dfs_list_ppt)
 
-stns_df_dict = {stn: [] for stn in stn_ids}
-dfs = []
 for df_file in dfs_list_ppt:
     print('Number of files is', all_dfs_len)
     stn_id = split_one_df_file_to_get_stn_id(df_file)
@@ -58,14 +56,10 @@ for df_file in dfs_list_ppt:
     except Exception:
         print(stn_id, ' problem in file')
         continue
-#     df_all = pd.concat([df_all, in_df], axis=1, join='outer')
-
-#     stns_df_dict[stn_id] =
-#     df_all.ix[in_df.index, stn_id] = in_df.values.ravel()
 
     all_dfs_len -= 1
 
-df_all.to_feather(os.path.join(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW',
-                               r'ppt_all_netatmo_hourly_stns_combined_.ft'))
-df_all.csv(os.path.join(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW',
-                        r'ppt_all_netatmo_hourly_stns_combined_.csv'), sep=';')
+df_all.to_csv(os.path.join(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW',
+                           r'ppt_all_netatmo_hourly_stns_combined_.csv'), sep=';')
+
+print('done with everything')
