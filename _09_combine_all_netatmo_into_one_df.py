@@ -51,9 +51,13 @@ for df_file in dfs_list_ppt:
                         parse_dates=True,
                         infer_datetime_format=True,
                         engine='c')
-    idx_int = df_all.index.intersection(in_df.index).ravel()
-    vals_df = in_df.values.ravel()
-    df_all.loc[idx_int, stn_id] = vals_df
+    try:
+        idx_int = df_all.index.intersection(in_df.index).ravel()
+        vals_df = in_df.values.ravel()
+        df_all.loc[idx_int, stn_id] = vals_df
+    except Exception:
+        print(stn_id, ' problem in file')
+        continue
 #     df_all = pd.concat([df_all, in_df], axis=1, join='outer')
 
 #     stns_df_dict[stn_id] =
