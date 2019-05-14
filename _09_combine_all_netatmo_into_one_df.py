@@ -35,7 +35,7 @@ date_range = pd.date_range('2014-04-01 00:00:00',
 data_mtx = np.zeros(shape=(date_range.shape[0], len(stn_ids))).astype('float')
 data_mtx[data_mtx == 0] = np.nan
 
-df_all = pd.DataFrame(index=date_range, columns=stn_ids,  data=data_mtx)
+df_all = pd.DataFrame(index=date_range, columns=stn_ids, data=data_mtx)
 
 all_dfs_len = len(dfs_list_ppt)
 

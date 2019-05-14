@@ -24,7 +24,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 import scipy.spatial as spatial
+
 from scipy import stats
+from scipy.stats import spearmanr as spr
+from scipy.stats import pearsonr as pears
 
 from b_get_data import HDF5
 
@@ -46,7 +49,7 @@ x_col_name = 'Rechtswert'
 y_col_name = 'Hochwert'
 
 # till 6 hours
-aggregation_frequencies = ['10min', '15min', '30min', '60min', '90min',
+aggregation_frequencies = ['5min', '10min', '15min', '30min', '60min', '90min',
                            '120min', '180min', '240min', '300min', '360min']
 #==============================================================================
 # look at different aggregations
@@ -121,18 +124,27 @@ def get_cdf_part_abv_thr(ppt_data, ppt_thr):
 
     return x_abv_thr, y_abv_thr
 
+#==============================================================================
+#
+#==============================================================================
+
 
 def get_dwd_stns_coords(coords_df_file, x_col_name, y_col_name):
+    '''function used to return to coordinates dataframe of the DWD stations'''
     in_coords_df = pd.read_csv(coords_df_file, sep=';',
                                index_col=3, engine='c')
     stn_ids = in_coords_df.index
     x_vals = in_coords_df[x_col_name].values.ravel()
     y_vals = in_coords_df[y_col_name].values.ravel()
     return in_coords_df, x_vals, y_vals, stn_ids
+#==============================================================================
+#
+#==============================================================================
 
 
 def get_nearest_station(first_stn_id, coords_df_file,
                         x_col_name, y_col_name):
+    ''' Find for one station, the closest neibhouring station'''
     # read df coordinates and get station ids, and x, y values
     in_coords_df, x_vals, y_vals, stn_ids = get_dwd_stns_coords(
         coords_df_file, x_col_name, y_col_name)
@@ -152,55 +164,83 @@ def get_nearest_station(first_stn_id, coords_df_file,
     return coords_nearest_nbr, stn_near, distance_near
 
 
-def plt_scatter_plot_2_stns(df1, df2):
-    plt.scatter(df1.values, df2.values, c='b', alpha=0.5)
-    return
+def plt_scatter_plot_2_stns(st1_id, st2_id, seperate_distance,
+                            df1, df2,
+                            temp_freq, out_dir):
+    ''' plot scatter plots between two stations'''
+#     plt.scatter(df1.values, df2.values, c='b', alpha=0.25)
+
+    print('plotting scatter plots')
+    values_x = df1.values.ravel()
+    values_y = df2.values.ravel()
+
+    corr = pears(values_x, values_y)[0]
+    rho = spr(values_x, values_y)[0]
+
+    plt.figure(figsize=(12, 8), dpi=300)
+    plt.scatter(values_x, values_y, c='darkblue', marker='o', alpha=0.35)
+
+    _min = min(values_x.min(), values_y.min())
+    _max = max(values_x.max(), values_y.max())
+
+    plt.plot([_min, _max], [_min, _max], c='k', linestyle='--', alpha=0.4)
+
+    plt.xlim(-0.01, _max + 0.1)
+    plt.ylim(-0.01, _max + 0.1)
+
+    plt.xlabel('Observed %s Rainfall station Id: %s' % (temp_freq, st1_id))
+    plt.ylabel('Observed %s Rainfall station Id: %s' % (temp_freq, st2_id))
+    plt.title("Stn: %s vs Stn: %s; Distance: %0.1f Km; Time Freq: %s; \nPearson Cor=%0.3f; "
+              "Spearman Cor=%0.3f" % (st1_id, st2_id, seperate_distance / 1000,
+                                      temp_freq, corr, rho))
+
+    plt.grid(color='k', linestyle='-', linewidth=0.1)
+    plt.tight_layout()
+    plt.savefig(os.path.join(out_dir, '%s_scatter_stn_%s_vs_stn_%s_.png'
+                             % (temp_freq, st1_id, st2_id)))
+    print('Done saving')
+#     plt.close('all')
+    # return
 
 
 def compare_cdf_two_stns(stns_ids):
     for iid in stns_ids:
+        print('First Stn Id is', iid)
         try:
             idf1 = HDF52.get_pandas_dataframe(ids=[iid])
             idf1.dropna(axis=0, inplace=True)
-            df_resample1 = resampleDf(data_frame=idf1,
-                                      temp_freq=aggregation_frequencies[0])
 
-            coords_near, stn_near, distance_near = get_nearest_station(
+            _, stn_near, distance_near = get_nearest_station(
                 iid, coords_df_file, x_col_name, y_col_name)
             assert iid != str(stn_near), 'wrong neighbour selected'
             idf2 = HDF52.get_pandas_dataframe(ids=str(stn_near))
+            print('Second Stn Id is', stn_near)
+            for tem_freq in aggregation_frequencies:
+                print('Aggregation is: ', tem_freq)
+                df_resample1 = resampleDf(data_frame=idf1,
+                                          temp_freq=tem_freq)
+                df_resample2 = resampleDf(data_frame=idf2,
+                                          temp_freq=tem_freq)
 
-            df_resample2 = resampleDf(data_frame=idf2,
-                                      temp_freq=aggregation_frequencies[0])
+                idx_common = df_resample1.index.intersection(
+                    df_resample2.index)
+                df_common1 = df_resample1.loc[idx_common, :]  # .rank()
+                df_common2 = df_resample2.loc[idx_common, :]
 
-            idx_common = df_resample1.index.intersection(df_resample2.index)
-            # TODO fix plotting
-            df_common1 = df_resample1.loc[idx_common, :]  # .rank()
-            df_common2 = df_resample2.loc[idx_common, :].rank()
+                try:
+                    plt_scatter_plot_2_stns(iid, stn_near, distance_near,
+                                            df_common1, df_common2,
+                                            tem_freq,
+                                            out_save_dir)
+                except Exception as msg:
+                    print('error  while plotting', msg)
+                    continue
 
-            rank_data = stats.rankdata(df_common1.values)
-            plt.scatter(df_common1.values, df_common2.values, c='b', alpha=0.5)
+#             rank_data = stats.rankdata(df_common1.values)
         except Exception as msg:
             print(msg)
-            continue
 
         break
-#         x_extremes, y_extremes = get_cdf_part_abv_thr(idf1.values, 1)
-#         ids2 = np.array(list(filter(lambda x: x != iid, ids)))
-#         count_all_stns = len(ids2)
-#         for ii2, iid2 in enumerate(ids2):
-#
-#             print('Second Station ID is: ', iid2,
-#                   ' index is ', ii2,
-#                   ' Count of Stns is :', count_all_stns)
-#             # read second station
-#             try:
-#                 idf2 = HDF52.get_pandas_dataframe(ids=[iid2])
-#             except Exception as msg:
-#                 print(msg)
-#                 continue
-
-#         return idf1, x_extremes, y_extremes
 
 
 if __name__ == '__main__':
