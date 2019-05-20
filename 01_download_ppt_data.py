@@ -41,8 +41,8 @@ def main():
         'client_secret': 'ZtvUyd2q32YIJrV4EC1jGyatm',
         'scope': 'read_station'}
 
-    gauge_type = 'rain'
-
+#     gauge_type = 'rain'
+    gauge_type = ' humidity'
     # BW
     public_data_params = {
         'lat_ne': '49.847',
@@ -77,7 +77,10 @@ def main():
 #     temp_scale = '1day'
 
     scale_type = 'sum_rain'
+#     scale_type = 'max_hum'
+
     data_type = 'rain_60min'
+#     data_type = 'date_max_hum'
 
     overwrite_flag = False
 

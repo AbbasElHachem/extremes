@@ -119,3 +119,86 @@ def pltcolor():
 #==============================================================================
 #
 #==============================================================================
+
+
+def resampleDf(data_frame,
+               temp_freq,
+               temp_shift=0,
+               label_shift=None,
+               df_sep_=None,
+               out_save_dir=None,
+               fillnan=False,
+               df_save_name=None):
+    ''' sample DF based on freq and time shift and label shift '''
+
+    df_ = data_frame.copy()
+    df_res = df_.resample(temp_freq,
+                          label='right',
+                          closed='right',
+                          loffset=label_shift,
+                          base=temp_shift).sum()
+
+    if fillnan:
+        df_res.fillna(value=0, inplace=True)
+    if df_save_name is not None and out_save_dir is not None:
+        df_res.to_csv(os.path.join(out_save_dir, df_save_name),
+                      sep=df_sep_)
+    return df_res
+
+#==============================================================================
+#
+#==============================================================================
+
+
+def select_df_within_period(df, start, end):
+    ''' a function to select df between two dates'''
+    mask = (df.index > start) & (df.index <= end)
+    df_period = df.loc[mask]
+    return df_period
+
+#==============================================================================
+#
+#==============================================================================
+
+
+def calculate_probab_ppt_below_thr(ppt_data, ppt_thr):
+    ''' calculate probability of values being below threshold '''
+    origin_count = ppt_data.shape[0]
+    count_below_thr = ppt_data[ppt_data <= ppt_thr].shape[0]
+    p0 = np.divide(count_below_thr, origin_count)
+    return p0
+
+
+#==============================================================================
+#
+#==============================================================================
+
+
+def build_edf_fr_vals(ppt_data):
+    # Construct EDF
+    ''' construct empirical distribution function given data values '''
+    data_sorted = np.sort(ppt_data, axis=0)[::-1]
+    x0 = np.squeeze(data_sorted)[::-1]
+    y0 = (np.arange(data_sorted.size) / len(data_sorted))
+    return x0, y0
+
+
+#==============================================================================
+#
+#==============================================================================
+
+
+def get_cdf_part_abv_thr(ppt_data, ppt_thr):
+    ''' select part of the CDF that is abv ppt thr '''
+
+    p0 = calculate_probab_ppt_below_thr(ppt_data, ppt_thr)
+
+    x0, y0 = build_edf_fr_vals(ppt_data)
+    x_abv_thr = x0[x0 > ppt_thr]
+    y_abv_thr = y0[np.where(x0 > ppt_thr)]
+    assert y_abv_thr[0] == p0, 'something is wrong with probability cal'
+
+    return x_abv_thr, y_abv_thr
+#==============================================================================
+#
+#==============================================================================
