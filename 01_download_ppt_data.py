@@ -41,8 +41,8 @@ def main():
         'client_secret': 'ZtvUyd2q32YIJrV4EC1jGyatm',
         'scope': 'read_station'}
 
-#     gauge_type = 'rain'
-    gauge_type = ' humidity'
+    gauge_type = 'rain'
+#     gauge_type = ' humidity'
     # BW
     public_data_params = {
         'lat_ne': '49.847',

@@ -52,7 +52,7 @@ path_to_ppt_hdf_data = (r'X:\exchange\ElHachem'
                         r'\1993_2016_5min_merge_nan.h5')
 
 coords_df_file = (r'X:\exchange\ElHachem\niederschlag_deutschland'
-                  '\1993_2016_5min_merge_nan.csv')
+                  r'\1993_2016_5min_merge_nan.csv')
 assert os.path.exists(coords_df_file), 'wrong DWD coords file'
 
 out_save_dir = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\cdf_plots_08')
@@ -112,6 +112,42 @@ def get_nearest_dwd_station(first_stn_id, coords_df_file,
 
     return coords_nearest_nbr, stn_near, distance_near
 
+
+#==============================================================================
+#
+#==============================================================================
+
+
+def plt_bar_plot_2_stns(stn1_id, stn2_id, seperate_distance,
+                        df1, df2, temp_freq, out_dir):
+    ''' plot line plots between two stations'''
+    print('plotting line plots')
+
+    fig = plt.figure(figsize=(16, 12), dpi=300)
+    ax = fig.add_subplot(111)
+
+    ax.plot(df1.index, df1.values, c='darkblue', marker='o', alpha=0.25)
+    ax.plot(df2.index, df2.values, c='darkred', marker='+', alpha=0.25)
+
+    ax.xaxis.set_major_locator(majorLocator)
+    ax.xaxis.set_major_formatter(FormatStrFormatter('%.0f'))
+    ax.yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
+
+    ax.set_xlabel('Observed %s Rainfall station Id: %s' % (temp_freq, stn1_id))
+    ax.set_ylabel('Observed %s Rainfall station Id: %s' % (temp_freq, stn2_id))
+    ax.set_title("Stn: %s vs Stn: %s; Distance: %0.1f Km; "
+                 "Time Freq: %s; " % (stn1_id, stn2_id,
+                                      seperate_distance / 1000,
+                                      temp_freq))
+
+    ax.grid(color='k', linestyle='--', linewidth=0.1, alpha=0.25)
+    plt.tight_layout()
+    plt.savefig(os.path.join(out_dir, '%s_lineplot_stn_%s_vs_stn_%s_.png'
+                             % (temp_freq, stn1_id, stn2_id)))
+    plt.close()
+    print('Done saving figure Line plot')
+
+    return
 #==============================================================================
 #
 #==============================================================================
@@ -218,8 +254,17 @@ def plot_end_tail_cdf_2_stns(stn1_id, stn2_id, seperate_distance,
 def plot_ranked_stns(stn1_id, stn2_id, seperate_distance,
                      df1, df2, temp_freq, out_dir):
     print('plotting Ranked plots')
-    sorted_ranked_df1 = df1.rank(method='dense').sort_values(by=stn1_id)
-    sorted_ranked_df2 = df2.rank(method='dense').sort_values(by=stn2_id)
+    if isinstance(df1, pd.DataFrame):
+        sorted_ranked_df1 = df1.rank(
+            method='dense').sort_values(by=stn1_id)
+    else:
+        sorted_ranked_df1 = df1.rank(method='dense').sort_values()
+
+    if isinstance(df2, pd.DataFrame):
+        sorted_ranked_df2 = df2.rank(
+            method='dense').sort_values(by=stn2_id)
+    else:
+        sorted_ranked_df2 = df2.rank(method='dense').sort_values()
 
     values_x = sorted_ranked_df1.values.ravel()
     values_y = sorted_ranked_df2.values.ravel()
@@ -270,7 +315,7 @@ def plot_ranked_stns(stn1_id, stn2_id, seperate_distance,
 
 
 def compare_cdf_two_dwd_stns(stns_ids):
-    for iid in stns_ids[2:]:
+    for iid in stns_ids:
         print('First Stn Id is', iid)
         try:
             idf1 = HDF52.get_pandas_dataframe(ids=[iid])
