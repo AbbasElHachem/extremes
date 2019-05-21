@@ -20,7 +20,8 @@ __email__ = "abbas.el-hachem@iws.uni-stuttgart.de"
 #
 #==============================================================================
 import os
-
+import timeit
+import time
 import numpy as np
 import pandas as pd
 
@@ -36,6 +37,9 @@ from _09_aggregate_do_cdf_compare_2_DWD_stns import (plt_bar_plot_2_stns,
                                                      plot_ranked_stns)
 
 from b_get_data import HDF5
+#==============================================================================
+#
+#==============================================================================
 
 path_to_ppt_netatmo_data = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
                             r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_.csv')
@@ -74,10 +78,10 @@ utm32 = "+init=EPSG:32632"
 
 # threshold for CDF, consider only above thr, below is P0
 ppt_thr = 1.
-max_ppt_thr = 50.
+max_ppt_thr = 100.
 
-# till 1 day
-aggregation_frequencies = ['5min', '10min', '15min', '30min', '60min',
+# till 1 day '5min', '10min', '15min', '30min',
+aggregation_frequencies = ['60min',
                            '90min', '120min', '180min', '240min',
                            '360min', '480min', '720min', '1440min']
 #==============================================================================
@@ -141,7 +145,7 @@ def get_for_netatmo_nearest_dwd_station(first_stn_id, dwd_coords_df_file,
 
     coords_nearest_nbr = coords_tuples[indices[1]]
     stn_near = str(stn_ids[indices[1]])
-    distance_near = distances[1] / 1000
+    distance_near = distances[1]
 
     return coords_nearest_nbr, stn_near, distance_near
 
@@ -219,5 +223,12 @@ def compare_cdf_two_stns(netatmo_ppt_df_file, path_to_ppt_hdf_data):
 
 
 if __name__ == '__main__':
+    print('**** Started on %s ****\n' % time.asctime())
+    START = timeit.default_timer()  # to get the runtime of the program
+
     compare_cdf_two_stns(path_to_ppt_netatmo_data,
                          path_to_ppt_hdf_data)
+
+    STOP = timeit.default_timer()  # Ending time
+    print(('\n****Done with everything on %s.\nTotal run time was'
+           ' about %0.4f seconds ***' % (time.asctime(), STOP - START)))

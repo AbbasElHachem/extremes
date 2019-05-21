@@ -20,15 +20,20 @@ __email__ = "abbas.el-hachem@iws.uni-stuttgart.de"
 #
 #==============================================================================
 import os
+import timeit
+import time
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.dates as md
 
 import scipy.spatial as spatial
 
 from scipy.stats import spearmanr as spr
 from scipy.stats import pearsonr as pears
+
+from pandas.plotting import register_matplotlib_converters
 
 from matplotlib import rc
 from matplotlib import rcParams
@@ -39,6 +44,11 @@ from _00_additional_functions import (resampleDf,
 
 from b_get_data import HDF5
 
+register_matplotlib_converters()
+
+#==============================================================================
+#
+#==============================================================================
 rc('font', size=13)
 rc('font', family='serif')
 rc('axes', labelsize=13)
@@ -55,7 +65,8 @@ coords_df_file = (r'X:\exchange\ElHachem\niederschlag_deutschland'
                   r'\1993_2016_5min_merge_nan.csv')
 assert os.path.exists(coords_df_file), 'wrong DWD coords file'
 
-out_save_dir = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\cdf_plots_08')
+out_save_dir = (
+    r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\cdf_plots_DWD_DWD')
 
 
 if not os.path.exists(out_save_dir):
@@ -123,24 +134,36 @@ def plt_bar_plot_2_stns(stn1_id, stn2_id, seperate_distance,
     ''' plot line plots between two stations'''
     print('plotting line plots')
 
-    fig = plt.figure(figsize=(16, 12), dpi=300)
+    fig = plt.figure(figsize=(20, 12), dpi=150)
     ax = fig.add_subplot(111)
 
-    ax.plot(df1.index, df1.values, c='darkblue', marker='o', alpha=0.25)
-    ax.plot(df2.index, df2.values, c='darkred', marker='+', alpha=0.25)
+    time_vals = df1.index.to_pydatetime()
+    time_arr = md.date2num(time_vals)
 
-    ax.xaxis.set_major_locator(majorLocator)
-    ax.xaxis.set_major_formatter(FormatStrFormatter('%.0f'))
-    ax.yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
+    ax.plot(time_arr, df1.values, c='darkblue', marker='o', markersize=2,
+            alpha=0.25, label=stn1_id)
+    ax.plot(time_arr, df2.values, c='darkred', marker='+', markersize=2,
+            alpha=0.25, label=stn2_id)
 
+    xfmt = md.DateFormatter('%Y-%m-%d')
+
+    ax.xaxis.set_major_locator(MultipleLocator(15))
+    ax.yaxis.set_major_locator(MultipleLocator(2))
+
+    ax.xaxis.set_major_formatter(xfmt)
+    ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+
+    ax.set_ylim(0.0, np.max([df1.values.max(), df2.values.max()]) + 0.1)
     ax.set_xlabel('Observed %s Rainfall station Id: %s' % (temp_freq, stn1_id))
     ax.set_ylabel('Observed %s Rainfall station Id: %s' % (temp_freq, stn2_id))
-    ax.set_title("Stn: %s vs Stn: %s; Distance: %0.1f Km; "
+    ax.set_title("Stn: %s vs Stn: %s;\n Distance: %0.1f m; "
                  "Time Freq: %s; " % (stn1_id, stn2_id,
-                                      seperate_distance / 1000,
+                                      seperate_distance,
                                       temp_freq))
 
     ax.grid(color='k', linestyle='--', linewidth=0.1, alpha=0.25)
+    plt.xticks(rotation=30)
+    plt.legend(loc='best')
     plt.tight_layout()
     plt.savefig(os.path.join(out_dir, '%s_lineplot_stn_%s_vs_stn_%s_.png'
                              % (temp_freq, stn1_id, stn2_id)))
@@ -164,10 +187,10 @@ def plt_scatter_plot_2_stns(stn1_id, stn2_id, seperate_distance,
     corr = pears(values_x, values_y)[0]
     rho = spr(values_x, values_y)[0]
 
-    fig = plt.figure(figsize=(16, 12), dpi=300)
+    fig = plt.figure(figsize=(20, 12), dpi=150)
     ax = fig.add_subplot(111)
 
-    ax.scatter(values_x, values_y, c='darkblue', marker='.', alpha=0.35)
+    ax.scatter(values_x, values_y, c='r', marker='.', alpha=0.35)
 
     # plot 45 deg line
     _min = min(values_x.min(), values_y.min())
@@ -182,12 +205,14 @@ def plt_scatter_plot_2_stns(stn1_id, stn2_id, seperate_distance,
     ax.xaxis.set_major_formatter(FormatStrFormatter('%.0f'))
     ax.yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
 
-    ax.set_xlabel('Observed %s Rainfall station Id: %s' % (temp_freq, stn1_id))
-    ax.set_ylabel('Observed %s Rainfall station Id: %s' % (temp_freq, stn2_id))
-    ax.set_title("Stn: %s vs Stn: %s; Distance: %0.1f Km; "
+    ax.set_xlabel('Observed %s Rainfall in mm station Id: %s'
+                  % (temp_freq, stn1_id))
+    ax.set_ylabel('Observed %s Rainfall in mm station Id: %s'
+                  % (temp_freq, stn2_id))
+    ax.set_title("Stn: %s vs Stn: %s; \n Distance: %0.1f m; "
                  "Time Freq: %s; \n Pearson Cor=%0.3f; "
                  "Spearman Cor=%0.3f" % (stn1_id, stn2_id,
-                                         seperate_distance / 1000,
+                                         seperate_distance,
                                          temp_freq, corr, rho))
 
     ax.grid(color='k', linestyle='--', linewidth=0.1, alpha=0.25)
@@ -213,7 +238,7 @@ def plot_end_tail_cdf_2_stns(stn1_id, stn2_id, seperate_distance,
     xvals1, yvals1 = get_cdf_part_abv_thr(values_x, ppt_thr)
     xvals2, yvals2 = get_cdf_part_abv_thr(values_y, ppt_thr)
 
-    fig = plt.figure(figsize=(16, 12), dpi=300)
+    fig = plt.figure(figsize=(20, 12), dpi=150)
     ax = fig.add_subplot(111)
     ax.plot(xvals1, yvals1, c='darkblue', marker='+', markersize=3,
             alpha=0.5, linestyle='--', label=stn1_id)
@@ -227,14 +252,14 @@ def plot_end_tail_cdf_2_stns(stn1_id, stn2_id, seperate_distance,
     ax.xaxis.set_major_formatter(FormatStrFormatter('%.0f'))
     ax.yaxis.set_major_formatter(FormatStrFormatter('%.4f'))
 
-    ax.set_xlabel('Observed %s Rainfall stations Id: %s and %s'
+    ax.set_xlabel('Observed %s Rainfall in mm stations Id: %s and %s'
                   % (temp_freq, stn1_id, stn2_id))
     ax.set_ylabel('Observed %s CDF stations Id: %s and %s'
                   % (temp_freq, stn1_id, stn2_id))
     ax.legend(loc='lower right')
-    ax.set_title("CDF of extremes; Stn: %s vs Stn: %s; Distance: %0.1f Km; \n"
+    ax.set_title("CDF of extremes; Stn: %s vs Stn: %s;\n Distance: %0.1f m; \n"
                  "Time Freq: %s; Ppt thr: %.1f" % (stn1_id, stn2_id,
-                                                   seperate_distance / 1000,
+                                                   seperate_distance,
                                                    temp_freq, ppt_thr))
 
     ax.grid(color='k', linestyle='--', linewidth=0.1, alpha=0.25)
@@ -256,15 +281,17 @@ def plot_ranked_stns(stn1_id, stn2_id, seperate_distance,
     print('plotting Ranked plots')
     if isinstance(df1, pd.DataFrame):
         sorted_ranked_df1 = df1.rank(
-            method='dense').sort_values(by=stn1_id)
+            method='dense', na_option='keep').sort_values(by=stn1_id)
     else:
-        sorted_ranked_df1 = df1.rank(method='dense').sort_values()
+        sorted_ranked_df1 = df1.rank(method='dense',
+                                     na_option='keep').sort_values()
 
     if isinstance(df2, pd.DataFrame):
         sorted_ranked_df2 = df2.rank(
-            method='dense').sort_values(by=stn2_id)
+            method='dense', na_option='keep').sort_values(by=stn2_id)
     else:
-        sorted_ranked_df2 = df2.rank(method='dense').sort_values()
+        sorted_ranked_df2 = df2.rank(method='dense',
+                                     na_option='keep').sort_values()
 
     values_x = sorted_ranked_df1.values.ravel()
     values_y = sorted_ranked_df2.values.ravel()
@@ -273,10 +300,10 @@ def plot_ranked_stns(stn1_id, stn2_id, seperate_distance,
     corr = pears(values_x, values_y)[0]
     rho = spr(values_x, values_y)[0]
 
-    fig = plt.figure(figsize=(16, 12), dpi=300)
+    fig = plt.figure(figsize=(20, 12), dpi=150)
     ax = fig.add_subplot(111)
 
-    ax.scatter(values_x, values_y, c='red', marker='.', alpha=0.35)
+    ax.scatter(values_x, values_y, c='darkred', marker='.', alpha=0.35)
 
     # plot 45 deg line
     _min = min(values_x.min(), values_y.min())
@@ -294,10 +321,10 @@ def plot_ranked_stns(stn1_id, stn2_id, seperate_distance,
 
     ax.set_xlabel('Observed %s Ranks station Id: %s' % (temp_freq, stn1_id))
     ax.set_ylabel('Observed %s Ranks station Id: %s' % (temp_freq, stn2_id))
-    ax.set_title("Stn: %s vs Stn: %s; Distance: %0.1f Km; "
+    ax.set_title("Stn: %s vs Stn: %s;\n Distance: %0.1f m; "
                  "Time Freq: %s; \n Pearson Cor=%0.3f; "
                  "Spearman Cor=%0.3f" % (stn1_id, stn2_id,
-                                         seperate_distance / 1000,
+                                         seperate_distance,
                                          temp_freq, corr, rho))
 
     ax.grid(color='k', linestyle='--', linewidth=0.1, alpha=0.25)
@@ -315,7 +342,7 @@ def plot_ranked_stns(stn1_id, stn2_id, seperate_distance,
 
 
 def compare_cdf_two_dwd_stns(stns_ids):
-    for iid in stns_ids:
+    for iid in stns_ids[2:]:
         print('First Stn Id is', iid)
         try:
             idf1 = HDF52.get_pandas_dataframe(ids=[iid])
@@ -344,6 +371,10 @@ def compare_cdf_two_dwd_stns(stns_ids):
                 df_common2 = df_resample2.loc[idx_common, :]
 
                 try:
+                    plt_bar_plot_2_stns(iid, stn_near, distance_near,
+                                        df_common1, df_common2, tem_freq,
+                                        out_save_dir)
+
                     plt_scatter_plot_2_stns(iid, stn_near, distance_near,
                                             df_common1, df_common2,
                                             tem_freq,
@@ -367,6 +398,14 @@ def compare_cdf_two_dwd_stns(stns_ids):
 
 
 if __name__ == '__main__':
+
+    print('**** Started on %s ****\n' % time.asctime())
+    START = timeit.default_timer()  # to get the runtime of the program
+
     HDF52 = HDF5(infile=path_to_ppt_hdf_data)
     ids = HDF52.get_all_ids()
     compare_cdf_two_dwd_stns(ids)
+
+    STOP = timeit.default_timer()  # Ending time
+    print(('\n****Done with everything on %s.\nTotal run time was'
+           ' about %0.4f seconds ***' % (time.asctime(), STOP - START)))

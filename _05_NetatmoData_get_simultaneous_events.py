@@ -43,14 +43,14 @@ os.chdir(main_dir)
 
 path_to_netatmo_data = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
                         r'\NetAtmo_BW'
-                        r'\ppt_bw_grosser_1hour')
+                        r'\rain_bw_1hour')
 print(path_to_netatmo_data)
 assert os.path.exists(path_to_netatmo_data), 'wrong data_df path'
 
 path_to_netatmo_coords_df = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
                              r'\NetAtmo_BW'
-                             r'\ppt_bw_grosser_hourly_coords'
-                             r'\netatmo_bw_ppt_coords_0.csv')
+                             r'\rain_bw_1hour'
+                             r'\netatmo_bw_1hour_coords.csv')
 assert os.path.exists(path_to_netatmo_coords_df), 'wrong coords_df path'
 
 out_save_dir = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\thr24NetAtmo')

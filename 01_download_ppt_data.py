@@ -33,16 +33,16 @@ def main():
         'grant_type': 'password',
         # 'username': 'micha.eisele@iws.uni-stuttgart.de',
         # 'password': 'QWEasd123!',
-        #         'username': 'faizananwar2006@gmail.com',
-        #         'password': 'n37AT30+B',
-        'username': 'abbas.el-hachem@iws.uni-stuttgart.de',
-        'password': 'Netatmo159',
+        'username': 'faizananwar2006@gmail.com',
+        'password': 'n37AT30+B',
+        #'username': 'abbas.el-hachem@iws.uni-stuttgart.de',
+        #'password': 'Netatmo159',
         'client_id': '59788efd6b0affa5208b480e',
         'client_secret': 'ZtvUyd2q32YIJrV4EC1jGyatm',
         'scope': 'read_station'}
 
     gauge_type = 'rain'
-#     gauge_type = ' humidity'
+
     # BW
     public_data_params = {
         'lat_ne': '49.847',
@@ -72,15 +72,12 @@ def main():
     in_date_fmt = '%Y-%m-%d'
 
     # temporal scale
-    temp_scale = '1hour'
-    # temp_scale = '5min'
+#     temp_scale = '1hour'
+    temp_scale = '5min'
 #     temp_scale = '1day'
 
     scale_type = 'sum_rain'
-#     scale_type = 'max_hum'
-
     data_type = 'rain_60min'
-#     data_type = 'date_max_hum'
 
     overwrite_flag = False
 

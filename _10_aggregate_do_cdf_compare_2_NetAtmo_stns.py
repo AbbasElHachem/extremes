@@ -20,6 +20,8 @@ __email__ = "abbas.el-hachem@iws.uni-stuttgart.de"
 #
 #==============================================================================
 import os
+import timeit
+import time
 
 import numpy as np
 import pandas as pd
@@ -43,7 +45,8 @@ coords_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
 
 assert os.path.exists(coords_df_file), 'wrong NETATMO coords file'
 
-out_save_dir = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\cdf_plots_NetAtmo')
+out_save_dir = (
+    r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\cdf_plots_NetAtmo_Netatmo')
 
 
 if not os.path.exists(out_save_dir):
@@ -55,10 +58,10 @@ y_col_name = ' lat'
 
 # threshold for CDF, consider only above thr, below is P0
 ppt_thr = 1.
-max_ppt_thr = 50.
+max_ppt_thr = 100.
 
-# till 1 day
-aggregation_frequencies = ['5min', '10min', '15min', '30min', '60min',
+# till 1 day '5min', '10min', '15min', '30min',
+aggregation_frequencies = ['60min',
                            '90min', '120min', '180min', '240min',
                            '360min', '480min', '720min', '1440min']
 #==============================================================================
@@ -150,6 +153,9 @@ def compare_cdf_two_stns(netatmo_ppt_df_file):
                 df_common2 = df_resample2.loc[idx_common]
 
                 try:
+                    plt_bar_plot_2_stns(stn_id, stn_near, distance_near,
+                                        df_common1, df_common2, tem_freq,
+                                        out_save_dir)
                     plt_scatter_plot_2_stns(stn_id, stn_near, distance_near,
                                             df_common1, df_common2,
                                             tem_freq,
@@ -169,8 +175,16 @@ def compare_cdf_two_stns(netatmo_ppt_df_file):
         except Exception as msg:
             print(msg)
 
-#         break
+        break
 
 
 if __name__ == '__main__':
+
+    print('**** Started on %s ****\n' % time.asctime())
+    START = timeit.default_timer()  # to get the runtime of the program
+
     compare_cdf_two_stns(path_to_ppt_netatmo_data)
+
+    STOP = timeit.default_timer()  # Ending time
+    print(('\n****Done with everything on %s.\nTotal run time was'
+           ' about %0.4f seconds ***' % (time.asctime(), STOP - START)))
