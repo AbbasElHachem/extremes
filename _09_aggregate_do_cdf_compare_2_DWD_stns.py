@@ -153,7 +153,7 @@ def plt_bar_plot_2_stns(stn1_id, stn2_id, seperate_distance,
     ax.xaxis.set_major_formatter(xfmt)
     ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
 
-    ax.set_ylim(0.0, np.max([df1.values.max(), df2.values.max()]) + 0.1)
+    ax.set_ylim(0.0, np.max([df1.values.max(), df2.values.max()]) + 1)
     ax.set_xlabel('Observed %s Rainfall station Id: %s' % (temp_freq, stn1_id))
     ax.set_ylabel('Observed %s Rainfall station Id: %s' % (temp_freq, stn2_id))
     ax.set_title("Stn: %s vs Stn: %s;\n Distance: %0.1f m; "
@@ -342,7 +342,7 @@ def plot_ranked_stns(stn1_id, stn2_id, seperate_distance,
 
 
 def compare_cdf_two_dwd_stns(stns_ids):
-    for iid in stns_ids[2:]:
+    for iid in stns_ids[10:]:
         print('First Stn Id is', iid)
         try:
             idf1 = HDF52.get_pandas_dataframe(ids=[iid])
@@ -369,28 +369,32 @@ def compare_cdf_two_dwd_stns(stns_ids):
                     df_resample2.index)
                 df_common1 = df_resample1.loc[idx_common, :]
                 df_common2 = df_resample2.loc[idx_common, :]
-
-                try:
-                    plt_bar_plot_2_stns(iid, stn_near, distance_near,
-                                        df_common1, df_common2, tem_freq,
-                                        out_save_dir)
-
-                    plt_scatter_plot_2_stns(iid, stn_near, distance_near,
-                                            df_common1, df_common2,
-                                            tem_freq,
+                if (df_common1.values.shape[0] > 0 and
+                        df_common2.values.shape[0] > 0):
+                    try:
+                        plt_bar_plot_2_stns(iid, stn_near, distance_near,
+                                            df_common1, df_common2, tem_freq,
                                             out_save_dir)
-                    plot_end_tail_cdf_2_stns(iid, stn_near, distance_near,
-                                             df_common1, df_common2,
-                                             tem_freq, ppt_thr,
-                                             out_save_dir)
-                    plot_ranked_stns(iid, stn_near, distance_near,
-                                     df_common1, df_common2,
-                                     tem_freq,
-                                     out_save_dir)
-                except Exception as msg:
-                    print('error while plotting', msg, tem_freq)
+
+                        plt_scatter_plot_2_stns(iid, stn_near, distance_near,
+                                                df_common1, df_common2,
+                                                tem_freq,
+                                                out_save_dir)
+                        plot_end_tail_cdf_2_stns(iid, stn_near, distance_near,
+                                                 df_common1, df_common2,
+                                                 tem_freq, ppt_thr,
+                                                 out_save_dir)
+                        plot_ranked_stns(iid, stn_near, distance_near,
+                                         df_common1, df_common2,
+                                         tem_freq,
+                                         out_save_dir)
+                    except Exception as msg:
+                        print('error while plotting', msg, tem_freq)
+                        continue
+                        # break
+                else:
+                    print('empty df')
                     continue
-                # break
         except Exception as msg:
             print(msg)
 

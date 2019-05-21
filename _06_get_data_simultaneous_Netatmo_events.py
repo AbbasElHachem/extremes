@@ -17,8 +17,9 @@ __email__ = "abbas.el-hachem@iws.uni-stuttgart.de"
 
 import pandas as pd
 
-from _05_NetatmoData__get_simultaneous_events import time_shifts_arr_floats
-from _05_NetatmoData__get_simultaneous_events import get_stns_ids_coords_file
+from _00_additional_functions import get_stns_ids_coords_file
+from _05_NetatmoData_get_simultaneous_events import time_shifts_arr_floats
+
 
 #==============================================================================
 #
@@ -27,7 +28,7 @@ from _05_NetatmoData__get_simultaneous_events import get_stns_ids_coords_file
 
 def read_df_stns_coord(path_to_df):
     ''' read df_file for stations ids and coordinates'''
-    in_df_coords = pd.read_csv(path_to_df, sep=',',
+    in_df_coords = pd.read_csv(path_to_df, sep=';',
                                index_col=0, engine='c')
     return in_df_coords
 
@@ -45,16 +46,22 @@ def get_netatmo_events_stn_data(df_event_file,
     df_coords = read_df_stns_coord(path_stns_coords)
     stn_ids = get_stns_ids_coords_file(path_stns_coords)
 
+    assert len(stn_ids) > 0, 'error in gettiog all stn ids'
+
     print(df_event_file)
     split_file = df_event_file.split('_')
 
     stn_one_id = df_event_file[-28:-11]
+    print('First station ID is', stn_one_id)
     assert stn_one_id in stn_ids, 'wrong stn id'
 
     ppt_thr = split_file[-1].replace('.csv', '')
     # print(split_file)
     ppt_stn_one = float(split_file[3])
     stn_one_id_orig = stn_one_id.replace('_', ':')
+
+    assert xcoord_name in df_coords.columns, 'wrong column for coords'
+
     stn_one_xcoords = df_coords.loc[stn_one_id_orig, xcoord_name]
     stn_one_ycoords = df_coords.loc[stn_one_id_orig, ycoord_name]
 

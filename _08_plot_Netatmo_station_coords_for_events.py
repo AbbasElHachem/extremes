@@ -37,15 +37,19 @@ plt.rcParams.update({'axes.labelsize': 12})
 path_to_dfs_simultaneous_events = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\thr24NetAtmo'
 
 path_to_netatmo_coords_df_file = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
-                                  r"\ppt_bw_grosser_hourly_coords"
-                                  r"\netatmo_bw_ppt_coords_0.csv")
-
+                                  r"\rain_bw_1hour"
+                                  r"\netatmo_bw_1hour_coords.csv")
 
 path_to_shpfile = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
                    r'\shp_file_germany\DEU_adm1.shp')
+
+out_plots_dir = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmoPlotsExtremes"
+if not os.path.exists(out_plots_dir):
+    os.mkdir(out_plots_dir
+             )
 # in station df, to get coordinates
-xcoord_name = 'lon'
-ycoord_name = 'lat'
+xcoord_name = ' lon'
+ycoord_name = ' lat'
 
 # used when plotting to make different markers per time and values
 markers = ['^', '2', 'x', '.', '+']
@@ -63,7 +67,8 @@ def plot_netatmot_coordinates(path_to_events,
                               xcoords_name,
                               ycoords_name,
                               shp_de,
-                              radius=30000):
+                              radius,
+                              out_save_dir):
     '''fct to plot station event data and all other stations within +-60min'''
 
     # colrs_dict = pltcolor()  # create dictionary for colors
@@ -186,7 +191,7 @@ def plot_netatmot_coordinates(path_to_events,
     #             ax.set_aspect(1.0)
 
     #             plt.tight_layout()
-                plt.savefig(os.path.join(path_to_dfs_simultaneous_events,
+                plt.savefig(os.path.join(out_save_dir,
                                          'station_%s_ppt_thr_%smm_at_%s_2.png'
                                          % (str(stn_one_id),
                                              ppt_thr, save_event_time)),
@@ -208,9 +213,13 @@ if __name__ == '__main__':
     print('**** Started on %s ****\n' % time.asctime())
     START = timeit.default_timer()  # to get the runtime of the program
 
-    plot_netatmot_coordinates(path_to_dfs_simultaneous_events,
-                              path_to_netatmo_coords_df_file, xcoord_name,
-                              ycoord_name, path_to_shpfile)
+    plot_netatmot_coordinates(path_to_events=path_to_dfs_simultaneous_events,
+                              path_stns_coords=path_to_netatmo_coords_df_file,
+                              xcoords_name=xcoord_name,
+                              ycoords_name=ycoord_name,
+                              shp_de=path_to_shpfile,
+                              radius=30000,
+                              out_save_dir=out_plots_dir)
 
     STOP = timeit.default_timer()  # Ending time
     print(('\n****Done with everything on %s.\nTotal run time was'

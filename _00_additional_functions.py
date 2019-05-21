@@ -5,7 +5,7 @@ import pyproj
 
 import matplotlib.colors as mcolors
 import numpy as np
-
+import pandas as pd
 
 #==============================================================================
 #
@@ -115,6 +115,76 @@ def pltcolor():
         elif l == 60:
             cols_time_dict[l].append(sorted_names_all[i * 6])
     return cols_time_dict
+
+#==============================================================================
+#
+#==============================================================================
+
+
+def get_stns_ids_coords_file(netatmo_coords_df_file):
+    ''' get all ids from coords_file'''
+    in_coords_df = pd.read_csv(netatmo_coords_df_file, index_col=0, sep=';')
+    ids_lst = [stn_id.replace(':', '_') for stn_id in in_coords_df.index]
+    ids_lst_unique = list(set(ids_lst))
+    return ids_lst_unique
+# @profile
+
+#==============================================================================
+#
+#==============================================================================
+
+
+def split_df_file_to_get_alls_stn_ids(all_df_files_list):
+    ''' get stn_id from netatmo file'''
+    stns_ids = []
+    for df_file in all_df_files_list:
+        try:
+            _, _, p3 = df_file.split('(')
+            p3 = p3.replace(')).csv', '')
+        except Exception as msg:
+            print(msg)
+        stns_ids.append(p3)
+    stns_ids_unique = list(set(stns_ids))
+    return stns_ids_unique
+
+#==============================================================================
+#
+#==============================================================================
+
+
+def split_one_df_file_to_get_stn_id(df_file):
+    ''' get stn_id from netatmo file'''
+    try:
+        _, _, p3 = df_file.split('(')
+        p3 = p3.replace(')).csv', '')
+    except Exception as msg:
+        print(msg)
+    return p3
+
+#==============================================================================
+#
+#==============================================================================
+
+
+def ids_list_intersection(lst1, lst2):
+    ''' intersect two lists'''
+    # Use of hybrid method
+    temp = set(lst2)
+    lst3 = [value for value in lst1 if value in temp]
+    return lst3
+
+#==============================================================================
+#
+#==============================================================================
+
+
+def remove_one_elt_lst(elt, lst):
+    ''' remove a specific element from a list'''
+    new_lst = []
+    for el in lst:
+        if el != elt:
+            new_lst.append(el)
+    return new_lst
 
 #==============================================================================
 #

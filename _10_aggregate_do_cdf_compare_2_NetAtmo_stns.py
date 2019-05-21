@@ -123,7 +123,7 @@ def compare_cdf_two_stns(netatmo_ppt_df_file):
                                      engine='c')
     stns_ids = in_netatmo_stns_df.columns
 
-    for stn_id in stns_ids:
+    for stn_id in stns_ids[5:]:
         print('First Stn Id is', stn_id)
         try:
             idf1 = in_netatmo_stns_df.loc[:, stn_id]
@@ -151,27 +151,31 @@ def compare_cdf_two_stns(netatmo_ppt_df_file):
                     df_resample2.index)
                 df_common1 = df_resample1.loc[idx_common]
                 df_common2 = df_resample2.loc[idx_common]
-
-                try:
-                    plt_bar_plot_2_stns(stn_id, stn_near, distance_near,
-                                        df_common1, df_common2, tem_freq,
-                                        out_save_dir)
-                    plt_scatter_plot_2_stns(stn_id, stn_near, distance_near,
-                                            df_common1, df_common2,
-                                            tem_freq,
+                if (df_common1.values.shape[0] > 0 and
+                        df_common2.values.shape[0] > 0):
+                    try:
+                        plt_bar_plot_2_stns(stn_id, stn_near, distance_near,
+                                            df_common1, df_common2, tem_freq,
                                             out_save_dir)
-                    plot_end_tail_cdf_2_stns(stn_id, stn_near, distance_near,
-                                             df_common1, df_common2,
-                                             tem_freq, ppt_thr,
-                                             out_save_dir)
-                    plot_ranked_stns(stn_id, stn_near, distance_near,
-                                     df_common1, df_common2,
-                                     tem_freq,
-                                     out_save_dir)
-                except Exception as msg:
-                    print('error while plotting', msg, tem_freq)
+                        plt_scatter_plot_2_stns(stn_id, stn_near, distance_near,
+                                                df_common1, df_common2,
+                                                tem_freq,
+                                                out_save_dir)
+                        plot_end_tail_cdf_2_stns(stn_id, stn_near, distance_near,
+                                                 df_common1, df_common2,
+                                                 tem_freq, ppt_thr,
+                                                 out_save_dir)
+                        plot_ranked_stns(stn_id, stn_near, distance_near,
+                                         df_common1, df_common2,
+                                         tem_freq,
+                                         out_save_dir)
+                    except Exception as msg:
+                        print('error while plotting', msg, tem_freq)
+                        continue
+                    # break
+                else:
+                    print('empty df')
                     continue
-                # break
         except Exception as msg:
             print(msg)
 

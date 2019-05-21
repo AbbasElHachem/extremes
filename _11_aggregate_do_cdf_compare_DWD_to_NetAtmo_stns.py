@@ -31,6 +31,7 @@ import scipy.spatial as spatial
 from _00_additional_functions import (
     convert_coords_fr_wgs84_to_utm32_, resampleDf)
 
+
 from _09_aggregate_do_cdf_compare_2_DWD_stns import (plt_bar_plot_2_stns,
                                                      plt_scatter_plot_2_stns,
                                                      plot_end_tail_cdf_2_stns,
@@ -99,6 +100,8 @@ def get_dwd_stns_coords(coords_df_file, x_col_name, y_col_name):
     return in_coords_df, x_vals, y_vals, stn_ids
 
 #==============================================================================
+#
+#==============================================================================
 
 
 def get_netatmo_stns_coords(coords_df_file, x_col_name, y_col_name):
@@ -164,7 +167,7 @@ def compare_cdf_two_stns(netatmo_ppt_df_file, path_to_ppt_hdf_data):
                                      engine='c')
     netatmo_stns_ids = in_netatmo_stns_df.columns
 
-    for stn_id in netatmo_stns_ids:
+    for stn_id in netatmo_stns_ids[200:]:
         print('First Netatmo Stn Id is', stn_id)
 
         try:
@@ -194,26 +197,31 @@ def compare_cdf_two_stns(netatmo_ppt_df_file, path_to_ppt_hdf_data):
                     df_resample2.index)
                 df_common1 = df_resample1.loc[idx_common]
                 df_common2 = df_resample2.loc[idx_common]
+                if (df_common1.values.shape[0] > 0 and
+                        df_common2.values.shape[0] > 0):
 
-                try:
-                    plt_bar_plot_2_stns(stn_id, dwd_stn_near, distance_near,
-                                        df_common1, df_common2,
-                                        tem_freq,
-                                        out_save_dir)
-                    plt_scatter_plot_2_stns(stn_id, dwd_stn_near, distance_near,
+                    try:
+                        plt_bar_plot_2_stns(stn_id, dwd_stn_near, distance_near,
                                             df_common1, df_common2,
                                             tem_freq,
                                             out_save_dir)
-                    plot_end_tail_cdf_2_stns(stn_id, dwd_stn_near, distance_near,
-                                             df_common1, df_common2,
-                                             tem_freq, ppt_thr,
-                                             out_save_dir)
-                    plot_ranked_stns(stn_id, dwd_stn_near, distance_near,
-                                     df_common1, df_common2,
-                                     tem_freq,
-                                     out_save_dir)
-                except Exception as msg:
-                    print('error while plotting', msg, tem_freq)
+                        plt_scatter_plot_2_stns(stn_id, dwd_stn_near, distance_near,
+                                                df_common1, df_common2,
+                                                tem_freq,
+                                                out_save_dir)
+                        plot_end_tail_cdf_2_stns(stn_id, dwd_stn_near, distance_near,
+                                                 df_common1, df_common2,
+                                                 tem_freq, ppt_thr,
+                                                 out_save_dir)
+                        plot_ranked_stns(stn_id, dwd_stn_near, distance_near,
+                                         df_common1, df_common2,
+                                         tem_freq,
+                                         out_save_dir)
+                    except Exception as msg:
+                        print('error while plotting', msg, tem_freq)
+                        continue
+                else:
+                    print('empty df')
                     continue
                 # break
         except Exception as msg:
