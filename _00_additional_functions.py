@@ -206,7 +206,7 @@ def resampleDf(data_frame,
                           label='right',
                           closed='right',
                           loffset=label_shift,
-                          base=temp_shift).sum()
+                          base=temp_shift).apply(lambda x: x.values.sum())
 
     if fillnan:
         df_res.fillna(value=0, inplace=True)
