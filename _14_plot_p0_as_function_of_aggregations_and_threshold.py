@@ -2,15 +2,8 @@
 # -*- coding: utf-8 -*-
 
 """
-Look at pairs of stations (DWD-DWD) 
-
-For different aggregations (15min, 30min, 60min, ..., 6hours, ..., 1 day)
-Calculate P0 (probability that rainfall < 1mm)
-Construct Cdf for extremes ( > 1mm) and compare
-Calculate the correlation between the ranks on all scales
-Find if the similarities or differences in the stations are due to 
-a systematic or a random error.
-If a systematic error is present (bias) find the correction factor 
+Plot P0 =probability that rainfall below a threshold as a function
+of time aggregations for every station and it's closest neighour
 """
 
 __author__ = "Abbas El Hachem"
@@ -68,7 +61,10 @@ x_col_name = 'Rechtswert'
 y_col_name = 'Hochwert'
 
 # threshold for CDF, consider only above thr, below is P0
-ppt_thrs_list = [0.25, 0.5, 1, 2]
+ppt_thrs_list = [0.25, 0.5, 1, 2, 5]
+
+colors = ['r', 'b', 'g', 'orange', 'k']
+
 
 # till 1 day
 aggregation_frequencies = ['5min', '10min', '15min', '30min', '60min', '90min',
@@ -136,8 +132,8 @@ def get_p0_for_2_stns_temp_freq(df1, df2, ppt_thr):
 #==============================================================================
 
 
-def compare_cdf_two_dwd_stns(stns_ids):
-    for iid in stns_ids[10:]:
+def plot_p0_as_a_sequence_two_dwd_stns(stns_ids):
+    for iid in stns_ids:
         print('First Stn Id is', iid)
         try:
             idf1 = HDF52.get_pandas_dataframe(ids=[iid])
@@ -152,7 +148,8 @@ def compare_cdf_two_dwd_stns(stns_ids):
                                        index=ppt_thrs_list)
             df_p01_stn2 = pd.DataFrame(columns=aggregation_frequencies,
                                        index=ppt_thrs_list)
-            for ppt_thr in ppt_thrs_list:
+            plt.figure(figsize=(16, 12), dpi=200)
+            for i, ppt_thr in enumerate(ppt_thrs_list):
                 print('Ppt Threshold is', ppt_thr)
                 for tem_freq in aggregation_frequencies:
                     print('Aggregation is: ', tem_freq)
@@ -166,7 +163,7 @@ def compare_cdf_two_dwd_stns(stns_ids):
 
                     df_common1 = df_resample1.loc[idx_common, :]
                     df_common2 = df_resample2.loc[idx_common, :]
-                    print('done interscting Dataframes')
+                    print('Done interscting Dataframes')
                     if (df_common1.values.shape[0] > 0 and
                             df_common2.values.shape[0] > 0):
                         try:
@@ -185,16 +182,30 @@ def compare_cdf_two_dwd_stns(stns_ids):
                         continue
                 print('plotting for Ppt thr', ppt_thr)
 
+                lines = plt.plot(aggregation_frequencies,
+                                 df_p01_stn1.loc[ppt_thr, :],
+                                 c=colors[i],
+                                 marker='o', linestyle='--',
+                                 label=ppt_thr, alpha=0.75)
+
                 plt.plot(aggregation_frequencies,
-                         df_p01_stn1.loc[ppt_thr, :], c='r',
-                         marker='o', linestyle='--',
-                         label=ppt_thr, alpha=0.5)
-                plt.plot(aggregation_frequencies,
-                         df_p01_stn2.loc[ppt_thr, :], c='b',
-                         marker='+', linestyle='-.', alpha=0.5,
-                         label=ppt_thr)
-            plt.legend(loc=0)
-            plt.show()
+                         df_p01_stn2.loc[ppt_thr, :], c=colors[i],
+                         marker='+', linestyle='dotted', alpha=0.75)
+
+            plt.legend(loc=0, ncol=2)
+            plt.grid(alpha=0.5)
+            plt.ylabel('P0')
+            plt.yticks([0.5, 0.6, 0.7, 0.8, 0.85, 0.9, 0.925, 0.95, 0.975, 1])
+
+            plt.title('P0 as a sequence %s vs %s \n distance: %0.1f m'
+                      % (iid, stn_near, distance_near))
+            plt.axis('equal')
+            plt.tight_layout()
+            plt.savefig(os.path.join(out_save_dir,
+                                     'P0_as_a_sequence_%s_%s.png'
+                                     % (iid, stn_near)))
+#             plt.show()
+
         except Exception as msg:
             print(msg)
 
@@ -208,7 +219,7 @@ if __name__ == '__main__':
 
     HDF52 = HDF5(infile=path_to_ppt_hdf_data)
     ids = HDF52.get_all_ids()
-    compare_cdf_two_dwd_stns(ids)
+    plot_p0_as_a_sequence_two_dwd_stns(ids)
 
     STOP = timeit.default_timer()  # Ending time
     print(('\n****Done with everything on %s.\nTotal run time was'

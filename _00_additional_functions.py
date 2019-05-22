@@ -201,12 +201,12 @@ def resampleDf(data_frame,
                df_save_name=None):
     ''' sample DF based on freq and time shift and label shift '''
 
-    df_ = data_frame.copy()
-    df_res = df_.resample(temp_freq,
-                          label='right',
-                          closed='right',
-                          loffset=label_shift,
-                          base=temp_shift).apply(lambda x: x.values.sum())
+    # df_ = data_frame.copy()
+    df_res = data_frame.resample(temp_freq,
+                                 label='right',
+                                 closed='right',
+                                 loffset=label_shift,
+                                 base=temp_shift).apply(lambda x: x.values.sum())
 
     if fillnan:
         df_res.fillna(value=0, inplace=True)
