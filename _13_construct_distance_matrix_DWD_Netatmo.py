@@ -69,18 +69,22 @@ coords_netatmo = np.array([(x, y) for x, y in zip(xnetatmo, ynetatmo)])
 coords_dwd = np.array([(xd, yd) for xd, yd in zip(x_dwd, y_dwd)])
 
 
-distance.cdist(coords_dwd, coords_netatmo, 'euclidean')
+# distance.cdist(coords_dwd, coords_netatmo, 'euclidean')
 
 data_mtx = np.zeros(
     shape=(in_df_netatmo_coords.index.shape[0],
            in_df_dwd_coords.index.shape[0])).astype('float')
 data_mtx[data_mtx == 0] = np.nan
 
-df_distance = pd.DataFrame(index=in_df_netatmo_coords.index,
+stations_id_with_ = [stn_id.replace(':', '_')
+                     for stn_id in in_df_netatmo_coords.index]
+
+df_distance = pd.DataFrame(index=stations_id_with_,
                            columns=in_df_dwd_coords.index,
                            data=data_mtx)
 
 for stn_mac in in_df_netatmo_coords.index:
+    print(stn_mac)
     lon_stn = in_df_netatmo_coords.loc[stn_mac, lon_col_name]
     lat_stn = in_df_netatmo_coords.loc[stn_mac, lat_col_name]
     xstn, ystn = convert_coords_fr_wgs84_to_utm32_(wgs82,
@@ -88,9 +92,11 @@ for stn_mac in in_df_netatmo_coords.index:
                                                    lon_stn,
                                                    lat_stn)
 
-    dist = distance.cdist([(xstn, ystn)],
-                          coords_dwd, 'euclidean') / 1000
-    df_distance.loc[stn_mac, :] = dist
+    dist = distance.cdist([(xstn, ystn)], coords_dwd, 'euclidean')
+    stn_max_with_ = stn_mac.replace(':', '_')
+    df_distance.loc[stn_max_with_, :] = dist
 
-df_distance.to_csv(os.path.join(out_save_dir, 'distance_mtx_NetAtmo_DWD.csv'),
+df_distance.to_csv(os.path.join(out_save_dir, 'distance_mtx_in_m_NetAtmo_DWD.csv'),
                    sep=';')
+
+print('Done with everything')

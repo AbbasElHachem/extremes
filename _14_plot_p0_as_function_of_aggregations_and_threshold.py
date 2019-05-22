@@ -182,24 +182,24 @@ def plot_p0_as_a_sequence_two_dwd_stns(stns_ids):
                         continue
                 print('plotting for Ppt thr', ppt_thr)
 
-                lines = plt.plot(aggregation_frequencies,
-                                 df_p01_stn1.loc[ppt_thr, :],
-                                 c=colors[i],
-                                 marker='o', linestyle='--',
-                                 label=ppt_thr, alpha=0.75)
+                plt.plot(aggregation_frequencies,
+                         df_p01_stn1.loc[ppt_thr, :],
+                         c=colors[i],
+                         marker='o', linestyle='--',
+                         label=ppt_thr, alpha=0.75)
 
                 plt.plot(aggregation_frequencies,
                          df_p01_stn2.loc[ppt_thr, :], c=colors[i],
                          marker='+', linestyle='dotted', alpha=0.75)
 
             plt.legend(loc=0, ncol=2)
-            plt.grid(alpha=0.5)
+            plt.grid(alpha=0.25)
             plt.ylabel('P0')
-            plt.yticks([0.5, 0.6, 0.7, 0.8, 0.85, 0.9, 0.925, 0.95, 0.975, 1])
-
+#             plt.yticks([0.5, 0.6, 0.7, 0.8, 0.85, 0.9, 0.925, 0.95, 0.975, 1])
+#             plt.ylim([0.5, 1])
             plt.title('P0 as a sequence %s vs %s \n distance: %0.1f m'
                       % (iid, stn_near, distance_near))
-            plt.axis('equal')
+#             plt.axis('equal')
             plt.tight_layout()
             plt.savefig(os.path.join(out_save_dir,
                                      'P0_as_a_sequence_%s_%s.png'

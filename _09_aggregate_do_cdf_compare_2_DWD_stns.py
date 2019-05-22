@@ -154,8 +154,8 @@ def plt_bar_plot_2_stns(stn1_id, stn2_id, seperate_distance,
     ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
 
     ax.set_ylim(0.0, np.max([df1.values.max(), df2.values.max()]) + 1)
-    ax.set_xlabel('Observed %s Rainfall station Id: %s' % (temp_freq, stn1_id))
-    ax.set_ylabel('Observed %s Rainfall station Id: %s' % (temp_freq, stn2_id))
+#     ax.set_xlabel('Time')
+    ax.set_ylabel('Ppt in mm/%s' % temp_freq)
     ax.set_title("Stn: %s vs Stn: %s;\n Distance: %0.1f m; "
                  "Time Freq: %s; " % (stn1_id, stn2_id,
                                       seperate_distance,
