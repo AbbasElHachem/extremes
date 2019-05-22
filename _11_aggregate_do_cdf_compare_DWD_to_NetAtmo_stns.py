@@ -78,7 +78,7 @@ wgs82 = "+init=EPSG:4326"
 utm32 = "+init=EPSG:32632"
 
 # threshold for CDF, consider only above thr, below is P0
-ppt_thr = 1.
+ppt_thr = .5
 max_ppt_thr = 100.
 
 # till 1 day '5min', '10min', '15min', '30min',

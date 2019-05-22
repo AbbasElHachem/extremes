@@ -32,7 +32,7 @@ import scipy.spatial as spatial
 
 from scipy.stats import spearmanr as spr
 from scipy.stats import pearsonr as pears
-
+from scipy.stats import rankdata as rankdata
 from pandas.plotting import register_matplotlib_converters
 
 from matplotlib import rc
@@ -76,13 +76,13 @@ x_col_name = 'Rechtswert'
 y_col_name = 'Hochwert'
 
 # threshold for CDF, consider only above thr, below is P0
-ppt_thr = 1.
+ppt_thr = .5
 
 # till 1 day
 aggregation_frequencies = ['5min', '10min', '15min', '30min', '60min', '90min',
                            '120min', '180min', '240min',  '360min',
                            '480min', '720min', '1440min']
-# TODO: Fix for '300min', 520min
+
 
 #==============================================================================
 #
@@ -177,11 +177,14 @@ def plt_bar_plot_2_stns(stn1_id, stn2_id, seperate_distance,
 
 
 def plt_scatter_plot_2_stns(stn1_id, stn2_id, seperate_distance,
-                            df1, df2, temp_freq, out_dir):
+                            df1, df2, ppt_min_thr, temp_freq, out_dir):
     ''' plot scatter plots between two stations'''
     print('plotting scatter plots')
-    values_x = df1.values.ravel()
-    values_y = df2.values.ravel()
+
+    ppt_abv_thr1 = df1[df1 >= ppt_min_thr]
+    ppt_abv_thr2 = df2[df2 >= ppt_min_thr]
+    values_x = ppt_abv_thr1.values.ravel()
+    values_y = ppt_abv_thr2.values.ravel()
 
     # calculate correlations (pearson and spearman)
     corr = pears(values_x, values_y)[0]
@@ -281,7 +284,7 @@ def plot_ranked_stns(stn1_id, stn2_id, seperate_distance,
     print('plotting Ranked plots')
     if isinstance(df1, pd.DataFrame):
         sorted_ranked_df1 = df1.rank(
-            method='dense', na_option='keep').sort_values(by=stn1_id)
+            method='average', na_option='keep').sort_values(by=stn1_id)
     else:
         sorted_ranked_df1 = df1.rank(method='dense',
                                      na_option='keep').sort_values()
@@ -372,18 +375,18 @@ def compare_cdf_two_dwd_stns(stns_ids):
                 if (df_common1.values.shape[0] > 0 and
                         df_common2.values.shape[0] > 0):
                     try:
-                        plt_bar_plot_2_stns(iid, stn_near, distance_near,
-                                            df_common1, df_common2, tem_freq,
-                                            out_save_dir)
-
-                        plt_scatter_plot_2_stns(iid, stn_near, distance_near,
-                                                df_common1, df_common2,
-                                                tem_freq,
-                                                out_save_dir)
-                        plot_end_tail_cdf_2_stns(iid, stn_near, distance_near,
-                                                 df_common1, df_common2,
-                                                 tem_freq, ppt_thr,
-                                                 out_save_dir)
+                        #                         plt_bar_plot_2_stns(iid, stn_near, distance_near,
+                        #                                             df_common1, df_common2, tem_freq,
+                        #                                             out_save_dir)
+                        #
+                        #                         plt_scatter_plot_2_stns(iid, stn_near, distance_near,
+                        #                                                 df_common1, df_common2, ppt_thr,
+                        #                                                 tem_freq,
+                        #                                                 out_save_dir)
+                        #                         plot_end_tail_cdf_2_stns(iid, stn_near, distance_near,
+                        #                                                  df_common1, df_common2,
+                        #                                                  tem_freq, ppt_thr,
+                        # out_save_dir)
                         plot_ranked_stns(iid, stn_near, distance_near,
                                          df_common1, df_common2,
                                          tem_freq,

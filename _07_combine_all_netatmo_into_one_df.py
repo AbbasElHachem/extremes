@@ -17,7 +17,7 @@ import os
 import numpy as np
 
 from _00_additional_functions import list_all_full_path
-from _05_NetatmoData_get_simultaneous_events import (
+from _00_additional_functions import (
     split_one_df_file_to_get_stn_id, split_df_file_to_get_alls_stn_ids)
 
 
@@ -49,6 +49,8 @@ for df_file in dfs_list_ppt:
                         parse_dates=True,
                         infer_datetime_format=True,
                         engine='c')
+    in_df.dropna(inplace=True)
+    print('Data has the following shape', in_df.values.shape)
     try:
         idx_int = df_all.index.intersection(in_df.index).ravel()
         vals_df = in_df.values.ravel()
