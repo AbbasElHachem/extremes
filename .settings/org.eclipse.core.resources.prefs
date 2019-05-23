@@ -12,5 +12,3 @@ encoding/_10_aggregate_do_cdf_compare_2_NetAtmo_stns.py=utf-8
 encoding/_11_aggregate_do_cdf_compare_DWD_to_NetAtmo_stns.py=utf-8
 encoding/_12_aggregate_do_plots_compare_alls_stns_in_convex_hull_for_extreme.py=utf-8
 encoding/_13_construct_distance_matrix_DWD_Netatmo.py=utf-8
-encoding/_14_plot_p0_as_function_of_aggregations_and_threshold.py=utf-8
-encoding/_15_contingency_tables_2_stns.py=utf-8

@@ -30,7 +30,7 @@ from _06_get_data_simultaneous_Netatmo_events import get_netatmo_events_stn_data
 from _09_aggregate_do_cdf_compare_2_DWD_stns import (plt_bar_plot_2_stns,
                                                      plt_scatter_plot_2_stns,
                                                      plot_end_tail_cdf_2_stns,
-                                                     plot_ranked_stns)
+                                                     plot_normalized_ranked_stns)
 
 from _10_aggregate_do_cdf_compare_2_NetAtmo_stns import aggregation_frequencies
 
@@ -181,11 +181,13 @@ def plot_netatmot_coordinates(path_to_events,
                                                              tem_freq,
                                                              p0_ppt_thr,
                                                              out_save_dir)
-                                    plot_ranked_stns(stn_one_id, stn2_id,
-                                                     distance_near,
-                                                     df_common1, df_common2,
-                                                     tem_freq,
-                                                     out_save_dir)
+                                    plot_normalized_ranked_stns(stn_one_id,
+                                                                stn2_id,
+                                                                distance_near,
+                                                                df_common1,
+                                                                df_common2,
+                                                                tem_freq,
+                                                                out_save_dir)
                                 except Exception as msg:
                                     print('error while plotting', msg, tem_freq)
                                     continue

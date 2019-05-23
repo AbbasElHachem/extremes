@@ -32,15 +32,17 @@ import scipy.spatial as spatial
 
 from scipy.stats import spearmanr as spr
 from scipy.stats import pearsonr as pears
-from scipy.stats import rankdata as rankdata
+
 from pandas.plotting import register_matplotlib_converters
 
 from matplotlib import rc
 from matplotlib import rcParams
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
-
-from _00_additional_functions import (resampleDf,
-                                      get_cdf_part_abv_thr)
+from collections import OrderedDict
+from _00_additional_functions import (resample_intersect_2_dfs,
+                                      get_cdf_part_abv_thr,
+                                      calculate_probab_ppt_below_thr,
+                                      constrcut_contingency_table)
 
 from b_get_data import HDF5
 
@@ -53,8 +55,8 @@ rc('font', size=13)
 rc('font', family='serif')
 rc('axes', labelsize=13)
 rcParams['axes.labelpad'] = 13
-majorLocator = MultipleLocator(1)
 
+majorLocator = MultipleLocator(2)
 minorLocator = MultipleLocator(1)
 
 path_to_ppt_hdf_data = (r'X:\exchange\ElHachem'
@@ -77,6 +79,10 @@ y_col_name = 'Hochwert'
 
 # threshold for CDF, consider only above thr, below is P0
 ppt_thr = .5
+
+# used for P0 calculation
+ppt_thrs_list = [0.25, 0.5, 1]  # , 0.25, 0.5, 1, 2, 5]
+
 
 # till 1 day
 aggregation_frequencies = ['5min', '10min', '15min', '30min', '60min', '90min',
@@ -147,7 +153,7 @@ def plt_bar_plot_2_stns(stn1_id, stn2_id, seperate_distance,
 
     xfmt = md.DateFormatter('%Y-%m-%d')
 
-    ax.xaxis.set_major_locator(MultipleLocator(15))
+    ax.xaxis.set_major_locator(MultipleLocator(20))
     ax.yaxis.set_major_locator(MultipleLocator(2))
 
     ax.xaxis.set_major_formatter(xfmt)
@@ -167,7 +173,8 @@ def plt_bar_plot_2_stns(stn1_id, stn2_id, seperate_distance,
     plt.tight_layout()
     plt.savefig(os.path.join(out_dir, '%s_lineplot_stn_%s_vs_stn_%s_.png'
                              % (temp_freq, stn1_id, stn2_id)))
-    plt.close()
+    plt.clf()
+    plt.close('all')
     print('Done saving figure Line plot')
 
     return
@@ -183,8 +190,17 @@ def plt_scatter_plot_2_stns(stn1_id, stn2_id, seperate_distance,
 
     ppt_abv_thr1 = df1[df1 >= ppt_min_thr]
     ppt_abv_thr2 = df2[df2 >= ppt_min_thr]
-    values_x = ppt_abv_thr1.values.ravel()
-    values_y = ppt_abv_thr2.values.ravel()
+
+    ppt_abv_thr1.dropna(inplace=True)
+    ppt_abv_thr2.dropna(inplace=True)
+
+    idx_cmn = ppt_abv_thr1.index.intersection(ppt_abv_thr2.index)
+
+    df1_cmn_df2 = ppt_abv_thr1.loc[idx_cmn]
+    df2_cmn_df1 = ppt_abv_thr2.loc[idx_cmn]
+
+    values_x = df1_cmn_df2.values.ravel()
+    values_y = df2_cmn_df1.values.ravel()
 
     # calculate correlations (pearson and spearman)
     corr = pears(values_x, values_y)[0]
@@ -205,6 +221,7 @@ def plt_scatter_plot_2_stns(stn1_id, stn2_id, seperate_distance,
     ax.set_ylim(-0.1, _max + 0.1)
 
     ax.xaxis.set_major_locator(majorLocator)
+    ax.yaxis.set_major_locator(majorLocator)
     ax.xaxis.set_major_formatter(FormatStrFormatter('%.0f'))
     ax.yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
 
@@ -222,7 +239,8 @@ def plt_scatter_plot_2_stns(stn1_id, stn2_id, seperate_distance,
     plt.tight_layout()
     plt.savefig(os.path.join(out_dir, '%s_scatter_stn_%s_vs_stn_%s_.png'
                              % (temp_freq, stn1_id, stn2_id)))
-    plt.close()
+    plt.clf()
+    plt.close('all')
     print('Done saving figure Scatter')
 
     return
@@ -269,7 +287,8 @@ def plot_end_tail_cdf_2_stns(stn1_id, stn2_id, seperate_distance,
     plt.tight_layout()
     plt.savefig(os.path.join(out_dir, '%s_cdf_stn_%s_vs_stn_%s_.png'
                              % (temp_freq, stn1_id, stn2_id)))
-    plt.close()
+    plt.clf()
+    plt.close('all')
     print('Done saving figure CDF')
 
     return
@@ -279,29 +298,25 @@ def plot_end_tail_cdf_2_stns(stn1_id, stn2_id, seperate_distance,
 #==============================================================================
 
 
-def plot_ranked_stns(stn1_id, stn2_id, seperate_distance,
-                     df1, df2, temp_freq, out_dir):
-    print('plotting Ranked plots')
+def plot_normalized_ranked_stns(stn1_id, stn2_id, seperate_distance,
+                                df1, df2, temp_freq, out_dir):
+    print('plotting normalized Ranked plots')
     if isinstance(df1, pd.DataFrame):
         sorted_ranked_df1 = df1.rank(
-            method='average', na_option='keep').sort_values(by=stn1_id)
+            method='dense', na_option='keep')  # .sort_values(by=stn1_id)
     else:
         sorted_ranked_df1 = df1.rank(method='dense',
-                                     na_option='keep').sort_values()
+                                     na_option='keep')  # .sort_values()
 
     if isinstance(df2, pd.DataFrame):
         sorted_ranked_df2 = df2.rank(
-            method='dense', na_option='keep').sort_values(by=stn2_id)
+            method='dense', na_option='keep')  # .sort_values(by=stn2_id)
     else:
         sorted_ranked_df2 = df2.rank(method='dense',
-                                     na_option='keep').sort_values()
+                                     na_option='keep')  # .sort_values()
 
-    values_x = sorted_ranked_df1.values.ravel()
-    values_y = sorted_ranked_df2.values.ravel()
-
-    # calculate correlations (pearson and spearman)
-    corr = pears(values_x, values_y)[0]
-    rho = spr(values_x, values_y)[0]
+    values_x = sorted_ranked_df1.values.ravel() / sorted_ranked_df1.values.max()
+    values_y = sorted_ranked_df2.values.ravel() / sorted_ranked_df2.values.max()
 
     fig = plt.figure(figsize=(20, 12), dpi=150)
     ax = fig.add_subplot(111)
@@ -314,28 +329,94 @@ def plot_ranked_stns(stn1_id, stn2_id, seperate_distance,
     ax.plot([_min, _max], [_min, _max], c='k', linestyle='--', alpha=0.4)
 
     # set plot limit
-    ax.set_xlim(-0.1, _max + 0.1)
-    ax.set_ylim(-0.1, _max + 0.1)
+    ax.set_xlim(-0.01, _max + 0.01)
+    ax.set_ylim(-0.01, _max + 0.01)
 
-    ax.xaxis.set_major_locator(MultipleLocator(25))
-    ax.yaxis.set_major_locator(MultipleLocator(25))
+    ax.xaxis.set_major_locator(MultipleLocator(1))
+    ax.yaxis.set_major_locator(MultipleLocator(1))
     ax.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
     ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
 
-    ax.set_xlabel('Observed %s Ranks station Id: %s' % (temp_freq, stn1_id))
-    ax.set_ylabel('Observed %s Ranks station Id: %s' % (temp_freq, stn2_id))
+    ax.set_xlabel('Normalized Observed %s Ranks station Id: %s'
+                  % (temp_freq, stn1_id))
+    ax.set_ylabel('Normalized Observed %s Ranks station Id: %s'
+                  % (temp_freq, stn2_id))
     ax.set_title("Stn: %s vs Stn: %s;\n Distance: %0.1f m; "
-                 "Time Freq: %s; \n Pearson Cor=%0.3f; "
-                 "Spearman Cor=%0.3f" % (stn1_id, stn2_id,
-                                         seperate_distance,
-                                         temp_freq, corr, rho))
+                 "Time Freq: %s; "
+                 % (stn1_id, stn2_id,
+                     seperate_distance,
+                     temp_freq))
 
-    ax.grid(color='k', linestyle='--', linewidth=0.1, alpha=0.25)
+    ax.grid(color='k', linestyle='--', linewidth=0.1, alpha=0.5)
     plt.tight_layout()
     plt.savefig(os.path.join(out_dir, '%s_ranks_stn_%s_vs_stn_%s_.png'
                              % (temp_freq, stn1_id, stn2_id)))
-    plt.close()
-    print('Done saving figure Ranks')
+    plt.clf()
+    plt.close('all')
+    print('Done saving figure normalized Ranks')
+
+    return
+#==============================================================================
+#
+#==============================================================================
+
+
+def plot_normalized_sorted_ranked_stns(stn1_id, stn2_id, seperate_distance,
+                                       df1, df2, temp_freq, out_dir):
+    print('plotting sorted normalized Ranked plots')
+    if isinstance(df1, pd.DataFrame):
+        sorted_ranked_df1 = df1.rank(
+            method='dense', na_option='keep').sort_values(by=stn1_id)
+    else:
+        sorted_ranked_df1 = df1.rank(method='dense',
+                                     na_option='keep').sort_values()
+
+    if isinstance(df2, pd.DataFrame):
+        sorted_ranked_df2 = df2.rank(
+            method='dense', na_option='keep').sort_values(by=stn2_id)
+    else:
+        sorted_ranked_df2 = df2.rank(method='dense',
+                                     na_option='keep').sort_values()
+
+    values_x = sorted_ranked_df1.values.ravel() / sorted_ranked_df1.values.max()
+    values_y = sorted_ranked_df2.values.ravel() / sorted_ranked_df2.values.max()
+
+    fig = plt.figure(figsize=(20, 12), dpi=150)
+    ax = fig.add_subplot(111)
+
+    ax.scatter(values_x, values_y, c='darkred', marker='.', alpha=0.35)
+
+    # plot 45 deg line
+    _min = min(values_x.min(), values_y.min())
+    _max = max(values_x.max(), values_y.max())
+    ax.plot([_min, _max], [_min, _max], c='k', linestyle='--', alpha=0.4)
+
+    # set plot limit
+    ax.set_xlim(-0.01, _max + 0.01)
+    ax.set_ylim(-0.01, _max + 0.01)
+
+    ax.xaxis.set_major_locator(MultipleLocator(1))
+    ax.yaxis.set_major_locator(MultipleLocator(1))
+    ax.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+    ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+
+    ax.set_xlabel('Normalized Observed %s Ranks station Id: %s'
+                  % (temp_freq, stn1_id))
+    ax.set_ylabel('Normalized Observed %s Ranks station Id: %s'
+                  % (temp_freq, stn2_id))
+    ax.set_title("Stn: %s vs Stn: %s;\n Distance: %0.1f m; "
+                 "Time Freq: %s; "
+                 % (stn1_id, stn2_id,
+                     seperate_distance,
+                     temp_freq))
+
+    ax.grid(color='k', linestyle='--', linewidth=0.1, alpha=0.5)
+    plt.tight_layout()
+    plt.savefig(os.path.join(out_dir, '%s_sorted_ranks_stn_%s_vs_stn_%s_.png'
+                             % (temp_freq, stn1_id, stn2_id)))
+    plt.clf()
+    plt.close('all')
+    print('Done saving figure sorted normalized Ranks')
 
     return
 
@@ -344,7 +425,278 @@ def plot_ranked_stns(stn1_id, stn2_id, seperate_distance,
 #==============================================================================
 
 
-def compare_cdf_two_dwd_stns(stns_ids):
+def plot_sorted_stns_vals(stn1_id, stn2_id, seperate_distance,
+                          df1, df2, temp_freq, out_dir):
+    print('plotting sorted plots')
+    if isinstance(df1, pd.DataFrame):
+        sorted_df1 = df1.sort_values(by=stn1_id)
+    else:
+        sorted_df1 = df1.sort_values()
+
+    if isinstance(df2, pd.DataFrame):
+        sorted_df2 = df2.sort_values(by=stn2_id)
+    else:
+        sorted_df2 = df2.sort_values()
+
+    values_x = sorted_df1.values.ravel()
+    values_y = sorted_df2.values.ravel()
+
+    # calculate correlations (pearson and spearman)
+    corr = pears(values_x, values_y)[0]
+    rho = spr(values_x, values_y)[0]
+
+    fig = plt.figure(figsize=(20, 12), dpi=150)
+    ax = fig.add_subplot(111)
+
+    ax.scatter(values_x, values_y, c='b', marker='+', alpha=0.5)
+
+    # plot 45 deg line
+    _min = min(values_x.min(), values_y.min())
+    _max = max(values_x.max(), values_y.max())
+    ax.plot([_min, _max], [_min, _max], c='k', linestyle='--', alpha=0.4)
+
+    # set plot limit
+    ax.set_xlim(-0.01, _max + 0.1)
+    ax.set_ylim(-0.01, _max + 0.1)
+
+    ax.xaxis.set_major_locator(MultipleLocator(2))
+    ax.yaxis.set_major_locator(MultipleLocator(2))
+    ax.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+    ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+
+    ax.set_xlabel('Observed %s sorted Ppt station Id: %s'
+                  % (temp_freq, stn1_id))
+    ax.set_ylabel('Observed %s sorted Ppt Ranks station Id: %s'
+                  % (temp_freq, stn2_id))
+    ax.set_title("Stn: %s vs Stn: %s;\n Distance: %0.1f m; "
+                 "Time Freq: %s; \n Pearson Cor=%0.3f; "
+                 "Spearman Cor=%0.3f" % (stn1_id, stn2_id,
+                                         seperate_distance,
+                                         temp_freq, corr, rho))
+
+    ax.grid(color='k', linestyle='--', linewidth=0.1, alpha=0.5)
+    plt.tight_layout()
+    plt.savefig(os.path.join(out_dir, '%s_sorted_stn_%s_vs_stn_%s_.png'
+                             % (temp_freq, stn1_id, stn2_id)))
+    plt.clf()
+    plt.close('all')
+    print('Done saving figure Sorted dfs')
+
+    return
+
+#==============================================================================
+#
+#==============================================================================
+
+
+def plot_p0_as_a_sequence_two_stns(stn_id,
+                                   stn_2_id,
+                                   min_dist,
+                                   ppt_thrs_list,
+                                   df_stn1,
+                                   df_stn2,
+                                   aggregation_frequencies_lst,
+                                   out_dir):
+    '''
+    Plot P0 =probability that rainfall below a threshold as a function
+    of time aggregations for every station and it's closest neighour
+    '''
+    print('Plotting P0 as a sequence')
+
+    plt.ioff()
+
+    colors = ['r', 'b', 'g', 'orange', 'k']
+    df_p01_stn1 = pd.DataFrame(columns=aggregation_frequencies_lst,
+                               index=ppt_thrs_list)
+    df_p01_stn2 = pd.DataFrame(columns=aggregation_frequencies_lst,
+                               index=ppt_thrs_list)
+    fig = plt.figure(figsize=(16, 12), dpi=200)
+    ax = fig.add_subplot(111)
+
+    for i, ppt_thr in enumerate(ppt_thrs_list):
+        print('Ppt Threshold is', ppt_thr)
+
+        for temp_freq in aggregation_frequencies_lst:
+
+            df_common1, df_common2 = resample_intersect_2_dfs(df_stn1,
+                                                              df_stn2,
+                                                              temp_freq)
+            if (df_common1.values.shape[0] > 0 and
+                    df_common2.values.shape[0] > 0):
+
+                try:
+                    p01 = calculate_probab_ppt_below_thr(
+                        df_common1.values, ppt_thr)
+                    p02 = calculate_probab_ppt_below_thr(
+                        df_common2.values, ppt_thr)
+
+                    df_p01_stn1.loc[ppt_thr, temp_freq] = p01
+                    df_p01_stn2.loc[ppt_thr, temp_freq] = p02
+                except Exception as msg:
+                    print('error while calculating P0', msg, temp_freq)
+                    continue
+
+                print('plotting for Ppt thr', temp_freq)
+
+                ax.plot(df_p01_stn1.columns,
+                        df_p01_stn1.loc[ppt_thr, :],
+                        c=colors[i],
+                        marker='o', linestyle='--',
+                        linewidth=1,
+                        alpha=0.5,
+                        markersize=3,
+                        label=str(ppt_thr) + ' mm')
+
+                ax.plot(df_p01_stn2.columns,
+                        df_p01_stn2.loc[ppt_thr, :], c=colors[i],
+                        linewidth=1,
+                        marker='+', linestyle='dotted', alpha=0.5,
+                        markersize=3)
+
+            else:
+                print('empty df')
+                continue
+
+    handles, labels = plt.gca().get_legend_handles_labels()
+    by_label = OrderedDict(zip(labels, handles))
+    plt.legend(by_label.values(), by_label.keys())
+
+    ax.set_ylabel('P0')
+
+    ax.set_title('P0 as a sequence %s vs %s \n distance: %0.1f m'
+                 % (stn_id, stn_2_id, min_dist))
+
+    plt.tight_layout()
+    plt.grid(alpha=0.15)
+    plt.savefig(os.path.join(out_dir,
+                             'P0_as_a_sequence_%s_%s.png'
+                             % (stn_id, stn_2_id)))
+    print('Done plotting P0 as a sequence')
+    return df_p01_stn1, df_p01_stn2
+
+#==============================================================================
+#
+#==============================================================================
+
+
+def plot_contingency_tables_as_a_sequence_two_stns(stn_id,
+                                                   stn_2_id,
+                                                   min_dist,
+                                                   ppt_thrs_list,
+                                                   df_stn1,
+                                                   df_stn2,
+                                                   aggregation_frequencies_lst,
+                                                   out_dir):
+    '''
+    Do contingenccy tables a function of time and thresholds for 2 stations
+    '''
+    print('Plotting contingency_table a sequence')
+
+    plt.ioff()
+
+    colors = ['r', 'b', 'g', 'orange', 'k']
+    df_below_thr_stn1 = pd.DataFrame(columns=aggregation_frequencies_lst,
+                                     index=ppt_thrs_list)
+
+    df_abv_thr_stn1 = pd.DataFrame(columns=aggregation_frequencies_lst,
+                                   index=ppt_thrs_list)
+
+    df_below_thr_stn2 = pd.DataFrame(columns=aggregation_frequencies_lst,
+                                     index=ppt_thrs_list)
+
+    df_abv_thr_stn2 = pd.DataFrame(columns=aggregation_frequencies_lst,
+                                   index=ppt_thrs_list)
+    fig = plt.figure(figsize=(16, 12), dpi=200)
+    ax = fig.add_subplot(111)
+
+    for i, ppt_thr in enumerate(ppt_thrs_list):
+        print('Ppt Threshold is', ppt_thr)
+
+        for temp_freq in aggregation_frequencies_lst:
+            print('Time freq is', temp_freq)
+            df_common1, df_common2 = resample_intersect_2_dfs(df_stn1,
+                                                              df_stn2,
+                                                              temp_freq)
+            if (df_common1.values.shape[0] > 0 and
+                    df_common2.values.shape[0] > 0):
+                print('getting percentages for contingency table')
+                try:
+                    (stn1_below_thr,
+                     stn1_abv_thr) = constrcut_contingency_table(df_common1,
+                                                                 1)
+                    (stn2_below_thr,
+                     stn2_abv_thr) = constrcut_contingency_table(df_common2,
+                                                                 1)
+
+                    df_below_thr_stn1.loc[ppt_thr, temp_freq] = stn1_below_thr
+                    df_abv_thr_stn1.loc[ppt_thr, temp_freq] = stn1_abv_thr
+
+                    df_below_thr_stn2.loc[ppt_thr, temp_freq] = stn2_below_thr
+                    df_abv_thr_stn2.loc[ppt_thr, temp_freq] = stn2_abv_thr
+                except Exception as msg:
+                    print('error while calculating P0', msg, temp_freq)
+                    continue
+            else:
+                print('empty df values')
+                continue
+
+    print(df_below_thr_stn1)
+    print('plotting for Ppt thr, temp frequency is', temp_freq)
+
+#     ax.plot(df_below_thr_stn1.columns,
+#             df_below_thr_stn1.loc[:, :],
+#             c='r',
+#             marker='o', linestyle='--',
+#             linewidth=1,
+#             alpha=0.5,
+#             markersize=3,
+#             label=str(ppt_thr) + ' mm')
+#
+#     ax.plot(df_abv_thr_stn1.columns,
+#             df_abv_thr_stn1.loc[ppt_thr, :],
+#             c='b',
+#             marker='*', linestyle='--',
+#             linewidth=1,
+#             alpha=0.5,
+#             markersize=3)
+#
+# #                 ax.plot(df_below_thr_stn2.columns,
+# #                         df_below_thr_stn2.loc[ppt_thr, :],
+# #                         c='g',
+# #                         marker='+', linestyle='--',
+# #                         linewidth=1,
+# #                         alpha=0.5,
+# #                         markersize=3)
+# #                 ax.plot(df_abv_thr_stn2.columns,
+# #                         df_abv_thr_stn2.loc[ppt_thr, :], c='orange',
+# #                         linewidth=1,
+# #                         marker='d', linestyle='dotted', alpha=0.5,
+# #                         markersize=3)
+#
+#     handles, labels = plt.gca().get_legend_handles_labels()
+#     by_label = OrderedDict(zip(labels, handles))
+#     plt.legend(by_label.values(), by_label.keys())
+#
+#     ax.set_ylabel('Percentage of Values below or above threshold')
+#
+#     ax.set_title('Percentage Values below or above threshold as a sequence '
+#                  '%s vs %s \n distance: %0.1f m'
+#                  % (stn_id, stn_2_id, min_dist))
+#
+#     plt.tight_layout()
+#     plt.grid(alpha=0.15)
+#     plt.savefig(os.path.join(out_dir,
+#                              'contingency_table_as_a_sequence_%s_%s.png'
+#                              % (stn_id, stn_2_id)))
+#     print('Done plotting contingency_tableas a sequence')
+#     return
+#==============================================================================
+#
+#==============================================================================
+
+
+def compare_two_dwd_stns(stns_ids):
+
     for iid in stns_ids[10:]:
         print('First Stn Id is', iid)
         try:
@@ -356,48 +708,71 @@ def compare_cdf_two_dwd_stns(stns_ids):
             assert iid != stn_near, 'wrong neighbour selected'
             idf2 = HDF52.get_pandas_dataframe(ids=stn_near)
             print('Second Stn Id is', stn_near)
-            for tem_freq in aggregation_frequencies:
-                print('Aggregation is: ', tem_freq)
-                df_resample1 = resampleDf(data_frame=idf1,
-                                          temp_freq=tem_freq)
-                df_resample2 = resampleDf(data_frame=idf2,
-                                          temp_freq=tem_freq)
-#                 df2 = select_df_within_period(df_resample2,
-#                                               df_resample1.index[0],
-#                                               df_resample1.index[-1])
-#                 df1 = select_df_within_period(df_resample1,
-#                                               df2.index[0],
-#                                               df2.index[-1])
-                idx_common = df_resample1.index.intersection(
-                    df_resample2.index)
-                df_common1 = df_resample1.loc[idx_common, :]
-                df_common2 = df_resample2.loc[idx_common, :]
-                if (df_common1.values.shape[0] > 0 and
-                        df_common2.values.shape[0] > 0):
-                    try:
-                        #                         plt_bar_plot_2_stns(iid, stn_near, distance_near,
-                        #                                             df_common1, df_common2, tem_freq,
-                        #                                             out_save_dir)
-                        #
-                        #                         plt_scatter_plot_2_stns(iid, stn_near, distance_near,
-                        #                                                 df_common1, df_common2, ppt_thr,
-                        #                                                 tem_freq,
-                        #                                                 out_save_dir)
-                        #                         plot_end_tail_cdf_2_stns(iid, stn_near, distance_near,
-                        #                                                  df_common1, df_common2,
-                        #                                                  tem_freq, ppt_thr,
-                        # out_save_dir)
-                        plot_ranked_stns(iid, stn_near, distance_near,
-                                         df_common1, df_common2,
-                                         tem_freq,
-                                         out_save_dir)
-                    except Exception as msg:
-                        print('error while plotting', msg, tem_freq)
-                        continue
-                        # break
-                else:
-                    print('empty df')
-                    continue
+
+#             for tem_freq in aggregation_frequencies:
+#                 print('Aggregation is: ', tem_freq)
+#                 df_common1, df_common2 = resample_intersect_2_dfs(idf1,
+#                                                                   idf2,
+#                                                                   tem_freq)
+#                 if (df_common1.values.shape[0] > 0 and
+#                         df_common2.values.shape[0] > 0):
+#                     try:
+#                         #======================================================
+#                         plt_bar_plot_2_stns(iid, stn_near, distance_near,
+#                                             df_common1, df_common2, tem_freq,
+#                                             out_save_dir)
+#
+#                         plt_scatter_plot_2_stns(iid, stn_near, distance_near,
+#                                                 df_common1, df_common2, ppt_thr,
+#                                                 tem_freq,
+#                                                 out_save_dir)
+#                         plot_end_tail_cdf_2_stns(iid, stn_near, distance_near,
+#                                                  df_common1, df_common2,
+#                                                  tem_freq, ppt_thr,
+#                                                  out_save_dir)
+#                         plot_normalized_ranked_stns(iid, stn_near,
+#                                                     distance_near,
+#                                                     df_common1, df_common2,
+#                                                     tem_freq,
+#                                                     out_save_dir)
+#                         plot_normalized_sorted_ranked_stns(iid, stn_near,
+#                                                            distance_near,
+#                                                            df_common1,
+#                                                            df_common2,
+#                                                            tem_freq,
+#                                                            out_save_dir)
+#                         plot_sorted_stns_vals(iid, stn_near, distance_near,
+#                                               df_common1, df_common2,
+#                                               tem_freq,
+#                                               out_save_dir)
+#
+#                         pass
+#                     except Exception as msg:
+#                         print('error while plotting', msg, tem_freq)
+#                         continue
+# #                         break
+#
+#                 else:
+#                     print('empty df')
+#                     continue
+#
+#             plot_p0_as_a_sequence_two_stns(iid,
+#                                            stn_near,
+#                                            distance_near,
+#                                            ppt_thrs_list,
+#                                            idf1,
+#                                            idf2,
+#                                            aggregation_frequencies,
+#                                            out_save_dir)
+
+            plot_contingency_tables_as_a_sequence_two_stns(iid,
+                                                           stn_near,
+                                                           distance_near,
+                                                           ppt_thrs_list,
+                                                           idf1,
+                                                           idf2,
+                                                           aggregation_frequencies,
+                                                           out_save_dir)
         except Exception as msg:
             print(msg)
 
@@ -411,7 +786,7 @@ if __name__ == '__main__':
 
     HDF52 = HDF5(infile=path_to_ppt_hdf_data)
     ids = HDF52.get_all_ids()
-    compare_cdf_two_dwd_stns(ids)
+    compare_two_dwd_stns(ids)
 
     STOP = timeit.default_timer()  # Ending time
     print(('\n****Done with everything on %s.\nTotal run time was'

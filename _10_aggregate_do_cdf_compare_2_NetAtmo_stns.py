@@ -33,7 +33,7 @@ from _00_additional_functions import (resampleDf)
 from _09_aggregate_do_cdf_compare_2_DWD_stns import (plt_bar_plot_2_stns,
                                                      plt_scatter_plot_2_stns,
                                                      plot_end_tail_cdf_2_stns,
-                                                     plot_ranked_stns)
+                                                     plot_normalized_ranked_stns)
 
 
 path_to_ppt_netatmo_data = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
@@ -154,21 +154,35 @@ def compare_cdf_two_stns(netatmo_ppt_df_file):
                 if (df_common1.values.shape[0] > 0 and
                         df_common2.values.shape[0] > 0):
                     try:
-                        plt_bar_plot_2_stns(stn_id, stn_near, distance_near,
-                                            df_common1, df_common2, tem_freq,
+                        plt_bar_plot_2_stns(stn_id,
+                                            stn_near,
+                                            distance_near,
+                                            df_common1,
+                                            df_common2,
+                                            tem_freq,
                                             out_save_dir)
-                        plt_scatter_plot_2_stns(stn_id, stn_near, distance_near,
-                                                df_common1, df_common2,
+                        plt_scatter_plot_2_stns(stn_id,
+                                                stn_near,
+                                                distance_near,
+                                                df_common1,
+                                                df_common2,
                                                 tem_freq,
                                                 out_save_dir)
-                        plot_end_tail_cdf_2_stns(stn_id, stn_near, distance_near,
-                                                 df_common1, df_common2,
-                                                 tem_freq, ppt_thr,
+                        plot_end_tail_cdf_2_stns(stn_id,
+                                                 stn_near,
+                                                 distance_near,
+                                                 df_common1,
+                                                 df_common2,
+                                                 tem_freq,
+                                                 ppt_thr,
                                                  out_save_dir)
-                        plot_ranked_stns(stn_id, stn_near, distance_near,
-                                         df_common1, df_common2,
-                                         tem_freq,
-                                         out_save_dir)
+                        plot_normalized_ranked_stns(stn_id,
+                                                    stn_near,
+                                                    distance_near,
+                                                    df_common1,
+                                                    df_common2,
+                                                    tem_freq,
+                                                    out_save_dir)
                     except Exception as msg:
                         print('error while plotting', msg, tem_freq)
                         continue

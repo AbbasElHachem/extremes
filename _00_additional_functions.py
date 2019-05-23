@@ -4,9 +4,10 @@ import fnmatch
 import pyproj
 
 import matplotlib.colors as mcolors
+
 import numpy as np
 import pandas as pd
-
+import scipy.spatial as spatial
 #==============================================================================
 #
 #==============================================================================
@@ -231,6 +232,22 @@ def select_df_within_period(df, start, end):
 #==============================================================================
 
 
+def resample_intersect_2_dfs(df1, df2, temp_freq):
+    ''' a fct to resample and intersect two dataframes'''
+    df_resample1 = resampleDf(data_frame=df1, temp_freq=temp_freq)
+    df_resample2 = resampleDf(data_frame=df2, temp_freq=temp_freq)
+
+    idx_common = df_resample1.index.intersection(df_resample2.index)
+
+    df_common1 = df_resample1.loc[idx_common, :]
+    df_common2 = df_resample2.loc[idx_common, :]
+    return df_common1, df_common2
+
+#==============================================================================
+#
+#==============================================================================
+
+
 def calculate_probab_ppt_below_thr(ppt_data, ppt_thr):
     ''' calculate probability of values being below threshold '''
     origin_count = ppt_data.shape[0]
@@ -269,6 +286,89 @@ def get_cdf_part_abv_thr(ppt_data, ppt_thr):
     assert y_abv_thr[0] == p0, 'something is wrong with probability cal'
 
     return x_abv_thr, y_abv_thr
+#==============================================================================
+#
+#==============================================================================
+
+
+def get_dwd_stns_coords(coords_df_file, x_col_name, y_col_name):
+    '''function used to return to coordinates dataframe of the DWD stations'''
+    in_coords_df = pd.read_csv(coords_df_file, sep=';',
+                               index_col=3, engine='c')
+    stn_ids = in_coords_df.index
+    x_vals = in_coords_df[x_col_name].values.ravel()
+    y_vals = in_coords_df[y_col_name].values.ravel()
+    return in_coords_df, x_vals, y_vals, stn_ids
+
+#==============================================================================
+#
+#==============================================================================
+
+
+def get_netatmo_stns_coords(coords_df_file, x_col_name, y_col_name):
+    '''function used to return to coordinates dataframe of the DWD stations'''
+    in_coords_df = pd.read_csv(coords_df_file, sep=';',
+                               index_col=0, engine='c')
+    stn_ids = list(set([stn_id.replace(':', '_')
+                        for stn_id in in_coords_df.index]))
+
+    lon_vals = in_coords_df[x_col_name].values.ravel()
+    lat_vals = in_coords_df[y_col_name].values.ravel()
+
+    return in_coords_df, lon_vals, lat_vals, stn_ids
+#==============================================================================
+#
+#==============================================================================
+
+
+def get_for_netatmo_nearest_dwd_station(first_stn_id, dwd_coords_df_file,
+                                        netatmo_coords_df_file,
+                                        x_col_name, y_col_name,
+                                        lon_col_name, lat_col_name):
+    ''' Find for one netatmo station, the closest DWD neibhouring station'''
+
+    wgs82 = "+init=EPSG:4326"
+    utm32 = "+init=EPSG:32632"
+
+    # read df coordinates and get station ids, and x, y values
+    _, x_vals, y_vals, stn_ids = get_dwd_stns_coords(
+        dwd_coords_df_file, x_col_name, y_col_name)
+
+    in_netatmo_coords_df, _, _, _ = get_netatmo_stns_coords(
+        netatmo_coords_df_file, lon_col_name, lat_col_name)
+
+    first_stn_id = first_stn_id.replace('_', ':')
+    lon_stn = in_netatmo_coords_df.loc[first_stn_id, lon_col_name]
+    lat_stn = in_netatmo_coords_df.loc[first_stn_id, lat_col_name]
+
+    x_stn, y_stn = convert_coords_fr_wgs84_to_utm32_(wgs82, utm32,
+                                                     lon_stn, lat_stn)
+    # make a tupples from the coordinates
+    coords_tuples = np.array([(x, y) for x, y in zip(x_vals, y_vals)])
+
+    # create a tree from coordinates
+    points_tree = spatial.cKDTree(coords_tuples)
+
+    distances, indices = points_tree.query([x_stn, y_stn], k=2)
+
+    coords_nearest_nbr = coords_tuples[indices[1]]
+    stn_near = str(stn_ids[indices[1]])
+    distance_near = distances[1]
+
+    return coords_nearest_nbr, stn_near, distance_near
+
+#==============================================================================
+#
+#==============================================================================
+
+
+def constrcut_contingency_table(dataframe,  thr):
+    ''' return percentage of values below or above a threshold'''
+    df = dataframe.values.ravel()
+    df_below_thr = np.round((df[df <= thr].shape[0] / df.shape[0]) * 100, 2)
+    df_abv_thr = np.round((df[df > thr].shape[0] / df.shape[0]) * 100, 2)
+
+    return df_below_thr, df_abv_thr
 #==============================================================================
 #
 #==============================================================================
