@@ -28,7 +28,7 @@ import pandas as pd
 
 import scipy.spatial as spatial
 
-from _00_additional_functions import (resampleDf)
+from _00_additional_functions import (resample_intersect_2_dfs)
 
 from _09_aggregate_do_cdf_compare_2_DWD_stns import (plt_bar_plot_2_stns,
                                                      plt_scatter_plot_2_stns,
@@ -60,6 +60,8 @@ y_col_name = ' lat'
 # threshold for CDF, consider only above thr, below is P0
 ppt_thr = .5
 max_ppt_thr = 100.
+
+ppt_thr_2 = 0.5  # for the scatter plot
 
 # till 1 day '5min', '10min', '15min', '30min',
 aggregation_frequencies = ['60min',
@@ -138,22 +140,11 @@ def compare_cdf_two_stns(netatmo_ppt_df_file):
             print('Second Stn Id is', stn_near)
             for tem_freq in aggregation_frequencies:
                 print('Aggregation is: ', tem_freq)
-                df_resample1 = resampleDf(data_frame=idf1,
-                                          temp_freq=tem_freq)
-                df_resample2 = resampleDf(data_frame=idf2,
-                                          temp_freq=tem_freq)
-#                 df2 = select_df_within_period(df_resample2,
-#                                               df_resample1.index[0],
-#                                               df_resample1.index[-1])
-#                 df1 = select_df_within_period(df_resample1,
-#                                               df2.index[0],
-#                                               df2.index[-1])
-                idx_common = df_resample1.index.intersection(
-                    df_resample2.index)
-                df_common1 = df_resample1.loc[idx_common]
-                df_common2 = df_resample2.loc[idx_common]
-                if (df_common1.values.shape[0] > 0 and
-                        df_common2.values.shape[0] > 0):
+                df_common1, df_common2 = resample_intersect_2_dfs(idf1,
+                                                                  idf2,
+                                                                  tem_freq)
+                if (df_common1.values.shape[0] > 10 and
+                        df_common2.values.shape[0] > 10):
                     try:
                         plt_bar_plot_2_stns(stn_id,
                                             stn_near,
@@ -167,6 +158,7 @@ def compare_cdf_two_stns(netatmo_ppt_df_file):
                                                 distance_near,
                                                 df_common1,
                                                 df_common2,
+                                                ppt_thr_2,
                                                 tem_freq,
                                                 out_save_dir)
                         plot_end_tail_cdf_2_stns(stn_id,

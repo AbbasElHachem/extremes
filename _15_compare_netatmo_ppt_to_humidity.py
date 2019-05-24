@@ -22,7 +22,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as md
 
-import scipy.spatial as spatial
+
 from scipy.stats import spearmanr as spr
 from scipy.stats import pearsonr as pears
 
@@ -32,11 +32,11 @@ from matplotlib import rcParams
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 from pandas.plotting import register_matplotlib_converters
 
-from _00_additional_functions import (resample_intersect_2_dfs)
+from _00_additional_functions import (
+    resampleDf, resample_Humidity_Df)
 
-from _09_aggregate_do_cdf_compare_2_DWD_stns import (plt_bar_plot_2_stns,
-                                                     plot_end_tail_cdf_2_stns,
-                                                     plot_normalized_ranked_stns)
+from _09_aggregate_do_cdf_compare_2_DWD_stns import plot_contingency_tables_as_a_sequence_two_stns
+
 register_matplotlib_converters()
 
 plt.ioff()
@@ -48,7 +48,9 @@ rcParams['axes.labelpad'] = 13
 
 majorLocator = MultipleLocator(2)
 minorLocator = MultipleLocator(1)
-
+#==============================================================================
+#
+#==============================================================================
 path_to_ppt_netatmo_data = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
                             r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_.csv')
 assert os.path.exists(path_to_ppt_netatmo_data), 'wrong NETATMO Ppt file'
@@ -82,6 +84,8 @@ y_col_name = ' lat'
 ppt_thr = .5
 max_ppt_thr = 100.
 
+ppt_thrs_list = [0.5, 1, 2, 5]
+
 # till 1 day '5min', '10min', '15min', '30min',
 aggregation_frequencies = ['60min', '90min', '120min', '180min', '240min',
                            '360min', '480min', '720min', '1440min']
@@ -103,21 +107,31 @@ def plt_bar_plot_ppt_hum_stns(stn1_id, stn2_id, seperate_distance,
     time_arr = md.date2num(time_vals)
 
     ax.plot(time_arr, df1.values, c='darkblue', marker='o', markersize=2,
-            alpha=0.25, label=stn1_id)
-    ax.plot(time_arr, df2.values / 10, c='red', marker='+', markersize=2,
-            alpha=0.25, label=stn2_id)
+            alpha=0.25)  # , label=stn1_id)
+
+    ax2 = ax.twinx()
+    ax2.plot(time_arr, df2.values, c='darkred', marker='+', markersize=2,
+             alpha=0.25)  # , label=stn2_id)
 
     xfmt = md.DateFormatter('%Y-%m-%d')
 
-    ax.xaxis.set_major_locator(MultipleLocator(5))
-    ax.yaxis.set_major_locator(MultipleLocator(2))
+    ax.xaxis.set_major_locator(MultipleLocator(20))
+    ax.yaxis.set_major_locator(MultipleLocator(10))
+
+    ax2.yaxis.set_major_locator(MultipleLocator(10))
 
     ax.xaxis.set_major_formatter(xfmt)
     ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
 
-    ax.set_ylim(0.0, np.max([df1.values.max(), df2.values.max()]) + 1)
+    ax.set_ylim(0.0, df1.values.max() + 1)
 #     ax.set_xlabel('Time')
-    ax.set_ylabel('Ppt in mm/%s and Humidity (/10) in percentage' % temp_freq)
+    ax.set_ylabel('Stn  %s   Precipitation  in mm/%s ' % (stn1_id, temp_freq))
+    ax.tick_params('y', colors='darkblue')
+    ax2.set_ylim(0.0, 100.01)
+    ax2.set_ylabel('Stn %s   Average Humidity  in percentage %s'
+                   % (stn2_id, temp_freq), rotation=-90)
+    ax2.tick_params('y', colors='darkred')
+
     ax.set_title("Stn: %s vs Stn: %s;\n Distance: %0.1f m; "
                  "Time Freq: %s; " % (stn1_id, stn2_id,
                                       seperate_distance,
@@ -125,9 +139,10 @@ def plt_bar_plot_ppt_hum_stns(stn1_id, stn2_id, seperate_distance,
 
     ax.grid(color='k', linestyle='--', linewidth=0.1, alpha=0.25)
     plt.xticks(rotation=30)
-    plt.legend(loc='best')
+#     ax.legend(loc='best')
+#     ax2.legend(loc='best')
     plt.tight_layout()
-    plt.savefig(os.path.join(out_dir, '%s_lineplot_stn_%s_vs_stn_%s_.png'
+    plt.savefig(os.path.join(out_dir, '%s_mean_lineplot_stn_%s_vs_stn_%s_.png'
                              % (temp_freq, stn1_id, stn2_id)))
     plt.clf()
     plt.close('all')
@@ -141,6 +156,71 @@ def plt_bar_plot_ppt_hum_stns(stn1_id, stn2_id, seperate_distance,
 #==============================================================================
 
 
+def plt_bar_plot_ppt_mean_min_max_hum_stns(stn1_id, stn2_id,
+                                           seperate_distance,
+                                           df1, df2_mean, df2_min, df2_max,
+                                           temp_freq, out_dir):
+    ''' plot line plots between two stations'''
+    print('plotting line plots')
+
+    fig = plt.figure(figsize=(20, 12), dpi=150)
+    ax = fig.add_subplot(111)
+
+    time_vals = df1.index.to_pydatetime()
+    time_arr = md.date2num(time_vals)
+
+    ax.plot(time_arr, df1.values, c='darkblue', marker='o', markersize=2,
+            alpha=0.25)  # , label=stn1_id)
+
+    ax2 = ax.twinx()
+    ax2.plot(time_arr, df2_mean.values, c='orange', marker='+', markersize=2,
+             alpha=0.5)  # , label=stn2_id)
+    ax2.plot(time_arr, df2_min.values, c='g', marker='*', markersize=2,
+             alpha=0.5)  # , label=stn2_id)
+    ax2.plot(time_arr, df2_max.values, c='r', marker='d', markersize=2,
+             alpha=0.5)  # , label=stn2_id)
+
+    xfmt = md.DateFormatter('%Y-%m-%d')
+
+    ax.xaxis.set_major_locator(MultipleLocator(20))
+    ax.yaxis.set_major_locator(MultipleLocator(10))
+
+    ax2.yaxis.set_major_locator(MultipleLocator(10))
+
+    ax.xaxis.set_major_formatter(xfmt)
+    ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+
+    ax.set_ylim(0.0, df1.values.max() + 1)
+#     ax.set_xlabel('Time')
+    ax.set_ylabel('Stn  %s   Precipitation  in mm/%s ' % (stn1_id, temp_freq))
+    ax.tick_params('y', colors='darkblue')
+    ax2.set_ylim(0.0, 100.01)
+    ax2.set_ylabel('Stn %s   Humidity  in percentage %s'
+                   % (stn2_id, temp_freq), rotation=-90)
+    ax2.tick_params('y', colors='darkred')
+
+    ax.set_title("Stn: %s vs Stn: %s;\n Distance: %0.1f m; "
+                 "Time Freq: %s; " % (stn1_id, stn2_id,
+                                      seperate_distance,
+                                      temp_freq))
+
+    ax.grid(color='k', linestyle='--', linewidth=0.1, alpha=0.25)
+    plt.xticks(rotation=30)
+#     ax.legend(loc='best')
+#     ax2.legend(loc='best')
+    plt.tight_layout()
+    plt.savefig(os.path.join(out_dir, '%s_all_lineplot_stn_%s_vs_stn_%s_.png'
+                             % (temp_freq, stn1_id, stn2_id)))
+    plt.clf()
+    plt.close('all')
+    print('Done saving figure Line plot')
+
+    return
+
+
+#==============================================================================
+#
+#==============================================================================
 def plt_scatter_plot_ppt_hum(stn1_id, stn2_id, seperate_distance,
                              df1, df2, ppt_min_thr, temp_freq, out_dir):
     ''' plot scatter plots between two stations'''
@@ -247,43 +327,61 @@ def compare_cdf_two_stns(netatmo_ppt_df_file, netatmo_humidity_df_file,
                 for tem_freq in aggregation_frequencies:
                     print('Aggregation is: ', tem_freq)
 
-                    df_common1, df_common2 = resample_intersect_2_dfs(idf1,
-                                                                      idf2,
-                                                                      tem_freq)
+                    df_resampled1 = resampleDf(idf1, tem_freq)
+                    df_resampled2_mean = resample_Humidity_Df(idf2,
+                                                              tem_freq,
+                                                              method='mean')
 
+                    df_resampled2_min = resample_Humidity_Df(idf2,
+                                                             tem_freq,
+                                                             method='min')
+
+                    df_resampled2_max = resample_Humidity_Df(idf2,
+                                                             tem_freq,
+                                                             method='max')
+
+                    idx_cmn = df_resampled1.index.intersection(
+                        df_resampled2_mean.index)
+#
+                    df_common1 = df_resampled1.loc[idx_cmn]
+                    df_common2_mean = df_resampled2_mean.loc[idx_cmn]
+
+                    df_common2_min = df_resampled2_min.loc[idx_cmn]
+                    df_common2_max = df_resampled2_max.loc[idx_cmn]
+#                     df_common1, df_common2 = resample_intersect_2_dfs(
+#                         idf1, idf2, tem_freq)
                     if (df_common1.values.shape[0] > 0 and
-                            df_common2.values.shape[0] > 0):
+                            df_common2_mean.values.shape[0] > 0):
                         try:
-                            plt_bar_plot_ppt_hum_stns(ppt_stn_id,
-                                                      stn_2_id,
-                                                      min_dist,
-                                                      df_common1,
-                                                      df_common2,
-                                                      tem_freq,
-                                                      out_save_dir)
-                            plt_scatter_plot_ppt_hum(ppt_stn_id,
-                                                     stn_2_id,
-                                                     min_dist,
-                                                     df_common1,
-                                                     df_common2,
-                                                     0,
-                                                     tem_freq,
-                                                     out_save_dir)
-#                             plot_end_tail_cdf_2_stns(ppt_stn_id,
+                            pass
+#                             plt_bar_plot_ppt_hum_stns(ppt_stn_id,
+#                                                       stn_2_id,
+#                                                       min_dist,
+#                                                       df_common1,
+#                                                       df_common2_mean,
+#                                                       tem_freq,
+#                                                       out_save_dir)
+#
+                            plt_bar_plot_ppt_mean_min_max_hum_stns(
+                                ppt_stn_id,
+                                stn_2_id,
+                                min_dist,
+                                df_common1,
+                                df_common2_mean,
+                                df_common2_min,
+                                df_common2_max,
+                                tem_freq,
+                                out_save_dir)
+#
+#                             plt_scatter_plot_ppt_hum(ppt_stn_id,
 #                                                      stn_2_id,
 #                                                      min_dist,
 #                                                      df_common1,
-#                                                      df_common2,
+#                                                      df_common2_mean,
+#                                                      0,
 #                                                      tem_freq,
-#                                                      ppt_thr,
 #                                                      out_save_dir)
-#                             plot_normalized_ranked_stns(ppt_stn_id,
-#                                                         stn_2_id,
-#                                                         min_dist,
-#                                                         df_common1,
-#                                                         df_common2,
-#                                                         tem_freq,
-#                                                         out_save_dir)
+
                         except Exception as msg:
                             print('error while plotting', msg, tem_freq)
                             continue
@@ -291,6 +389,15 @@ def compare_cdf_two_stns(netatmo_ppt_df_file, netatmo_humidity_df_file,
                     else:
                         print('empty df')
                         continue
+
+                plot_contingency_tables_as_a_sequence_two_stns(ppt_stn_id,
+                                                               stn_2_id,
+                                                               min_dist,
+                                                               ppt_thrs_list,
+                                                               df_common1,
+                                                               df_common2_max,
+                                                               aggregation_frequencies,
+                                                               out_save_dir)
         except Exception as msg:
             print(msg)
 

@@ -221,6 +221,48 @@ def resampleDf(data_frame,
 #==============================================================================
 
 
+def resample_Humidity_Df(data_frame,
+                         temp_freq,
+                         temp_shift=0,
+                         label_shift=None,
+                         df_sep_=None,
+                         out_save_dir=None,
+                         fillnan=False,
+                         df_save_name=None,
+                         method='mean'):
+    ''' sample DF based on freq and time shift and label shift '''
+
+    # df_ = data_frame.copy()
+    if method == 'mean':
+        df_res = data_frame.resample(temp_freq,
+                                     label='right',
+                                     closed='right',
+                                     loffset=label_shift,
+                                     base=temp_shift).mean()
+    if method == 'max':
+        df_res = data_frame.resample(temp_freq,
+                                     label='right',
+                                     closed='right',
+                                     loffset=label_shift,
+                                     base=temp_shift).max()
+    if method == 'min':
+        df_res = data_frame.resample(temp_freq,
+                                     label='right',
+                                     closed='right',
+                                     loffset=label_shift,
+                                     base=temp_shift).min()
+    if fillnan:
+        df_res.fillna(value=0, inplace=True)
+    if df_save_name is not None and out_save_dir is not None:
+        df_res.to_csv(os.path.join(out_save_dir, df_save_name),
+                      sep=df_sep_)
+    return df_res
+
+
+#==============================================================================
+#
+#==============================================================================
+
 def select_df_within_period(df, start, end):
     ''' a function to select df between two dates'''
     mask = (df.index > start) & (df.index <= end)

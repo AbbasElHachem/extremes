@@ -513,8 +513,8 @@ def plot_p0_as_a_sequence_two_stns(stn_id,
                                index=ppt_thrs_list)
     fig = plt.figure(figsize=(16, 12), dpi=200)
     ax = fig.add_subplot(111)
-    if (df_stn1.values.shape[0] > 1000 and
-            df_stn2.values.shape[0] > 1000):
+    if (df_stn1.values.shape[0] > 10 and
+            df_stn2.values.shape[0] > 10):
         for i, ppt_thr in enumerate(ppt_thrs_list):
             print('Ppt Threshold is', ppt_thr)
 
@@ -616,8 +616,8 @@ def plot_contingency_tables_as_a_sequence_two_stns(stn_id,
     fig = plt.figure(figsize=(16, 12), dpi=200)
     ax = fig.add_subplot(111)
 
-    if (df_stn1.values.shape[0] > 1000 and
-            df_stn2.values.shape[0] > 1000):
+    if (df_stn1.values.shape[0] > 10 and
+            df_stn2.values.shape[0] > 10):
         for i, ppt_thr in enumerate(ppt_thrs_list):
             print('Ppt Threshold is', ppt_thr)
 
