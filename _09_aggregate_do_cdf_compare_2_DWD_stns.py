@@ -81,7 +81,7 @@ y_col_name = 'Hochwert'
 ppt_thr = .5
 
 # used for P0 calculation
-ppt_thrs_list = [0.25, 0.5, 1]  # , 0.25, 0.5, 1, 2, 5]
+ppt_thrs_list = [0.5, 1, 2]
 
 
 # till 1 day
@@ -89,6 +89,7 @@ aggregation_frequencies = ['5min', '10min', '15min', '30min', '60min', '90min',
                            '120min', '180min', '240min',  '360min',
                            '480min', '720min', '1440min']
 
+# aggregation_frequencies = ['720min', '1440min']
 
 #==============================================================================
 #
@@ -512,66 +513,71 @@ def plot_p0_as_a_sequence_two_stns(stn_id,
                                index=ppt_thrs_list)
     fig = plt.figure(figsize=(16, 12), dpi=200)
     ax = fig.add_subplot(111)
+    if (df_stn1.values.shape[0] > 1000 and
+            df_stn2.values.shape[0] > 1000):
+        for i, ppt_thr in enumerate(ppt_thrs_list):
+            print('Ppt Threshold is', ppt_thr)
 
-    for i, ppt_thr in enumerate(ppt_thrs_list):
-        print('Ppt Threshold is', ppt_thr)
+            for temp_freq in aggregation_frequencies_lst:
+                print('Time freq is', temp_freq)
+                df_common1, df_common2 = resample_intersect_2_dfs(df_stn1,
+                                                                  df_stn2,
+                                                                  temp_freq)
+                if (df_common1.values.shape[0] > 10 and
+                        df_common2.values.shape[0] > 10):
 
-        for temp_freq in aggregation_frequencies_lst:
+                    try:
+                        p01 = calculate_probab_ppt_below_thr(
+                            df_common1.values, ppt_thr)
+                        p02 = calculate_probab_ppt_below_thr(
+                            df_common2.values, ppt_thr)
 
-            df_common1, df_common2 = resample_intersect_2_dfs(df_stn1,
-                                                              df_stn2,
-                                                              temp_freq)
-            if (df_common1.values.shape[0] > 0 and
-                    df_common2.values.shape[0] > 0):
+                        df_p01_stn1.loc[ppt_thr, temp_freq] = p01
+                        df_p01_stn2.loc[ppt_thr, temp_freq] = p02
+                    except Exception as msg:
+                        print('error while calculating P0', msg, temp_freq)
+                        continue
 
-                try:
-                    p01 = calculate_probab_ppt_below_thr(
-                        df_common1.values, ppt_thr)
-                    p02 = calculate_probab_ppt_below_thr(
-                        df_common2.values, ppt_thr)
+                    print('plotting for Ppt thr', temp_freq)
 
-                    df_p01_stn1.loc[ppt_thr, temp_freq] = p01
-                    df_p01_stn2.loc[ppt_thr, temp_freq] = p02
-                except Exception as msg:
-                    print('error while calculating P0', msg, temp_freq)
+                    ax.plot(df_p01_stn1.columns,
+                            df_p01_stn1.loc[ppt_thr, :],
+                            c=colors[i],
+                            marker='o', linestyle='--',
+                            linewidth=1,
+                            alpha=0.5,
+                            markersize=3,
+                            label=str(ppt_thr) + ' mm')
+
+                    ax.plot(df_p01_stn2.columns,
+                            df_p01_stn2.loc[ppt_thr, :], c=colors[i],
+                            linewidth=1,
+                            marker='+', linestyle='dotted', alpha=0.5,
+                            markersize=3)
+
+                else:
+                    print('empty df')
+
                     continue
+        if df_p01_stn1.shape[0] > 0:
 
-                print('plotting for Ppt thr', temp_freq)
+            handles, labels = plt.gca().get_legend_handles_labels()
+            by_label = OrderedDict(zip(labels, handles))
+            plt.legend(by_label.values(), by_label.keys())
 
-                ax.plot(df_p01_stn1.columns,
-                        df_p01_stn1.loc[ppt_thr, :],
-                        c=colors[i],
-                        marker='o', linestyle='--',
-                        linewidth=1,
-                        alpha=0.5,
-                        markersize=3,
-                        label=str(ppt_thr) + ' mm')
+            ax.set_ylabel('P0')
 
-                ax.plot(df_p01_stn2.columns,
-                        df_p01_stn2.loc[ppt_thr, :], c=colors[i],
-                        linewidth=1,
-                        marker='+', linestyle='dotted', alpha=0.5,
-                        markersize=3)
+            ax.set_title('P0 as a sequence %s vs %s \n distance: %0.1f m'
+                         % (stn_id, stn_2_id, min_dist))
 
-            else:
-                print('empty df')
-                continue
-
-    handles, labels = plt.gca().get_legend_handles_labels()
-    by_label = OrderedDict(zip(labels, handles))
-    plt.legend(by_label.values(), by_label.keys())
-
-    ax.set_ylabel('P0')
-
-    ax.set_title('P0 as a sequence %s vs %s \n distance: %0.1f m'
-                 % (stn_id, stn_2_id, min_dist))
-
-    plt.tight_layout()
-    plt.grid(alpha=0.15)
-    plt.savefig(os.path.join(out_dir,
-                             'P0_as_a_sequence_%s_%s.png'
-                             % (stn_id, stn_2_id)))
-    print('Done plotting P0 as a sequence')
+            plt.tight_layout()
+            plt.grid(alpha=0.15)
+            plt.savefig(os.path.join(out_dir,
+                                     'P0_as_a_sequence_%s_%s.png'
+                                     % (stn_id, stn_2_id)))
+        else:
+            print('empty df not plotting P0')
+        print('Done plotting P0 as a sequence')
     return df_p01_stn1, df_p01_stn2
 
 #==============================================================================
@@ -595,6 +601,7 @@ def plot_contingency_tables_as_a_sequence_two_stns(stn_id,
     plt.ioff()
 
     colors = ['r', 'b', 'g', 'orange', 'k']
+
     df_below_thr_stn1 = pd.DataFrame(columns=aggregation_frequencies_lst,
                                      index=ppt_thrs_list)
 
@@ -609,87 +616,96 @@ def plot_contingency_tables_as_a_sequence_two_stns(stn_id,
     fig = plt.figure(figsize=(16, 12), dpi=200)
     ax = fig.add_subplot(111)
 
-    for i, ppt_thr in enumerate(ppt_thrs_list):
-        print('Ppt Threshold is', ppt_thr)
+    if (df_stn1.values.shape[0] > 1000 and
+            df_stn2.values.shape[0] > 1000):
+        for i, ppt_thr in enumerate(ppt_thrs_list):
+            print('Ppt Threshold is', ppt_thr)
 
-        for temp_freq in aggregation_frequencies_lst:
-            print('Time freq is', temp_freq)
-            df_common1, df_common2 = resample_intersect_2_dfs(df_stn1,
-                                                              df_stn2,
-                                                              temp_freq)
-            if (df_common1.values.shape[0] > 0 and
-                    df_common2.values.shape[0] > 0):
-                print('getting percentages for contingency table')
-                try:
-                    (stn1_below_thr,
-                     stn1_abv_thr) = constrcut_contingency_table(df_common1,
-                                                                 1)
-                    (stn2_below_thr,
-                     stn2_abv_thr) = constrcut_contingency_table(df_common2,
-                                                                 1)
+            for temp_freq in aggregation_frequencies_lst:
+                print('Time freq is', temp_freq)
+                df_common1, df_common2 = resample_intersect_2_dfs(df_stn1,
+                                                                  df_stn2,
+                                                                  temp_freq)
+                if (df_common1.values.shape[0] > 10 and
+                        df_common2.values.shape[0] > 10):
+                    print('getting percentages for contingency table')
+                    try:
+                        (stn1_below_thr,
+                         stn1_abv_thr) = constrcut_contingency_table(df_common1,
+                                                                     ppt_thr)
+                        (stn2_below_thr,
+                         stn2_abv_thr) = constrcut_contingency_table(df_common2,
+                                                                     ppt_thr)
 
-                    df_below_thr_stn1.loc[ppt_thr, temp_freq] = stn1_below_thr
-                    df_abv_thr_stn1.loc[ppt_thr, temp_freq] = stn1_abv_thr
+                        df_below_thr_stn1.loc[ppt_thr,
+                                              temp_freq] = stn1_below_thr
+                        df_abv_thr_stn1.loc[ppt_thr, temp_freq] = stn1_abv_thr
 
-                    df_below_thr_stn2.loc[ppt_thr, temp_freq] = stn2_below_thr
-                    df_abv_thr_stn2.loc[ppt_thr, temp_freq] = stn2_abv_thr
-                except Exception as msg:
-                    print('error while calculating P0', msg, temp_freq)
+                        df_below_thr_stn2.loc[ppt_thr,
+                                              temp_freq] = stn2_below_thr
+                        df_abv_thr_stn2.loc[ppt_thr, temp_freq] = stn2_abv_thr
+                    except Exception as msg:
+                        print('error while calculating P0', msg, temp_freq)
+                        continue
+                else:
+                    print('empty df values')
                     continue
-            else:
-                print('empty df values')
-                continue
 
-    print(df_below_thr_stn1)
-    print('plotting for Ppt thr, temp frequency is', temp_freq)
+            print(df_below_thr_stn1.loc[ppt_thr, :])
+            print('plotting for Ppt thr, temp frequency is', temp_freq)
 
-#     ax.plot(df_below_thr_stn1.columns,
-#             df_below_thr_stn1.loc[:, :],
-#             c='r',
-#             marker='o', linestyle='--',
-#             linewidth=1,
-#             alpha=0.5,
-#             markersize=3,
-#             label=str(ppt_thr) + ' mm')
-#
-#     ax.plot(df_abv_thr_stn1.columns,
-#             df_abv_thr_stn1.loc[ppt_thr, :],
-#             c='b',
-#             marker='*', linestyle='--',
-#             linewidth=1,
-#             alpha=0.5,
-#             markersize=3)
-#
-# #                 ax.plot(df_below_thr_stn2.columns,
-# #                         df_below_thr_stn2.loc[ppt_thr, :],
-# #                         c='g',
-# #                         marker='+', linestyle='--',
-# #                         linewidth=1,
-# #                         alpha=0.5,
-# #                         markersize=3)
-# #                 ax.plot(df_abv_thr_stn2.columns,
-# #                         df_abv_thr_stn2.loc[ppt_thr, :], c='orange',
-# #                         linewidth=1,
-# #                         marker='d', linestyle='dotted', alpha=0.5,
-# #                         markersize=3)
-#
-#     handles, labels = plt.gca().get_legend_handles_labels()
-#     by_label = OrderedDict(zip(labels, handles))
-#     plt.legend(by_label.values(), by_label.keys())
-#
-#     ax.set_ylabel('Percentage of Values below or above threshold')
-#
-#     ax.set_title('Percentage Values below or above threshold as a sequence '
-#                  '%s vs %s \n distance: %0.1f m'
-#                  % (stn_id, stn_2_id, min_dist))
-#
-#     plt.tight_layout()
-#     plt.grid(alpha=0.15)
-#     plt.savefig(os.path.join(out_dir,
-#                              'contingency_table_as_a_sequence_%s_%s.png'
-#                              % (stn_id, stn_2_id)))
-#     print('Done plotting contingency_tableas a sequence')
-#     return
+            ax.plot(df_below_thr_stn1.columns,
+                    df_below_thr_stn1.loc[ppt_thr, :],
+                    c=colors[i],
+                    marker='o', linestyle='--',
+                    linewidth=1,
+                    alpha=0.75,
+                    markersize=3,
+                    label=str(ppt_thr) + ' mm')
+
+            ax.plot(df_abv_thr_stn1.columns,
+                    df_abv_thr_stn1.loc[ppt_thr, :],
+                    c=colors[i],
+                    marker='o', linestyle='--',
+                    linewidth=1,
+                    alpha=0.75,
+                    markersize=3)
+
+            ax.plot(df_below_thr_stn2.columns,
+                    df_below_thr_stn2.loc[ppt_thr, :],
+                    c=colors[i],
+                    marker='+', linestyle='dotted',
+                    linewidth=1,
+                    alpha=0.75,
+                    markersize=3)
+            ax.plot(df_abv_thr_stn2.columns,
+                    df_abv_thr_stn2.loc[ppt_thr, :], c=colors[i],
+                    linewidth=1,
+                    marker='+', linestyle='dotted', alpha=0.75,
+                    markersize=3)
+        if df_below_thr_stn1.shape[0] > 0:
+
+            handles, labels = plt.gca().get_legend_handles_labels()
+            by_label = OrderedDict(zip(labels, handles))
+
+            ax.yaxis.set_major_locator(MultipleLocator(10))
+            ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+
+            ax.set_ylabel('Percentage of Values below or above threshold')
+        #
+            ax.set_title('Percentage Values below or above threshold as a sequence '
+                         '%s vs %s \n distance: %0.1f m'
+                         % (stn_id, stn_2_id, min_dist))
+            plt.legend(by_label.values(), by_label.keys())
+            plt.tight_layout()
+            plt.grid(alpha=0.15)
+            plt.savefig(os.path.join(out_dir,
+                                     'contingency_table_as_a_sequence_%s_%s.png'
+                                     % (stn_id, stn_2_id)))
+            print('Done plotting contingency_tableas a sequence')
+        else:
+            print('empty df not plotting Contingency table')
+    return
 #==============================================================================
 #
 #==============================================================================
@@ -709,61 +725,61 @@ def compare_two_dwd_stns(stns_ids):
             idf2 = HDF52.get_pandas_dataframe(ids=stn_near)
             print('Second Stn Id is', stn_near)
 
-#             for tem_freq in aggregation_frequencies:
-#                 print('Aggregation is: ', tem_freq)
-#                 df_common1, df_common2 = resample_intersect_2_dfs(idf1,
-#                                                                   idf2,
-#                                                                   tem_freq)
-#                 if (df_common1.values.shape[0] > 0 and
-#                         df_common2.values.shape[0] > 0):
-#                     try:
-#                         #======================================================
-#                         plt_bar_plot_2_stns(iid, stn_near, distance_near,
-#                                             df_common1, df_common2, tem_freq,
-#                                             out_save_dir)
-#
-#                         plt_scatter_plot_2_stns(iid, stn_near, distance_near,
-#                                                 df_common1, df_common2, ppt_thr,
-#                                                 tem_freq,
-#                                                 out_save_dir)
-#                         plot_end_tail_cdf_2_stns(iid, stn_near, distance_near,
-#                                                  df_common1, df_common2,
-#                                                  tem_freq, ppt_thr,
-#                                                  out_save_dir)
-#                         plot_normalized_ranked_stns(iid, stn_near,
-#                                                     distance_near,
-#                                                     df_common1, df_common2,
-#                                                     tem_freq,
-#                                                     out_save_dir)
-#                         plot_normalized_sorted_ranked_stns(iid, stn_near,
-#                                                            distance_near,
-#                                                            df_common1,
-#                                                            df_common2,
-#                                                            tem_freq,
-#                                                            out_save_dir)
-#                         plot_sorted_stns_vals(iid, stn_near, distance_near,
-#                                               df_common1, df_common2,
-#                                               tem_freq,
-#                                               out_save_dir)
-#
-#                         pass
-#                     except Exception as msg:
-#                         print('error while plotting', msg, tem_freq)
-#                         continue
-# #                         break
-#
-#                 else:
-#                     print('empty df')
-#                     continue
-#
-#             plot_p0_as_a_sequence_two_stns(iid,
-#                                            stn_near,
-#                                            distance_near,
-#                                            ppt_thrs_list,
-#                                            idf1,
-#                                            idf2,
-#                                            aggregation_frequencies,
-#                                            out_save_dir)
+            for tem_freq in aggregation_frequencies:
+                print('Aggregation is: ', tem_freq)
+                df_common1, df_common2 = resample_intersect_2_dfs(idf1,
+                                                                  idf2,
+                                                                  tem_freq)
+                if (df_common1.values.shape[0] > 1000 and
+                        df_common2.values.shape[0] > 1000):
+                    try:
+                        #======================================================
+                        plt_bar_plot_2_stns(iid, stn_near, distance_near,
+                                            df_common1, df_common2, tem_freq,
+                                            out_save_dir)
+
+                        plt_scatter_plot_2_stns(iid, stn_near, distance_near,
+                                                df_common1, df_common2, ppt_thr,
+                                                tem_freq,
+                                                out_save_dir)
+                        plot_end_tail_cdf_2_stns(iid, stn_near, distance_near,
+                                                 df_common1, df_common2,
+                                                 tem_freq, ppt_thr,
+                                                 out_save_dir)
+                        plot_normalized_ranked_stns(iid, stn_near,
+                                                    distance_near,
+                                                    df_common1, df_common2,
+                                                    tem_freq,
+                                                    out_save_dir)
+                        plot_normalized_sorted_ranked_stns(iid, stn_near,
+                                                           distance_near,
+                                                           df_common1,
+                                                           df_common2,
+                                                           tem_freq,
+                                                           out_save_dir)
+                        plot_sorted_stns_vals(iid, stn_near, distance_near,
+                                              df_common1, df_common2,
+                                              tem_freq,
+                                              out_save_dir)
+
+                        pass
+                    except Exception as msg:
+                        print('error while plotting', msg, tem_freq)
+                        continue
+#                         break
+
+                else:
+                    print('empty df')
+                    continue
+
+            plot_p0_as_a_sequence_two_stns(iid,
+                                           stn_near,
+                                           distance_near,
+                                           ppt_thrs_list,
+                                           idf1,
+                                           idf2,
+                                           aggregation_frequencies,
+                                           out_save_dir)
 
             plot_contingency_tables_as_a_sequence_two_stns(iid,
                                                            stn_near,

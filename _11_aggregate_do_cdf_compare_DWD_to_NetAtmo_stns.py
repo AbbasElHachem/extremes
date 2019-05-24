@@ -37,13 +37,16 @@ import numpy as np
 import pandas as pd
 
 
-from _00_additional_functions import (resampleDf)
+from _00_additional_functions import (resample_intersect_2_dfs)
 
 from _09_aggregate_do_cdf_compare_2_DWD_stns import (plt_bar_plot_2_stns,
                                                      plt_scatter_plot_2_stns,
                                                      plot_end_tail_cdf_2_stns,
                                                      plot_normalized_ranked_stns,
-                                                     plot_sorted_stns_vals)
+                                                     plot_normalized_sorted_ranked_stns,
+                                                     plot_sorted_stns_vals,
+                                                     plot_p0_as_a_sequence_two_stns,
+                                                     plot_contingency_tables_as_a_sequence_two_stns)
 from b_get_data import HDF5
 #==============================================================================
 #
@@ -72,17 +75,20 @@ distance_matrix_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
                            r'\NetAtmo_BW\distance_mtx_in_m_NetAtmo_DWD.csv')
 assert os.path.exists(distance_matrix_df_file), 'wrong Distance MTX  file'
 
-out_save_dir = (
+out_save_dir_orig = (
     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\cdf_plots_DWD_NetAtmo')
 
 
-if not os.path.exists(out_save_dir):
-    os.mkdir(out_save_dir)
+if not os.path.exists(out_save_dir_orig):
+    os.mkdir(out_save_dir_orig)
 
 
 # threshold for CDF, consider only above thr, below is P0
 ppt_thr = .5
-ppt_thr2 = 0
+ppt_thr2 = 0.5
+
+
+ppt_thrs_list = [0.5, 1., 2]
 
 max_ppt_thr = 100.
 
@@ -95,7 +101,8 @@ aggregation_frequencies = ['60min',
 #==============================================================================
 
 
-def compare_cdf_two_stns(netatmo_ppt_df_file, path_to_ppt_hdf_data):
+def compare_cdf_two_stns(netatmo_ppt_df_file, path_to_ppt_hdf_data,
+                         distance_matrix_df_file):
     HDF52 = HDF5(infile=path_to_ppt_hdf_data)
 
     in_netatmo_stns_df = pd.read_csv(netatmo_ppt_df_file,
@@ -108,7 +115,7 @@ def compare_cdf_two_stns(netatmo_ppt_df_file, path_to_ppt_hdf_data):
     in_df_distance_netatmo_dwd = pd.read_csv(distance_matrix_df_file,
                                              sep=';', index_col=0)
 
-    for stn_id in netatmo_stns_ids[200:]:
+    for stn_id in netatmo_stns_ids:
         print('First Netatmo Stn Id is', stn_id)
 
         try:
@@ -117,57 +124,35 @@ def compare_cdf_two_stns(netatmo_ppt_df_file, path_to_ppt_hdf_data):
             idf1 = idf1[idf1 < max_ppt_thr]
 
             distances_to_stn1 = in_df_distance_netatmo_dwd.loc[stn_id, :]
-            sorted_distances = distances_to_stn1.sort_values(ascending=True)
+            sorted_distances = distances_to_stn1.sort_values(
+                ascending=True)
 
             min_dist = sorted_distances.values[0]
-            stn_2_id = sorted_distances.index[0]
+            if min_dist <= 5000:
 
-            idf2 = HDF52.get_pandas_dataframe(ids=[stn_2_id])
-            idf2 = idf2[idf2 < max_ppt_thr]
-            print('Second DWD Stn Id is', stn_2_id)
+                stn_2_id = sorted_distances.index[0]
 
-            for tem_freq in aggregation_frequencies:
-                print('Aggregation is: ', tem_freq)
-                df_resample1 = resampleDf(data_frame=idf1,
-                                          temp_freq=tem_freq)
-                df_resample2 = resampleDf(data_frame=idf2,
-                                          temp_freq=tem_freq)
+                idf2 = HDF52.get_pandas_dataframe(ids=[stn_2_id])
+                idf2 = idf2[idf2 < max_ppt_thr]
+                print('Second DWD Stn Id is', stn_2_id)
+                if (idf1.values.shape[0] > 1000) and (idf2.values.shape[0] > 1000):
+                    out_save_dir = os.path.join(out_save_dir_orig,
+                                                '%s_%s' % (stn_id, stn_2_id))
+                    if not os.path.exists(out_save_dir):
+                        os.mkdir(out_save_dir)
 
-                idx_common = df_resample1.index.intersection(
-                    df_resample2.index)
-                df_common1 = df_resample1.loc[idx_common]
-                df_common2 = df_resample2.loc[idx_common]
-                if (df_common1.values.shape[0] > 0 and
-                        df_common2.values.shape[0] > 0):
-                    #
-                    try:
-                        plt_bar_plot_2_stns(stn_id,
-                                            stn_2_id,
-                                            min_dist,
-                                            df_common1,
-                                            df_common2,
-                                            tem_freq,
-                                            out_save_dir)
+                    for tem_freq in aggregation_frequencies:
+                        print('Aggregation is: ', tem_freq)
 
-                        plt_scatter_plot_2_stns(stn_id,
-                                                stn_2_id,
-                                                min_dist,
-                                                df_common1,
-                                                df_common2,
-                                                ppt_thr2,
-                                                tem_freq,
-                                                out_save_dir)
+                        df_common1, df_common2 = resample_intersect_2_dfs(idf1,
+                                                                          idf2,
+                                                                          tem_freq)
 
-                        plot_end_tail_cdf_2_stns(stn_id,
-                                                 stn_2_id,
-                                                 min_dist,
-                                                 df_common1,
-                                                 df_common2,
-                                                 tem_freq,
-                                                 ppt_thr,
-                                                 out_save_dir)
-
-                        plot_normalized_ranked_stns(stn_id,
+                        if (df_common1.values.shape[0] > 0 and
+                                df_common2.values.shape[0] > 0):
+                            #
+                            try:
+                                plt_bar_plot_2_stns(stn_id,
                                                     stn_2_id,
                                                     min_dist,
                                                     df_common1,
@@ -175,30 +160,79 @@ def compare_cdf_two_stns(netatmo_ppt_df_file, path_to_ppt_hdf_data):
                                                     tem_freq,
                                                     out_save_dir)
 
-                        plot_sorted_stns_vals(stn_id,
-                                              stn_2_id,
-                                              min_dist,
-                                              df_common1,
-                                              df_common2,
-                                              tem_freq,
-                                              out_save_dir)
-                    except Exception as msg:
-                        print('error while plotting', msg, tem_freq)
-                        continue
-                else:
-                    print('empty df')
-                    continue
-                # break
+                                plt_scatter_plot_2_stns(stn_id,
+                                                        stn_2_id,
+                                                        min_dist,
+                                                        df_common1,
+                                                        df_common2,
+                                                        ppt_thr2,
+                                                        tem_freq,
+                                                        out_save_dir)
+
+                                plot_end_tail_cdf_2_stns(stn_id,
+                                                         stn_2_id,
+                                                         min_dist,
+                                                         df_common1,
+                                                         df_common2,
+                                                         tem_freq,
+                                                         ppt_thr,
+                                                         out_save_dir)
+
+                                plot_normalized_sorted_ranked_stns(stn_id,
+                                                                   stn_2_id,
+                                                                   min_dist,
+                                                                   df_common1,
+                                                                   df_common2,
+                                                                   tem_freq,
+                                                                   out_save_dir)
+                                plot_normalized_ranked_stns(stn_id,
+                                                            stn_2_id,
+                                                            min_dist,
+                                                            df_common1,
+                                                            df_common2,
+                                                            tem_freq,
+                                                            out_save_dir)
+                                plot_sorted_stns_vals(stn_id,
+                                                      stn_2_id,
+                                                      min_dist,
+                                                      df_common1,
+                                                      df_common2,
+                                                      tem_freq,
+                                                      out_save_dir)
+                            except Exception as msg:
+                                print('error while plotting', msg, tem_freq)
+                                continue
+                        else:
+                            print('empty df')
+                            continue
+                    plot_p0_as_a_sequence_two_stns(stn_id,
+                                                   stn_2_id,
+                                                   min_dist,
+                                                   ppt_thrs_list,
+                                                   idf1,
+                                                   idf2,
+                                                   aggregation_frequencies,
+                                                   out_save_dir)
+
+                    plot_contingency_tables_as_a_sequence_two_stns(stn_id,
+                                                                   stn_2_id,
+                                                                   min_dist,
+                                                                   ppt_thrs_list,
+                                                                   idf1,
+                                                                   idf2,
+                                                                   aggregation_frequencies,
+                                                                   out_save_dir)
         except Exception as msg:
             print(msg)
+#         break
 
 
 if __name__ == '__main__':
     print('**** Started on %s ****\n' % time.asctime())
     START = timeit.default_timer()  # to get the runtime of the program
 
-    compare_cdf_two_stns(path_to_ppt_netatmo_data,
-                         path_to_ppt_hdf_data)
+    compare_cdf_two_stns(path_to_ppt_netatmo_data, path_to_ppt_hdf_data,
+                         distance_matrix_df_file)
 
     STOP = timeit.default_timer()  # Ending time
     print(('\n****Done with everything on %s.\nTotal run time was'

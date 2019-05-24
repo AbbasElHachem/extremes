@@ -12,3 +12,5 @@ encoding/_10_aggregate_do_cdf_compare_2_NetAtmo_stns.py=utf-8
 encoding/_11_aggregate_do_cdf_compare_DWD_to_NetAtmo_stns.py=utf-8
 encoding/_12_aggregate_do_plots_compare_alls_stns_in_convex_hull_for_extreme.py=utf-8
 encoding/_13_construct_distance_matrix_DWD_Netatmo.py=utf-8
+encoding/_14_construct_distance_matrix_NetAtmo_NetAtmo.py=utf-8
+encoding/_15_compare_netatmo_ppt_to_humidity.py=utf-8

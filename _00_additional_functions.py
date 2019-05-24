@@ -239,8 +239,12 @@ def resample_intersect_2_dfs(df1, df2, temp_freq):
 
     idx_common = df_resample1.index.intersection(df_resample2.index)
 
-    df_common1 = df_resample1.loc[idx_common, :]
-    df_common2 = df_resample2.loc[idx_common, :]
+    try:
+        df_common1 = df_resample1.loc[idx_common, :]
+        df_common2 = df_resample2.loc[idx_common, :]
+    except Exception:
+        df_common1 = df_resample1.loc[idx_common]
+        df_common2 = df_resample2.loc[idx_common]
     return df_common1, df_common2
 
 #==============================================================================

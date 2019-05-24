@@ -96,7 +96,8 @@ for stn_mac in in_df_netatmo_coords.index:
     stn_max_with_ = stn_mac.replace(':', '_')
     df_distance.loc[stn_max_with_, :] = dist
 
-df_distance.to_csv(os.path.join(out_save_dir, 'distance_mtx_in_m_NetAtmo_DWD.csv'),
+df_distance.to_csv(os.path.join(out_save_dir,
+                                'distance_mtx_in_m_NetAtmo_DWD.csv'),
                    sep=';')
 
 print('Done with everything')

@@ -37,7 +37,8 @@ from _09_aggregate_do_cdf_compare_2_DWD_stns import (plt_bar_plot_2_stns,
 
 
 path_to_ppt_netatmo_data = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-                            r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_.csv')
+                            r'\NetAtmo_BW'
+                            r'\ppt_all_netatmo_hourly_stns_combined_.csv')
 assert os.path.exists(path_to_ppt_netatmo_data), 'wrong NETATMO Ppt file'
 
 coords_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'

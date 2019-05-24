@@ -21,14 +21,15 @@ from _00_additional_functions import (
     split_one_df_file_to_get_stn_id, split_df_file_to_get_alls_stn_ids)
 
 
-dfs_loc = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\rain_bw_1hour'
+# rain_bw_1hour'
+dfs_loc = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\humidity_bw_1hour'
 
 dfs_list = list_all_full_path('.csv', dfs_loc)
 dfs_list_ppt = list(filter(lambda x: 'coords' not in x, dfs_list))
 
 stn_ids = split_df_file_to_get_alls_stn_ids(dfs_list_ppt)
-
-date_range = pd.date_range('2014-04-01 00:00:00',
+# 2014-04-01 00:00:00 for ppt
+date_range = pd.date_range('2012-04-01 00:00:00',
                            '2019-05-10 00:00:00',
                            freq='H')
 
@@ -56,12 +57,12 @@ for df_file in dfs_list_ppt:
         vals_df = in_df.values.ravel()
         df_all.loc[idx_int, stn_id] = vals_df
     except Exception:
-        print(stn_id, ' problem in file')
+        print(stn_id, ' problem in file, skipping file')
         continue
 
     all_dfs_len -= 1
 
 df_all.to_csv(os.path.join(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW',
-                           r'ppt_all_netatmo_hourly_stns_combined_.csv'), sep=';')
+                           r'humidity_all_netatmo_hourly_stns_combined_.csv'), sep=';')
 
 print('done with everything')
