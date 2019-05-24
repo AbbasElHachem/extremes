@@ -59,7 +59,7 @@ plt.rcParams.update({'axes.labelsize': 12})
 #==============================================================================
 path_to_dfs_simultaneous_events = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\thr8'
 
-out_plots_dir = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\thr8Plots'
+out_plots_dir = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\thr8Plots_DWD'
 
 path_to_ppt_coords_data = (r'X:\exchange\ElHachem'
                            r'\niederschlag_deutschland'

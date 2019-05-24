@@ -39,15 +39,19 @@ plt.rcParams.update({'axes.labelsize': 12})
 #==============================================================================
 path_to_dfs_simultaneous_events = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\thr8'
 
+
 path_to_ppt_coords_data = (r'X:\exchange\ElHachem'
                            r'\niederschlag_deutschland'
                            r'\1993_2016_5min_merge_nan.csv')
 
 path_to_shpfile = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
                    r'\shp_file_germany\DEU_adm1.shp')
+
+out_save_dir = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\thr8Plots_DWD'
 # in station df, to get coordinates
 xcoord_name = 'Rechtswert'
 ycoord_name = 'Hochwert'
+
 
 # def epsg wgs84 and utm32 for coordinates conversion
 wgs82 = "+init=EPSG:4326"
@@ -71,7 +75,8 @@ def plot_coordinates(path_to_events,
                      path_stns_coords,
                      xcoords_name,
                      ycoords_name,
-                     shp_de):
+                     shp_de,
+                     out_dir):
     '''fct to plot station event data and all other stations within +-60min'''
 
     colrs_dict = pltcolor()  # create dictionary for colors
@@ -168,7 +173,7 @@ def plot_coordinates(path_to_events,
     #                   fancybox=True, shadow=True, ncol=3)
 
             plt.tight_layout()
-            plt.savefig(os.path.join(path_to_dfs_simultaneous_events,
+            plt.savefig(os.path.join(out_dir,
                                      'station_%s_ppt_thr_%smm_at_%s_2.png'
                                      % (str(int(stn_one_id)),
                                          ppt_thr, save_event_time)),
@@ -190,7 +195,7 @@ if __name__ == '__main__':
 
     plot_coordinates(path_to_dfs_simultaneous_events,
                      path_to_ppt_coords_data, xcoord_name,
-                     ycoord_name, path_to_shpfile)
+                     ycoord_name, path_to_shpfile, out_save_dir)
 
     STOP = timeit.default_timer()  # Ending time
     print(('\n****Done with everything on %s.\nTotal run time was'

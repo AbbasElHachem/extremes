@@ -43,7 +43,7 @@ path_to_netatmo_coords_df_file = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetA
 path_to_shpfile = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
                    r'\shp_file_germany\DEU_adm1.shp')
 
-out_plots_dir = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmoPlotsExtremes"
+out_plots_dir = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\thr24Plots_Netatmo"
 if not os.path.exists(out_plots_dir):
     os.mkdir(out_plots_dir
              )
