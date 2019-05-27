@@ -408,13 +408,36 @@ def get_for_netatmo_nearest_dwd_station(first_stn_id, dwd_coords_df_file,
 #==============================================================================
 
 
-def constrcut_contingency_table(dataframe,  thr):
+def constrcut_contingency_table(stn1_id, stn2_id,
+                                dataframe1, dataframe2, thr1, thr2):
     ''' return percentage of values below or above a threshold'''
-    df = dataframe.values.ravel()
-    df_below_thr = np.round((df[df <= thr].shape[0] / df.shape[0]) * 100, 2)
-    df_abv_thr = np.round((df[df > thr].shape[0] / df.shape[0]) * 100, 2)
+    df_1 = dataframe1.values.ravel()
+    df_2 = dataframe2.values.ravel()
 
-    return df_below_thr, df_abv_thr
+    assert df_1.shape[0] == df_2.shape[0], 'values should have same shape'
+
+    df_combined = dataframe1.copy()
+    df_combined.loc[:, stn2_id] = df_2
+    print(df_combined)
+    df_both_below_thr = ((df_combined[stn1_id].values <= thr1) & (
+        df_combined[stn2_id].values <= thr2)).sum() / df_1.shape[0]
+
+    df_first_abv_second_below_thr = ((df_combined[stn1_id].values > thr1) & (
+        df_combined[stn2_id].values <= thr2)).sum() / df_1.shape[0]
+
+    df_first_below_second_abv_thr = ((df_combined[stn1_id].values <= thr1) & (
+        df_combined[stn2_id].values > thr2)).sum() / df_1.shape[0]
+
+    df_both_abv_thr = ((df_combined[stn1_id].values > thr1) & (
+        df_combined[stn2_id].values > thr2)).sum() / df_1.shape[0]
+
+#     assert np.sum((df_both_below_thr +
+#                    df_first_abv_second_below_thr +
+#                    df_first_below_second_abv_thr +
+#                    df_both_abv_thr)) == 1, 'wrong sum'
+
+    return (100 * df_both_below_thr, 100 * df_first_abv_second_below_thr,
+            100 * df_first_below_second_abv_thr, 100 * df_both_abv_thr)
 #==============================================================================
 #
 #==============================================================================

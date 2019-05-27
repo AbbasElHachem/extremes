@@ -14,4 +14,5 @@ encoding/_12_aggregate_do_plots_compare_alls_stns_in_convex_hull_for_extreme.py=
 encoding/_13_construct_distance_matrix_DWD_Netatmo.py=utf-8
 encoding/_14_construct_distance_matrix_NetAtmo_NetAtmo.py=utf-8
 encoding/_15_compare_netatmo_ppt_to_humidity.py=utf-8
-encoding/_16_disaggregate_dwd_using_netatmo_relative_values.py=utf-8
+encoding/_16_construct_and_compare_daily_netatmo_dwd_dfs.py=utf-8
+encoding/_17_disaggregate_DWD_based_on_NetAtmo.py=utf-8

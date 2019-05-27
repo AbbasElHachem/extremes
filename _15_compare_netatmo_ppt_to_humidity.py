@@ -19,6 +19,7 @@ import time
 
 import numpy as np
 import pandas as pd
+import seaborn as sn
 import matplotlib.pyplot as plt
 import matplotlib.dates as md
 
@@ -31,11 +32,12 @@ from matplotlib import rc
 from matplotlib import rcParams
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 from pandas.plotting import register_matplotlib_converters
+from collections import OrderedDict
 
 from _00_additional_functions import (
-    resampleDf, resample_Humidity_Df)
+    resampleDf, resample_Humidity_Df, constrcut_contingency_table)
 
-from _09_aggregate_do_cdf_compare_2_DWD_stns import plot_contingency_tables_as_a_sequence_two_stns
+# from _09_aggregate_do_cdf_compare_2_DWD_stns import plot_contingency_tables_as_a_sequence_two_stns
 
 register_matplotlib_converters()
 
@@ -85,6 +87,7 @@ ppt_thr = .5
 max_ppt_thr = 100.
 
 ppt_thrs_list = [0.5, 1, 2, 5]
+hum_thrs_list = [80, 90, 95, 100]
 
 # till 1 day '5min', '10min', '15min', '30min',
 aggregation_frequencies = ['60min', '90min', '120min', '180min', '240min',
@@ -288,8 +291,115 @@ def plt_scatter_plot_ppt_hum(stn1_id, stn2_id, seperate_distance,
 #
 #==============================================================================
 
-def compare_cdf_two_stns(netatmo_ppt_df_file, netatmo_humidity_df_file,
-                         distance_matrix_df_file):
+def plot_contingency_tables_as_a_sequence_ppt_hum_stns(stn_id,
+                                                       stn_2_id,
+                                                       min_dist,
+                                                       ppt_thrs_list,
+                                                       hum_thrs_list,
+                                                       df_stn1,
+                                                       df_stn2,
+                                                       aggregation_frequencies_lst,
+                                                       out_dir):
+    '''
+    Do contingenccy tables a function of time and thresholds for 2 stations
+    '''
+    print('Plotting contingency_table a sequence')
+
+    plt.ioff()
+
+    #colors = ['r', 'b', 'g', 'orange', 'k']
+
+    if (df_stn1.values.shape[0] > 10 and
+            df_stn2.values.shape[0] > 10):
+
+        for _, (ppt_thr, hum_thr) in enumerate(zip(ppt_thrs_list,
+                                                   hum_thrs_list)):
+
+            print('Ppt Threshold is', ppt_thr)
+
+            for temp_freq in aggregation_frequencies_lst:
+                fig = plt.figure(figsize=(16, 12), dpi=200)
+                ax = fig.add_subplot(111)
+                ax.set_aspect(1)
+                print('Time freq is', temp_freq)
+                df_resampled1 = resampleDf(df_stn1, temp_freq)
+                df_resampled2_mean = resample_Humidity_Df(df_stn2,
+                                                          temp_freq,
+                                                          method='mean')
+
+#                 df_resampled2_min = resample_Humidity_Df(idf2,
+#                                                              tem_freq,
+#                                                              method='min')
+
+#                     df_resampled2_max = resample_Humidity_Df(idf2,
+#                                                              tem_freq,
+#                                                              method='max')
+
+                idx_cmn = df_resampled1.index.intersection(
+                    df_resampled2_mean.index)
+#
+                df_common1 = df_resampled1.loc[idx_cmn]
+                df_common2_mean = df_resampled2_mean.loc[idx_cmn]
+
+#                     df_common2_min = df_resampled2_min.loc[idx_cmn]
+#                     df_common2_max = df_resampled2_max.loc[idx_cmn]
+
+                if (df_common1.values.shape[0] > 10 and
+                        df_common2_mean.values.shape[0] > 10):
+                    print('getting percentages for contingency table')
+                    df_common1_new = pd.DataFrame(data=df_common1.values,
+                                                  index=df_common1.index)
+                    df_common2_mean_new = pd.DataFrame(data=df_common2_mean.values,
+                                                       index=df_common2_mean.index)
+                    try:
+                        (df_both_below_thr,
+                         df_first_abv_second_below_thr,
+                         df_first_below_second_abv_thr,
+                         df_both_abv_thr) = constrcut_contingency_table(stn_id,
+                                                                        stn_2_id,
+                                                                        df_common1_new,
+                                                                        df_common2_mean_new,
+                                                                        ppt_thr,
+                                                                        hum_thr)
+                        # TODO FIX ME
+                        conf_arr = np.array([[df_both_below_thr, df_first_abv_second_below_thr],
+                                             [df_first_below_second_abv_thr, df_both_abv_thr]])
+
+                    except Exception as msg:
+                        print('error while calculating P0', msg, temp_freq)
+                        continue
+                else:
+                    print('empty df values')
+                    continue
+                if conf_arr.shape[0] > 0:
+                    print('plotting for Ppt thr, temp frequency is', temp_freq)
+
+                    res = sn.heatmap(conf_arr, annot=True, vmin=0.0,
+                                     vmax=100.0, fmt='.2f')
+
+                    ax.set_title('contingency table \n Humidiy thr %0.0f Rainfall %0.1f '
+                                 '%s vs %s \n distance: %0.1f m, time freq: %s'
+                                 % (hum_thr, ppt_thr, stn_id,
+                                    stn_2_id, min_dist, temp_freq))
+                    plt.savefig(
+                        os.path.join(out_dir,
+                                     'contingency_table_as_a_sequence_%s_%s_%s_ppt_%0.1f_hum_%0.1f.png'
+                                     % (stn_id, stn_2_id, temp_freq, ppt_thr, hum_thr)),
+                        bbox_inches='tight')
+                    plt.close(fig)
+            print('Done plotting contingency_tableas a sequence')
+        else:
+            print('empty df not plotting Contingency table')
+    return
+
+
+#==============================================================================
+#
+#==============================================================================
+
+def compare_ppt_to_humidity_stns(netatmo_ppt_df_file,
+                                 netatmo_humidity_df_file,
+                                 distance_matrix_df_file):
     in_netatmo_ppt_stns_df = pd.read_csv(netatmo_ppt_df_file,
                                          index_col=0, sep=';',
                                          parse_dates=True,
@@ -362,16 +472,16 @@ def compare_cdf_two_stns(netatmo_ppt_df_file, netatmo_humidity_df_file,
 #                                                       tem_freq,
 #                                                       out_save_dir)
 #
-                            plt_bar_plot_ppt_mean_min_max_hum_stns(
-                                ppt_stn_id,
-                                stn_2_id,
-                                min_dist,
-                                df_common1,
-                                df_common2_mean,
-                                df_common2_min,
-                                df_common2_max,
-                                tem_freq,
-                                out_save_dir)
+#                             plt_bar_plot_ppt_mean_min_max_hum_stns(
+#                                 ppt_stn_id,
+#                                 stn_2_id,
+#                                 min_dist,
+#                                 df_common1,
+#                                 df_common2_mean,
+#                                 df_common2_min,
+#                                 df_common2_max,
+#                                 tem_freq,
+#                                 out_save_dir)
 #
 #                             plt_scatter_plot_ppt_hum(ppt_stn_id,
 #                                                      stn_2_id,
@@ -390,18 +500,19 @@ def compare_cdf_two_stns(netatmo_ppt_df_file, netatmo_humidity_df_file,
                         print('empty df')
                         continue
 
-                plot_contingency_tables_as_a_sequence_two_stns(ppt_stn_id,
-                                                               stn_2_id,
-                                                               min_dist,
-                                                               ppt_thrs_list,
-                                                               df_common1,
-                                                               df_common2_max,
-                                                               aggregation_frequencies,
-                                                               out_save_dir)
+                plot_contingency_tables_as_a_sequence_ppt_hum_stns(ppt_stn_id,
+                                                                   stn_2_id,
+                                                                   min_dist,
+                                                                   ppt_thrs_list,
+                                                                   hum_thrs_list,
+                                                                   idf1,
+                                                                   idf2,
+                                                                   aggregation_frequencies,
+                                                                   out_save_dir)
         except Exception as msg:
             print(msg)
 
-#         break
+        break
 
 
 if __name__ == '__main__':
@@ -409,8 +520,9 @@ if __name__ == '__main__':
     print('**** Started on %s ****\n' % time.asctime())
     START = timeit.default_timer()  # to get the runtime of the program
 
-    compare_cdf_two_stns(path_to_ppt_netatmo_data, path_to_hum_netatmo_data,
-                         distance_matrix_df_file_ppt_hum)
+    compare_ppt_to_humidity_stns(path_to_ppt_netatmo_data,
+                                 path_to_hum_netatmo_data,
+                                 distance_matrix_df_file_ppt_hum)
 
     STOP = timeit.default_timer()  # Ending time
     print(('\n****Done with everything on %s.\nTotal run time was'
