@@ -104,7 +104,7 @@ def construct_netatmo_dwd_daily_dfs(netatmo_ppt_df_file,
 
             min_dist = sorted_distances.values[0]
             if min_dist <= 5000:
-                raise Exception
+
                 stn_2_id = sorted_distances.index[0]
 
                 idf2 = HDF52.get_pandas_dataframe(ids=[stn_2_id])
@@ -112,18 +112,23 @@ def construct_netatmo_dwd_daily_dfs(netatmo_ppt_df_file,
 
                 print('Second DWD Stn Id is', stn_2_id)
 
-                df_combined = pd.DataFrame(columns=[stn_id, stn_2_id])
+                # df_combined = pd.DataFrame(columns=[stn_id, stn_2_id])
 
                 df_netatmo_hourly, df_dwd_hourly = resample_intersect_2_dfs(
                     idf1,
                     idf2,
                     '60min')
+
                 if (df_netatmo_hourly.values.shape[0] > 1000):
-                    raise Exception
+                    #                     raise Exception
+
                     df_dwd_daily = resampleDf(df_dwd_hourly, '1440min')
                     df_netatmo_daily = resampleDf(df_netatmo_hourly, '1440min')
 
-                    df_disaggregated = pd.DataFrame(data=np.empty(shape=(df_dwd_hourly.shape[0])),
+                    empty_data_arr = np.empty(shape=(df_dwd_hourly.shape[0]))
+                    empty_data_arr[empty_data_arr == 0] = np.nan
+
+                    df_disaggregated = pd.DataFrame(data=empty_data_arr,
                                                     index=df_dwd_hourly.index)
 
                     for idx, val in zip(df_dwd_hourly.index,
@@ -143,20 +148,26 @@ def construct_netatmo_dwd_daily_dfs(netatmo_ppt_df_file,
                                 print('sum netatmo is', sum_daily_netatmo)
                                 if sum_daily_dwd == 0:
                                     ppt_disagg = 0
+                                elif sum_daily_netatmo == 0:
+                                    ppt_disagg = 0
                                 else:
                                     ppt_disagg = (
-                                        val * sum_daily_netatmo) / sum_daily_dwd
+                                        val / sum_daily_netatmo) * sum_daily_dwd
 
                                 print('disaggregated ppt is', ppt_disagg)
                                 df_disaggregated.loc[idx] = ppt_disagg
                             else:
                                 df_disaggregated.loc[idx] = np.nan
-                            # break
+                                print('index not in daily values ppt is nan')
+                            break
                     plt.ioff()
+                    plt.figure()
                     plt.plot(df_disaggregated.index,
                              df_disaggregated.values, c='r', alpha=0.25)
                     plt.plot(df_dwd_hourly.index,
                              df_dwd_hourly.values, c='b', alpha=0.25)
+                    plt.scatter(df_disaggregated.values,
+                                df_dwd_hourly.values, alpha=0.25)
                     plt.show()
                 else:
                     print('empty df')

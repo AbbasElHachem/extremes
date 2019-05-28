@@ -39,14 +39,14 @@ import pandas as pd
 
 from _00_additional_functions import (resample_intersect_2_dfs)
 
-from _09_aggregate_do_cdf_compare_2_DWD_stns import (plt_bar_plot_2_stns,
-                                                     plt_scatter_plot_2_stns,
-                                                     plot_end_tail_cdf_2_stns,
-                                                     plot_normalized_ranked_stns,
-                                                     plot_normalized_sorted_ranked_stns,
-                                                     plot_sorted_stns_vals,
-                                                     plot_p0_as_a_sequence_two_stns,
-                                                     plot_contingency_tables_as_a_sequence_two_stns)
+from _09_aggregate_plot_compare_2_DWD_stns import (plt_bar_plot_2_stns,
+                                                   plt_scatter_plot_2_stns,
+                                                   plot_end_tail_cdf_2_stns,
+                                                   plot_normalized_ranked_stns,
+                                                   plot_normalized_sorted_ranked_stns,
+                                                   plot_sorted_stns_vals,
+                                                   plot_p0_as_a_sequence_two_stns,
+                                                   plot_contingency_tables_as_a_sequence_two_stns)
 from b_get_data import HDF5
 #==============================================================================
 #

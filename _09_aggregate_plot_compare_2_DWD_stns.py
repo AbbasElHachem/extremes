@@ -147,9 +147,11 @@ def plt_bar_plot_2_stns(stn1_id, stn2_id, seperate_distance,
     time_vals = df1.index.to_pydatetime()
     time_arr = md.date2num(time_vals)
 
-    ax.plot(time_arr, df1.values, c='darkblue', marker='o', markersize=2,
+    ax.plot(time_arr, df1.values, c='darkblue',
+            marker='o', markersize=2,
             alpha=0.25, label=stn1_id)
-    ax.plot(time_arr, df2.values, c='darkred', marker='+', markersize=2,
+    ax.plot(time_arr, df2.values, c='darkred',
+            marker='+', markersize=2,
             alpha=0.25, label=stn2_id)
 
     xfmt = md.DateFormatter('%Y-%m-%d')
@@ -659,23 +661,6 @@ def plot_contingency_tables_as_a_sequence_two_stns(stn_id,
                 print('Done plotting contingency_tableas a sequence')
 
     return
-#==============================================================================
-#
-#==============================================================================
-
-
-def calculate_Brier_score_2_stns(stn_1_id,
-                                 stn_2_id,
-                                 min_dist,
-                                 df_stn1,
-                                 df_stn2,
-                                 temp_freq,
-                                 out_dir):
-
-    count_all_vals = df_stn1.shape[0]
-    # TODO FIX ME
-    brier_score = []
-    pass
 
 
 #==============================================================================

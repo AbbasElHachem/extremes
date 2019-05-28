@@ -24,7 +24,7 @@ __email__ = "abbas.el-hachem@iws.uni-stuttgart.de"
 import os
 import timeit
 import time
-import numpy as np
+
 import pandas as pd
 
 
