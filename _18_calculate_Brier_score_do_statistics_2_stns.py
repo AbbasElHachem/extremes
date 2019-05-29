@@ -77,7 +77,7 @@ if not os.path.exists(out_save_dir_orig):
 
 max_ppt_thr = 100.
 ppt_thrs = [0.5, 1, 2, 5]
-aggregation_frequencies = ['5min', '10min', '15min', '30min', '60min', '90min',
+aggregation_frequencies = ['60min', '90min',
                            '120min', '180min', '240min',  '360min',
                            '480min', '720min', '1440min']
 
@@ -165,6 +165,7 @@ def calculate_brier_score_2_stns_per_temp_freq(netatmo_ppt_df_file,
                 print('Second DWD Stn Id is', stn_2_id)
 
                 for ppt_thr in ppt_thrs_list:
+
                     df_statistics_with_agg = pd.DataFrame(
                         index=aggregation_frequencies_list)
 
@@ -174,9 +175,13 @@ def calculate_brier_score_2_stns_per_temp_freq(netatmo_ppt_df_file,
                             idf1,
                             idf2,
                             temp_freq)
-
-                        if (df_netatmo.values.shape[0] > 1000):
-                            raise Exception
+#                         df2 = idf2.to_xarray()
+#                         df2.resample(index=temp_freq).sum('index')
+#                         df1 = idf1.to_xarray()
+#                         df1.resample(index=temp_freq).sum('index')
+                        print(df_netatmo.values.shape[0])
+                        if len(df_netatmo.values) > 0:  # FIX ME
+                            #                             raise Exception
                             print('getting statistics')
                             brier_score = calculate_brier_score(stn_1_id=stn_id,
                                                                 stn_2_id=stn_2_id,
@@ -189,9 +194,9 @@ def calculate_brier_score_2_stns_per_temp_freq(netatmo_ppt_df_file,
                             rho = spr(df_dwd.values.ravel(),
                                       df_netatmo.values.ravel())[0]
                             p01 = calculate_probab_ppt_below_thr(
-                                df_netatmo.values, ppt_thr)
+                                df_netatmo.values.ravel(), ppt_thr)
                             p02 = calculate_probab_ppt_below_thr(
-                                df_dwd.values, ppt_thr)
+                                df_dwd.values.ravel(), ppt_thr)
 
                             df_statistics_with_agg.loc[
                                 temp_freq,
@@ -213,17 +218,23 @@ def calculate_brier_score_2_stns_per_temp_freq(netatmo_ppt_df_file,
                                 temp_freq,
                                 'p0 DWD'] = np.round(p02, 2)
                         else:
-                            print('not enough data')
-
+                            print('not enough data, moving to next station')
+                            break
 #                     print(df_statistics_with_agg.values.shape[0])
 
-#                     if df_statistics_with_agg.values.shape[0] > 0:
-#                         df_statistics_with_agg.to_csv(
-#                             os.path.join(out_dir,
-#                                          'statistics_netatmo_%s_dwd_%s_ppt_thr_%0.1f_.csv'
-#                                          % (stn_id, stn_2_id, ppt_thr)), sep=';',
-#                             float_format='0.3f')
-
+                    if len(df_statistics_with_agg.values[0]) > 0:
+                        df_statistics_with_agg.to_csv(
+                            os.path.join(out_dir,
+                                         r'statistics_netatmo_%s_dwd_%s_ppt_thr_%0.1f_.csv'
+                                         % (stn_id, stn_2_id, ppt_thr)),
+                            sep=';')
+                        plt.ioff()
+                        df_statistics_with_agg.plot()
+                        plt.savefig(
+                            os.path.join(out_dir,
+                                         r'statistics_netatmo_%s_dwd_%s_ppt_thr_%0.1f_.png'
+                                         % (stn_id, stn_2_id, ppt_thr)))
+#                     break
         except Exception as msg:
             print(msg)
 

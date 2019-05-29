@@ -119,7 +119,7 @@ def construct_netatmo_dwd_daily_dfs(netatmo_ppt_df_file,
                     idf2,
                     '60min')
 
-                if (df_netatmo_hourly.values.shape[0] > 1000):
+                if len(df_netatmo_hourly.values) > 0:
                     #                     raise Exception
 
                     df_dwd_daily = resampleDf(df_dwd_hourly, '1440min')
