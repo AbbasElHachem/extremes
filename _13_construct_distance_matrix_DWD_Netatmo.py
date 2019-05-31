@@ -30,8 +30,13 @@ coords_dwd_df_file = (r'X:\exchange\ElHachem\niederschlag_deutschland'
                       r'\1993_2016_5min_merge_nan.csv')
 assert os.path.exists(coords_dwd_df_file), 'wrong DWD coords file'
 
+# coords_netatmo_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
+#                           r'\NetAtmo_BW\rain_bw_1hour\netatmo_bw_1hour_coords.csv')
+#
+# assert os.path.exists(coords_netatmo_df_file), 'wrong NETATMO coords file'
+
 coords_netatmo_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-                          r'\NetAtmo_BW\rain_bw_1hour\netatmo_bw_1hour_coords.csv')
+                          r'\NetAtmo_BW\rain_bw_5min\netatmo_bw_1hour_coords.csv')
 
 assert os.path.exists(coords_netatmo_df_file), 'wrong NETATMO coords file'
 

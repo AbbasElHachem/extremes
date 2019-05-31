@@ -52,32 +52,33 @@ from b_get_data import HDF5
 #
 #==============================================================================
 
-path_to_ppt_netatmo_data = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-                            r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_.csv')
-assert os.path.exists(path_to_ppt_netatmo_data), 'wrong NETATMO Ppt file'
+path_to_ppt_hourly_netatmo_data = (
+    r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
+    r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_.csv')
+assert os.path.exists(
+    path_to_ppt_hourly_netatmo_data), 'wrong NETATMO Ppt file'
+
+path_to_ppt_5min_netatmo_data = (
+    r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
+    r'\NetAtmo_BW\ppt_all_netatmo_5min_stns_combined_.csv')
+assert os.path.exists(
+    path_to_ppt_5min_netatmo_data), 'wrong NETATMO Ppt file'
 
 path_to_ppt_hdf_data = (r'X:\exchange\ElHachem'
                         r'\niederschlag_deutschland'
                         r'\1993_2016_5min_merge_nan.h5')
 assert os.path.exists(path_to_ppt_hdf_data), 'wrong NETATMO Ppt file'
 
-coords_dwd_df_file = (r'X:\exchange\ElHachem\niederschlag_deutschland'
-                      r'\1993_2016_5min_merge_nan.csv')
-assert os.path.exists(coords_dwd_df_file), 'wrong DWD coords file'
-
-coords_netatmo_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-                          r'\NetAtmo_BW\rain_bw_1hour\netatmo_bw_1hour_coords.csv')
-
-assert os.path.exists(coords_netatmo_df_file), 'wrong NETATMO coords file'
-
 
 distance_matrix_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
                            r'\NetAtmo_BW\distance_mtx_in_m_NetAtmo_DWD.csv')
 assert os.path.exists(distance_matrix_df_file), 'wrong Distance MTX  file'
 
-out_save_dir_orig = (
-    r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\cdf_plots_DWD_NetAtmo')
+# out_save_dir_orig = (
+#     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\cdf_plots_DWD_NetAtmo_hourly')
 
+out_save_dir_orig = (
+    r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\cdf_plots_DWD_NetAtmo_5min')
 
 if not os.path.exists(out_save_dir_orig):
     os.mkdir(out_save_dir_orig)
@@ -93,7 +94,7 @@ ppt_thrs_list = [0.5, 1., 2]
 max_ppt_thr = 100.
 
 # till 1 day '5min', '10min', '15min', '30min',
-aggregation_frequencies = ['60min',
+aggregation_frequencies = ['5min', '10min', '15min', '30min', '60min',
                            '90min', '120min', '180min', '240min',
                            '360min', '480min', '720min', '1440min']
 #==============================================================================
@@ -122,7 +123,7 @@ def compare_cdf_two_stns(netatmo_ppt_df_file, path_to_ppt_hdf_data,
             idf1 = in_netatmo_stns_df.loc[:, stn_id]
             idf1.dropna(axis=0, inplace=True)
             idf1 = idf1[idf1 < max_ppt_thr]
-
+            assert stn_id in in_df_distance_netatmo_dwd.index, 'check dist mtx'
             distances_to_stn1 = in_df_distance_netatmo_dwd.loc[stn_id, :]
             sorted_distances = distances_to_stn1.sort_values(
                 ascending=True)
@@ -134,85 +135,86 @@ def compare_cdf_two_stns(netatmo_ppt_df_file, path_to_ppt_hdf_data,
 
                 idf2 = HDF52.get_pandas_dataframe(ids=[stn_2_id])
                 idf2 = idf2[idf2 < max_ppt_thr]
-                print('Second DWD Stn Id is', stn_2_id)
+                print('Second DWD Stn Id is', stn_2_id,
+                      'distance is ', min_dist)
                 if (idf1.values.shape[0] > 1000) and (idf2.values.shape[0] > 1000):
                     out_save_dir = os.path.join(out_save_dir_orig,
                                                 '%s_%s' % (stn_id, stn_2_id))
                     if not os.path.exists(out_save_dir):
                         os.mkdir(out_save_dir)
 
-#                     for tem_freq in aggregation_frequencies:
-#                         print('Aggregation is: ', tem_freq)
-#
-#                         df_common1, df_common2 = resample_intersect_2_dfs(idf1,
-#                                                                           idf2,
-#                                                                           tem_freq)
-#
-#                         if (df_common1.values.shape[0] > 0 and
-#                                 df_common2.values.shape[0] > 0):
-#                             #
-#                             try:
-#                                 plt_bar_plot_2_stns(stn_id,
-#                                                     stn_2_id,
-#                                                     min_dist,
-#                                                     df_common1,
-#                                                     df_common2,
-#                                                     tem_freq,
-#                                                     out_save_dir)
-#
-#                                 plt_scatter_plot_2_stns(stn_id,
-#                                                         stn_2_id,
-#                                                         min_dist,
-#                                                         df_common1,
-#                                                         df_common2,
-#                                                         ppt_thr2,
-#                                                         tem_freq,
-#                                                         out_save_dir)
-#
-#                                 plot_end_tail_cdf_2_stns(stn_id,
-#                                                          stn_2_id,
-#                                                          min_dist,
-#                                                          df_common1,
-#                                                          df_common2,
-#                                                          tem_freq,
-#                                                          ppt_thr,
-#                                                          out_save_dir)
-#
-#                                 plot_normalized_sorted_ranked_stns(stn_id,
-#                                                                    stn_2_id,
-#                                                                    min_dist,
-#                                                                    df_common1,
-#                                                                    df_common2,
-#                                                                    tem_freq,
-#                                                                    out_save_dir)
-#                                 plot_normalized_ranked_stns(stn_id,
-#                                                             stn_2_id,
-#                                                             min_dist,
-#                                                             df_common1,
-#                                                             df_common2,
-#                                                             tem_freq,
-#                                                             out_save_dir)
-#                                 plot_sorted_stns_vals(stn_id,
-#                                                       stn_2_id,
-#                                                       min_dist,
-#                                                       df_common1,
-#                                                       df_common2,
-#                                                       tem_freq,
-#                                                       out_save_dir)
-#                             except Exception as msg:
-#                                 print('error while plotting', msg, tem_freq)
-#                                 continue
-#                         else:
-#                             print('empty df')
-#                             continue
-#                     plot_p0_as_a_sequence_two_stns(stn_id,
-#                                                    stn_2_id,
-#                                                    min_dist,
-#                                                    ppt_thrs_list,
-#                                                    idf1,
-#                                                    idf2,
-#                                                    aggregation_frequencies,
-#                                                    out_save_dir)
+                    for tem_freq in aggregation_frequencies:
+                        print('Aggregation is: ', tem_freq)
+
+                        df_common1, df_common2 = resample_intersect_2_dfs(idf1,
+                                                                          idf2,
+                                                                          tem_freq)
+
+                        if (df_common1.values.shape[0] > 0 and
+                                df_common2.values.shape[0] > 0):
+                            #
+                            try:
+                                plt_bar_plot_2_stns(stn_id,
+                                                    stn_2_id,
+                                                    min_dist,
+                                                    df_common1,
+                                                    df_common2,
+                                                    tem_freq,
+                                                    out_save_dir)
+
+                                plt_scatter_plot_2_stns(stn_id,
+                                                        stn_2_id,
+                                                        min_dist,
+                                                        df_common1,
+                                                        df_common2,
+                                                        ppt_thr2,
+                                                        tem_freq,
+                                                        out_save_dir)
+
+                                plot_end_tail_cdf_2_stns(stn_id,
+                                                         stn_2_id,
+                                                         min_dist,
+                                                         df_common1,
+                                                         df_common2,
+                                                         tem_freq,
+                                                         ppt_thr,
+                                                         out_save_dir)
+
+                                plot_normalized_sorted_ranked_stns(stn_id,
+                                                                   stn_2_id,
+                                                                   min_dist,
+                                                                   df_common1,
+                                                                   df_common2,
+                                                                   tem_freq,
+                                                                   out_save_dir)
+                                plot_normalized_ranked_stns(stn_id,
+                                                            stn_2_id,
+                                                            min_dist,
+                                                            df_common1,
+                                                            df_common2,
+                                                            tem_freq,
+                                                            out_save_dir)
+                                plot_sorted_stns_vals(stn_id,
+                                                      stn_2_id,
+                                                      min_dist,
+                                                      df_common1,
+                                                      df_common2,
+                                                      tem_freq,
+                                                      out_save_dir)
+                            except Exception as msg:
+                                print('error while plotting', msg, tem_freq)
+                                continue
+                        else:
+                            print('empty df')
+                            break
+                    plot_p0_as_a_sequence_two_stns(stn_id,
+                                                   stn_2_id,
+                                                   min_dist,
+                                                   ppt_thrs_list,
+                                                   idf1,
+                                                   idf2,
+                                                   aggregation_frequencies,
+                                                   out_save_dir)
 
                     plot_contingency_tables_as_a_sequence_two_stns(stn_2_id,
                                                                    stn_id,
@@ -237,7 +239,8 @@ if __name__ == '__main__':
     print('**** Started on %s ****\n' % time.asctime())
     START = timeit.default_timer()  # to get the runtime of the program
 
-    compare_cdf_two_stns(path_to_ppt_netatmo_data, path_to_ppt_hdf_data,
+    compare_cdf_two_stns(path_to_ppt_5min_netatmo_data,
+                         path_to_ppt_hdf_data,
                          distance_matrix_df_file)
 
     STOP = timeit.default_timer()  # Ending time

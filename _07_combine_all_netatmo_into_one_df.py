@@ -63,7 +63,7 @@ for df_file in dfs_list_ppt:
         continue
 
     all_dfs_len -= 1
-df_all.reset_index(inplace=True)
+# df_all.reset_index(inplace=True)
 df_all.to_csv(os.path.join(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW',
                            r'ppt_all_netatmo_5min_stns_combined_.csv'), sep=';')
 
