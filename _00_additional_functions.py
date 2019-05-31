@@ -418,7 +418,9 @@ def constrcut_contingency_table(stn1_id, stn2_id,
 
     df_combined = dataframe1.copy()
     df_combined.loc[:, stn2_id] = df_2
+
     print(df_combined)
+
     df_both_below_thr = ((df_combined[stn1_id].values <= thr1) & (
         df_combined[stn2_id].values <= thr2)).sum() / df_1.shape[0]
 
@@ -430,11 +432,6 @@ def constrcut_contingency_table(stn1_id, stn2_id,
 
     df_both_abv_thr = ((df_combined[stn1_id].values > thr1) & (
         df_combined[stn2_id].values > thr2)).sum() / df_1.shape[0]
-
-#     assert np.sum((df_both_below_thr +
-#                    df_first_abv_second_below_thr +
-#                    df_first_below_second_abv_thr +
-#                    df_both_abv_thr)) == 1, 'wrong sum'
 
     return (100 * df_both_below_thr, 100 * df_first_abv_second_below_thr,
             100 * df_first_below_second_abv_thr, 100 * df_both_abv_thr)

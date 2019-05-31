@@ -22,7 +22,9 @@ from _00_additional_functions import (
 
 
 # rain_bw_1hour'
-dfs_loc = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\humidity_bw_1hour'
+dfs_loc = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\rain_bw_1hour'
+
+dfs_loc = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\rain_bw_5min'
 
 dfs_list = list_all_full_path('.csv', dfs_loc)
 dfs_list_ppt = list(filter(lambda x: 'coords' not in x, dfs_list))
@@ -31,7 +33,7 @@ stn_ids = split_df_file_to_get_alls_stn_ids(dfs_list_ppt)
 # 2014-04-01 00:00:00 for ppt
 date_range = pd.date_range('2012-04-01 00:00:00',
                            '2019-05-10 00:00:00',
-                           freq='H')
+                           freq='5min')  # 'H'
 
 data_mtx = np.zeros(shape=(date_range.shape[0], len(stn_ids))).astype('float')
 data_mtx[data_mtx == 0] = np.nan
@@ -61,8 +63,8 @@ for df_file in dfs_list_ppt:
         continue
 
     all_dfs_len -= 1
-
+df_all.reset_index(inplace=True)
 df_all.to_csv(os.path.join(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW',
-                           r'humidity_all_netatmo_hourly_stns_combined_.csv'), sep=';')
+                           r'ppt_all_netatmo_5min_stns_combined_.csv'), sep=';')
 
 print('done with everything')

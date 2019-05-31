@@ -87,7 +87,7 @@ ppt_thr = .5
 max_ppt_thr = 100.
 
 ppt_thrs_list = [0.5, 1, 2, 5]
-hum_thrs_list = [80, 90, 95, 100]
+hum_thrs_list = [80, 85, 90, 95]
 
 # till 1 day '5min', '10min', '15min', '30min',
 aggregation_frequencies = ['60min', '90min', '120min', '180min', '240min',
@@ -131,7 +131,7 @@ def plt_bar_plot_ppt_hum_stns(stn1_id, stn2_id, seperate_distance,
     ax.set_ylabel('Stn  %s   Precipitation  in mm/%s ' % (stn1_id, temp_freq))
     ax.tick_params('y', colors='darkblue')
     ax2.set_ylim(0.0, 100.01)
-    ax2.set_ylabel('Stn %s   Average Humidity  in percentage %s'
+    ax2.set_ylabel('Stn %s   Humidity  in percentage %s'
                    % (stn2_id, temp_freq), rotation=-90)
     ax2.tick_params('y', colors='darkred')
 
@@ -323,34 +323,34 @@ def plot_contingency_tables_as_a_sequence_ppt_hum_stns(stn_id,
                 ax.set_aspect(1)
                 print('Time freq is', temp_freq)
                 df_resampled1 = resampleDf(df_stn1, temp_freq)
-                df_resampled2_mean = resample_Humidity_Df(df_stn2,
-                                                          temp_freq,
-                                                          method='mean')
+#                 df_resampled2_mean = resample_Humidity_Df(df_stn2,
+#                                                           temp_freq,
+#                                                           method='mean')
 
-#                 df_resampled2_min = resample_Humidity_Df(idf2,
-#                                                              tem_freq,
+#                 df_resampled2_min = resample_Humidity_Df(df_stn2,
+#                                                              temp_freq,
 #                                                              method='min')
 
-#                     df_resampled2_max = resample_Humidity_Df(idf2,
-#                                                              tem_freq,
-#                                                              method='max')
+                df_resampled2_max = resample_Humidity_Df(df_stn2,
+                                                         temp_freq,
+                                                         method='max')
 
                 idx_cmn = df_resampled1.index.intersection(
-                    df_resampled2_mean.index)
+                    df_resampled2_max.index)
 #
                 df_common1 = df_resampled1.loc[idx_cmn]
-                df_common2_mean = df_resampled2_mean.loc[idx_cmn]
+#                 df_common2_mean = df_resampled2_mean.loc[idx_cmn]
 
 #                     df_common2_min = df_resampled2_min.loc[idx_cmn]
-#                     df_common2_max = df_resampled2_max.loc[idx_cmn]
+                df_common2_max = df_resampled2_max.loc[idx_cmn]
 
                 if (df_common1.values.shape[0] > 10 and
-                        df_common2_mean.values.shape[0] > 10):
+                        df_common2_max.values.shape[0] > 10):
                     print('getting percentages for contingency table')
                     df_common1_new = pd.DataFrame(data=df_common1.values,
                                                   index=df_common1.index)
-                    df_common2_mean_new = pd.DataFrame(data=df_common2_mean.values,
-                                                       index=df_common2_mean.index)
+                    df_common2_mean_new = pd.DataFrame(data=df_common2_max.values,
+                                                       index=df_common2_max.index)
                     try:
                         (df_both_below_thr,
                          df_first_abv_second_below_thr,
@@ -361,9 +361,11 @@ def plot_contingency_tables_as_a_sequence_ppt_hum_stns(stn_id,
                                                                         df_common2_mean_new,
                                                                         ppt_thr,
                                                                         hum_thr)
-                        # TODO FIX ME
-                        conf_arr = np.array([[df_both_below_thr, df_first_abv_second_below_thr],
-                                             [df_first_below_second_abv_thr, df_both_abv_thr]])
+
+                        conf_arr = np.array([[df_both_below_thr,
+                                              df_first_abv_second_below_thr],
+                                             [df_first_below_second_abv_thr,
+                                              df_both_abv_thr]])
 
                     except Exception as msg:
                         print('error while calculating P0', msg, temp_freq)
@@ -374,10 +376,10 @@ def plot_contingency_tables_as_a_sequence_ppt_hum_stns(stn_id,
                 if conf_arr.shape[0] > 0:
                     print('plotting for Ppt thr, temp frequency is', temp_freq)
 
-                    res = sn.heatmap(conf_arr, annot=True, vmin=0.0,
-                                     vmax=100.0, fmt='.2f')
+                    sn.heatmap(conf_arr, annot=True, vmin=0.0,
+                               vmax=100.0, fmt='.2f')
 
-                    ax.set_title('contingency table \n Humidiy thr %0.0f Rainfall %0.1f '
+                    ax.set_title('contingency table \n Humidiy thr %0.0f \n Rainfall %0.1f '
                                  '%s vs %s \n distance: %0.1f m, time freq: %s'
                                  % (hum_thr, ppt_thr, stn_id,
                                     stn_2_id, min_dist, temp_freq))
@@ -438,9 +440,9 @@ def compare_ppt_to_humidity_stns(netatmo_ppt_df_file,
                     print('Aggregation is: ', tem_freq)
 
                     df_resampled1 = resampleDf(idf1, tem_freq)
-                    df_resampled2_mean = resample_Humidity_Df(idf2,
-                                                              tem_freq,
-                                                              method='mean')
+#                     df_resampled2_mean = resample_Humidity_Df(idf2,
+#                                                               tem_freq,
+#                                                               method='mean')
 
                     df_resampled2_min = resample_Humidity_Df(idf2,
                                                              tem_freq,
@@ -451,26 +453,26 @@ def compare_ppt_to_humidity_stns(netatmo_ppt_df_file,
                                                              method='max')
 
                     idx_cmn = df_resampled1.index.intersection(
-                        df_resampled2_mean.index)
+                        df_resampled2_max.index)
 #
                     df_common1 = df_resampled1.loc[idx_cmn]
-                    df_common2_mean = df_resampled2_mean.loc[idx_cmn]
+#                     df_common2_mean = df_resampled2_mean.loc[idx_cmn]
 
-                    df_common2_min = df_resampled2_min.loc[idx_cmn]
+#                     df_common2_min = df_resampled2_min.loc[idx_cmn]
                     df_common2_max = df_resampled2_max.loc[idx_cmn]
 #                     df_common1, df_common2 = resample_intersect_2_dfs(
 #                         idf1, idf2, tem_freq)
                     if (df_common1.values.shape[0] > 0 and
-                            df_common2_mean.values.shape[0] > 0):
+                            df_common2_max.values.shape[0] > 0):
                         try:
                             pass
-#                             plt_bar_plot_ppt_hum_stns(ppt_stn_id,
-#                                                       stn_2_id,
-#                                                       min_dist,
-#                                                       df_common1,
-#                                                       df_common2_mean,
-#                                                       tem_freq,
-#                                                       out_save_dir)
+                            plt_bar_plot_ppt_hum_stns(ppt_stn_id,
+                                                      stn_2_id,
+                                                      min_dist,
+                                                      df_common1,
+                                                      df_common2_max,
+                                                      tem_freq,
+                                                      out_save_dir)
 #
 #                             plt_bar_plot_ppt_mean_min_max_hum_stns(
 #                                 ppt_stn_id,
@@ -483,14 +485,14 @@ def compare_ppt_to_humidity_stns(netatmo_ppt_df_file,
 #                                 tem_freq,
 #                                 out_save_dir)
 #
-#                             plt_scatter_plot_ppt_hum(ppt_stn_id,
-#                                                      stn_2_id,
-#                                                      min_dist,
-#                                                      df_common1,
-#                                                      df_common2_mean,
-#                                                      0,
-#                                                      tem_freq,
-#                                                      out_save_dir)
+                            plt_scatter_plot_ppt_hum(ppt_stn_id,
+                                                     stn_2_id,
+                                                     min_dist,
+                                                     df_common1,
+                                                     df_common2_max,
+                                                     0,
+                                                     tem_freq,
+                                                     out_save_dir)
 
                         except Exception as msg:
                             print('error while plotting', msg, tem_freq)

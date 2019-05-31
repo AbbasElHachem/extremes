@@ -152,23 +152,36 @@ def construct_netatmo_dwd_daily_dfs(netatmo_ppt_df_file,
                                     ppt_disagg = 0
                                 else:
                                     ppt_disagg = (
-                                        val / sum_daily_netatmo) * sum_daily_dwd
+                                        val / sum_daily_dwd) * sum_daily_netatmo
 
                                 print('disaggregated ppt is', ppt_disagg)
                                 df_disaggregated.loc[idx] = ppt_disagg
                             else:
                                 df_disaggregated.loc[idx] = np.nan
                                 print('index not in daily values ppt is nan')
-                            break
-                    plt.ioff()
-                    plt.figure()
-                    plt.plot(df_disaggregated.index,
-                             df_disaggregated.values, c='r', alpha=0.25)
-                    plt.plot(df_dwd_hourly.index,
-                             df_dwd_hourly.values, c='b', alpha=0.25)
-                    plt.scatter(df_disaggregated.values,
-                                df_dwd_hourly.values, alpha=0.25)
-                    plt.show()
+
+#                             break
+                    df_combined = pd.DataFrame(
+                        index=df_dwd_hourly.index,
+                        data=df_dwd_hourly.values,
+                        columns=['DWD original'])
+                    df_combined['DWD disaggregated'] = df_disaggregated.values
+                    df_combined['Netatmo original'] = df_netatmo_hourly.values
+                    df_combined.to_csv(
+                        os.path.join(
+                            out_save_dir_orig,
+                            'combined_orig_disaggregated_DWD_%s_Netatmo_%s_hourly_data.csv'
+                            % (stn_id, stn_2_id)),
+                        sep=';', float_format='%.2f')
+#                     plt.ioff()
+#                     plt.figure()
+#                     plt.plot(df_disaggregated.index,
+#                              df_disaggregated.values, c='r', alpha=0.25)
+#                     plt.plot(df_dwd_hourly.index,
+#                              df_dwd_hourly.values, c='b', alpha=0.25)
+#                     plt.scatter(df_disaggregated.values,
+#                                 df_dwd_hourly.values, alpha=0.25)
+#                     plt.show()
                 else:
                     print('empty df')
                     continue
