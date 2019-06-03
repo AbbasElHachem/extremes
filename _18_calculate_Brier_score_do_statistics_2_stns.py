@@ -34,13 +34,23 @@ import seaborn as sns
 from scipy.stats import spearmanr as spr
 from scipy.stats import pearsonr as pears
 from dateutil import parser, rrule
-
+from matplotlib import rc
+from matplotlib import rcParams
+from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 
 from _00_additional_functions import (resample_intersect_2_dfs, resampleDf,
                                       calculate_probab_ppt_below_thr)
 
 
 from b_get_data import HDF5
+
+plt.ioff()
+
+rc('font', size=13)
+rc('font', family='serif')
+rc('axes', labelsize=13)
+rcParams['axes.labelpad'] = 13
+
 #==============================================================================
 #
 #==============================================================================
@@ -75,12 +85,14 @@ if not os.path.exists(out_save_dir_orig):
     os.mkdir(out_save_dir_orig)
 
 
-max_ppt_thr = 100.
+max_ppt_thr = 80.
 ppt_thrs = [0.5, 1, 2, 5]
-aggregation_frequencies = ['60min', '90min',
+aggregation_frequencies = ['60min',
                            '120min', '180min', '240min',  '360min',
                            '480min', '720min', '1440min']
 
+colors_list = ['r', 'b', 'g', 'k', 'orange']
+markers_list = ['*', '+', 'o', 'd', '1']
 #==============================================================================
 #
 #==============================================================================
@@ -92,6 +104,14 @@ def calculate_brier_score(stn_1_id,  # id of first station
                           df_2,  # df second station
                           min_ppt_thr  # min ppt thr, above is rain
                           ):
+    '''
+    if rain event took place then associate value of 1
+    else if measured value below threshold associate value of 0
+    do it for the two data frames (2 stations one observed other 'simulated')
+    calculate the Brier score add the result to dataframe
+
+    BS = 1/N * sum(i to N) (simulated(i)-observed(i))^2
+    '''
     if not isinstance(df_1, pd.DataFrame):
         df_1 = pd.DataFrame(data=df_1.values,
                             index=df_1.index,
@@ -123,12 +143,68 @@ def calculate_brier_score(stn_1_id,  # id of first station
 #==============================================================================
 
 
-def calculate_brier_score_2_stns_per_temp_freq(netatmo_ppt_df_file,
-                                               path_to_ppt_hdf_data,
-                                               distance_matrix_df_file,
-                                               aggregation_frequencies_list,
-                                               ppt_thrs_list,
-                                               out_dir):
+def plot_2_stns_statisitcs_with_time_aggregations(stn1_id,
+                                                  stn2_id,
+                                                  seperate_distance,
+                                                  df_statistics, ppt_thr,
+                                                  out_dir):
+    plt.ioff()
+    fig = plt.figure(figsize=(16, 16), dpi=200)
+    ax = fig.add_subplot(111)
+#     ax.set_aspect(1)
+
+    x_vals = df_statistics.index
+
+    for i, col in enumerate(df_statistics.columns):
+        y_vals = df_statistics.loc[:, col].values
+
+        ax.plot(x_vals,
+                y_vals,
+                c=colors_list[i],
+                marker=markers_list[i],
+                # linestyle='--',
+                linewidth=2,
+                alpha=0.5,
+                markersize=3,
+                label=str(col))
+
+        # set plot limit
+
+#     ax.set_ylabel('')
+#     ax.set_xlabel('')
+
+    ax.set_title("Ppt thr is: %0.1fmm; Stn: %s vs Stn: %s; \n Distance: %0.1f m; "
+                 % (ppt_thr, stn1_id, stn2_id,
+                     seperate_distance))
+    ax.legend(loc=0)
+    ax.grid(color='k', linestyle='--', linewidth=0.1, alpha=0.5)
+    plt.yticks([0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 1])
+    plt.tight_layout()
+    plt.savefig(os.path.join(out_dir,
+                             'statistics_ppt_thr_%0.0f_stn_%s_vs_stn_%s_.png'
+                             % (ppt_thr, stn1_id, stn2_id)))
+    plt.clf()
+    plt.close('all')
+    print('Done saving figure Scatter')
+    pass
+#==============================================================================
+#
+#==============================================================================
+
+
+def calculate_statistics_2_stns_per_temp_freq(netatmo_ppt_df_file,  # path to combined netatmo ppt df
+                                              path_to_ppt_hdf_data,  # path to combined dwd ppt df
+                                              distance_matrix_df_file,  # path to distances netatmo-dwd stns
+                                              aggregation_frequencies_list,  # list of temporal aggregations
+                                              ppt_thrs_list,  # list of precipitation thresholds
+                                              out_dir  # path to out save directory
+                                              ):
+    '''
+    calcualte for every temporal frequency (aggregation) the BS value,
+    the spearman correlation, pearson correlation and p0 for every
+    station and it's closest neighbout, add the result to a dataframe
+    and plot it    
+    '''
     HDF52 = HDF5(infile=path_to_ppt_hdf_data)
 
     in_netatmo_stns_df = pd.read_csv(netatmo_ppt_df_file,
@@ -180,7 +256,7 @@ def calculate_brier_score_2_stns_per_temp_freq(netatmo_ppt_df_file,
 #                         df1 = idf1.to_xarray()
 #                         df1.resample(index=temp_freq).sum('index')
                         print(df_netatmo.values.shape[0])
-                        if len(df_netatmo.values) > 0:  # FIX ME
+                        if len(df_netatmo.values) > 0:
                             #                             raise Exception
                             print('getting statistics')
                             brier_score = calculate_brier_score(stn_1_id=stn_id,
@@ -193,6 +269,7 @@ def calculate_brier_score_2_stns_per_temp_freq(netatmo_ppt_df_file,
                                          df_netatmo.values.ravel())[0]
                             rho = spr(df_dwd.values.ravel(),
                                       df_netatmo.values.ravel())[0]
+                            # TODO: FIX ME
                             p01 = calculate_probab_ppt_below_thr(
                                 df_netatmo.values.ravel(), ppt_thr)
                             p02 = calculate_probab_ppt_below_thr(
@@ -228,13 +305,15 @@ def calculate_brier_score_2_stns_per_temp_freq(netatmo_ppt_df_file,
                                          r'statistics_netatmo_%s_dwd_%s_ppt_thr_%0.1f_.csv'
                                          % (stn_id, stn_2_id, ppt_thr)),
                             sep=';')
-                        plt.ioff()
-                        df_statistics_with_agg.plot()
-                        plt.savefig(
-                            os.path.join(out_dir,
-                                         r'statistics_netatmo_%s_dwd_%s_ppt_thr_%0.1f_.png'
-                                         % (stn_id, stn_2_id, ppt_thr)))
-#                     break
+#                         plot function here
+                        plot_2_stns_statisitcs_with_time_aggregations(
+                            stn_id,
+                            stn_2_id,
+                            min_dist,
+                            df_statistics_with_agg,
+                            ppt_thr,
+                            out_dir)
+                    break
         except Exception as msg:
             print(msg)
 
@@ -245,12 +324,12 @@ if __name__ == '__main__':
     print('**** Started on %s ****\n' % time.asctime())
     START = timeit.default_timer()  # to get the runtime of the program
 
-    calculate_brier_score_2_stns_per_temp_freq(path_to_ppt_netatmo_data,
-                                               path_to_ppt_hdf_data,
-                                               distance_matrix_df_file,
-                                               aggregation_frequencies,
-                                               ppt_thrs,
-                                               out_save_dir_orig)
+    calculate_statistics_2_stns_per_temp_freq(path_to_ppt_netatmo_data,
+                                              path_to_ppt_hdf_data,
+                                              distance_matrix_df_file,
+                                              aggregation_frequencies,
+                                              ppt_thrs,
+                                              out_save_dir_orig)
 
     STOP = timeit.default_timer()  # Ending time
     print(('\n****Done with everything on %s.\nTotal run time was'

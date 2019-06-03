@@ -275,19 +275,59 @@ def select_df_within_period(df, start, end):
 
 
 def resample_intersect_2_dfs(df1, df2, temp_freq):
-    ''' a fct to resample and intersect two dataframes'''
+    ''' 
+    a fct to resample and intersect two dataframes
+    also to handle Nans is Nans are found after the stations 
+    have been intersected, nans are removed and reintersection is done
+    '''
     df_resample1 = resampleDf(data_frame=df1, temp_freq=temp_freq)
     df_resample2 = resampleDf(data_frame=df2, temp_freq=temp_freq)
 
     idx_common = df_resample1.index.intersection(df_resample2.index)
 
-    try:
-        df_common1 = df_resample1.loc[idx_common, :]
-        df_common2 = df_resample2.loc[idx_common, :]
-    except Exception:
-        df_common1 = df_resample1.loc[idx_common]
-        df_common2 = df_resample2.loc[idx_common]
-    return df_common1, df_common2
+    if idx_common.shape[0] > 0:
+        print('common index is found, interescting dataframes')
+        try:
+            df_common1 = df_resample1.loc[idx_common, :]
+            df_common2 = df_resample2.loc[idx_common, :]
+        except Exception:
+
+            df_common1 = df_resample1.loc[idx_common]
+            df_common2 = df_resample2.loc[idx_common]
+#             print(df_common2)
+        print('After resampling sum of NaN values is \n')
+        print('first station has ', df_common1.isna().sum(), 'NaN values')
+        print('second station has ', df_common2.isna().sum(), 'NaN values')
+
+        if df_common1.isna().sum() != 0:
+            if df_common1.isna().sum()[0] > 0:
+                ix_df1_nans = df_common1.index[np.where(df_common1.isna())[0]]
+                print('first station has Nans on ', ix_df1_nans)
+                df_common1.dropna(inplace=True)
+
+            if df_common2.isna().sum()[0] > 0:
+                ix_df2_nans = df_common2.index[np.where(df_common2.isna())[0]]
+                print('second station has Nans on ', ix_df2_nans)
+                df_common2.dropna(inplace=True)
+        else:
+            pass
+
+        new_idx_common = df_common1.index.intersection(df_common2.index)
+        if new_idx_common.shape[0] != idx_common.shape[0]:
+            print('Nan dropped fom Index, dfs have been resampled')
+
+        try:
+            df_common1 = df_common1.loc[new_idx_common, :]
+            df_common2 = df_common2.loc[new_idx_common, :]
+        except Exception:
+
+            df_common1 = df_common1.loc[idx_common]
+            df_common2 = df_common2.loc[idx_common]
+
+        return df_common1, df_common2
+    else:
+        print('no common index found, returning empty dataframes')
+        return pd.DataFrame(), pd.DataFrame()
 
 #==============================================================================
 #
@@ -417,9 +457,14 @@ def constrcut_contingency_table(stn1_id, stn2_id,
     assert df_1.shape[0] == df_2.shape[0], 'values should have same shape'
 
     df_combined = dataframe1.copy()
-    df_combined.loc[:, stn2_id] = df_2
 
-    print(df_combined)
+    if stn1_id != stn2_id:
+        df_combined.loc[:, stn2_id] = df_2
+    else:
+        stn2_id = stn2_id + '_'
+        df_combined.loc[:, stn2_id] = df_2
+#     df_combined.fillna(value=0, inplace=True)
+#     print(df_combined)
 
     df_both_below_thr = ((df_combined[stn1_id].values <= thr1) & (
         df_combined[stn2_id].values <= thr2)).sum() / df_1.shape[0]

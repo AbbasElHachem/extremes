@@ -33,11 +33,14 @@ __email__ = "abbas.el-hachem@iws.uni-stuttgart.de"
 import os
 import timeit
 import time
+
+import shutil
+
 import numpy as np
 import pandas as pd
 
 
-from _00_additional_functions import (resample_intersect_2_dfs)
+from _00_additional_functions import (resampleDf, resample_intersect_2_dfs)
 
 from _09_aggregate_plot_compare_2_DWD_stns import (plt_bar_plot_2_stns,
                                                    plt_scatter_plot_2_stns,
@@ -140,6 +143,7 @@ def compare_cdf_two_stns(netatmo_ppt_df_file, path_to_ppt_hdf_data,
                 if (idf1.values.shape[0] > 1000) and (idf2.values.shape[0] > 1000):
                     out_save_dir = os.path.join(out_save_dir_orig,
                                                 '%s_%s' % (stn_id, stn_2_id))
+
                     if not os.path.exists(out_save_dir):
                         os.mkdir(out_save_dir)
 
@@ -205,7 +209,7 @@ def compare_cdf_two_stns(netatmo_ppt_df_file, path_to_ppt_hdf_data,
                                 print('error while plotting', msg, tem_freq)
                                 continue
                         else:
-                            print('empty df')
+                            print('empty df, moving to another station')
                             break
                     plot_p0_as_a_sequence_two_stns(stn_id,
                                                    stn_2_id,
@@ -224,10 +228,12 @@ def compare_cdf_two_stns(netatmo_ppt_df_file, path_to_ppt_hdf_data,
                                                                    idf1,
                                                                    aggregation_frequencies,
                                                                    out_save_dir)
+
                 else:
                     print('Station is near but dont have enough data')
+                    shutil.rmtree(out_save_dir, ignore_errors=True)
             else:
-                print('station is not near looking for another station')
+                print('DWD station is not near looking for another station')
                 continue
 
         except Exception as msg:

@@ -71,12 +71,12 @@ assert os.path.exists(path_to_hum_netatmo_data), 'wrong NETATMO Hum file'
 distance_matrix_df_file_ppt_hum = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\distance_mtx_in_m_NetAtmo_ppt_Netatmo_hum.csv"
 assert os.path.exists(distance_matrix_df_file_ppt_hum), 'wrong distance df'
 
-out_save_dir = (
+out_save_dir_orig = (
     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\plots_NetAtmo_ppt_NetAtmo_humidity')
 
 
-if not os.path.exists(out_save_dir):
-    os.mkdir(out_save_dir)
+if not os.path.exists(out_save_dir_orig):
+    os.mkdir(out_save_dir_orig)
 
 x_col_name = ' lon'
 y_col_name = ' lat'
@@ -86,8 +86,8 @@ y_col_name = ' lat'
 ppt_thr = .5
 max_ppt_thr = 100.
 
-ppt_thrs_list = [0.5, 1, 2, 5]
-hum_thrs_list = [80, 85, 90, 95]
+ppt_thrs_list = [0.5, 1, 2, 0.5, 5]
+hum_thrs_list = [80, 85, 90, 95, 95]
 
 # till 1 day '5min', '10min', '15min', '30min',
 aggregation_frequencies = ['60min', '90min', '120min', '180min', '240min',
@@ -113,7 +113,7 @@ def plt_bar_plot_ppt_hum_stns(stn1_id, stn2_id, seperate_distance,
             alpha=0.25)  # , label=stn1_id)
 
     ax2 = ax.twinx()
-    ax2.plot(time_arr, df2.values, c='darkred', marker='+', markersize=2,
+    ax2.plot(time_arr, df2.values, c='red', marker='+', markersize=2,
              alpha=0.25)  # , label=stn2_id)
 
     xfmt = md.DateFormatter('%Y-%m-%d')
@@ -130,10 +130,11 @@ def plt_bar_plot_ppt_hum_stns(stn1_id, stn2_id, seperate_distance,
 #     ax.set_xlabel('Time')
     ax.set_ylabel('Stn  %s   Precipitation  in mm/%s ' % (stn1_id, temp_freq))
     ax.tick_params('y', colors='darkblue')
+
     ax2.set_ylim(0.0, 100.01)
     ax2.set_ylabel('Stn %s   Humidity  in percentage %s'
                    % (stn2_id, temp_freq), rotation=-90)
-    ax2.tick_params('y', colors='darkred')
+    ax2.tick_params('y', colors='red')
 
     ax.set_title("Stn: %s vs Stn: %s;\n Distance: %0.1f m; "
                  "Time Freq: %s; " % (stn1_id, stn2_id,
@@ -145,7 +146,7 @@ def plt_bar_plot_ppt_hum_stns(stn1_id, stn2_id, seperate_distance,
 #     ax.legend(loc='best')
 #     ax2.legend(loc='best')
     plt.tight_layout()
-    plt.savefig(os.path.join(out_dir, '%s_mean_lineplot_stn_%s_vs_stn_%s_.png'
+    plt.savefig(os.path.join(out_dir, '%s_max_lineplot_stn_%s_vs_stn_%s_.png'
                              % (temp_freq, stn1_id, stn2_id)))
     plt.clf()
     plt.close('all')
@@ -309,8 +310,8 @@ def plot_contingency_tables_as_a_sequence_ppt_hum_stns(stn_id,
 
     #colors = ['r', 'b', 'g', 'orange', 'k']
 
-    if (df_stn1.values.shape[0] > 10 and
-            df_stn2.values.shape[0] > 10):
+    if (df_stn1.values.shape[0] > 0 and
+            df_stn2.values.shape[0] > 0):
 
         for _, (ppt_thr, hum_thr) in enumerate(zip(ppt_thrs_list,
                                                    hum_thrs_list)):
@@ -322,43 +323,54 @@ def plot_contingency_tables_as_a_sequence_ppt_hum_stns(stn_id,
                 ax = fig.add_subplot(111)
                 ax.set_aspect(1)
                 print('Time freq is', temp_freq)
-                df_resampled1 = resampleDf(df_stn1, temp_freq)
-#                 df_resampled2_mean = resample_Humidity_Df(df_stn2,
+                df_resampled_ppt = resampleDf(df_stn1, temp_freq)
+
+#                 df_resampled2_hum_mean = resample_Humidity_Df(df_stn2,
 #                                                           temp_freq,
 #                                                           method='mean')
 
-#                 df_resampled2_min = resample_Humidity_Df(df_stn2,
+#                 df_resampled2_hum_min = resample_Humidity_Df(df_stn2,
 #                                                              temp_freq,
 #                                                              method='min')
 
-                df_resampled2_max = resample_Humidity_Df(df_stn2,
-                                                         temp_freq,
-                                                         method='max')
+                df_resampled2_hum_max = resample_Humidity_Df(df_stn2,
+                                                             temp_freq,
+                                                             method='max')
 
-                idx_cmn = df_resampled1.index.intersection(
-                    df_resampled2_max.index)
-#
-                df_common1 = df_resampled1.loc[idx_cmn]
-#                 df_common2_mean = df_resampled2_mean.loc[idx_cmn]
+                idx_cmn = df_resampled_ppt.index.intersection(
+                    df_resampled2_hum_max.index)
 
-#                     df_common2_min = df_resampled2_min.loc[idx_cmn]
-                df_common2_max = df_resampled2_max.loc[idx_cmn]
+                df_ppt_common1 = df_resampled_ppt.loc[idx_cmn]
 
-                if (df_common1.values.shape[0] > 10 and
-                        df_common2_max.values.shape[0] > 10):
+#                 df_common2_mean = df_resampled2_hum_mean.loc[idx_cmn]
+#                     df_common2_min = df_resampled2_hum_min.loc[idx_cmn]
+                df_hum_common2_max = df_resampled2_hum_max.loc[idx_cmn]
+
+#                 df_ppt_common1.fillna(0, inplace=True)
+#                 df_hum_common2_max.fillna(0, inplace=True)
+
+                if (df_ppt_common1.values.shape[0] > 10 and
+                        df_hum_common2_max.values.shape[0] > 10):
                     print('getting percentages for contingency table')
-                    df_common1_new = pd.DataFrame(data=df_common1.values,
-                                                  index=df_common1.index)
-                    df_common2_mean_new = pd.DataFrame(data=df_common2_max.values,
-                                                       index=df_common2_max.index)
+
+                    df_ppt_common1_new = pd.DataFrame(
+                        data=df_ppt_common1.values,
+                        index=df_ppt_common1.index,
+                        columns=[stn_id])
+
+                    df_hum_common2_max_new = pd.DataFrame(
+                        data=df_hum_common2_max.values,
+                        index=df_hum_common2_max.index,
+                        columns=[stn_2_id])
+
                     try:
                         (df_both_below_thr,
                          df_first_abv_second_below_thr,
                          df_first_below_second_abv_thr,
                          df_both_abv_thr) = constrcut_contingency_table(stn_id,
                                                                         stn_2_id,
-                                                                        df_common1_new,
-                                                                        df_common2_mean_new,
+                                                                        df_ppt_common1_new,
+                                                                        df_hum_common2_max_new,
                                                                         ppt_thr,
                                                                         hum_thr)
 
@@ -366,13 +378,15 @@ def plot_contingency_tables_as_a_sequence_ppt_hum_stns(stn_id,
                                               df_first_abv_second_below_thr],
                                              [df_first_below_second_abv_thr,
                                               df_both_abv_thr]])
-
+                        print(conf_arr)
                     except Exception as msg:
-                        print('error while calculating P0', msg, temp_freq)
+                        print('error while calculating contingency_table',
+                              msg, temp_freq)
                         continue
                 else:
                     print('empty df values')
-                    continue
+                    break
+
                 if conf_arr.shape[0] > 0:
                     print('plotting for Ppt thr, temp frequency is', temp_freq)
 
@@ -385,7 +399,7 @@ def plot_contingency_tables_as_a_sequence_ppt_hum_stns(stn_id,
                                     stn_2_id, min_dist, temp_freq))
                     plt.savefig(
                         os.path.join(out_dir,
-                                     'contingency_table_as_a_sequence_%s_%s_%s_ppt_%0.1f_hum_%0.1f.png'
+                                     'contingency_table_as_a_sequence_%s_%s_%s_ppt_%0.0f_hum_%0.0f.png'
                                      % (stn_id, stn_2_id, temp_freq, ppt_thr, hum_thr)),
                         bbox_inches='tight')
                     plt.close(fig)
@@ -444,9 +458,9 @@ def compare_ppt_to_humidity_stns(netatmo_ppt_df_file,
 #                                                               tem_freq,
 #                                                               method='mean')
 
-                    df_resampled2_min = resample_Humidity_Df(idf2,
-                                                             tem_freq,
-                                                             method='min')
+#                     df_resampled2_min = resample_Humidity_Df(idf2,
+#                                                              tem_freq,
+#                                                              method='min')
 
                     df_resampled2_max = resample_Humidity_Df(idf2,
                                                              tem_freq,
@@ -464,16 +478,23 @@ def compare_ppt_to_humidity_stns(netatmo_ppt_df_file,
 #                         idf1, idf2, tem_freq)
                     if (df_common1.values.shape[0] > 0 and
                             df_common2_max.values.shape[0] > 0):
+
+                        out_save_dir = os.path.join(
+                            out_save_dir_orig,
+                            'ppt_%s_hum_%s' % (ppt_stn_id, stn_2_id))
+
+                        if not os.path.exists(out_save_dir):
+                            os.mkdir(out_save_dir)
                         try:
                             pass
-                            plt_bar_plot_ppt_hum_stns(ppt_stn_id,
-                                                      stn_2_id,
-                                                      min_dist,
-                                                      df_common1,
-                                                      df_common2_max,
-                                                      tem_freq,
-                                                      out_save_dir)
-#
+#                             plt_bar_plot_ppt_hum_stns(ppt_stn_id,
+#                                                       stn_2_id,
+#                                                       min_dist,
+#                                                       df_common1,
+#                                                       df_common2_max,
+#                                                       tem_freq,
+#                                                       out_save_dir)
+
 #                             plt_bar_plot_ppt_mean_min_max_hum_stns(
 #                                 ppt_stn_id,
 #                                 stn_2_id,
@@ -484,15 +505,15 @@ def compare_ppt_to_humidity_stns(netatmo_ppt_df_file,
 #                                 df_common2_max,
 #                                 tem_freq,
 #                                 out_save_dir)
-#
-                            plt_scatter_plot_ppt_hum(ppt_stn_id,
-                                                     stn_2_id,
-                                                     min_dist,
-                                                     df_common1,
-                                                     df_common2_max,
-                                                     0,
-                                                     tem_freq,
-                                                     out_save_dir)
+
+#                             plt_scatter_plot_ppt_hum(ppt_stn_id,
+#                                                      stn_2_id,
+#                                                      min_dist,
+#                                                      df_common1,
+#                                                      df_common2_max,
+#                                                      0,
+#                                                      tem_freq,
+#                                                      out_save_dir)
 
                         except Exception as msg:
                             print('error while plotting', msg, tem_freq)
@@ -501,20 +522,23 @@ def compare_ppt_to_humidity_stns(netatmo_ppt_df_file,
                     else:
                         print('empty df')
                         continue
-
-                plot_contingency_tables_as_a_sequence_ppt_hum_stns(ppt_stn_id,
-                                                                   stn_2_id,
-                                                                   min_dist,
-                                                                   ppt_thrs_list,
-                                                                   hum_thrs_list,
-                                                                   idf1,
-                                                                   idf2,
-                                                                   aggregation_frequencies,
-                                                                   out_save_dir)
+                if os.path.exists(out_save_dir):
+                    print('out directory is ', out_save_dir)
+                    plot_contingency_tables_as_a_sequence_ppt_hum_stns(ppt_stn_id,
+                                                                       stn_2_id,
+                                                                       min_dist,
+                                                                       ppt_thrs_list,
+                                                                       hum_thrs_list,
+                                                                       idf1,
+                                                                       idf2,
+                                                                       aggregation_frequencies,
+                                                                       out_save_dir)
+                else:
+                    continue
         except Exception as msg:
             print(msg)
 
-        break
+#         break
 
 
 if __name__ == '__main__':
