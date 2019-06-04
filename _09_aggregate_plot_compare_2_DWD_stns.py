@@ -41,7 +41,6 @@ from matplotlib import rcParams
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 from collections import OrderedDict
 from _00_additional_functions import (resample_intersect_2_dfs,
-                                      resampleDf,
                                       get_cdf_part_abv_thr,
                                       calculate_probab_ppt_below_thr,
                                       constrcut_contingency_table)
@@ -158,7 +157,7 @@ def plt_bar_plot_2_stns(stn1_id, stn2_id, seperate_distance,
 
     xfmt = md.DateFormatter('%Y-%m-%d')
 
-    ax.xaxis.set_major_locator(MultipleLocator(30))
+    ax.xaxis.set_major_locator(MultipleLocator(35))
 
     ax.yaxis.set_major_locator(MultipleLocator(2))
 
@@ -521,6 +520,22 @@ def plot_p0_as_a_sequence_two_stns(stn_id,
 
     if (df_stn1.values.shape[0] > 10 and
             df_stn2.values.shape[0] > 10):
+        # TODO: check is it works
+        ppt_thr = ppt_thrs_list[0]
+        print('Testing for Ppt Threshold of', ppt_thr)
+
+        for temp_freq in aggregation_frequencies_lst:
+            print('Time freq is', temp_freq)
+            df_common1, df_common2 = resample_intersect_2_dfs(df_stn1,
+                                                              df_stn2,
+                                                              temp_freq)
+            if (df_common1.values.shape[0] > 10 and
+                    df_common2.values.shape[0] > 10):
+                print(True)
+                continue
+            else:
+                return
+
         for i, ppt_thr in enumerate(ppt_thrs_list):
             print('Ppt Threshold is', ppt_thr)
 
@@ -584,6 +599,7 @@ def plot_p0_as_a_sequence_two_stns(stn_id,
                                      % (stn_id, stn_2_id)))
         else:
             print('empty df not plotting P0')
+
         print('Done plotting P0 as a sequence')
     return df_p01_stn1, df_p01_stn2
 
@@ -675,7 +691,7 @@ def plot_contingency_tables_as_a_sequence_two_stns(stn_id,
 #==============================================================================
 def compare_two_dwd_stns(stns_ids):
 
-    for iid in stns_ids:
+    for iid in stns_ids[105:]:
         print('First Stn Id is', iid)
         try:
             idf1 = HDF52.get_pandas_dataframe(ids=[iid])
@@ -688,26 +704,28 @@ def compare_two_dwd_stns(stns_ids):
             idf2 = HDF52.get_pandas_dataframe(ids=stn_near)
             print('Second Stn Id is', stn_near)
 
-            for tem_freq in aggregation_frequencies:
-                print('Aggregation is: ', tem_freq)
-                df_common1, df_common2 = resample_intersect_2_dfs(idf1,
-                                                                  idf2,
-                                                                  tem_freq)
-                if (df_common1.values.shape[0] > 1000 and
-                        df_common2.values.shape[0] > 1000):
-                    print('enough data are available for plotting')
-                    out_save_dir = os.path.join(out_save_dir_orig,
-                                                '%s_%s' % (iid, stn_near))
+            out_save_dir = os.path.join(out_save_dir_orig,
+                                        '%s_%s' % (iid, stn_near))
 
-                    if not os.path.exists(out_save_dir):
-                        os.mkdir(out_save_dir)
-                    try:
-                        #======================================================
+            if not os.path.exists(out_save_dir):
+                os.mkdir(out_save_dir)
 
-                        plt_bar_plot_2_stns(iid, stn_near, distance_near,
-                                            df_common1, df_common2, tem_freq,
-                                            out_save_dir)
-
+#             for tem_freq in aggregation_frequencies:
+#                 print('Aggregation is: ', tem_freq)
+#                 df_common1, df_common2 = resample_intersect_2_dfs(idf1,
+#                                                                   idf2,
+#                                                                   tem_freq)
+#                 if (df_common1.values.shape[0] > 1000 and
+#                         df_common2.values.shape[0] > 1000):
+#                     print('enough data are available for plotting')
+#
+#                     try:
+#                         #====================================================
+#                         pass
+#                         plt_bar_plot_2_stns(iid, stn_near, distance_near,
+#                                             df_common1, df_common2, tem_freq,
+#                                             out_save_dir)
+#
 #                         plt_scatter_plot_2_stns(iid, stn_near, distance_near,
 #                                                 df_common1, df_common2, ppt_thr,
 #                                                 tem_freq,
@@ -731,24 +749,25 @@ def compare_two_dwd_stns(stns_ids):
 #                                               df_common1, df_common2,
 #                                               tem_freq,
 #                                               out_save_dir)
-                    except Exception as msg:
-                        print('error while plotting', msg, tem_freq)
-                        continue
-
-                else:
-                    print('Station is near but dont have enough data')
-#                     shutil.rmtree(out_save_dir, ignore_errors=True)
-                    break
-
-#             plot_p0_as_a_sequence_two_stns(iid,
-#                                            stn_near,
-#                                            distance_near,
-#                                            ppt_thrs_list,
-#                                            idf1,
-#                                            idf2,
-#                                            aggregation_frequencies,
-#                                            out_save_dir)
+#                     except Exception as msg:
+#                         print('error while plotting', msg, tem_freq)
+#                         continue
 #
+#                 else:
+#                     print('Station is near but dont have enough data')
+#                     shutil.rmtree(out_save_dir, ignore_errors=True)
+#                     break
+
+            # TODO CHECK again with out dir
+            plot_p0_as_a_sequence_two_stns(iid,
+                                           stn_near,
+                                           distance_near,
+                                           ppt_thrs_list,
+                                           idf1,
+                                           idf2,
+                                           aggregation_frequencies,
+                                           out_save_dir)
+
 #             plot_contingency_tables_as_a_sequence_two_stns(iid,
 #                                                            stn_near,
 #                                                            distance_near,
@@ -757,6 +776,9 @@ def compare_two_dwd_stns(stns_ids):
 #                                                            idf2,
 #                                                            aggregation_frequencies,
 #                                                            out_save_dir)
+            if not os.listdir(out_save_dir):
+                os.rmdir(out_save_dir)
+
         except Exception as msg:
             print(msg)
 

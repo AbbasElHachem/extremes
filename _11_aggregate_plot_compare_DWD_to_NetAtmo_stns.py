@@ -36,11 +36,10 @@ import time
 
 import shutil
 
-import numpy as np
 import pandas as pd
 
 
-from _00_additional_functions import (resampleDf, resample_intersect_2_dfs)
+from _00_additional_functions import (resample_intersect_2_dfs)
 
 from _09_aggregate_plot_compare_2_DWD_stns import (plt_bar_plot_2_stns,
                                                    plt_scatter_plot_2_stns,

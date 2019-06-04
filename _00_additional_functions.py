@@ -302,14 +302,14 @@ def resample_intersect_2_dfs(df1, df2, temp_freq):
                                   data=df_common1.values)
         df_common2 = pd.DataFrame(index=df_common2.index,
                                   data=df_common2.values)
-        print('After resampling sum of NaN values is \n')
+        print('After resampling sum of NaN values is')
         print('first station has ', df_common1.isna().sum(), 'NaN values')
         print('second station has ', df_common2.isna().sum(), 'NaN values')
 
         try:
             if df_common1.isna().sum()[0] > 0:
                 ix_df1_nans = df_common1.index[np.where(df_common1.isna())[0]]
-                print('first station has Nans on ', ix_df1_nans)
+                print('first station has Nans on ', len(ix_df1_nans), ' dates')
                 df_common1.dropna(inplace=True)
         except IndexError:
             df_common1 = df_common1
@@ -317,7 +317,7 @@ def resample_intersect_2_dfs(df1, df2, temp_freq):
         try:
             if df_common2.isna().sum()[0] > 0:
                 ix_df2_nans = df_common2.index[np.where(df_common2.isna())[0]]
-                print('second station has Nans on ', ix_df2_nans)
+                print('second station has Nans on', len(ix_df2_nans), ' dates')
                 df_common2.dropna(inplace=True)
         except IndexError:
             df_common2 = df_common2
@@ -468,15 +468,15 @@ def constrcut_contingency_table(stn1_id, stn2_id,
 
     assert df_1.shape[0] == df_2.shape[0], 'values should have same shape'
 
-    df_combined = dataframe1.copy()
+    df_combined = pd.DataFrame(index=dataframe1.index,
+                               data=dataframe1.values,
+                               columns=[stn1_id])
 
     if stn1_id != stn2_id:
         df_combined.loc[:, stn2_id] = df_2
     else:
         stn2_id = stn2_id + '_'
         df_combined.loc[:, stn2_id] = df_2
-#     df_combined.fillna(value=0, inplace=True)
-#     print(df_combined)
 
     df_both_below_thr = ((df_combined[stn1_id].values <= thr1) & (
         df_combined[stn2_id].values <= thr2)).sum() / df_1.shape[0]
