@@ -27,16 +27,14 @@ import timeit
 import time
 import numpy as np
 import pandas as pd
-import datetime
+
 import matplotlib.pyplot as plt
-import seaborn as sns
+
 
 from scipy.stats import spearmanr as spr
 from scipy.stats import pearsonr as pears
-from dateutil import parser, rrule
 from matplotlib import rc
 from matplotlib import rcParams
-from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 
 from _00_additional_functions import (resample_intersect_2_dfs, resampleDf,
                                       calculate_probab_ppt_below_thr)
@@ -86,12 +84,12 @@ if not os.path.exists(out_save_dir_orig):
 
 
 max_ppt_thr = 80.
-ppt_thrs = [0.5, 1, 2, 5]
+ppt_thrs = [0, 0.5, 2, 5]
 aggregation_frequencies = ['60min',
                            '120min', '180min', '240min',  '360min',
                            '480min', '720min', '1440min']
 
-colors_list = ['r', 'b', 'g', 'k', 'orange']
+colors_list = ['k', 'b', 'g', 'r', 'orange']
 markers_list = ['*', '+', 'o', 'd', '1']
 #==============================================================================
 #
@@ -112,15 +110,15 @@ def calculate_brier_score(stn_1_id,  # id of first station
 
     BS = 1/N * sum(i to N) (simulated(i)-observed(i))^2
     '''
-    if not isinstance(df_1, pd.DataFrame):
-        df_1 = pd.DataFrame(data=df_1.values,
-                            index=df_1.index,
-                            columns=[stn_1_id])
+#     if not isinstance(df_1, pd.DataFrame):
+    df_1 = pd.DataFrame(data=df_1.values,
+                        index=df_1.index,
+                        columns=[stn_1_id])
 
-    if not isinstance(df_2, pd.DataFrame):
-        df_2 = pd.DataFrame(data=df_2.values,
-                            index=df_2.index,
-                            columns=[stn_2_id])
+#     if not isinstance(df_2, pd.DataFrame):
+    df_2 = pd.DataFrame(data=df_2.values,
+                        index=df_2.index,
+                        columns=[stn_2_id])
 
     df_brier = pd.DataFrame(index=df_1.index,
                             data=np.zeros(shape=(df_1.shape[0], 2)),
@@ -151,7 +149,6 @@ def plot_2_stns_statisitcs_with_time_aggregations(stn1_id,
     plt.ioff()
     fig = plt.figure(figsize=(16, 16), dpi=200)
     ax = fig.add_subplot(111)
-#     ax.set_aspect(1)
 
     x_vals = df_statistics.index
 
@@ -168,12 +165,8 @@ def plot_2_stns_statisitcs_with_time_aggregations(stn1_id,
                 markersize=3,
                 label=str(col))
 
-        # set plot limit
-
-#     ax.set_ylabel('')
-#     ax.set_xlabel('')
-
-    ax.set_title("Ppt thr is: %0.1fmm; Stn: %s vs Stn: %s; \n Distance: %0.1f m; "
+    ax.set_title("Ppt thr is: %0.1fmm; "
+                 "Stn: %s vs Stn: %s; \n Distance: %0.1f m; "
                  % (ppt_thr, stn1_id, stn2_id,
                      seperate_distance))
     ax.legend(loc=0)
@@ -186,7 +179,7 @@ def plot_2_stns_statisitcs_with_time_aggregations(stn1_id,
     plt.clf()
     plt.close('all')
     print('Done saving figure Scatter')
-    pass
+    return
 #==============================================================================
 #
 #==============================================================================
@@ -251,10 +244,7 @@ def calculate_statistics_2_stns_per_temp_freq(netatmo_ppt_df_file,  # path to co
                             idf1,
                             idf2,
                             temp_freq)
-#                         df2 = idf2.to_xarray()
-#                         df2.resample(index=temp_freq).sum('index')
-#                         df1 = idf1.to_xarray()
-#                         df1.resample(index=temp_freq).sum('index')
+
                         print(df_netatmo.values.shape[0])
                         if len(df_netatmo.values) > 0:
                             #                             raise Exception
@@ -267,9 +257,10 @@ def calculate_statistics_2_stns_per_temp_freq(netatmo_ppt_df_file,  # path to co
                             # calculate correlations (pearson and spearman)
                             corr = pears(df_dwd.values.ravel(),
                                          df_netatmo.values.ravel())[0]
+
                             rho = spr(df_dwd.values.ravel(),
                                       df_netatmo.values.ravel())[0]
-                            # TODO: FIX ME
+
                             p01 = calculate_probab_ppt_below_thr(
                                 df_netatmo.values.ravel(), ppt_thr)
                             p02 = calculate_probab_ppt_below_thr(
@@ -297,7 +288,6 @@ def calculate_statistics_2_stns_per_temp_freq(netatmo_ppt_df_file,  # path to co
                         else:
                             print('not enough data, moving to next station')
                             break
-#                     print(df_statistics_with_agg.values.shape[0])
 
                     if len(df_statistics_with_agg.values[0]) > 0:
                         df_statistics_with_agg.to_csv(
@@ -313,7 +303,7 @@ def calculate_statistics_2_stns_per_temp_freq(netatmo_ppt_df_file,  # path to co
                             df_statistics_with_agg,
                             ppt_thr,
                             out_dir)
-                    break
+#                     break
         except Exception as msg:
             print(msg)
 

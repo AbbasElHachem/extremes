@@ -32,12 +32,10 @@ from matplotlib import rc
 from matplotlib import rcParams
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 from pandas.plotting import register_matplotlib_converters
-from collections import OrderedDict
+
 
 from _00_additional_functions import (
     resampleDf, resample_Humidity_Df, constrcut_contingency_table)
-
-# from _09_aggregate_plot_compare_2_DWD_stns import plot_contingency_tables_as_a_sequence_two_stns
 
 register_matplotlib_converters()
 

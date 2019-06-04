@@ -194,8 +194,6 @@ def remove_one_elt_lst(elt, lst):
 
 def resampleDf(data_frame,
                temp_freq,
-               temp_shift=0,
-               label_shift=None,
                df_sep_=None,
                out_save_dir=None,
                fillnan=False,
@@ -203,17 +201,19 @@ def resampleDf(data_frame,
     ''' sample DF based on freq and time shift and label shift '''
 
     # df_ = data_frame.copy()
-    df_res = data_frame.resample(temp_freq,
-                                 label='right',
+    df_res = data_frame.resample(rule=temp_freq,
+                                 axis=0,
+                                 label='left',
                                  closed='right',
-                                 loffset=label_shift,
-                                 base=temp_shift).apply(lambda x: x.values.sum())
+                                 convention='end').apply(lambda x: x.values.sum())
 
     if fillnan:
         df_res.fillna(value=0, inplace=True)
     if df_save_name is not None and out_save_dir is not None:
         df_res.to_csv(os.path.join(out_save_dir, df_save_name),
                       sep=df_sep_)
+    if not isinstance(df_res, pd.DataFrame):
+        df_res = pd.DataFrame(index=df_res.index, data=df_res.values)
     return df_res
 
 #==============================================================================
@@ -279,6 +279,9 @@ def resample_intersect_2_dfs(df1, df2, temp_freq):
     a fct to resample and intersect two dataframes
     also to handle Nans is Nans are found after the stations 
     have been intersected, nans are removed and reintersection is done
+
+    Some workaround was done to deal with pandas Series and Dataframes
+    as the Netatmo and DWD stations are different
     '''
     df_resample1 = resampleDf(data_frame=df1, temp_freq=temp_freq)
     df_resample2 = resampleDf(data_frame=df2, temp_freq=temp_freq)
@@ -295,22 +298,32 @@ def resample_intersect_2_dfs(df1, df2, temp_freq):
             df_common1 = df_resample1.loc[idx_common]
             df_common2 = df_resample2.loc[idx_common]
 #             print(df_common2)
+        df_common1 = pd.DataFrame(index=df_common1.index,
+                                  data=df_common1.values)
+        df_common2 = pd.DataFrame(index=df_common2.index,
+                                  data=df_common2.values)
         print('After resampling sum of NaN values is \n')
         print('first station has ', df_common1.isna().sum(), 'NaN values')
         print('second station has ', df_common2.isna().sum(), 'NaN values')
 
-        if df_common1.isna().sum() != 0:
+        try:
             if df_common1.isna().sum()[0] > 0:
                 ix_df1_nans = df_common1.index[np.where(df_common1.isna())[0]]
                 print('first station has Nans on ', ix_df1_nans)
                 df_common1.dropna(inplace=True)
+        except IndexError:
+            df_common1 = df_common1
 
+        try:
             if df_common2.isna().sum()[0] > 0:
                 ix_df2_nans = df_common2.index[np.where(df_common2.isna())[0]]
                 print('second station has Nans on ', ix_df2_nans)
                 df_common2.dropna(inplace=True)
-        else:
-            pass
+        except IndexError:
+            df_common2 = df_common2
+
+        assert df_common1.isna().sum()[0] == 0, 'Nans in First station'
+        assert df_common2.isna().sum()[0] == 0, 'Nans in second station'
 
         new_idx_common = df_common1.index.intersection(df_common2.index)
         if new_idx_common.shape[0] != idx_common.shape[0]:
@@ -320,7 +333,6 @@ def resample_intersect_2_dfs(df1, df2, temp_freq):
             df_common1 = df_common1.loc[new_idx_common, :]
             df_common2 = df_common2.loc[new_idx_common, :]
         except Exception:
-
             df_common1 = df_common1.loc[idx_common]
             df_common2 = df_common2.loc[idx_common]
 
