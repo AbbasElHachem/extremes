@@ -146,13 +146,28 @@ def plot_ratio_2_stns(stn1_id, stn2_id, df1, df2, seperate_dist,
     ratio_values[ratio_values > 1000] = 0
 #     ratio_values[(0 <= ratio_values) & (ratio_values < 100)]
 
-    ax.plot(time_arr, ratio_values, c='darkblue', marker='o', markersize=2,
-            alpha=0.25)  # , label=stn1_id)
+    ax.plot(time_arr,
+            ratio_values,
+            c='b',
+            marker='o',
+            markersize=2,
+            alpha=0.5,
+            label=str(stn1_id + r' / ' + stn2_id))
 
+    ax.plot(time_arr,
+            np.full(ratio_values.shape,
+                    ratio_values.mean()),
+            c='r',
+            marker='+',
+            markersize=2,
+            alpha=0.5,
+            label='mean ratio = %0.1f' % ratio_values.mean())
+#     np.argwhere(ratio_values == ratio_values.max())
+#     df1.index[np.argwhere(ratio_values == ratio_values.max())[0]][0]
     xfmt = md.DateFormatter('%Y-%m-%d')
 
     ax.xaxis.set_major_locator(MultipleLocator(30))
-    ax.yaxis.set_major_locator(MultipleLocator(3))
+    ax.yaxis.set_major_locator(MultipleLocator(2))
 
     ax.xaxis.set_major_formatter(xfmt)
     ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
@@ -162,17 +177,19 @@ def plot_ratio_2_stns(stn1_id, stn2_id, df1, df2, seperate_dist,
     ax.set_ylabel(r'Ratio daily values Stn  %s  Stn  %s ' %
                   (stn1_id, stn2_id))
 
-    ax.tick_params('y', colors='darkblue')
+    ax.tick_params('y', colors='blue')
 
-    ax.set_title("Ratio between values Stn: %s vs Stn: %s;\n Distance: %0.1f m; "
-                 "Time Freq: %s; " % (stn1_id, stn2_id,
-                                      seperate_dist,
-                                      temp_freq))
+    ax.set_title("Ratio between values Stn: %s vs Stn: %s;"
+                 "\n Distance: %0.1f m; "
+                 "Time Freq: %s; "
+                 % (stn1_id, stn2_id,
+                    seperate_dist,
+                    temp_freq))
 
     ax.grid(color='k', linestyle='--', linewidth=0.1, alpha=0.25)
     plt.xticks(rotation=30)
 
-#     ax2.legend(loc='best')
+    ax.legend(loc='best')
 #     plt.tight_layout()
     plt.savefig(os.path.join(out_dir, '%s_ratio_values_stn_%s_vs_stn_%s_.png'
                              % (temp_freq, stn1_id, stn2_id)))

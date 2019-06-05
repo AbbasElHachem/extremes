@@ -31,6 +31,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as md
 
+from scipy.stats import spearmanr as spr
+from scipy.stats import pearsonr as pears
+
 from matplotlib import rc
 from matplotlib import rcParams
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
@@ -138,7 +141,7 @@ def plot_original_disaggregated_values(stn_1_id,
 
     ax.set_ylim(0.0, max(df_dwd_hourly_orig.values.max(),
                          df_dwd_hourly_disagg.values.max(),
-                         df_netatmo_hourly_orig.values.max()))
+                         df_netatmo_hourly_orig.values.max()) + 1)
 
     ax.set_ylabel('Stn  %s   Precipitation  in mm/hour ' % (stn_1_id))
     ax.tick_params('y', colors='darkblue')
@@ -155,6 +158,105 @@ def plot_original_disaggregated_values(stn_1_id,
     plt.savefig(os.path.join(out_dir,
                              'orig_vs_disaggregated_ppt_stn_%s_vs_stn_%s_.png'
                              % (stn_1_id, stn_2_id)))
+    plt.clf()
+    plt.close('all')
+    print('Done saving figure ')
+    return
+
+#==============================================================================
+#
+#==============================================================================
+
+
+def scatter_original_disaggregated_values(stn_1_id,
+                                          stn_2_id,
+                                          df_dwd_hourly_orig,
+                                          df_dwd_hourly_disagg,
+                                          df_netatmo_hourly_orig,
+                                          sep_dist_netatmo_dwd,
+                                          out_dir):
+    plt.ioff()
+    fig = plt.figure(figsize=(24, 12), dpi=200)
+    ax = fig.add_subplot(111)
+
+    ax.scatter(df_dwd_hourly_disagg.values.ravel(),
+               df_dwd_hourly_orig.values.ravel(),
+               c='r',
+               marker='+',
+               # linestyle='--',
+               # linewidth=2,
+               alpha=0.5,
+               s=8,
+               label='DWD Original vs Disaggregated %s' % stn_1_id)
+
+#     ax.plot(df_dwd_hourly_disagg.index,
+#             df_dwd_hourly_disagg.values,
+#             c='r',
+#             marker='+',
+#             # linestyle='--',
+#             linewidth=2,
+#             alpha=0.25,
+#             markersize=3,
+#             label='DWD Disaggregated %s' % stn_1_id)
+
+    ax.scatter(df_dwd_hourly_disagg.values.ravel(),
+               df_netatmo_hourly_orig.values.ravel(),
+               c='g',
+               marker='*',
+               # linestyle='--',
+               # linewidth=2,
+               alpha=0.25,
+               s=5,
+               label='Netatmo Original %s vs DWD Disaggregated %s'
+               % (stn_2_id, stn_1_id))
+
+    # calculate correlations (pearson and spearman)
+    corr = pears(df_dwd_hourly_disagg.values,
+                 df_dwd_hourly_orig.values)[0]
+
+    rho = spr(df_dwd_hourly_disagg.values,
+              df_dwd_hourly_orig.values)[0]
+
+    # plot 45 deg line
+    _min = min(0, min(df_dwd_hourly_orig.values.min(),
+                      df_dwd_hourly_disagg.values.min(),
+                      df_netatmo_hourly_orig.values.min()))
+
+    _max = max(df_dwd_hourly_orig.values.max(),
+               df_dwd_hourly_disagg.values.max(),
+               df_netatmo_hourly_orig.values.max())
+
+    ax.plot([_min, _max], [_min, _max], c='k', linestyle='--', alpha=0.25)
+
+    # set plot limit
+    ax.set_xlim(-0.1, _max + 0.1)
+    ax.set_ylim(-0.1, _max + 0.1)
+
+    ax.xaxis.set_major_locator(MultipleLocator(2))
+    ax.yaxis.set_major_locator(MultipleLocator(2))
+
+    ax.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+    ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+
+    ax.set_xlabel('Stn  %s  Disaggregated Precipitation  in mm/hour '
+                  % (stn_1_id))
+    ax.set_ylabel('Stn  %s  Original Precipitation in mm/hour ' % (stn_1_id))
+
+    ax.set_title("Stn: %s vs Stn: %s; \n Distance: %0.1f m; "
+                 " Pearson Corr %0.1f ; Spearman Corr %0.1f"
+                 % (stn_1_id, stn_2_id,
+                     sep_dist_netatmo_dwd, corr, rho))
+    ax.legend(loc=0)
+
+    ax.grid(color='k', linestyle='--', linewidth=0.1, alpha=0.5)
+
+#     plt.xticks(rotation=45)
+
+#     plt.tight_layout()
+    plt.savefig(
+        os.path.join(out_dir,
+                     'scatter_orig_vs_disaggregated_ppt_stn_%s_vs_stn_%s_.png'
+                     % (stn_1_id, stn_2_id)))
     plt.clf()
     plt.close('all')
     print('Done saving figure ')
@@ -258,6 +360,13 @@ def construct_netatmo_dwd_daily_dfs(netatmo_ppt_df_file,
                                                        df_netatmo_hourly,
                                                        min_dist,
                                                        out_save_dir_orig)
+                    scatter_original_disaggregated_values(stn_id,
+                                                          stn_2_id,
+                                                          df_dwd_hourly,
+                                                          df_disaggregated,
+                                                          df_netatmo_hourly,
+                                                          min_dist,
+                                                          out_save_dir_orig)
 #                             break
 #                     df_combined = pd.DataFrame(
 #                         index=df_dwd_hourly.index,
@@ -278,7 +387,6 @@ def construct_netatmo_dwd_daily_dfs(netatmo_ppt_df_file,
 
         except Exception as msg:
             print(msg)
-#         break
 
 
 if __name__ == '__main__':
