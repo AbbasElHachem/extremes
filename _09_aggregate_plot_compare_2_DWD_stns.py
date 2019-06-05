@@ -79,7 +79,7 @@ x_col_name = 'Rechtswert'
 y_col_name = 'Hochwert'
 
 # threshold for CDF, consider only above thr, below is P0
-ppt_thr = .5
+ppt_thr_min = .5
 
 # used for P0 calculation
 ppt_thrs_list = [0.5, 1, 2]
@@ -231,9 +231,9 @@ def plt_scatter_plot_2_stns(stn1_id, stn2_id, seperate_distance,
     ax.yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
 
     ax.set_xlabel('Observed %s Rainfall in mm >= %0.1fmm Station Id: %s'
-                  % (temp_freq, ppt_thr, stn1_id))
+                  % (temp_freq, ppt_min_thr, stn1_id))
     ax.set_ylabel('Observed %s Rainfall in mm >= %0.1fmm Station Id: %s'
-                  % (temp_freq, ppt_thr, stn2_id))
+                  % (temp_freq, ppt_min_thr, stn2_id))
     ax.set_title("Stn: %s vs Stn: %s; \n Distance: %0.1f m; "
                  "Time Freq: %s; \n Pearson Cor=%0.3f; "
                  "Spearman Cor=%0.3f" % (stn1_id, stn2_id,
@@ -518,11 +518,8 @@ def plot_p0_as_a_sequence_two_stns(stn_id,
     fig = plt.figure(figsize=(16, 12), dpi=200)
     ax = fig.add_subplot(111)
 
-    if (df_stn1.values.shape[0] > 10 and
-            df_stn2.values.shape[0] > 10):
-        # TODO: check is it works
-        ppt_thr = ppt_thrs_list[0]
-        print('Testing for Ppt Threshold of', ppt_thr)
+    for i, ppt_thr in enumerate(ppt_thrs_list):
+        print('Ppt Threshold is', ppt_thr)
 
         for temp_freq in aggregation_frequencies_lst:
             print('Time freq is', temp_freq)
@@ -531,74 +528,59 @@ def plot_p0_as_a_sequence_two_stns(stn_id,
                                                               temp_freq)
             if (df_common1.values.shape[0] > 10 and
                     df_common2.values.shape[0] > 10):
-                print(True)
-                continue
+
+                try:
+                    p01 = calculate_probab_ppt_below_thr(
+                        df_common1.values, ppt_thr)
+                    p02 = calculate_probab_ppt_below_thr(
+                        df_common2.values, ppt_thr)
+
+                    df_p01_stn1.loc[ppt_thr, temp_freq] = p01
+                    df_p01_stn2.loc[ppt_thr, temp_freq] = p02
+                except Exception as msg:
+                    print('error while calculating P0', msg, temp_freq)
+                    continue
+
+                print('plotting for Ppt thr', ppt_thr,
+                      'temp freq ', temp_freq)
+
+                ax.plot(df_p01_stn1.columns,
+                        df_p01_stn1.loc[ppt_thr, :],
+                        c=colors[i],
+                        marker='o', linestyle='--',
+                        linewidth=1,
+                        alpha=0.5,
+                        markersize=3,
+                        label=str(ppt_thr) + ' mm')
+
+                ax.plot(df_p01_stn2.columns,
+                        df_p01_stn2.loc[ppt_thr, :], c=colors[i],
+                        linewidth=1,
+                        marker='+', linestyle='dotted', alpha=0.5,
+                        markersize=3)
+
             else:
-                return
+                print('empty df')
+                break
 
-        for i, ppt_thr in enumerate(ppt_thrs_list):
-            print('Ppt Threshold is', ppt_thr)
+    if df_p01_stn1.shape[0] > 0:
 
-            for temp_freq in aggregation_frequencies_lst:
-                print('Time freq is', temp_freq)
-                df_common1, df_common2 = resample_intersect_2_dfs(df_stn1,
-                                                                  df_stn2,
-                                                                  temp_freq)
-                if (df_common1.values.shape[0] > 10 and
-                        df_common2.values.shape[0] > 10):
+        handles, labels = plt.gca().get_legend_handles_labels()
+        by_label = OrderedDict(zip(labels, handles))
+        plt.legend(by_label.values(), by_label.keys())
 
-                    try:
-                        p01 = calculate_probab_ppt_below_thr(
-                            df_common1.values, ppt_thr)
-                        p02 = calculate_probab_ppt_below_thr(
-                            df_common2.values, ppt_thr)
+        ax.set_ylabel('P0')
 
-                        df_p01_stn1.loc[ppt_thr, temp_freq] = p01
-                        df_p01_stn2.loc[ppt_thr, temp_freq] = p02
-                    except Exception as msg:
-                        print('error while calculating P0', msg, temp_freq)
-                        continue
+        ax.set_title('P0 as a sequence %s vs %s \n distance: %0.1f m'
+                     % (stn_id, stn_2_id, min_dist))
 
-                    print('plotting for Ppt thr', ppt_thr,
-                          'temp freq ', temp_freq)
-
-                    ax.plot(df_p01_stn1.columns,
-                            df_p01_stn1.loc[ppt_thr, :],
-                            c=colors[i],
-                            marker='o', linestyle='--',
-                            linewidth=1,
-                            alpha=0.5,
-                            markersize=3,
-                            label=str(ppt_thr) + ' mm')
-
-                    ax.plot(df_p01_stn2.columns,
-                            df_p01_stn2.loc[ppt_thr, :], c=colors[i],
-                            linewidth=1,
-                            marker='+', linestyle='dotted', alpha=0.5,
-                            markersize=3)
-
-                else:
-                    print('empty df')
-                    break
-
-        if df_p01_stn1.shape[0] > 0:
-
-            handles, labels = plt.gca().get_legend_handles_labels()
-            by_label = OrderedDict(zip(labels, handles))
-            plt.legend(by_label.values(), by_label.keys())
-
-            ax.set_ylabel('P0')
-
-            ax.set_title('P0 as a sequence %s vs %s \n distance: %0.1f m'
-                         % (stn_id, stn_2_id, min_dist))
-
-            plt.tight_layout()
-            plt.grid(alpha=0.15)
-            plt.savefig(os.path.join(out_dir,
-                                     'P0_as_a_sequence_%s_%s.png'
-                                     % (stn_id, stn_2_id)))
-        else:
-            print('empty df not plotting P0')
+        plt.tight_layout()
+        plt.grid(alpha=0.15)
+        plt.savefig(os.path.join(out_dir,
+                                 'P0_as_a_sequence_%s_%s.png'
+                                 % (stn_id, stn_2_id)))
+    else:
+        print('empty df not plotting P0')
 
         print('Done plotting P0 as a sequence')
     return df_p01_stn1, df_p01_stn2
@@ -691,7 +673,7 @@ def plot_contingency_tables_as_a_sequence_two_stns(stn_id,
 #==============================================================================
 def compare_two_dwd_stns(stns_ids):
 
-    for iid in stns_ids[105:]:
+    for iid in stns_ids[50:]:
         print('First Stn Id is', iid)
         try:
             idf1 = HDF52.get_pandas_dataframe(ids=[iid])
@@ -710,72 +692,107 @@ def compare_two_dwd_stns(stns_ids):
             if not os.path.exists(out_save_dir):
                 os.mkdir(out_save_dir)
 
-#             for tem_freq in aggregation_frequencies:
-#                 print('Aggregation is: ', tem_freq)
-#                 df_common1, df_common2 = resample_intersect_2_dfs(idf1,
-#                                                                   idf2,
-#                                                                   tem_freq)
-#                 if (df_common1.values.shape[0] > 1000 and
-#                         df_common2.values.shape[0] > 1000):
-#                     print('enough data are available for plotting')
-#
-#                     try:
-#                         #====================================================
-#                         pass
-#                         plt_bar_plot_2_stns(iid, stn_near, distance_near,
-#                                             df_common1, df_common2, tem_freq,
-#                                             out_save_dir)
-#
-#                         plt_scatter_plot_2_stns(iid, stn_near, distance_near,
-#                                                 df_common1, df_common2, ppt_thr,
-#                                                 tem_freq,
-#                                                 out_save_dir)
-#                         plot_end_tail_cdf_2_stns(iid, stn_near, distance_near,
-#                                                  df_common1, df_common2,
-#                                                  tem_freq, ppt_thr,
-#                                                  out_save_dir)
-#                         plot_normalized_ranked_stns(iid, stn_near,
-#                                                     distance_near,
-#                                                     df_common1, df_common2,
-#                                                     tem_freq,
-#                                                     out_save_dir)
-#                         plot_normalized_sorted_ranked_stns(iid, stn_near,
-#                                                            distance_near,
-#                                                            df_common1,
-#                                                            df_common2,
-#                                                            tem_freq,
-#                                                            out_save_dir)
-#                         plot_sorted_stns_vals(iid, stn_near, distance_near,
-#                                               df_common1, df_common2,
-#                                               tem_freq,
-#                                               out_save_dir)
-#                     except Exception as msg:
-#                         print('error while plotting', msg, tem_freq)
-#                         continue
-#
-#                 else:
-#                     print('Station is near but dont have enough data')
-#                     shutil.rmtree(out_save_dir, ignore_errors=True)
-#                     break
+            for tem_freq in aggregation_frequencies:
+                print('Aggregation is: ', tem_freq)
+                df_common1, df_common2 = resample_intersect_2_dfs(idf1,
+                                                                  idf2,
+                                                                  tem_freq)
 
-            # TODO CHECK again with out dir
-            plot_p0_as_a_sequence_two_stns(iid,
-                                           stn_near,
-                                           distance_near,
-                                           ppt_thrs_list,
-                                           idf1,
-                                           idf2,
-                                           aggregation_frequencies,
-                                           out_save_dir)
+                if (df_common1.values.shape[0] > 1000 and
+                        df_common2.values.shape[0] > 1000):
+                    df_common1 = pd.DataFrame(
+                        data=df_common1.values,
+                        index=df_common1.index,
+                        columns=[iid])
 
-#             plot_contingency_tables_as_a_sequence_two_stns(iid,
-#                                                            stn_near,
-#                                                            distance_near,
-#                                                            ppt_thrs_list,
-#                                                            idf1,
-#                                                            idf2,
-#                                                            aggregation_frequencies,
-#                                                            out_save_dir)
+                    df_common2 = pd.DataFrame(
+                        data=df_common2.values,
+                        index=df_common2.index,
+                        columns=[stn_near])
+                    print('enough data are available for plotting')
+
+                    try:
+                        #====================================================
+                        pass
+                        plt_bar_plot_2_stns(iid, stn_near, distance_near,
+                                            df_common1, df_common2, tem_freq,
+                                            out_save_dir)
+
+                        plt_scatter_plot_2_stns(iid, stn_near, distance_near,
+                                                df_common1, df_common2, ppt_thr_min,
+                                                tem_freq,
+                                                out_save_dir)
+                        plot_end_tail_cdf_2_stns(iid, stn_near, distance_near,
+                                                 df_common1, df_common2,
+                                                 tem_freq, ppt_thr_min,
+                                                 out_save_dir)
+                        plot_normalized_ranked_stns(iid, stn_near,
+                                                    distance_near,
+                                                    df_common1, df_common2,
+                                                    tem_freq,
+                                                    out_save_dir)
+                        plot_normalized_sorted_ranked_stns(iid, stn_near,
+                                                           distance_near,
+                                                           df_common1,
+                                                           df_common2,
+                                                           tem_freq,
+                                                           out_save_dir)
+                        plot_sorted_stns_vals(iid, stn_near, distance_near,
+                                              df_common1, df_common2,
+                                              tem_freq,
+                                              out_save_dir)
+                    except Exception as msg:
+                        print('error while plotting', msg, tem_freq)
+                        continue
+
+                else:
+                    print('Station is near but dont have enough data')
+                    print('deleting out directory')
+                    shutil.rmtree(out_save_dir, ignore_errors=True)
+                    break
+
+            if os.path.exists(out_save_dir):
+                if (idf1.values.shape[0] > 1000 and
+                        idf1.values.shape[0] > 1000):
+                    # TODO: check is it works
+                    ppt_thr = ppt_thrs_list[0]
+                    print('Testing for Ppt Threshold of', ppt_thr)
+
+                    for temp_freq in aggregation_frequencies:
+                        print('Time freq is', temp_freq)
+                        df_common1, df_common2 = resample_intersect_2_dfs(idf1,
+                                                                          idf2,
+                                                                          temp_freq)
+                        if (df_common1.values.shape[0] > 10 and
+                                df_common2.values.shape[0] > 10):
+                            print(True, 'Plotting P0 and Contingency Tables')
+
+                            # TODO CHECK again with out dir
+                            plot_p0_as_a_sequence_two_stns(
+                                iid,
+                                stn_near,
+                                distance_near,
+                                ppt_thrs_list,
+                                idf1,
+                                idf2,
+                                aggregation_frequencies,
+                                out_save_dir)
+
+                            plot_contingency_tables_as_a_sequence_two_stns(
+                                iid,
+                                stn_near,
+                                distance_near,
+                                ppt_thrs_list,
+                                idf1,
+                                idf2,
+                                aggregation_frequencies,
+                                out_save_dir)
+
+                        else:
+                            print('not enough data for P0 and Contingency Table')
+                            break
+                else:
+                    print('not enough data for P0, Contnigency tables')
             if not os.listdir(out_save_dir):
                 os.rmdir(out_save_dir)
 

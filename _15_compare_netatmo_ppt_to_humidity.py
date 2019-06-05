@@ -144,7 +144,7 @@ def plt_bar_plot_ppt_hum_stns(stn1_id, stn2_id, seperate_distance,
 #     ax.legend(loc='best')
 #     ax2.legend(loc='best')
     plt.tight_layout()
-    plt.savefig(os.path.join(out_dir, '%s_max_lineplot_stn_%s_vs_stn_%s_.png'
+    plt.savefig(os.path.join(out_dir, '%s_mean_lineplot_stn_%s_vs_stn_%s_.png'
                              % (temp_freq, stn1_id, stn2_id)))
     plt.clf()
     plt.close('all')
@@ -211,7 +211,8 @@ def plt_bar_plot_ppt_mean_min_max_hum_stns(stn1_id, stn2_id,
 #     ax.legend(loc='best')
 #     ax2.legend(loc='best')
     plt.tight_layout()
-    plt.savefig(os.path.join(out_dir, '%s_all_lineplot_stn_%s_vs_stn_%s_.png'
+    plt.savefig(os.path.join(out_dir,
+                             'mean_%s_all_lineplot_stn_%s_vs_stn_%s_.png'
                              % (temp_freq, stn1_id, stn2_id)))
     plt.clf()
     plt.close('all')
@@ -277,7 +278,8 @@ def plt_scatter_plot_ppt_hum(stn1_id, stn2_id, seperate_distance,
 
     ax.grid(color='k', linestyle='--', linewidth=0.1, alpha=0.25)
     plt.tight_layout()
-    plt.savefig(os.path.join(out_dir, '%s_scatter_stn_%s_vs_stn_%s_.png'
+    plt.savefig(os.path.join(out_dir,
+                             'mean_%s_scatter_stn_%s_vs_stn_%s_.png'
                              % (temp_freq, stn1_id, stn2_id)))
     plt.clf()
     plt.close('all')
@@ -396,9 +398,10 @@ def plot_contingency_tables_as_a_sequence_ppt_hum_stns(stn_id,
                                  % (hum_thr, ppt_thr, stn_id,
                                     stn_2_id, min_dist, temp_freq))
                     plt.savefig(
-                        os.path.join(out_dir,
-                                     'contingency_table_as_a_sequence_%s_%s_%s_ppt_%0.0f_hum_%0.0f.png'
-                                     % (stn_id, stn_2_id, temp_freq, ppt_thr, hum_thr)),
+                        os.path.join(
+                            out_dir,
+                            'mean_contingency_table_as_a_sequence_%s_%s_%s_ppt_%0.0f_hum_%0.0f.png'
+                            % (stn_id, stn_2_id, temp_freq, ppt_thr, hum_thr)),
                         bbox_inches='tight')
                     plt.close(fig)
             print('Done plotting contingency_tableas a sequence')
@@ -452,30 +455,30 @@ def compare_ppt_to_humidity_stns(netatmo_ppt_df_file,
                     print('Aggregation is: ', tem_freq)
 
                     df_resampled1 = resampleDf(idf1, tem_freq)
-#                     df_resampled2_mean = resample_Humidity_Df(idf2,
-#                                                               tem_freq,
-#                                                               method='mean')
+                    df_resampled2_mean = resample_Humidity_Df(idf2,
+                                                              tem_freq,
+                                                              method='mean')
 
 #                     df_resampled2_min = resample_Humidity_Df(idf2,
 #                                                              tem_freq,
 #                                                              method='min')
 
-                    df_resampled2_max = resample_Humidity_Df(idf2,
-                                                             tem_freq,
-                                                             method='max')
+#                     df_resampled2_max = resample_Humidity_Df(idf2,
+#                                                              tem_freq,
+#                                                              method='max')
 
                     idx_cmn = df_resampled1.index.intersection(
-                        df_resampled2_max.index)
+                        df_resampled2_mean.index)
 #
                     df_common1 = df_resampled1.loc[idx_cmn]
-#                     df_common2_mean = df_resampled2_mean.loc[idx_cmn]
+                    df_common2_mean = df_resampled2_mean.loc[idx_cmn]
 
 #                     df_common2_min = df_resampled2_min.loc[idx_cmn]
-                    df_common2_max = df_resampled2_max.loc[idx_cmn]
+#                     df_common2_max = df_resampled2_max.loc[idx_cmn]
 #                     df_common1, df_common2 = resample_intersect_2_dfs(
 #                         idf1, idf2, tem_freq)
                     if (df_common1.values.shape[0] > 0 and
-                            df_common2_max.values.shape[0] > 0):
+                            df_common2_mean.values.shape[0] > 0):
 
                         out_save_dir = os.path.join(
                             out_save_dir_orig,
@@ -485,13 +488,13 @@ def compare_ppt_to_humidity_stns(netatmo_ppt_df_file,
                             os.mkdir(out_save_dir)
                         try:
                             pass
-#                             plt_bar_plot_ppt_hum_stns(ppt_stn_id,
-#                                                       stn_2_id,
-#                                                       min_dist,
-#                                                       df_common1,
-#                                                       df_common2_max,
-#                                                       tem_freq,
-#                                                       out_save_dir)
+                            plt_bar_plot_ppt_hum_stns(ppt_stn_id,
+                                                      stn_2_id,
+                                                      min_dist,
+                                                      df_common1,
+                                                      df_common2_mean,
+                                                      tem_freq,
+                                                      out_save_dir)
 
 #                             plt_bar_plot_ppt_mean_min_max_hum_stns(
 #                                 ppt_stn_id,
@@ -504,14 +507,14 @@ def compare_ppt_to_humidity_stns(netatmo_ppt_df_file,
 #                                 tem_freq,
 #                                 out_save_dir)
 
-#                             plt_scatter_plot_ppt_hum(ppt_stn_id,
-#                                                      stn_2_id,
-#                                                      min_dist,
-#                                                      df_common1,
-#                                                      df_common2_max,
-#                                                      0,
-#                                                      tem_freq,
-#                                                      out_save_dir)
+                            plt_scatter_plot_ppt_hum(ppt_stn_id,
+                                                     stn_2_id,
+                                                     min_dist,
+                                                     df_common1,
+                                                     df_common2_mean,
+                                                     0,
+                                                     tem_freq,
+                                                     out_save_dir)
 
                         except Exception as msg:
                             print('error while plotting', msg, tem_freq)

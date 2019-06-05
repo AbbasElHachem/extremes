@@ -86,14 +86,12 @@ if not os.path.exists(out_save_dir_orig):
     os.mkdir(out_save_dir_orig)
 
 
-# threshold for CDF, consider only above thr, below is P0
-ppt_thr = .5
-ppt_thr2 = 0.5
-
+# threshold for CDF and scatter, consider only above thr, below is P0
+ppt_thr_min = .1
 
 ppt_thrs_list = [0.5, 1., 2]
 
-max_ppt_thr = 100.
+max_ppt_thr = 30.
 
 # till 1 day '5min', '10min', '15min', '30min',
 aggregation_frequencies = ['5min', '10min', '15min', '30min', '60min',
@@ -105,7 +103,7 @@ aggregation_frequencies = ['5min', '10min', '15min', '30min', '60min',
 
 
 def compare_cdf_two_stns(netatmo_ppt_df_file, path_to_ppt_hdf_data,
-                         distance_matrix_df_file):
+                         distance_matrix_df_file, out_dir):
     HDF52 = HDF5(infile=path_to_ppt_hdf_data)
 
     in_netatmo_stns_df = pd.read_csv(netatmo_ppt_df_file,
@@ -140,7 +138,7 @@ def compare_cdf_two_stns(netatmo_ppt_df_file, path_to_ppt_hdf_data,
                 print('Second DWD Stn Id is', stn_2_id,
                       'distance is ', min_dist)
                 if (idf1.values.shape[0] > 1000) and (idf2.values.shape[0] > 1000):
-                    out_save_dir = os.path.join(out_save_dir_orig,
+                    out_save_dir = os.path.join(out_dir,
                                                 '%s_%s' % (stn_id, stn_2_id))
 
                     if not os.path.exists(out_save_dir):
@@ -155,7 +153,15 @@ def compare_cdf_two_stns(netatmo_ppt_df_file, path_to_ppt_hdf_data,
 
                         if (df_common1.values.shape[0] > 0 and
                                 df_common2.values.shape[0] > 0):
-                            #
+                            df_common1 = pd.DataFrame(
+                                data=df_common1.values,
+                                index=df_common1.index,
+                                columns=[stn_id])
+
+                            df_common2 = pd.DataFrame(
+                                data=df_common2.values,
+                                index=df_common2.index,
+                                columns=[stn_2_id])
                             try:
                                 plt_bar_plot_2_stns(stn_id,
                                                     stn_2_id,
@@ -170,7 +176,7 @@ def compare_cdf_two_stns(netatmo_ppt_df_file, path_to_ppt_hdf_data,
                                                         min_dist,
                                                         df_common1,
                                                         df_common2,
-                                                        ppt_thr2,
+                                                        ppt_thr_min,
                                                         tem_freq,
                                                         out_save_dir)
 
@@ -180,7 +186,7 @@ def compare_cdf_two_stns(netatmo_ppt_df_file, path_to_ppt_hdf_data,
                                                          df_common1,
                                                          df_common2,
                                                          tem_freq,
-                                                         ppt_thr,
+                                                         ppt_thr_min,
                                                          out_save_dir)
 
                                 plot_normalized_sorted_ranked_stns(stn_id,
@@ -209,28 +215,48 @@ def compare_cdf_two_stns(netatmo_ppt_df_file, path_to_ppt_hdf_data,
                                 continue
                         else:
                             print('empty df, moving to another station')
+                            shutil.rmtree(out_save_dir, ignore_errors=True)
                             break
-                    plot_p0_as_a_sequence_two_stns(stn_id,
-                                                   stn_2_id,
-                                                   min_dist,
-                                                   ppt_thrs_list,
-                                                   idf1,
-                                                   idf2,
-                                                   aggregation_frequencies,
-                                                   out_save_dir)
+                    if os.path.exists(out_save_dir):
+                        if (idf1.values.shape[0] > 1000 and
+                                idf1.values.shape[0] > 1000):
 
-                    plot_contingency_tables_as_a_sequence_two_stns(stn_2_id,
-                                                                   stn_id,
-                                                                   min_dist,
-                                                                   ppt_thrs_list,
-                                                                   idf2,
-                                                                   idf1,
-                                                                   aggregation_frequencies,
-                                                                   out_save_dir)
+                            ppt_thr = ppt_thrs_list[0]
+                            print('Testing for Ppt Threshold of', ppt_thr)
+
+                            for temp_freq in aggregation_frequencies:
+                                print('Time freq is', temp_freq)
+                                df_common1, df_common2 = resample_intersect_2_dfs(idf1,
+                                                                                  idf2,
+                                                                                  temp_freq)
+                                if (df_common1.values.shape[0] > 10 and
+                                        df_common2.values.shape[0] > 10):
+                                    print(
+                                        True, 'Plotting P0 and Contingency Tables')
+
+                                    plot_p0_as_a_sequence_two_stns(
+                                        stn_id,
+                                        stn_2_id,
+                                        min_dist,
+                                        ppt_thrs_list,
+                                        idf1,
+                                        idf2,
+                                        aggregation_frequencies,
+                                        out_save_dir)
+
+                                    plot_contingency_tables_as_a_sequence_two_stns(
+                                        stn_2_id,
+                                        stn_id,
+                                        min_dist,
+                                        ppt_thrs_list,
+                                        idf2,
+                                        idf1,
+                                        aggregation_frequencies,
+                                        out_save_dir)
 
                 else:
                     print('Station is near but dont have enough data')
-                    shutil.rmtree(out_save_dir, ignore_errors=True)
+#                     shutil.rmtree(out_save_dir, ignore_errors=True)
             else:
                 print('DWD station is not near looking for another station')
                 continue
@@ -246,7 +272,8 @@ if __name__ == '__main__':
 
     compare_cdf_two_stns(path_to_ppt_5min_netatmo_data,
                          path_to_ppt_hdf_data,
-                         distance_matrix_df_file)
+                         distance_matrix_df_file,
+                         out_save_dir_orig)
 
     STOP = timeit.default_timer()  # Ending time
     print(('\n****Done with everything on %s.\nTotal run time was'

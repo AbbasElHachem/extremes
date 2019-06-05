@@ -178,6 +178,9 @@ def scatter_original_disaggregated_values(stn_1_id,
     plt.ioff()
     fig = plt.figure(figsize=(24, 12), dpi=200)
     ax = fig.add_subplot(111)
+    ax2 = ax.twinx()
+#     ax2.plot(time_arr, df2.values, c='red', marker='+', markersize=2,
+#             alpha=0.25)  # , label=stn2_id)
 
     ax.scatter(df_dwd_hourly_disagg.values.ravel(),
                df_dwd_hourly_orig.values.ravel(),
@@ -189,33 +192,35 @@ def scatter_original_disaggregated_values(stn_1_id,
                s=8,
                label='DWD Original vs Disaggregated %s' % stn_1_id)
 
-#     ax.plot(df_dwd_hourly_disagg.index,
-#             df_dwd_hourly_disagg.values,
-#             c='r',
-#             marker='+',
-#             # linestyle='--',
-#             linewidth=2,
-#             alpha=0.25,
-#             markersize=3,
-#             label='DWD Disaggregated %s' % stn_1_id)
-
-    ax.scatter(df_dwd_hourly_disagg.values.ravel(),
-               df_netatmo_hourly_orig.values.ravel(),
-               c='g',
-               marker='*',
-               # linestyle='--',
-               # linewidth=2,
-               alpha=0.25,
-               s=5,
-               label='Netatmo Original %s vs DWD Disaggregated %s'
-               % (stn_2_id, stn_1_id))
+    ax2.scatter(df_dwd_hourly_disagg.values.ravel(),
+                df_netatmo_hourly_orig.values.ravel(),
+                c='g',
+                marker='*',
+                # linestyle='--',
+                # linewidth=2,
+                alpha=0.25,
+                s=5,
+                label='Netatmo Original %s vs DWD Disaggregated %s'
+                % (stn_2_id, stn_1_id))
 
     # calculate correlations (pearson and spearman)
-    corr = pears(df_dwd_hourly_disagg.values,
-                 df_dwd_hourly_orig.values)[0]
+    pear_corr_dwd_orig_dwd_disagg = pears(df_dwd_hourly_disagg.values,
+                                          df_dwd_hourly_orig.values)[0]
 
-    rho = spr(df_dwd_hourly_disagg.values,
-              df_dwd_hourly_orig.values)[0]
+    spr_corr_dwd_orig_dwd_disagg = spr(df_dwd_hourly_disagg.values,
+                                       df_dwd_hourly_orig.values)[0]
+
+    pear_corr_dwd_orig_netatmo = pears(df_netatmo_hourly_orig.values,
+                                       df_dwd_hourly_orig.values)[0]
+
+    spr_corr_dwd_orig_netatmo = spr(df_netatmo_hourly_orig.values,
+                                    df_dwd_hourly_orig.values)[0]
+
+    pear_corr_netatmo_dwd_disagg = pears(df_dwd_hourly_disagg.values,
+                                         df_netatmo_hourly_orig.values)[0]
+
+    spr_corr_netatmo_dwd_disagg = spr(df_dwd_hourly_disagg.values,
+                                      df_netatmo_hourly_orig.values)[0]
 
     # plot 45 deg line
     _min = min(0, min(df_dwd_hourly_orig.values.min(),
@@ -227,27 +232,47 @@ def scatter_original_disaggregated_values(stn_1_id,
                df_netatmo_hourly_orig.values.max())
 
     ax.plot([_min, _max], [_min, _max], c='k', linestyle='--', alpha=0.25)
+    ax2.plot([_min, _max], [_min, _max], c='b', linestyle='--', alpha=0.25)
 
     # set plot limit
     ax.set_xlim(-0.1, _max + 0.1)
     ax.set_ylim(-0.1, _max + 0.1)
+    ax2.set_ylim(-0.1, _max + 0.1)
 
     ax.xaxis.set_major_locator(MultipleLocator(2))
     ax.yaxis.set_major_locator(MultipleLocator(2))
+    ax2.yaxis.set_major_locator(MultipleLocator(2))
 
     ax.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
     ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
 
     ax.set_xlabel('Stn  %s  Disaggregated Precipitation  in mm/hour '
                   % (stn_1_id))
-    ax.set_ylabel('Stn  %s  Original Precipitation in mm/hour ' % (stn_1_id))
+    ax.set_ylabel('Stn  %s  Orig DWD Ppt in mm/hour ' % (stn_1_id))
+    ax2.set_ylabel('Stn  %s  Netatmo Ppt in mm/hour ' % (stn_2_id))
 
-    ax.set_title("Stn: %s vs Stn: %s; \n Distance: %0.1f m; "
-                 " Pearson Corr %0.1f ; Spearman Corr %0.1f"
+    ax.tick_params('y', colors='red')
+    ax2.tick_params('y', colors='g')
+
+    ax.set_title("Hourly Stn: %s vs Stn: %s; Distance: %0.1f m \n "
+                 " DWD Orig- DWD Disagg:"
+                 " Pearson Corr %0.2f ; Spearman Corr %0.2f \n"
+
+                 " DWD Orig- Netatmo:"
+                 " Pearson Corr %0.2f ; Spearman Corr %0.2f \n"
+
+                 " Netatmo- DWD Disagg:"
+                 " Pearson Corr %0.2f ; Spearman Corr %0.2f"
                  % (stn_1_id, stn_2_id,
-                     sep_dist_netatmo_dwd, corr, rho))
-    ax.legend(loc=0)
-
+                     sep_dist_netatmo_dwd,
+                     pear_corr_dwd_orig_dwd_disagg,
+                    spr_corr_dwd_orig_dwd_disagg,
+                    pear_corr_dwd_orig_netatmo,
+                    spr_corr_dwd_orig_netatmo,
+                    pear_corr_netatmo_dwd_disagg,
+                    spr_corr_netatmo_dwd_disagg))
+#     ax.legend(loc=0)
+#     ax2.legend(loc=0)
     ax.grid(color='k', linestyle='--', linewidth=0.1, alpha=0.5)
 
 #     plt.xticks(rotation=45)
