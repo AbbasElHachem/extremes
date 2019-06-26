@@ -397,6 +397,8 @@ def plot_contingency_tables_as_a_sequence_ppt_hum_stns(stn_id,
                                  '%s vs %s \n distance: %0.1f m, time freq: %s'
                                  % (hum_thr, ppt_thr, stn_id,
                                     stn_2_id, min_dist, temp_freq))
+                    ax.set_xlabel('humidity %')
+                    ax.set_ylabel('rainfall')
                     plt.savefig(
                         os.path.join(
                             out_dir,
@@ -488,13 +490,13 @@ def compare_ppt_to_humidity_stns(netatmo_ppt_df_file,
                             os.mkdir(out_save_dir)
                         try:
                             pass
-                            plt_bar_plot_ppt_hum_stns(ppt_stn_id,
-                                                      stn_2_id,
-                                                      min_dist,
-                                                      df_common1,
-                                                      df_common2_mean,
-                                                      tem_freq,
-                                                      out_save_dir)
+#                             plt_bar_plot_ppt_hum_stns(ppt_stn_id,
+#                                                       stn_2_id,
+#                                                       min_dist,
+#                                                       df_common1,
+#                                                       df_common2_mean,
+#                                                       tem_freq,
+#                                                       out_save_dir)
 
 #                             plt_bar_plot_ppt_mean_min_max_hum_stns(
 #                                 ppt_stn_id,
@@ -507,14 +509,14 @@ def compare_ppt_to_humidity_stns(netatmo_ppt_df_file,
 #                                 tem_freq,
 #                                 out_save_dir)
 
-                            plt_scatter_plot_ppt_hum(ppt_stn_id,
-                                                     stn_2_id,
-                                                     min_dist,
-                                                     df_common1,
-                                                     df_common2_mean,
-                                                     0,
-                                                     tem_freq,
-                                                     out_save_dir)
+#                             plt_scatter_plot_ppt_hum(ppt_stn_id,
+#                                                      stn_2_id,
+#                                                      min_dist,
+#                                                      df_common1,
+#                                                      df_common2_mean,
+#                                                      0,
+#                                                      tem_freq,
+#                                                      out_save_dir)
 
                         except Exception as msg:
                             print('error while plotting', msg, tem_freq)

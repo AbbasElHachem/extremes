@@ -104,11 +104,10 @@ def plot_values_2_stns(stn1_id, stn2_id, df1, df2, seperate_dist,
 
     ax.set_ylim(-0.1, max(df1.values.ravel().max(),
                           df2.values.ravel().max()) + 1)
-    ax.set_ylabel('Ppt mm/day ',
-                  rotation=-90)
+    ax.set_ylabel('Ppt mm/day ')
     ax.tick_params('y', colors='darkred')
 
-    ax.set_title("Ratio between values Stn: %s vs Stn: %s;\n Distance: %0.1f m; "
+    ax.set_title("Daily values Stn: %s vs Stn: %s;\n Distance: %0.1f m; "
                  "Time Freq: %s; " % (stn1_id, stn2_id,
                                       seperate_dist,
                                       temp_freq))
@@ -303,11 +302,11 @@ def plot_max_monthly_vals_2_stns(stn1_id, stn2_id, df1, df2, seperate_dist,
     ax.plot(netatmo_monthly_avg.index,
             netatmo_monthly_avg.values, c='r',
             marker='+', markersize=4,
-            alpha=0.5)  # , label=stn1_id)
+            alpha=0.5, label=stn1_id)
 
     ax.plot(dwd_monthly_avg.index, dwd_monthly_avg.values, c='b',
             marker='+', markersize=4,
-            alpha=0.5)  # , label=stn2_id)
+            alpha=0.5, label=stn2_id)
 
 #     ax.plot(netatmo_monthly_min.index,
 #             netatmo_monthly_min.values, c='salmon',
@@ -425,21 +424,21 @@ def construct_netatmo_dwd_daily_dfs(netatmo_ppt_df_file,
                     df_netatmo_daily = resampleDf(df_netatmo_hourly, '1440min')
                     df_dwd_daily = resampleDf(df_dwd_hourly, '1440min')
 
-                    plot_values_2_stns(stn_id,
-                                       stn_2_id,
-                                       df_netatmo_daily,
-                                       df_dwd_daily,
-                                       min_dist,
-                                       '1440min',
-                                       out_save_dir_orig)
+#                     plot_values_2_stns(stn_id,
+#                                        stn_2_id,
+#                                        df_netatmo_daily,
+#                                        df_dwd_daily,
+#                                        min_dist,
+#                                        '1440min',
+#                                        out_save_dir_orig)
 
-                    plot_ratio_2_stns(stn_id,
-                                      stn_2_id,
-                                      df_netatmo_daily,
-                                      df_dwd_daily,
-                                      min_dist,
-                                      '1440min',
-                                      out_save_dir_orig)
+#                     plot_ratio_2_stns(stn_id,
+#                                       stn_2_id,
+#                                       df_netatmo_daily,
+#                                       df_dwd_daily,
+#                                       min_dist,
+#                                       '1440min',
+#                                       out_save_dir_orig)
 
 #                     plot_max_daily_vals_2_stns(stn_id,
 #                                                stn_2_id,

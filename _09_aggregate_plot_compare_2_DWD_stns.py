@@ -655,7 +655,8 @@ def plot_contingency_tables_as_a_sequence_two_stns(stn_id,
                              '%s vs %s \n distance: %0.1f m, time freq: %s'
                              % (ppt_thr, stn_id,
                                 stn_2_id, min_dist, temp_freq))
-
+                ax.set_xlabel('Station %s' % stn_2_id)
+                ax.set_ylabel('Station %s' % stn_id)
                 plt.savefig(
                     os.path.join(
                         out_dir,
@@ -714,33 +715,33 @@ def compare_two_dwd_stns(stns_ids):
                     try:
                         #====================================================
                         pass
-                        plt_bar_plot_2_stns(iid, stn_near, distance_near,
-                                            df_common1, df_common2, tem_freq,
-                                            out_save_dir)
-
-                        plt_scatter_plot_2_stns(iid, stn_near, distance_near,
-                                                df_common1, df_common2, ppt_thr_min,
-                                                tem_freq,
-                                                out_save_dir)
-                        plot_end_tail_cdf_2_stns(iid, stn_near, distance_near,
-                                                 df_common1, df_common2,
-                                                 tem_freq, ppt_thr_min,
-                                                 out_save_dir)
-                        plot_normalized_ranked_stns(iid, stn_near,
-                                                    distance_near,
-                                                    df_common1, df_common2,
-                                                    tem_freq,
-                                                    out_save_dir)
-                        plot_normalized_sorted_ranked_stns(iid, stn_near,
-                                                           distance_near,
-                                                           df_common1,
-                                                           df_common2,
-                                                           tem_freq,
-                                                           out_save_dir)
-                        plot_sorted_stns_vals(iid, stn_near, distance_near,
-                                              df_common1, df_common2,
-                                              tem_freq,
-                                              out_save_dir)
+#                         plt_bar_plot_2_stns(iid, stn_near, distance_near,
+#                                             df_common1, df_common2, tem_freq,
+#                                             out_save_dir)
+#
+#                         plt_scatter_plot_2_stns(iid, stn_near, distance_near,
+#                                                 df_common1, df_common2, ppt_thr_min,
+#                                                 tem_freq,
+#                                                 out_save_dir)
+#                         plot_end_tail_cdf_2_stns(iid, stn_near, distance_near,
+#                                                  df_common1, df_common2,
+#                                                  tem_freq, ppt_thr_min,
+#                                                  out_save_dir)
+#                         plot_normalized_ranked_stns(iid, stn_near,
+#                                                     distance_near,
+#                                                     df_common1, df_common2,
+#                                                     tem_freq,
+#                                                     out_save_dir)
+#                         plot_normalized_sorted_ranked_stns(iid, stn_near,
+#                                                            distance_near,
+#                                                            df_common1,
+#                                                            df_common2,
+#                                                            tem_freq,
+#                                                            out_save_dir)
+#                         plot_sorted_stns_vals(iid, stn_near, distance_near,
+#                                               df_common1, df_common2,
+#                                               tem_freq,
+#                                               out_save_dir)
                     except Exception as msg:
                         print('error while plotting', msg, tem_freq)
                         continue
@@ -768,15 +769,15 @@ def compare_two_dwd_stns(stns_ids):
                             print(True, 'Plotting P0 and Contingency Tables')
 
                             # TODO CHECK again with out dir
-                            plot_p0_as_a_sequence_two_stns(
-                                iid,
-                                stn_near,
-                                distance_near,
-                                ppt_thrs_list,
-                                idf1,
-                                idf2,
-                                aggregation_frequencies,
-                                out_save_dir)
+#                             plot_p0_as_a_sequence_two_stns(
+#                                 iid,
+#                                 stn_near,
+#                                 distance_near,
+#                                 ppt_thrs_list,
+#                                 idf1,
+#                                 idf2,
+#                                 aggregation_frequencies,
+#                                 out_save_dir)
 
                             plot_contingency_tables_as_a_sequence_two_stns(
                                 iid,
