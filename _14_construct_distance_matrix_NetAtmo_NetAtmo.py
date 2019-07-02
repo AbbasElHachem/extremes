@@ -27,10 +27,15 @@ from _00_additional_functions import (convert_coords_fr_wgs84_to_utm32_)
 #==============================================================================
 
 
-coords_netatmo_humidity_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-                                   r'\NetAtmo_BW\humidity_bw_1hour'
-                                   r'\netatmo_bw_1hour_coords.csv')
-assert os.path.exists(coords_netatmo_humidity_df_file), 'wrong Hum coords file'
+# coords_netatmo_humidity_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
+#                                    r'\NetAtmo_BW\humidity_bw_1hour'
+#                                    r'\netatmo_bw_1hour_coords.csv')
+# assert os.path.exists(coords_netatmo_humidity_df_file), 'wrong Hum coords file'
+
+coords_netatmo_temp_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
+                               r'\NetAtmo_BW\temperature_bw_1hour'
+                               r'\netatmo_bw_1hour_coords.csv')
+assert os.path.exists(coords_netatmo_temp_df_file), 'wrong Temp coords file'
 
 coords_netatmo_ppt_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
                               r'\NetAtmo_BW\rain_bw_1hour'
@@ -61,14 +66,15 @@ x_ppt_netatmo, y_ppt_netatmo = convert_coords_fr_wgs84_to_utm32_(
     in_df_ppt_netatmo_coords.loc[:, lat_col_name].values.ravel())
 #==============================================================================
 
-in_df_hum_netatmo_coords = pd.read_csv(coords_netatmo_humidity_df_file,
-                                       index_col=0,
-                                       sep=';')
+in_df_temp_netatmo_coords = pd.read_csv(coords_netatmo_temp_df_file,
+                                        index_col=0,
+                                        sep=';')
+in_df_temp_netatmo_coords.drop_duplicates(keep='first', inplace=True)
 
 x_hum_netatmo, y_hum_netatmo = convert_coords_fr_wgs84_to_utm32_(
     wgs82, utm32,
-    in_df_hum_netatmo_coords.loc[:, lon_col_name].values.ravel(),
-    in_df_hum_netatmo_coords.loc[:, lat_col_name].values.ravel())
+    in_df_temp_netatmo_coords.loc[:, lon_col_name].values.ravel(),
+    in_df_temp_netatmo_coords.loc[:, lat_col_name].values.ravel())
 #==============================================================================
 
 
@@ -82,14 +88,14 @@ coords_hum_netatmo = np.array([(x, y) for x, y in zip(x_hum_netatmo,
 
 data_mtx = np.zeros(
     shape=(in_df_ppt_netatmo_coords.index.shape[0],
-           in_df_hum_netatmo_coords.index.shape[0])).astype('float')
+           in_df_temp_netatmo_coords.index.shape[0])).astype('float')
 data_mtx[data_mtx == 0] = np.nan
 
 stations_ppt_id_with_ = [stn_id.replace(':', '_')
                          for stn_id in in_df_ppt_netatmo_coords.index]
 
 stations_hum_id_with_ = [stn_id.replace(':', '_')
-                         for stn_id in in_df_hum_netatmo_coords.index]
+                         for stn_id in in_df_temp_netatmo_coords.index]
 df_distance = pd.DataFrame(index=stations_ppt_id_with_,
                            columns=stations_hum_id_with_,
                            data=data_mtx)
@@ -108,7 +114,7 @@ for stn_mac in in_df_ppt_netatmo_coords.index:
     df_distance.loc[stn_max_with_, :] = dist
 
 df_distance.to_csv(os.path.join(out_save_dir,
-                                'distance_mtx_in_m_NetAtmo_ppt_Netatmo_hum.csv'),
+                                'distance_mtx_in_m_NetAtmo_ppt_Netatmo_temp.csv'),
                    sep=';')
 
 print('Done with everything')

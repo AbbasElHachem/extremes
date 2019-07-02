@@ -22,9 +22,11 @@ from _00_additional_functions import (
 
 
 # rain_bw_1hour'
-dfs_loc = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\humidity_bw_1hour'
+# dfs_loc = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\humidity_bw_1hour'
 
 # dfs_loc = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\rain_bw_5min'
+
+dfs_loc = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\temperature_bw_1hour'
 
 dfs_list = list_all_full_path('.csv', dfs_loc)
 dfs_list_ppt = list(filter(lambda x: 'coords' not in x, dfs_list))
@@ -65,7 +67,7 @@ for df_file in dfs_list_ppt:
     all_dfs_len -= 1
 
 df_all.to_csv(os.path.join(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW',
-                           r'humidity_all_netatmo_hourly_stns_combined_.csv'),
+                           r'temperature_all_netatmo_hourly_stns_combined_.csv'),
               sep=';')
 
 print('done with everything')

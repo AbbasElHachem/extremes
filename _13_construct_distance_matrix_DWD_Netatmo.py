@@ -35,8 +35,11 @@ assert os.path.exists(coords_dwd_df_file), 'wrong DWD coords file'
 #
 # assert os.path.exists(coords_netatmo_df_file), 'wrong NETATMO coords file'
 
+# coords_netatmo_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
+#                           r'\NetAtmo_BW\rain_bw_5min\netatmo_bw_1hour_coords.csv')
+
 coords_netatmo_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-                          r'\NetAtmo_BW\rain_bw_5min\netatmo_bw_1hour_coords.csv')
+                          r'\NetAtmo_BW\\temperature_bw_1hour\netatmo_bw_1hour_coords.csv')
 
 assert os.path.exists(coords_netatmo_df_file), 'wrong NETATMO coords file'
 
@@ -58,6 +61,8 @@ utm32 = "+init=EPSG:32632"
 
 in_df_netatmo_coords = pd.read_csv(coords_netatmo_df_file, index_col=0,
                                    sep=';')
+# drop all duplicates in stations
+in_df_netatmo_coords.drop_duplicates(keep='first', inplace=True)
 
 xnetatmo, ynetatmo = convert_coords_fr_wgs84_to_utm32_(
     wgs82, utm32,
@@ -89,20 +94,25 @@ df_distance = pd.DataFrame(index=stations_id_with_,
                            data=data_mtx)
 
 for stn_mac in in_df_netatmo_coords.index:
-    print(stn_mac)
-    lon_stn = in_df_netatmo_coords.loc[stn_mac, lon_col_name]
-    lat_stn = in_df_netatmo_coords.loc[stn_mac, lat_col_name]
-    xstn, ystn = convert_coords_fr_wgs84_to_utm32_(wgs82,
-                                                   utm32,
-                                                   lon_stn,
-                                                   lat_stn)
+    try:
+        print(stn_mac)
+        lon_stn = in_df_netatmo_coords.loc[stn_mac, lon_col_name]
+        lat_stn = in_df_netatmo_coords.loc[stn_mac, lat_col_name]
+        xstn, ystn = convert_coords_fr_wgs84_to_utm32_(wgs82,
+                                                       utm32,
+                                                       lon_stn,
+                                                       lat_stn)
 
-    dist = distance.cdist([(xstn, ystn)], coords_dwd, 'euclidean')
-    stn_max_with_ = stn_mac.replace(':', '_')
-    df_distance.loc[stn_max_with_, :] = dist
+        dist = distance.cdist([(xstn, ystn)], coords_dwd, 'euclidean')
+        stn_max_with_ = stn_mac.replace(':', '_')
+        df_distance.loc[stn_max_with_, :] = dist
+        print('done for stn', stn_mac)
+    except Exception as msg:
+        print(msg, 'error for', stn_mac)
+        continue
 
 df_distance.to_csv(os.path.join(out_save_dir,
-                                'distance_mtx_in_m_NetAtmo_DWD.csv'),
+                                'distance_mtx_in_m_NetAtmo_temp_DWD_ppt.csv'),
                    sep=';')
 
 print('Done with everything')

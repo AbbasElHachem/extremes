@@ -60,17 +60,7 @@ assert os.path.exists(path_to_ppt_netatmo_data), 'wrong NETATMO Ppt file'
 path_to_ppt_hdf_data = (r'X:\exchange\ElHachem'
                         r'\niederschlag_deutschland'
                         r'\1993_2016_5min_merge_nan.h5')
-assert os.path.exists(path_to_ppt_hdf_data), 'wrong NETATMO Ppt file'
-
-coords_dwd_df_file = (r'X:\exchange\ElHachem\niederschlag_deutschland'
-                      r'\1993_2016_5min_merge_nan.csv')
-assert os.path.exists(coords_dwd_df_file), 'wrong DWD coords file'
-
-coords_netatmo_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-                          r'\NetAtmo_BW\rain_bw_1hour\netatmo_bw_1hour_coords.csv')
-
-assert os.path.exists(coords_netatmo_df_file), 'wrong NETATMO coords file'
-
+assert os.path.exists(path_to_ppt_hdf_data), 'wrong DWD Ppt file'
 
 distance_matrix_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
                            r'\NetAtmo_BW\distance_mtx_in_m_NetAtmo_DWD.csv')
