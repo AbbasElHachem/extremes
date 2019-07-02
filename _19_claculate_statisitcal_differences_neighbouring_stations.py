@@ -22,29 +22,19 @@ __email__ = "abbas.el-hachem@iws.uni-stuttgart.de"
 
 # =============================================================================
 
-from pathlib import Path
 
 import os
 import timeit
 import time
-
-import numpy as np
-import pandas as pd
-import seaborn as sn
-import matplotlib.pyplot as plt
-import matplotlib.dates as md
-
 import shapefile
+import pandas as pd
 
-from scipy.stats import spearmanr as spr
-from scipy.stats import pearsonr as pears
+import matplotlib.pyplot as plt
 
-
+from pathlib import Path
 from matplotlib import rc
 from matplotlib import rcParams
-from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 from pandas.plotting import register_matplotlib_converters
-
 
 from _00_additional_functions import (calculate_probab_ppt_below_thr,
                                       resample_intersect_2_dfs)
@@ -65,9 +55,6 @@ rc('font', size=13)
 rc('font', family='serif')
 rc('axes', labelsize=13)
 rcParams['axes.labelpad'] = 13
-
-majorLocator = MultipleLocator(2)
-minorLocator = MultipleLocator(1)
 #==============================================================================
 #
 #==============================================================================
@@ -130,16 +117,18 @@ y_col_name = ' lat'
 
 # threshold for max ppt value per hour
 max_ppt_thr = 100.
-ppt_min_thr = 1  # used when calculating p0
+ppt_min_thr = 1  # used when calculating p1 = 1-p0
 
-ppt_thrs_list = [0.5, 1, 2, 0.5, 5]
+ppt_thrs_list = [0, 0.5, 1, 2, 0.5, 5]  # for selecting all df data abv thr
 
 # till 1 day '5min', '10min', '15min', '30min',
 aggregation_frequencies = ['60min', '90min', '120min', '180min', '240min',
                            '360min', '480min', '720min', '1440min']
 # aggregation_frequencies = ['60min']
 
-use_temp_thr = True
+# if True remove all Ppt values where Temp < Temp_thr= 1°C
+temp_thr = 1
+use_temp_thr = False
 #==============================================================================
 #
 #==============================================================================
@@ -176,9 +165,10 @@ def select_netatmo_ppt_abv_netatmo_temp_thr(
         netatmo_ppt_coords_df,  # path to netatmo ppt coords df
         distance_matrix_netatmo_ppt_netatmo_temp,
         distance_matrix_netatmo_ppt_dwd_ppt,
-        temp_freq_resample,
-        use_temp_thr=use_temp_thr,  # remove all data where temp<temp_thr
-        temp_thr=1  # temp threshold, below assume ppt is snow
+        temp_freq_resample,  # temp freq to resample dfs
+        df_min_ppt_thr,  # ppt_thr, select all values above thr
+        use_temp_thr,  # remove all data where temp<temp_thr
+        temp_thr  # temp threshold, below assume ppt is snow
 ):
     '''
     For every netatmo precipitation station,
@@ -296,6 +286,11 @@ def select_netatmo_ppt_abv_netatmo_temp_thr(
                 print('Second DWD Stn Id is', stn_2_dwd,
                       'distance is ', min_dist_ppt_dwd)
 
+                # select ppt values above ppt threshold
+                netatmo_ppt_stn1 = netatmo_ppt_stn1[netatmo_ppt_stn1 >=
+                                                    df_min_ppt_thr]
+                df_dwd = df_dwd[df_dwd >= df_min_ppt_thr]
+
                 # intersect dwd and netatmo ppt data
                 df_netatmo_cmn, df_dwd_cmn = resample_intersect_2_dfs(
                     netatmo_ppt_stn1, df_dwd, temp_freq_resample)
@@ -374,6 +369,7 @@ def select_netatmo_ppt_abv_netatmo_temp_thr(
 def plt_on_map_comparing_p1_ppt_mean_netatmo_dwd(df_results,
                                                  shp_de_file,
                                                  temp_freq,
+                                                 df_min_ppt_thr,
                                                  use_temp_thr,
                                                  out_dir):
     if use_temp_thr:
@@ -405,8 +401,9 @@ def plt_on_map_comparing_p1_ppt_mean_netatmo_dwd(df_results,
                    s=15,
                    label='P1')
 
-    ax.set_title('Difference in Probability P1 (Ppt>1mm) Netatmo and DWD %s %s'
-                 % (temp_freq, title_add))
+    ax.set_title('Difference in Probability P1 (Ppt>1mm)'
+                 ' Netatmo and DWD %s  above %d mm, %s'
+                 % (temp_freq, df_min_ppt_thr, title_add))
     plt.grid(alpha=0.5)
     plt.axis('equal')
     plt.savefig(
@@ -446,14 +443,15 @@ def plt_on_map_comparing_p1_ppt_mean_netatmo_dwd(df_results,
                    alpha=1,
                    label='Mean')
     plt.grid(alpha=0.5)
-    ax.set_title('Difference in Average Rainfall values Netatmo and DWD %s %s'
-                 % (temp_freq, title_add))
+    ax.set_title('Difference in Average Rainfall values'
+                 'Netatmo and DWD %s above %d mm, %s'
+                 % (temp_freq, df_min_ppt_thr, title_add))
     plt.axis('equal')
     plt.savefig(
         os.path.join(
             out_dir,
-            '%s_%s_difference_in_mean_station_ppt_dwd_station.png'
-            % (title_add, temp_freq)),
+            '%s_%s_ppt_thr_%d_difference_in_mean_station_ppt_dwd_station.png'
+            % (title_add, temp_freq, df_min_ppt_thr)),
         frameon=True, papertype='a4',
         bbox_inches='tight', pad_inches=.2)
     plt.close()
@@ -471,22 +469,26 @@ if __name__ == '__main__':
     START = timeit.default_timer()  # to get the runtime of the program
     for temp_freq in aggregation_frequencies:
         print('Time aggregation is', temp_freq)
-        df_results = select_netatmo_ppt_abv_netatmo_temp_thr(
-            netatmo_ppt_df_file=path_to_ppt_netatmo_data,
-            netatmo_temperature_df_file=path_to_temp_netatmo_data,
-            path_to_dwd_data=path_to_ppt_hdf_data,
-            netatmo_ppt_coords_df=path_to_netatmo_coords_df_file,
-            distance_matrix_netatmo_ppt_netatmo_temp=distance_matrix_df_file_ppt_temp,
-            distance_matrix_netatmo_ppt_dwd_ppt=distance_matrix_netatmo_dwd_df_file,
-            temp_freq_resample=temp_freq,
-            use_temp_thr=use_temp_thr,
-            temp_thr=1)
+        for df_min_ppt_thr in ppt_thrs_list:
+            print('Ppt threshold is', df_min_ppt_thr)
+            df_results = select_netatmo_ppt_abv_netatmo_temp_thr(
+                netatmo_ppt_df_file=path_to_ppt_netatmo_data,
+                netatmo_temperature_df_file=path_to_temp_netatmo_data,
+                path_to_dwd_data=path_to_ppt_hdf_data,
+                netatmo_ppt_coords_df=path_to_netatmo_coords_df_file,
+                distance_matrix_netatmo_ppt_netatmo_temp=distance_matrix_df_file_ppt_temp,
+                distance_matrix_netatmo_ppt_dwd_ppt=distance_matrix_netatmo_dwd_df_file,
+                temp_freq_resample=temp_freq,
+                df_min_ppt_thr=df_min_ppt_thr,
+                use_temp_thr=use_temp_thr,
+                temp_thr=temp_thr)
 
-        plt_on_map_comparing_p1_ppt_mean_netatmo_dwd(df_results,
-                                                     path_to_shpfile,
-                                                     temp_freq,
-                                                     use_temp_thr,
-                                                     out_save_dir_orig)
-    STOP = timeit.default_timer()  # Ending time
+            plt_on_map_comparing_p1_ppt_mean_netatmo_dwd(df_results,
+                                                         path_to_shpfile,
+                                                         temp_freq,
+                                                         df_min_ppt_thr,
+                                                         use_temp_thr,
+                                                         out_save_dir_orig)
+        STOP = timeit.default_timer()  # Ending time
     print(('\n****Done with everything on %s.\nTotal run time was'
            ' about %0.4f seconds ***' % (time.asctime(), STOP - START)))
