@@ -30,9 +30,9 @@ from _00_additional_functions import (convert_coords_fr_wgs84_to_utm32_,
 from _02_get_data_simultaneous_stns import get_events_stn_data
 
 
-# plt.style.use('fast')
-plt.rcParams.update({'font.size': 14})
-plt.rcParams.update({'axes.labelsize': 12})
+plt.style.use('fast')
+plt.rcParams.update({'font.size': 8})  # 14
+plt.rcParams.update({'axes.labelsize': 8})  # 12
 
 #==============================================================================
 #
@@ -43,6 +43,7 @@ path_to_dfs_simultaneous_events = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\thr8
 path_to_ppt_coords_data = (r'X:\exchange\ElHachem'
                            r'\niederschlag_deutschland'
                            r'\1993_2016_5min_merge_nan.csv')
+
 
 path_to_shpfile = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
                    r'\shp_file_germany\DEU_adm1.shp')

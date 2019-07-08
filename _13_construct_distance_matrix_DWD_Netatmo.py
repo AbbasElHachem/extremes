@@ -30,16 +30,14 @@ coords_dwd_df_file = (r'X:\exchange\ElHachem\niederschlag_deutschland'
                       r'\1993_2016_5min_merge_nan.csv')
 assert os.path.exists(coords_dwd_df_file), 'wrong DWD coords file'
 
-# coords_netatmo_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-#                           r'\NetAtmo_BW\rain_bw_1hour\netatmo_bw_1hour_coords.csv')
-#
-# assert os.path.exists(coords_netatmo_df_file), 'wrong NETATMO coords file'
+coords_netatmo_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
+                          r'\NetAtmo_BW\rain_bw_1hour\netatmo_bw_1hour_coords.csv')
 
 # coords_netatmo_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
 #                           r'\NetAtmo_BW\rain_bw_5min\netatmo_bw_1hour_coords.csv')
 
-coords_netatmo_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-                          r'\NetAtmo_BW\\temperature_bw_1hour\netatmo_bw_1hour_coords.csv')
+# coords_netatmo_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
+#                           r'\NetAtmo_BW\\temperature_bw_1hour\netatmo_bw_1hour_coords.csv')
 
 assert os.path.exists(coords_netatmo_df_file), 'wrong NETATMO coords file'
 
@@ -48,7 +46,9 @@ out_save_dir = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW')
 
 if not os.path.exists(out_save_dir):
     os.mkdir(out_save_dir)
-
+#==============================================================================
+#
+#==============================================================================
 lon_col_name = ' lon'
 lat_col_name = ' lat'
 
@@ -58,7 +58,9 @@ y_col_name = 'Hochwert'
 # def epsg wgs84 and utm32 for coordinates conversion
 wgs82 = "+init=EPSG:4326"
 utm32 = "+init=EPSG:32632"
-
+#==============================================================================
+#
+#==============================================================================
 in_df_netatmo_coords = pd.read_csv(coords_netatmo_df_file, index_col=0,
                                    sep=';')
 # drop all duplicates in stations
@@ -112,7 +114,7 @@ for stn_mac in in_df_netatmo_coords.index:
         continue
 
 df_distance.to_csv(os.path.join(out_save_dir,
-                                'distance_mtx_in_m_NetAtmo_temp_DWD_ppt.csv'),
+                                'distance_mtx_in_m_NetAtmo_DWD.csv'),
                    sep=';')
 
 print('Done with everything')

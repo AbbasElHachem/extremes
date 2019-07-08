@@ -119,11 +119,12 @@ y_col_name = ' lat'
 max_ppt_thr = 100.
 ppt_min_thr = 1  # used when calculating p1 = 1-p0
 
-ppt_thrs_list = [0, 0.5, 1, 2, 0.5, 5]  # for selecting all df data abv thr
+# , 0.5, 1, 2, 0.5, 5]  # for selecting all df data abv thr
+ppt_thrs_list = [0]
 
 # till 1 day '5min', '10min', '15min', '30min',
-aggregation_frequencies = ['60min', '90min', '120min', '180min', '240min',
-                           '360min', '480min', '720min', '1440min']
+aggregation_frequencies = ['60min']  # , '120min', '180min', '240min',
+#                            '360min', '720min', '1440min']
 # aggregation_frequencies = ['60min']
 
 # if True remove all Ppt values where Temp < Temp_thr= 1°C
@@ -175,6 +176,12 @@ def select_netatmo_ppt_abv_netatmo_temp_thr(
      find nearest netatmo temperature station, intersect
      both stations and remove all days where temperature < 1°C
 
+     Find then for the netatmo station the neares DWD station
+     intersect both stations, calculate the difference in the
+     probability that P>1mm and in the mean value
+
+     Add the result to a new dataframe and return it
+
     '''
     # read netatmo ppt df
     in_netatmo_ppt_stns_df = pd.read_csv(netatmo_ppt_df_file,
@@ -211,7 +218,7 @@ def select_netatmo_ppt_abv_netatmo_temp_thr(
 
     for ppt_stn_id in stns_ppt_ids:
         # iterating through netatmo ppt stations
-        print('First Ppt Stn Id is', ppt_stn_id)
+        print('\n********\n First Ppt Stn Id is', ppt_stn_id)
 
         # orig stn name, for locating coordinates, appending to df_results
         ppt_stn_id_name_orig = ppt_stn_id.replace('_', ':')
@@ -234,7 +241,8 @@ def select_netatmo_ppt_abv_netatmo_temp_thr(
 
                 # check if temp station is close enough (5Km)
                 if min_dist_ppt_temp <= 5000:
-                    print('Seperating distance is ', min_dist_ppt_temp, ' m')
+                    print('\n********\n Seperating distance is ',
+                          min_dist_ppt_temp, ' m')
 
                     # if station is near, read df_temp
                     netatmo_temp_stn = sorted_distances_ppt_temp.index[0]
@@ -242,7 +250,7 @@ def select_netatmo_ppt_abv_netatmo_temp_thr(
                         :, netatmo_temp_stn]
                     df_temp.dropna(axis=0, inplace=True)
 
-                    print(' Temp Stn Id is', netatmo_temp_stn)
+                    print('\n********\n Temp Stn Id is', netatmo_temp_stn)
                     # intersect netatmo ppt and netatmo temp data
                     idx_cmn = netatmo_ppt_stn1.index.intersection(
                         df_temp.index)
@@ -264,7 +272,7 @@ def select_netatmo_ppt_abv_netatmo_temp_thr(
                         print('station is near but no common data')
                         continue
                 else:
-                    print('no nearby Temp station')
+                    print('\n********\n no nearby Temp station')
                     continue
             # if use temp thr and enough ppt data abv temp_thr exist
             if use_temp_thr and isinstance(df_ppt_abv_temp_thr, pd.Series):
@@ -283,13 +291,13 @@ def select_netatmo_ppt_abv_netatmo_temp_thr(
 
                 df_dwd = HDF52.get_pandas_dataframe(ids=[stn_2_dwd])
                 df_dwd = df_dwd[df_dwd < max_ppt_thr]
-                print('Second DWD Stn Id is', stn_2_dwd,
+                print('\n********\n Second DWD Stn Id is', stn_2_dwd,
                       'distance is ', min_dist_ppt_dwd)
 
                 # select ppt values above ppt threshold
-                netatmo_ppt_stn1 = netatmo_ppt_stn1[netatmo_ppt_stn1 >=
-                                                    df_min_ppt_thr]
-                df_dwd = df_dwd[df_dwd >= df_min_ppt_thr]
+#                 netatmo_ppt_stn1 = netatmo_ppt_stn1[netatmo_ppt_stn1 >=
+#                                                     df_min_ppt_thr]
+#                 df_dwd = df_dwd[df_dwd >= df_min_ppt_thr]
 
                 # intersect dwd and netatmo ppt data
                 df_netatmo_cmn, df_dwd_cmn = resample_intersect_2_dfs(
@@ -346,12 +354,13 @@ def select_netatmo_ppt_abv_netatmo_temp_thr(
                     df_results.loc[
                         ppt_stn_id,
                         'color_mean_ppt'] = colormean
-                    print('ADDED DATA TO DF RESULTS')
+
+                    print('\n********\n ADDED DATA TO DF RESULTS')
                 else:
                     print('DWD Station is near but not enough data')
 
             else:
-                print('DWD station is not near')
+                print('\n********\n DWD station is not near')
 
         except Exception as msg:
             print('error while finding neighbours ')
@@ -366,12 +375,20 @@ def select_netatmo_ppt_abv_netatmo_temp_thr(
 #==============================================================================
 
 
-def plt_on_map_comparing_p1_ppt_mean_netatmo_dwd(df_results,
-                                                 shp_de_file,
-                                                 temp_freq,
-                                                 df_min_ppt_thr,
-                                                 use_temp_thr,
-                                                 out_dir):
+def plt_on_map_comparing_p1_ppt_mean_netatmo_dwd(
+    df_results,  # df with netatmo stns and result of comparing
+    shp_de_file,  # shapefile of BW
+    temp_freq,  # temp freq of df
+    df_min_ppt_thr,  # min ppt df, select all vals abv thr
+    use_temp_thr,  # it True use remove all data where temp<thr
+    out_dir  # out save dir for plots
+):
+    '''
+    Read the df_results containing for every netatmo station
+    the coordinates (lon, lat) and the comparision between 
+    the p1 and the mean value, between netatmo and nearest dwd
+    plot the reults on a map, either with or with temp_thr
+    '''
     if use_temp_thr:
         title_add = 'With_Temperatre_threshold'
     else:
@@ -402,9 +419,12 @@ def plt_on_map_comparing_p1_ppt_mean_netatmo_dwd(df_results,
                    label='P1')
 
     ax.set_title('Difference in Probability P1 (Ppt>1mm)'
-                 ' Netatmo and DWD %s  above %d mm, %s'
-                 % (temp_freq, df_min_ppt_thr, title_add))
+                 ' Netatmo and DWD %s data'  # above %d mm, %s'
+                 % (temp_freq))  # , df_min_ppt_thr, title_add))
     plt.grid(alpha=0.5)
+
+    plt.xlabel('Longitude')
+    plt.ylabel('Latitude')
     plt.axis('equal')
     plt.savefig(
         os.path.join(
@@ -444,9 +464,12 @@ def plt_on_map_comparing_p1_ppt_mean_netatmo_dwd(df_results,
                    label='Mean')
     plt.grid(alpha=0.5)
     ax.set_title('Difference in Average Rainfall values'
-                 'Netatmo and DWD %s above %d mm, %s'
-                 % (temp_freq, df_min_ppt_thr, title_add))
+                 ' Netatmo and DWD %s data'  # above %d mm, %s
+                 % (temp_freq))  # , df_min_ppt_thr, title_add))
     plt.axis('equal')
+    plt.xlabel('Longitude')
+    plt.ylabel('Latitude')
+
     plt.savefig(
         os.path.join(
             out_dir,
@@ -467,10 +490,11 @@ if __name__ == '__main__':
 
     print('**** Started on %s ****\n' % time.asctime())
     START = timeit.default_timer()  # to get the runtime of the program
+
     for temp_freq in aggregation_frequencies:
-        print('Time aggregation is', temp_freq)
+        print('\n********\n Time aggregation is', temp_freq)
         for df_min_ppt_thr in ppt_thrs_list:
-            print('Ppt threshold is', df_min_ppt_thr)
+            print('\n********\n Ppt threshold is', df_min_ppt_thr)
             df_results = select_netatmo_ppt_abv_netatmo_temp_thr(
                 netatmo_ppt_df_file=path_to_ppt_netatmo_data,
                 netatmo_temperature_df_file=path_to_temp_netatmo_data,
