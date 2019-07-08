@@ -101,17 +101,28 @@ df_distance = pd.DataFrame(index=stations_ppt_id_with_,
                            data=data_mtx)
 
 for stn_mac in in_df_ppt_netatmo_coords.index:
-    print(stn_mac)
-    lon_stn = in_df_ppt_netatmo_coords.loc[stn_mac, lon_col_name]
-    lat_stn = in_df_ppt_netatmo_coords.loc[stn_mac, lat_col_name]
-    xstn, ystn = convert_coords_fr_wgs84_to_utm32_(wgs82,
-                                                   utm32,
-                                                   lon_stn,
-                                                   lat_stn)
+    try:
+        print(stn_mac)
+        lon_stn = in_df_ppt_netatmo_coords.loc[stn_mac, lon_col_name]
+        lat_stn = in_df_ppt_netatmo_coords.loc[stn_mac, lat_col_name]
+        assert isinstance(lon_stn, np.float)
+    except Exception as msg:
+        print(stn_mac, msg, '\n Coordinates not unique')
+        lon_stn = lon_stn.values[0]
+        lat_stn = lat_stn.values[0]
 
-    dist = distance.cdist([(xstn, ystn)], coords_hum_netatmo, 'euclidean')
-    stn_max_with_ = stn_mac.replace(':', '_')
-    df_distance.loc[stn_max_with_, :] = dist
+    try:
+        xstn, ystn = convert_coords_fr_wgs84_to_utm32_(wgs82,
+                                                       utm32,
+                                                       lon_stn,
+                                                       lat_stn)
+
+        dist = distance.cdist([(xstn, ystn)], coords_hum_netatmo, 'euclidean')
+        stn_max_with_ = stn_mac.replace(':', '_')
+        df_distance.loc[stn_max_with_, :] = dist
+    except Exception as msg:
+        print(msg)
+        raise Exception
 
 df_distance.to_csv(os.path.join(out_save_dir,
                                 'distance_mtx_in_m_NetAtmo_ppt_Netatmo_temp.csv'),

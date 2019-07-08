@@ -192,15 +192,17 @@ def remove_one_elt_lst(elt, lst):
 #==============================================================================
 
 
-def resampleDf(data_frame,
-               temp_freq,
-               df_sep_=None,
-               out_save_dir=None,
-               fillnan=False,
-               df_save_name=None):
+def resampleDf(data_frame,  # dataframe to resample (or series)
+               temp_freq,  # temp frequency to resample
+               df_sep_=None,  # sep used if saving dataframe
+               out_save_dir=None,  # out direcory for saving df
+               fillnan=False,  # if True, fill nans with fill_value
+               fillnan_value=0,  # if True, replace nans with 0
+               df_save_name=None  # name of outpot df
+               ):
     ''' sample DF based on freq and time shift and label shift '''
 
-    # df_ = data_frame.copy()
+    # data_frame = data_frame[data_frame >= 0]
     df_res = data_frame.resample(rule=temp_freq,
                                  axis=0,
                                  label='left',
@@ -208,7 +210,7 @@ def resampleDf(data_frame,
                                  convention='end').apply(lambda x: x.values.sum())
 
     if fillnan:
-        df_res.fillna(value=0, inplace=True)
+        df_res.fillna(value=fillnan_value, inplace=True)
     if df_save_name is not None and out_save_dir is not None:
         df_res.to_csv(os.path.join(out_save_dir, df_save_name),
                       sep=df_sep_)
@@ -274,7 +276,10 @@ def select_df_within_period(df, start, end):
 #==============================================================================
 
 
-def resample_intersect_2_dfs(df1, df2, temp_freq):
+def resample_intersect_2_dfs(df1,  # first dataframe to resample
+                             df2,  # second dataframe to resample
+                             temp_freq  # temporal frequency for resampling
+                             ):
     ''' 
     a fct to resample and intersect two dataframes
     also to handle Nans is Nans are found after the stations 
@@ -289,7 +294,7 @@ def resample_intersect_2_dfs(df1, df2, temp_freq):
     idx_common = df_resample1.index.intersection(df_resample2.index)
 
     if idx_common.shape[0] > 0:
-        print('common index is found, interescting dataframes')
+        print('\n********\n common index is found, interescting dataframes')
         try:
             df_common1 = df_resample1.loc[idx_common, :]
             df_common2 = df_resample2.loc[idx_common, :]
@@ -302,7 +307,7 @@ def resample_intersect_2_dfs(df1, df2, temp_freq):
                                   data=df_common1.values)
         df_common2 = pd.DataFrame(index=df_common2.index,
                                   data=df_common2.values)
-        print('After resampling sum of NaN values is')
+        print('\n********\n After resampling sum of NaN values is')
         print('first station has ', df_common1.isna().sum(), 'NaN values')
         print('second station has ', df_common2.isna().sum(), 'NaN values')
 
@@ -327,7 +332,7 @@ def resample_intersect_2_dfs(df1, df2, temp_freq):
 
         new_idx_common = df_common1.index.intersection(df_common2.index)
         if new_idx_common.shape[0] != idx_common.shape[0]:
-            print('Nan dropped fom Index, dfs have been resampled')
+            print('\n********\n Nan dropped fom Index, dfs resampled')
 
         try:
             df_common1 = df_common1.loc[new_idx_common, :]
@@ -338,7 +343,7 @@ def resample_intersect_2_dfs(df1, df2, temp_freq):
 
         return df_common1, df_common2
     else:
-        print('no common index found, returning empty dataframes')
+        print('\n********\n no common index found, returning empty dfs')
         return pd.DataFrame(), pd.DataFrame()
 
 #==============================================================================
