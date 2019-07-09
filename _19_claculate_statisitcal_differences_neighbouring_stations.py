@@ -31,13 +31,17 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+from adjustText import adjust_text
 from pathlib import Path
 from matplotlib import rc
 from matplotlib import rcParams
 from pandas.plotting import register_matplotlib_converters
+from scipy.stats import spearmanr as spr
+from scipy.stats import pearsonr as pears
 
 from _00_additional_functions import (calculate_probab_ppt_below_thr,
-                                      resample_intersect_2_dfs)
+                                      resample_intersect_2_dfs,
+                                      select_df_within_period)
 
 from b_get_data import HDF5
 
@@ -115,8 +119,8 @@ x_col_name = ' lon'
 y_col_name = ' lat'
 
 # min distance threshold used for selecting neighbours
-min_dist_thr_ppt = 20000  # m
-min_dist_thr_temp = 20000  # m
+min_dist_thr_ppt = 50000  # m
+min_dist_thr_temp = 50000  # m
 
 # threshold for max ppt value per hour
 max_ppt_thr = 100.
@@ -126,26 +130,33 @@ ppt_min_thr = 1  # used when calculating p1 = 1-p0
 ppt_thrs_list = [0]
 
 # till 1 day '5min', '10min', '15min', '30min',
-aggregation_frequencies = ['60min']  # , '120min', '180min', '240min',
+# aggregation_frequencies = ['60min', '120min', '180min', '240min',
 #                            '360min', '720min', '1440min']
-# aggregation_frequencies = ['60min']
+aggregation_frequencies = ['60min']
 
 # if True remove all Ppt values where Temp < Temp_thr= 1°C
 temp_thr = 1
-use_temp_thr = True
+use_temp_thr = False
+
+start_date = '01-05'
+end_date = '01-10'
+
 #==============================================================================
 #
 #==============================================================================
 
 
-def compare_p1_dwd_p1_netatmo(val_dwd, val_netatmo):
+def compare_p1_dwd_p1_netatmo(val_dwd,  # p1 or ppt_mean  for df_DWD
+                              val_netatmo  # p1 or ppt_mean for df_Netatmo
+                              ):
     '''
     use this function to compare two values from two different stations
     find if the values are equal +-10% , if smaller or if bigger
     return the result for being saved in a dataframe
     plot the result as scatter plots
 
-    marker, color 
+    Return:
+        marker, color 
     '''
     _10_percent_dwd = 0.1 * val_dwd
 
@@ -157,6 +168,37 @@ def compare_p1_dwd_p1_netatmo(val_dwd, val_netatmo):
         return '+', 'r'  # '+'
     return
 
+#==============================================================================
+#
+#==============================================================================
+
+
+def look_at_agreement_df1_df2(df_dwd,  # df dwd intersected with netatmo
+                              df_netatmo,  # df netatmo intersected with dwd
+                              ppt_thr,  # ppt thr to check agreement
+                              ):
+    '''
+    read two dataframes, one for dwd and one for netatmo
+    replace all values above threshold with 1 and below with 0
+
+    calculate coorelation between the two
+    look for agreement or disagreement
+    try it with or without considering temperature threshold
+    '''
+    df_dwd_copy = df_dwd.copy()
+    df_netatmo_copy = df_netatmo.copy()
+
+    df_dwd_copy['Bool'] = (df_dwd_copy.values > ppt_thr).astype(int)
+    df_netatmo_copy['Bool'] = (df_netatmo_copy.values > ppt_thr).astype(int)
+
+    # calculate correlations (pearson and spearman)
+    corr = np.round(pears(df_dwd_copy.Bool.values.ravel(),
+                          df_netatmo_copy.Bool.values.ravel())[0], 2)
+
+    rho = np.round(spr(df_dwd_copy.Bool.values.ravel(),
+                       df_netatmo_copy.Bool.values.ravel())[0], 2)
+
+    return corr, rho
 #==============================================================================
 #
 #==============================================================================
@@ -188,6 +230,7 @@ def select_netatmo_ppt_abv_netatmo_temp_thr(
      Add the result to a new dataframe and return it
 
     '''
+    print('\n######\n reading all dfs \n#######\n')
     # read netatmo ppt df
     in_netatmo_ppt_stns_df = pd.read_csv(netatmo_ppt_df_file,
                                          index_col=0, sep=';',
@@ -220,9 +263,12 @@ def select_netatmo_ppt_abv_netatmo_temp_thr(
     # read netatmo ppt coords df (for plotting)
     in_netatmo_df_coords = pd.read_csv(netatmo_ppt_coords_df, sep=';',
                                        index_col=0, engine='c')
-
+    print('\n######\n done reading all dfs \n#######\n')
     # create df to append results of comparing two stns
     df_results = pd.DataFrame(index=stns_ppt_ids)
+
+    df_results_correlations = pd.DataFrame(index=stns_ppt_ids)
+
     alls_stns_len = len(stns_ppt_ids)
     for ppt_stn_id in stns_ppt_ids:
         print('\n********\n Total number of Netatmo stations is\n********\n',
@@ -368,6 +414,24 @@ def select_netatmo_ppt_abv_netatmo_temp_thr(
                         ppt_stn_id,
                         'color_mean_ppt'] = colormean
 
+                    # calculate correlation, look for agreements
+                    pears_corr, spr_corr = look_at_agreement_df1_df2(
+                        df_dwd=df_dwd_cmn,
+                        df_netatmo=df_netatmo_cmn,
+                        ppt_thr=ppt_min_thr)
+                    # append the result to df_result, for each stn
+                    df_results_correlations.loc[ppt_stn_id,
+                                                'lon'] = lon_stn_netatmo
+                    df_results_correlations.loc[ppt_stn_id,
+                                                'lat'] = lat_stn_netatmo
+                    df_results_correlations.loc[
+                        ppt_stn_id,
+                        'Pearson Correlation'] = pears_corr
+
+                    df_results_correlations.loc[
+                        ppt_stn_id,
+                        'Spearman Correlation'] = spr_corr
+
                     print('\n********\n ADDED DATA TO DF RESULTS')
                 else:
                     print('DWD Station is near but not enough data')
@@ -381,19 +445,72 @@ def select_netatmo_ppt_abv_netatmo_temp_thr(
 
     # drop all netatmo stns with no data
     df_results.dropna(axis=0, how='any', inplace=True)
-    return df_results
+    df_results_correlations.dropna(axis=0, how='any', inplace=True)
+
+    # save both dataframes
+    df_results.to_csv(
+        os.path.join(
+            out_save_dir_orig,
+            'df_comparing_p%d_and_mean_freq_%s_dwd_netatmo_with_temp_thr_%s.csv'
+            % (ppt_min_thr, temp_freq_resample, use_temp_thr)),
+        sep=';')
+    df_results_correlations.to_csv(
+        os.path.join(
+            out_save_dir_orig,
+            'df_comparing_correlations_p%d_freq_%s_dwd_netatmo_with_temp_thr_%s.csv'
+            % (ppt_min_thr, temp_freq_resample, use_temp_thr)),
+        sep=';')
+    return df_results, df_results_correlations
 
 
 #==============================================================================
 #
 #==============================================================================
 
+def save_how_many_abv_same_below(
+    df_p1_mean,  # df with netatmo stns and result of comparing
+    temp_freq,  # temp freq of df
+    ppt_thr,  # used for calculating p1 or p5
+    use_temp_thr,  # it True use remove all data where temp<thr
+    out_dir  # out save dir for plots
+):
+    '''
+    use this funcion to find how many stations have similar values for p1 and
+    for the average, how many are netatmo are below dwd and how many 
+    netatmo are above dwd
 
+    return the result in a dataframe
+    '''
+    df_out = pd.DataFrame()
+
+    df_out.loc['count_vals_same_p1',
+               'Result'] = df_p1_mean[df_p1_mean['p1'] == 's'].shape[0]
+    df_out.loc['count_vals_less_p1',
+               'Result'] = df_p1_mean[df_p1_mean['p1'] == '_'].shape[0]
+    df_out.loc['count_vals_abv_p1',
+               'Result'] = df_p1_mean[df_p1_mean['p1'] == '+'].shape[0]
+
+    df_out.loc['count_vals_same_mean',
+               'Result'] = df_p1_mean[df_p1_mean['mean_ppt'] == 's'].shape[0]
+    df_out.loc['count_vals_less_mean',
+               'Result'] = df_p1_mean[df_p1_mean['mean_ppt'] == '_'].shape[0]
+    df_out.loc['count_vals_abv_mean',
+               'Result'] = df_p1_mean[df_p1_mean['mean_ppt'] == '+'].shape[0]
+
+    df_out.to_csv(os.path.join(out_dir,
+                               'df_similarities_%s_%dmm_use_temp_thr_%s_.csv'
+                               % (temp_freq, ppt_thr, use_temp_thr)))
+    pass
+
+
+#==============================================================================
+#
+#==============================================================================
 def plt_on_map_comparing_p1_ppt_mean_netatmo_dwd(
-    df_results,  # df with netatmo stns and result of comparing
+    df_p1_mean,  # df with netatmo stns and result of comparing
     shp_de_file,  # shapefile of BW
     temp_freq,  # temp freq of df
-    df_min_ppt_thr,  # min ppt df, select all vals abv thr
+    ppt_thr,  # min ppt df, select all vals abv thr
     use_temp_thr,  # it True use remove all data where temp<thr
     out_dir  # out save dir for plots
 ):
@@ -401,13 +518,17 @@ def plt_on_map_comparing_p1_ppt_mean_netatmo_dwd(
     Read the df_results containing for every netatmo station
     the coordinates (lon, lat) and the comparision between 
     the p1 and the mean value, between netatmo and nearest dwd
-    plot the reults on a map, either with or with temp_thr
+
+    plot the reults on a map, either with or without temp_thr
+    use the shapefile of BW
     '''
     if use_temp_thr:
         title_add = 'With_Temperatre_threshold'
     else:
         title_add = '_'
-
+    #==========================================================================
+    # Plot comparing p1
+    #==========================================================================
     print('plotting comparing p1')
     plt.ioff()
     fig = plt.figure(figsize=(15, 15), dpi=150)
@@ -423,34 +544,34 @@ def plt_on_map_comparing_p1_ppt_mean_netatmo_dwd(
         ax.scatter(lon, lat, marker='.', c='lightgrey',
                    alpha=0.25, s=2)
     # plot the stations in shapefile, look at the results of p1 comparasion
-    for i in range(df_results.shape[0]):
-        ax.scatter(df_results.lon.values[i],
-                   df_results.lat.values[i],
-                   marker=df_results.p1.values[i],
-                   c=df_results.colorp1.values[i],
+    for i in range(df_p1_mean.shape[0]):
+        ax.scatter(df_p1_mean.lon.values[i],
+                   df_p1_mean.lat.values[i],
+                   marker=df_p1_mean.p1.values[i],
+                   c=df_p1_mean.colorp1.values[i],
                    alpha=1,
                    s=15,
                    label='P1')
 
-    ax.set_title('Difference in Probability P1 (Ppt>1mm)'
+    ax.set_title('Difference in Probability P1 (Ppt>%dmm)'
                  ' Netatmo and DWD %s data'  # above %d mm, %s'
-                 % (temp_freq))  # , df_min_ppt_thr, title_add))
-    plt.grid(alpha=0.5)
+                 % (ppt_thr, temp_freq))  # , df_min_ppt_thr, title_add))
+    ax.grid(alpha=0.5)
 
-    plt.xlabel('Longitude')
-    plt.ylabel('Latitude')
-    plt.axis('equal')
+    ax.set_xlabel('Longitude')
+    ax.set_ylabel('Latitude')
+    ax.set_aspect(1.0)
     plt.savefig(
         os.path.join(
             out_dir,
-            '%s_%s_differece_in_p1_netatmo_ppt_dwd_station.png'
-            % (title_add, temp_freq)),
+            '%s_%s_differece_in_p%d_netatmo_ppt_dwd_station.png'
+            % (title_add, temp_freq, ppt_thr)),
 
         frameon=True, papertype='a4',
         bbox_inches='tight', pad_inches=.2)
     plt.close()
     #==========================================================================
-    #
+    # Plot comparision of mean ppt
     #==========================================================================
     print('plotting comparing mean')
     plt.ioff()
@@ -469,26 +590,26 @@ def plt_on_map_comparing_p1_ppt_mean_netatmo_dwd(
 
     for i in range(df_results.shape[0]):
 
-        ax.scatter(df_results.lon.values[i],
-                   df_results.lat.values[i],
-                   marker=df_results.loc[:, 'mean_ppt'].values[i],
-                   c=df_results.color_mean_ppt.values[i],
+        ax.scatter(df_p1_mean.lon.values[i],
+                   df_p1_mean.lat.values[i],
+                   marker=df_p1_mean.loc[:, 'mean_ppt'].values[i],
+                   c=df_p1_mean.color_mean_ppt.values[i],
                    s=15,
                    alpha=1,
                    label='Mean')
-    plt.grid(alpha=0.5)
+    ax.grid(alpha=0.5)
     ax.set_title('Difference in Average Rainfall values'
                  ' Netatmo and DWD %s data'  # above %d mm, %s
                  % (temp_freq))  # , df_min_ppt_thr, title_add))
-    plt.axis('equal')
-    plt.xlabel('Longitude')
-    plt.ylabel('Latitude')
+    ax.set_aspect(1.0)
+    ax.set_xlabel('Longitude')
+    ax.set_ylabel('Latitude')
 
     plt.savefig(
         os.path.join(
             out_dir,
             '%s_%s_ppt_thr_%d_difference_in_mean_station_ppt_dwd_station.png'
-            % (title_add, temp_freq, df_min_ppt_thr)),
+            % (title_add, temp_freq, ppt_thr)),
         frameon=True, papertype='a4',
         bbox_inches='tight', pad_inches=.2)
     plt.close()
@@ -500,21 +621,124 @@ def plt_on_map_comparing_p1_ppt_mean_netatmo_dwd(
 #==============================================================================
 
 
-def save_how_many_abv_same_below(
-    df_results,  # df with netatmo stns and result of comparing
+def plt_on_map_agreements(
+    df_correlations,  # df with netatmo stns, result of correlations
+    shp_de_file,  # shapefile of BW
     temp_freq,  # temp freq of df
-    df_min_ppt_thr,  # min ppt df, select all vals abv thr
+    ppt_thr,  # min ppt df, select all vals abv thr
     use_temp_thr,  # it True use remove all data where temp<thr
     out_dir  # out save dir for plots
 ):
-    count_vals_same_p1 = df_results[df_results['p1'] == 's']
-    count_vals_less_p1 = df_results[df_results['p1'] == '_']
-    pass
+    '''
+    Read the df_results containing for every netatmo station
+    the coordinates (lon, lat) and the comparision between 
+    the pearson and spearman correlations,
+    between netatmo and nearest dwd station
+    plot the reults on a map, either with or with temp_thr
+    '''
+    if use_temp_thr:
+        title_add = 'With_Temperatre_threshold'
+    else:
+        title_add = '_'
 
+    print('plotting comparing correlations')
+    plt.ioff()
+    fig = plt.figure(figsize=(15, 15), dpi=150)
+
+    ax = fig.add_subplot(111)
+
+    shp_de = shapefile.Reader(shp_de_file)
+    # read and plot shapefile (BW or Germany) should be lon lat
+    for shape_ in shp_de.shapeRecords():
+        lon = [i[0] for i in shape_.shape.points[:][::-1]]
+        lat = [i[1] for i in shape_.shape.points[:][::-1]]
+
+        ax.scatter(lon, lat, marker='.', c='lightgrey',
+                   alpha=0.25, s=2)
+    # plot the stations in shapefile, look at the results of agreements
+    texts = []
+    for i in range(df_correlations.shape[0]):
+        ax.scatter(df_correlations.lon.values[i],
+                   df_correlations.lat.values[i],
+                   alpha=1,
+                   c='b',
+                   s=15,
+                   label=df_correlations['Pearson Correlation'].values[i])
+        texts.append(ax.text(df_correlations.lon.values[i],
+                             df_correlations.lat.values[i],
+                             str(
+                                 df_correlations['Pearson Correlation'].values[i]),
+                             color='k'))
+    adjust_text(texts, ax=ax,
+                arrowprops=dict(arrowstyle='->', color='red', lw=0.25))
+    ax.set_title('Pearson Correaltion (Ppt>%dmm)'
+                 ' Netatmo and DWD %s data'  # above %d mm, %s'
+                 % (ppt_thr, temp_freq))  # , df_min_ppt_thr, title_add))
+    ax.grid(alpha=0.5)
+
+    ax.set_xlabel('Longitude')
+    ax.set_ylabel('Latitude')
+    ax.set_aspect(1.0)
+    plt.savefig(
+        os.path.join(
+            out_dir,
+            '%s_%s_pearson_correlations_p%d_netatmo_ppt_dwd_station.png'
+            % (title_add, temp_freq, ppt_thr)),
+
+        frameon=True, papertype='a4',
+        bbox_inches='tight', pad_inches=.2)
+    plt.close()
+    #==========================================================================
+    #
+    #==========================================================================
+#     print('plotting comparing mean')
+#     plt.ioff()
+#     fig = plt.figure(figsize=(15, 15), dpi=150)
+#
+#     ax = fig.add_subplot(111)
+#
+#     shp_de = shapefile.Reader(shp_de_file)
+#
+#     for shape_ in shp_de.shapeRecords():
+#         lon = [i[0] for i in shape_.shape.points[:][::-1]]
+#         lat = [i[1] for i in shape_.shape.points[:][::-1]]
+#
+#         ax.scatter(lon, lat, marker='.', c='lightgrey',
+#                    alpha=0.25, s=2)
+#
+#     for i in range(df_results.shape[0]):
+#
+#         ax.scatter(df_results.lon.values[i],
+#                    df_results.lat.values[i],
+#                    marker=df_results.loc[:, 'mean_ppt'].values[i],
+#                    c=df_results.color_mean_ppt.values[i],
+#                    s=15,
+#                    alpha=1,
+#                    label='Mean')
+#     plt.grid(alpha=0.5)
+#     ax.set_title('Difference in Average Rainfall values'
+#                  ' Netatmo and DWD %s data'  # above %d mm, %s
+#                  % (temp_freq))  # , df_min_ppt_thr, title_add))
+#     plt.axis('equal')
+#     plt.xlabel('Longitude')
+#     plt.ylabel('Latitude')
+#
+#     plt.savefig(
+#         os.path.join(
+#             out_dir,
+#             '%s_%s_ppt_thr_%d_difference_in_mean_station_ppt_dwd_station.png'
+#             % (title_add, temp_freq, ppt_thr)),
+#         frameon=True, papertype='a4',
+#         bbox_inches='tight', pad_inches=.2)
+#     plt.close()
+
+    return df_correlations
 
 #==============================================================================
 #
 #==============================================================================
+
+
 if __name__ == '__main__':
 
     print('**** Started on %s ****\n' % time.asctime())
@@ -522,9 +746,11 @@ if __name__ == '__main__':
 
     for temp_freq in aggregation_frequencies:
         print('\n********\n Time aggregation is', temp_freq)
+
         for df_min_ppt_thr in ppt_thrs_list:
             print('\n********\n Ppt threshold is', df_min_ppt_thr)
-            df_results = select_netatmo_ppt_abv_netatmo_temp_thr(
+
+            df_results, df_results_correlations = select_netatmo_ppt_abv_netatmo_temp_thr(
                 netatmo_ppt_df_file=path_to_ppt_netatmo_data,
                 netatmo_temperature_df_file=path_to_temp_netatmo_data,
                 path_to_dwd_data=path_to_ppt_hdf_data,
@@ -538,12 +764,29 @@ if __name__ == '__main__':
                 use_temp_thr=use_temp_thr,
                 temp_thr=temp_thr)
 
-            plt_on_map_comparing_p1_ppt_mean_netatmo_dwd(df_results,
-                                                         path_to_shpfile,
-                                                         temp_freq,
-                                                         df_min_ppt_thr,
-                                                         use_temp_thr,
-                                                         out_save_dir_orig)
-        STOP = timeit.default_timer()  # Ending time
+#             save_how_many_abv_same_below(
+#                 df_p1_mean=df_results,
+#                 temp_freq=temp_freq,
+#                 ppt_thr=ppt_min_thr,
+#                 use_temp_thr=use_temp_thr,
+#                 out_dir=out_save_dir_orig)
+#
+#             plt_on_map_comparing_p1_ppt_mean_netatmo_dwd(
+#                 df_p1_mean=df_results,
+#                 shp_de_file=path_to_shpfile,
+#                 temp_freq=temp_freq,
+#                 ppt_thr=ppt_min_thr,
+#                 use_temp_thr=use_temp_thr,
+#                 out_dir=out_save_dir_orig)
+            print('plotting')
+            plt_on_map_agreements(
+                df_correlations=df_results_correlations,
+                shp_de_file=path_to_shpfile,
+                temp_freq=temp_freq,
+                ppt_thr=ppt_min_thr,
+                use_temp_thr=use_temp_thr,
+                out_dir=out_save_dir_orig)
+
+    STOP = timeit.default_timer()  # Ending time
     print(('\n****Done with everything on %s.\nTotal run time was'
            ' about %0.4f seconds ***' % (time.asctime(), STOP - START)))
