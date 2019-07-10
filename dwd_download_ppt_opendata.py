@@ -23,18 +23,19 @@ import cartopy.feature as cfeature
 data_dir = Path("~/data/opendata_dwd").expanduser()
 # ftp_url = "ftp-cdc.dwd.de"
 ftp_url = "opendata.dwd.de"
-ftp_root = "climate_environment/CDC/observations_germany/climate/hourly/{variable}/historical"
+ftp_root = "climate_environment/CDC/observations_germany/climate/1_minute/{variable}/historical"
 # ftp_root = "pub/CDC/observations_germany/climate/hourly/{variable}/historical"
 # ftp_root = "pub/CDC/observations_germany/climate/daily/{variable}/historical"
 meta_url = (f"ftp://{ftp_url}/{ftp_root}"
-            "/{variable_short}_Stundenwerte_Beschreibung_Stationen.txt")
+            "/{variable_short}_dwd_stationen_new.txt")
 data_url = (f"ftp://{ftp_url}/{ftp_root}")
-zip_template = "stundenwerte_{variable_short}_{Stations_id:05d}"
+# zip_template = "1minutenwerte_{variable_short}_{Stations_id:05d}"
+zip_template = "1minutenwerte_{variable_short}_{00020}_{start_month}_{end_month}_hist"
 variable_shorts = {"cloudiness": "N",
                    # solar is f**d
                    # "solar": "ST",
                    "sun": "SD",
-                   "precipitation": "RR",
+                   "precipitation": "nieder",  # "RR",
                    "pressure": "P0",
                    "soil_temperature": "EB",
                    "air_temperature": "TU",
@@ -46,18 +47,19 @@ variable_cols = {"wind_speed": ["F"],
                  "air_temperature": ["TT_TU"],
                  "relative_humidity": ["RF_TU"],
                  "sun": ["SD_SO"],
-                 "precipitation": ["R1"],
+                 "precipitation": ["RS_01"],
                  }
 cols_variable = {val[0]: key
                  for key, val in variable_cols.items()}
-header_dtypes = OrderedDict((("Stations_id", int),
-                             ("von_datum", int),
-                             ("bis_datum", int),
-                             ("Stationshoehe", float),
-                             ("geoBreite", float),
-                             ("geoLaenge", float),
-                             ("Stationsname", str),
-                             ("Bundesland", str),))
+header_dtypes = OrderedDict((("STATIONS_ID", int),
+                             ("MESS_DATUM_BEGINN", int),
+                             ("MESS_DATUM_ENDE", int),
+                             ("QN", int),
+                             ("RS_01", float),
+                             ("RTH_01", float),
+                             ("RWH_01", float),
+                             ("RS_IND_01", float),
+                             ("eor", str),))
 meta_header = list(header_dtypes.keys())
 data_dir.mkdir(parents=True, exist_ok=True)
 
@@ -140,7 +142,7 @@ def _load_station_one_var(station_name, variable):
         ftp.close()
     with zipfile.ZipFile(str(zip_filepath_zip)) as zif:
         data_name = [name for name in zif.namelist()
-                         if name.startswith("produkt_")
+                     if name.startswith("produkt_")
                      ][0]
         filepath_txt = zip_filepath_zip.with_suffix(".txt")
         if not filepath_txt.exists():
@@ -152,7 +154,7 @@ def _load_station_one_var(station_name, variable):
         # faster version than this:
         # return datetime.strptime(stamp, "%Y%m%d%H")
         return datetime(int(stamp[:4]), int(stamp[4:6]),
-                   int(stamp[6:8]), int(stamp[8:10]))
+                        int(stamp[6:8]), int(stamp[8:10]))
 
     cols = ["MESS_DATUM"] + variable_col
     # colspecs = [(0, 11),
@@ -207,7 +209,7 @@ def load_data(station_names, variables):
 
 
 def filter_metadata(metadata, lon_min=None, lat_min=None, lon_max=None,
-                  lat_max=None, start=None, end=None):
+                    lat_max=None, start=None, end=None):
     lons = metadata["geoLaenge"]
     lats = metadata["geoBreite"]
     starts = metadata["von_datum"]
@@ -247,11 +249,11 @@ def get_metadata(variables):
 
 
 def map_stations(variables, lon_min=None, lat_min=None, lon_max=None,
-               lat_max=None, start=None, end=None, **skwds):
+                 lat_max=None, start=None, end=None, **skwds):
     metadata = get_metadata(variables)
     metadata = filter_metadata(metadata, lon_min, lat_min, lon_max,
                                lat_max, start, end)
-    
+
     stamen_terrain = cimgt.StamenTerrain()
     crs = ccrs.PlateCarree()
     land_10m = cfeature.NaturalEarthFeature('cultural',
@@ -277,8 +279,9 @@ def map_stations(variables, lon_min=None, lat_min=None, lon_max=None,
     ax.add_image(stamen_terrain, 10)
     return fig, ax
 
+
 def map_stations_var(variables, lon_min=None, lat_min=None,
-                   lon_max=None, lat_max=None, **skwds):
+                     lon_max=None, lat_max=None, **skwds):
     if isinstance(variables, str):
         variables = [variables]
     n_variables = len(variables)
@@ -298,7 +301,7 @@ def map_stations_var(variables, lon_min=None, lat_min=None,
                                             '10m',
                                             edgecolor=(0, 0, 0, 0),
                                             facecolor=(0, 0, 0, 0), )
-    
+
     if n_variables == 1:
         fig, axs = plt.subplots()
         axs = [axs]
@@ -364,8 +367,8 @@ def map_stations_var(variables, lon_min=None, lat_min=None,
 
 if __name__ == '__main__':
     _load_station_one_var("Konstanz", "wind")
-    start = datetime(1980, 1, 1)
-    end = datetime(2016, 12, 31)
+    start = datetime(2018, 1, 1)
+    end = datetime(2018, 12, 31)
     # df = map_stations(["wind", "air_temperature", "sun",
     #                    "precipitation"],
     #                   lon_min=7, lat_min=47.4,

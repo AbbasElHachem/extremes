@@ -500,3 +500,79 @@ def constrcut_contingency_table(stn1_id, stn2_id,
 #==============================================================================
 #
 #==============================================================================
+
+# USED IN SCRIPT NUMBER  19
+# netatmo_temperature_df_file,  # path to df of all netatmo temp
+# distance_matrix_netatmo_ppt_netatmo_temp,
+# min_dist_thr_temp,  # distance threshold, selecting netatmo neigbours
+    # temp_thr,  # temp threshold, below assume ppt is snow
+    # year_by_year,  # if True do it year by year and check tendency
+#             use_temp_thr,  # remove all data where temp<temp_thr
+    # read netatmo temp df
+    # in_netatmo_temperature_stns_df = pd.read_csv(netatmo_temperature_df_file,
+    #                                             index_col=0, sep=';',
+    #                                            parse_dates=True,
+    #                                           infer_datetime_format=True,
+    #                                          engine='c')
+
+    # read netatmo distance matrix ppt-temp
+    # in_df_distance_netatmo_netatmo = pd.read_csv(
+    #    distance_matrix_netatmo_ppt_netatmo_temp, sep=';', index_col=0)
+    # drop all duplicated stations in index
+    # in_df_distance_netatmo_netatmo = in_df_distance_netatmo_netatmo.loc[
+    #   ~in_df_distance_netatmo_netatmo.index.duplicated(keep='first')]
+
+#    # Flag if consider Temperature Threshold
+#    # remove all days with Temp < temp_thr (1°C)
+#    if use_temp_thr:
+#        # get distance netatmo ppt stn to all temp stns, get min
+#        distances_netatmo_to_stn1 = in_df_distance_netatmo_netatmo.loc[
+#            ppt_stn_id, :]
+#        sorted_distances_ppt_temp = distances_netatmo_to_stn1.sort_values(
+#            ascending=True)
+#        min_dist_ppt_temp = sorted_distances_ppt_temp.values[0]
+#
+#        # check if temp station is close enough (5Km)
+#        if min_dist_ppt_temp <= min_dist_thr_temp:
+#            print('\n********\n Seperating distance is ',
+#                  min_dist_ppt_temp, ' m')
+#
+#            # if station is near, read df_temp
+#            netatmo_temp_stn = sorted_distances_ppt_temp.index[0]
+#            df_temp = in_netatmo_temperature_stns_df.loc[
+#                :, netatmo_temp_stn]
+#            df_temp.dropna(axis=0, inplace=True)
+#
+#            print('\n********\n Temp Stn Id is', netatmo_temp_stn)
+#            # intersect netatmo ppt and netatmo temp data
+#            idx_cmn = netatmo_ppt_stn1.index.intersection(
+#                df_temp.index)
+#            df_netatmo_ppt_cmn = netatmo_ppt_stn1.loc[idx_cmn]
+#            df_temp_cmn = df_temp.loc[idx_cmn]
+#
+#            # if enough data available, remove all temp vals < thr
+#            if (df_netatmo_ppt_cmn.values.shape[0] > 0 and
+#                    df_temp_cmn.values.shape[0] > 0):
+#                df_ppt_abv_temp_thr = df_netatmo_ppt_cmn
+#                try:
+#                    # find all dates where temp <= thr
+#                    nan_vals_idx = df_temp_cmn[
+#                        df_temp_cmn <= temp_thr].index
+#                    # -999
+#                    df_ppt_abv_temp_thr.loc[nan_vals_idx] = np.nan
+#
+#                except Exception as msg:
+#                    print('error while selecting data abv thr', msg)
+#                    continue
+#            else:
+#                print('station is near but no common data')
+#                continue
+#        else:
+#            print('\n********\n no nearby Temp station')
+#            continue
+# if use temp thr and enough ppt data abv temp_thr exist
+#         if isinstance(df_ppt_abv_temp_thr, pd.Series):
+#             print('\n********\n Hours where temp<=1°C ',
+#                   np.round(100 - 100 * df_ppt_abv_temp_thr.shape[0] /
+#                            df_netatmo_ppt_cmn.shape[0]), '%')
+#             netatmo_ppt_stn1 = df_ppt_abv_temp_thr
