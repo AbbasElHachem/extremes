@@ -33,14 +33,15 @@ base_url = r'https://opendata.dwd.de/climate_environment/CDC/observations_german
 
 filename_template = '1minutenwerte_nieder_%s_akt.zip'
 
-stn_names_files =  os.path.join(main_dir, r'station_coordinates_names.csv')
+stn_names_files = os.path.join(main_dir, r'station_coordinates_names.csv')
 assert os.path.exists(stn_names_files)
 
 
 # In[5]:
 
 
-stn_names_df = pd.read_csv(stn_names_files, index_col=0, sep=',', encoding='latin-1')
+stn_names_df = pd.read_csv(
+    stn_names_files, index_col=0, sep=',', encoding='latin-1')
 stations_id = stn_names_df.index
 
 # get all station ids, make them a string for generating file_names
@@ -48,9 +49,9 @@ stations_id_str_lst = []
 for stn_id in stations_id:
     stn_id = str(stn_id)
     if len(stn_id) < 5:
-        stn_id = '0'*(5-len(stn_id)) + stn_id
+        stn_id = '0' * (5 - len(stn_id)) + stn_id
     stations_id_str_lst.append(stn_id)
-#print(stations_id_str)
+# print(stations_id_str)
 
 
 # In[80]:
@@ -74,13 +75,12 @@ for file_name in file_names:
     file_url = base_url + file_name
     r = requests.get(file_url, stream=True)
     local_filename = file_url.split('/')[-1]
-    
+
     with open(local_filename, 'wb') as f:
         for chunk in r.iter_content(chunk_size=1024):
             if chunk:  # filter out keep-alive new chunks
                 f.write(chunk)
         r.close()
-        
 
 
 # In[81]:
@@ -106,6 +106,7 @@ def list_all_full_path(ext, file_dir):
                 new_list.append(full_path)
     return(sorted(new_list))
 
+
 all_zip_files = list_all_full_path('.zip', main_dir)
 
 
@@ -114,9 +115,8 @@ all_zip_files = list_all_full_path('.zip', main_dir)
 
 # extract all zip files, dfs in zip files
 for zip_file in all_zip_files:
-    with zipfile.ZipFile(zip_file,"r") as zip_ref:
+    with zipfile.ZipFile(zip_file, "r") as zip_ref:
         zip_ref.extractall('targetdir')
-    
 
 
 # In[127]:
@@ -130,8 +130,8 @@ for df_txt_file in all_df_files:
     stn_name = df_txt_file.split('_')[-1].split('.')[0]
     assert len(stn_name) == 5
     available_stns.append(stn_name)
-    
-    
+
+
 start_date = '2018-01-01 00:00:00'
 end_date = '2019-07-11 00:00:00'
 
@@ -141,10 +141,7 @@ data = np.zeros(shape=(date_range.shape[0], len(all_df_files)))
 data[data == 0] = np.nan
 
 final_df_combined = pd.DataFrame(data=data, index=date_range,
-                                columns=available_stns)
-
-
-    
+                                 columns=available_stns)
 
 
 # In[128]:
@@ -158,11 +155,10 @@ for df_txt_file in all_df_files:
     in_df = pd.read_csv(df_txt_file, sep=';', index_col=1, engine='c')
     assert int(stn_name) == in_df.loc[:, 'STATIONS_ID'].values[0]
     assert stn_name in final_df_combined.columns
-    
+
     in_df.index = pd.to_datetime(in_df.index, format=time_fmt)
     ppt_data = in_df['RS_01'].values.ravel()
     final_df_combined.loc[in_df.index, stn_name] = ppt_data
-    
 
 
 # In[130]:
@@ -182,7 +178,7 @@ ppt_data_all = np.array(final_df_combined.values)
 
 hf = h5py.File("DWD_ppt_stns_201801010000_201907100000.h5", "w")
 
-hf_test = h5py.File("DWD_ppt_stns_201801010000_201907100000_Test.h5", "w")
+#hf_test = h5py.File("DWD_ppt_stns_201801010000_201907100000_Test.h5", "w")
 
 
 # In[152]:
@@ -193,9 +189,9 @@ stns_int = []
 for stn_str in available_stns:
     stns_int.append(int(stn_str))
 
-stns_coords_lon =  stn_names_df.loc[stns_int, 'geoBreite'].values
-stns_coords_lat =  stn_names_df.loc[stns_int, 'geoLaenge'].values
-stns_coords_z =  stn_names_df.loc[stns_int, 'Stationshoehe'].values
+stns_coords_lon = stn_names_df.loc[stns_int, 'geoBreite'].values
+stns_coords_lat = stn_names_df.loc[stns_int, 'geoLaenge'].values
+stns_coords_z = stn_names_df.loc[stns_int, 'Stationshoehe'].values
 stns_name = stn_names_df.loc[stns_int, 'Stationsname'].values
 stns_bundesland = stn_names_df.loc[stns_int, 'Bundesland'].values
 
@@ -203,7 +199,7 @@ stns_bundesland = stn_names_df.loc[stns_int, 'Bundesland'].values
 # In[153]:
 
 
-stns_bundesland
+# stns_bundesland
 
 
 # In[154]:
@@ -218,14 +214,14 @@ hf.create_dataset('data', data=ppt_data_all, dtype='f8')
 
 dt = h5py.special_dtype(vlen=str)
 
-dset = hf_test.create_dataset("Bundesland", data=stns_bundesland, dtype=dt)
+dset = hf.create_dataset("Bundesland", data=stns_bundesland, dtype=dt)
 #hf_test.create_dataset('Bundesland', data=stns_bundesland)
 
 
 # In[166]:
 
 
-hf_test.close()
+# hf_test.close()
 
 
 # In[155]:
@@ -253,4 +249,3 @@ g3.create_dataset('Index_1Min_Freq',
                   data=np.arange(0, len(final_df_combined.index), 1),
                   dtype='i4')
 hf.close()
-

@@ -19,3 +19,4 @@ encoding/_17_disaggregate_DWD_based_on_NetAtmo.py=utf-8
 encoding/_18_calculate_Brier_score_do_statistics_2_stns.py=utf-8
 encoding/_19_claculate_statisitcal_differences_neighbouring_stations.py=utf-8
 encoding/_21_plot_ppt_dwd_netatmo_stations.py=utf-8
+encoding/download_dwd_1min_recent_data.py=utf-8
