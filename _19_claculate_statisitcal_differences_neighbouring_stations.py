@@ -111,6 +111,11 @@ out_save_dir_orig = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
 if not os.path.exists(out_save_dir_orig):
     os.mkdir(out_save_dir_orig)
 
+
+# fr = r"E:\download_DWD_data_recent\DWD_1D_ppt_stns_20180101000000_20190711000000.h5"
+# hdf2 = HDF5(infile=fr)
+#
+# df_dwd = hdf2.get_pandas_dataframe(ids=['07372'])
 #==============================================================================
 #
 #==============================================================================
@@ -123,7 +128,7 @@ min_dist_thr_temp = 5000  # m
 
 # threshold for max ppt value per hour
 max_ppt_thr = 100.
-ppt_min_thr = 1  # used when calculating p1 = 1-p0
+ppt_min_thr = 5  # used when calculating p1 = 1-p0
 
 # aggregation_frequencies = ['60min', '120min', '180min', '240min',
 #                            '360min', '720min', '1440min']
@@ -188,7 +193,9 @@ def compare_p1_dwd_p1_netatmo(
 #==============================================================================
 
 
-def look_agreement_df1_df2(df_dwd,  # df dwd intersected with netatmo
+def look_agreement_df1_df2(stn_dwd_id,  # id of dwd station
+                           stn_netatmo_id,  # if of netatmo station
+                           df_dwd,  # df dwd intersected with netatmo
                            df_netatmo,  # df netatmo intersected with dwd
                            ppt_thr,  # ppt thr to check agreement
                            ):
@@ -204,8 +211,10 @@ def look_agreement_df1_df2(df_dwd,  # df dwd intersected with netatmo
     df_netatmo_copy = df_netatmo.copy()
     # calculate pearson and spearman between original values
 
-#     df_dwd_copy_abv_thr = df_dwd_copy[df_dwd_copy > ppt_thr]
-#     df_netatmo_copy_abv_thr = df_netatmo_copy[df_netatmo_copy > ppt_thr]
+#     df_dwd_copy_abv_thr = df_dwd_copy[
+#         df_dwd_copy.loc[:, stn_dwd_id] > ppt_thr]
+#     df_netatmo_copy_abv_thr = df_netatmo_copy[
+#         df_netatmo_copy.loc[:, stn_netatmo_id] > ppt_thr]
 
     orig_pear_corr = np.round(
         pears(df_dwd_copy.values.ravel(),
@@ -213,6 +222,9 @@ def look_agreement_df1_df2(df_dwd,  # df dwd intersected with netatmo
 
     orig_spr_corr = np.round(spr(df_dwd_copy.values.ravel(),
                                  df_netatmo_copy.values.ravel())[0], 2)
+
+#     spr_corr_abv_thr = np.round(spr(df_dwd_copy_abv_thr.values.ravel(),
+#                                     df_netatmo_copy_abv_thr.values.ravel())[0], 2)
     # transform values to booleans
     df_dwd_copy['Bool'] = (df_dwd_copy.values > ppt_thr).astype(int)
     df_netatmo_copy['Bool'] = (df_netatmo_copy.values > ppt_thr).astype(int)
@@ -382,6 +394,8 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt(
                     # calculate correlation, look for agreements
                     (orig_pears_corr, orig_spr_coor,
                         bool_pears_corr, bool_spr_corr) = look_agreement_df1_df2(
+                            stn_dwd_id=stn_2_dwd,
+                            stn_netatmo_id=ppt_stn_id,
                         df_dwd=df_dwd_cmn,
                         df_netatmo=df_netatmo_cmn,
                         ppt_thr=df_min_ppt_thr)
@@ -602,6 +616,8 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_year_by_year(
                          orig_spr_coor,
                          bool_pears_corr,
                          bool_spr_corr) = look_agreement_df1_df2(
+                             stn_dwd_id=stn_2_dwd,
+                            stn_netatmo_id=ppt_stn_id,
                             df_dwd=df_dwd_cmn,
                             df_netatmo=df_netatmo_cmn,
                             ppt_thr=df_min_ppt_thr)
@@ -631,9 +647,10 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_year_by_year(
 
                     else:
                         print('DWD Station is near but not enough data')
-
+                        continue  # test
                 else:
                     print('\n********\n DWD station is not near')
+                    continue  # test
 
             else:
                 print('\n*****\n neatmo station has not data for this year')
@@ -707,9 +724,9 @@ def save_how_many_abv_same_below(
 
     df_out.to_csv(os.path.join(
         out_dir,
-        'year_%_df_similarities_%s_%dmm_use_temp_thr_%s_.csv'
+        'year_%s_df_similarities_%s_%dmm_use_temp_thr_%s_.csv'
         % (year_vals, temp_freq, ppt_thr, use_temp_thr)))
-    pass
+    return df_out
 
 
 #==============================================================================
@@ -723,7 +740,8 @@ def plt_on_map_comparing_p1_ppt_mean_netatmo_dwd(
     ppt_thr,  # min ppt df, select all vals abv thr
     use_temp_thr,  # it True use remove all data where temp<thr
     out_dir,  # out save dir for plots
-    year_vals  # if all years or year by year
+    year_vals,  # if all years or year by year
+    table_to_plot=None  # if given add table on plot
 ):
     '''
     Read the df_results containing for every netatmo station
@@ -742,18 +760,19 @@ def plt_on_map_comparing_p1_ppt_mean_netatmo_dwd(
     #==========================================================================
     print('plotting comparing p1')
     plt.ioff()
-    fig = plt.figure(figsize=(15, 15), dpi=150)
-
-    ax = fig.add_subplot(111)
+    fig, (ax) = plt.subplots(1, 1, figsize=(15, 15), dpi=150)
+    fig.subplots_adjust(left=0.1, bottom=0.1)
+#     fig = plt.figure()
+#
+#     ax, ax2 = fig.add_subplot(2,1,1)
 
     shp_de = shapefile.Reader(shp_de_file)
     # read and plot shapefile (BW or Germany) should be lon lat
     for shape_ in shp_de.shapeRecords():
         lon = [i[0] for i in shape_.shape.points[:][::-1]]
         lat = [i[1] for i in shape_.shape.points[:][::-1]]
+        ax.scatter(lon, lat, marker='.', c='lightgrey', alpha=0.25, s=2)
 
-        ax.scatter(lon, lat, marker='.', c='lightgrey',
-                   alpha=0.25, s=2)
     # plot the stations in shapefile, look at the results of p1 comparasion
     for i in range(df_p1_mean.shape[0]):
         ax.scatter(df_p1_mean.lon.values[i],
@@ -764,20 +783,40 @@ def plt_on_map_comparing_p1_ppt_mean_netatmo_dwd(
                    s=15,
                    label='P1')
 
+#     # Add a table at the bottom of the axes
+    if table_to_plot is not None:
+        table_to_plot = table_to_plot.T
+        ax.axis('tight')
+        ax.axis('off')
+        ax.table(cellText=np.array([table_to_plot.values[0][:3]]),
+                 rowLabels=table_to_plot.index,
+                 cellLoc='right',
+                 # rowColours=,
+
+                 colColours=['b', 'g', 'r'],
+                 colLabels=table_to_plot.columns[:3],
+                 clip_on=True,
+                 in_layout=True,
+                 snap=True,
+                 loc='bottom')
+
     ax.set_title('Difference in Probability P1 (Ppt>%dmm)'
                  ' Netatmo and DWD %s data year %s'
                  % (ppt_thr, temp_freq, year_vals))
     ax.grid(alpha=0.5)
 
+    ax.set_xticklabels([])
+
     ax.set_xlabel('Longitude')
     ax.set_ylabel('Latitude')
     ax.set_aspect(1.0)
+
+#     fig.tight_layout()
     plt.savefig(
         os.path.join(
             out_dir,
             'year_%s_%s_%s_differece_in_p%d_netatmo_ppt_dwd_station.png'
             % (year_vals, title_add, temp_freq, ppt_thr)),
-
         frameon=True, papertype='a4',
         bbox_inches='tight', pad_inches=.2)
     plt.close()
@@ -937,7 +976,7 @@ if __name__ == '__main__':
 #             temp_freq=temp_freq,
 #             ppt_thr=ppt_min_thr,
 #             use_temp_thr=use_temp_thr,
-#             out_dir=out_save_dir_orig)
+#             out_dir=out_save_dir_orig, year_vals='all years')
 #
 #         # plot the results of df_results
 #         plt_on_map_comparing_p1_ppt_mean_netatmo_dwd(
@@ -960,7 +999,7 @@ if __name__ == '__main__':
 #                     use_temp_thr=use_temp_thr,
 #                     out_dir=out_save_dir_orig, year_vals='all years')
 
-        for year in ['2017', '2016', '2017', '2018', '2019']:
+        for year in ['2015', '2016', '2017']:
             print('\n***\n year is', year)
             (df_results_yearly,
              df_results_correlations_yearly) = compare_netatmo_dwd_p1_or_p5_or_mean_ppt_year_by_year(
@@ -973,6 +1012,15 @@ if __name__ == '__main__':
                 df_min_ppt_thr=ppt_min_thr,
                 year_val=year)
 
+            # use this funtion to find how many stations are similar,
+            # or above, or below neighbouring dwd station
+            df_table = save_how_many_abv_same_below(
+                df_p1_mean=df_results_yearly,
+                temp_freq=temp_freq,
+                ppt_thr=ppt_min_thr,
+                use_temp_thr=use_temp_thr,
+                out_dir=out_save_dir_orig, year_vals=year)
+
             # plot the results of df_results
             plt_on_map_comparing_p1_ppt_mean_netatmo_dwd(
                 df_p1_mean=df_results_yearly,
@@ -981,7 +1029,8 @@ if __name__ == '__main__':
                 ppt_thr=ppt_min_thr,
                 use_temp_thr=use_temp_thr,
                 out_dir=out_save_dir_orig,
-                year_vals=year)
+                year_vals=year,
+                table_to_plot=df_table)
 
             for col_label in df_results_correlations_yearly.columns:
                 if 'Correlation' in col_label:
