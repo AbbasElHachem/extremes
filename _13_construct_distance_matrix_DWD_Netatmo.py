@@ -24,10 +24,16 @@ from _00_additional_functions import (convert_coords_fr_wgs84_to_utm32_)
 #==============================================================================
 #
 #==============================================================================
+use_new_dwd_data = True
 
 
-coords_dwd_df_file = (r'X:\exchange\ElHachem\niederschlag_deutschland'
-                      r'\1993_2016_5min_merge_nan.csv')
+if use_new_dwd_data:
+    coords_dwd_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
+                          r'\download_DWD_data_recent\station_coordinates_names_hourly.csv')
+
+else:
+    coords_dwd_df_file = (r'X:\exchange\ElHachem\niederschlag_deutschland'
+                          r'\1993_2016_5min_merge_nan.csv')
 assert os.path.exists(coords_dwd_df_file), 'wrong DWD coords file'
 
 coords_netatmo_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
@@ -52,8 +58,11 @@ if not os.path.exists(out_save_dir):
 lon_col_name = ' lon'
 lat_col_name = ' lat'
 
-x_col_name = 'Rechtswert'
-y_col_name = 'Hochwert'
+# x_col_name = 'Rechtswert'
+# y_col_name = 'Hochwert'
+
+x_col_name = 'geoLaenge'
+y_col_name = 'geoBreite'
 
 # def epsg wgs84 and utm32 for coordinates conversion
 wgs82 = "+init=EPSG:4326"
@@ -71,10 +80,30 @@ xnetatmo, ynetatmo = convert_coords_fr_wgs84_to_utm32_(
     in_df_netatmo_coords.loc[:, lon_col_name].values.ravel(),
     in_df_netatmo_coords.loc[:, lat_col_name].values.ravel())
 
-in_df_dwd_coords = pd.read_csv(coords_dwd_df_file, index_col=3, sep=';')
+if use_new_dwd_data:
 
-x_dwd, y_dwd = (in_df_dwd_coords.loc[:, x_col_name].values.ravel(),
-                in_df_dwd_coords.loc[:, y_col_name].values.ravel())
+    in_df_dwd_coords = pd.read_csv(coords_dwd_df_file, index_col=0, sep=',',
+                                   encoding='latin-1')
+    # get all station ids, make them a string for generating file_names
+    stations_id_str_lst = []
+    for stn_id in in_df_dwd_coords.index:
+        stn_id = str(stn_id)
+        if len(stn_id) < 5:
+            stn_id = '0' * (5 - len(stn_id)) + stn_id
+        stations_id_str_lst.append(stn_id)
+    in_df_dwd_coords.index = stations_id_str_lst
+
+    lon_dwd, lat_dwd = (in_df_dwd_coords.loc[:, x_col_name].values.ravel(),
+                        in_df_dwd_coords.loc[:, y_col_name].values.ravel())
+
+    x_dwd, y_dwd = convert_coords_fr_wgs84_to_utm32_(
+        wgs82, utm32, lon_dwd,  lat_dwd)
+
+else:
+    in_df_dwd_coords = pd.read_csv(coords_dwd_df_file, index_col=3, sep=';')
+
+    x_dwd, y_dwd = (in_df_dwd_coords.loc[:, x_col_name].values.ravel(),
+                    in_df_dwd_coords.loc[:, y_col_name].values.ravel())
 
 
 coords_netatmo = np.array([(x, y) for x, y in zip(xnetatmo, ynetatmo)])
@@ -100,6 +129,7 @@ for stn_mac in in_df_netatmo_coords.index:
         print(stn_mac)
         lon_stn = in_df_netatmo_coords.loc[stn_mac, lon_col_name]
         lat_stn = in_df_netatmo_coords.loc[stn_mac, lat_col_name]
+
         xstn, ystn = convert_coords_fr_wgs84_to_utm32_(wgs82,
                                                        utm32,
                                                        lon_stn,

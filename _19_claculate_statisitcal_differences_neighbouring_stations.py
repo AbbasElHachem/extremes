@@ -78,9 +78,13 @@ distance_matrix_df_file_ppt_temp = (
 assert os.path.exists(distance_matrix_df_file_ppt_temp), 'wrong distance df'
 
 
-path_to_ppt_hdf_data = (r'X:\exchange\ElHachem'
-                        r'\niederschlag_deutschland'
-                        r'\1993_2016_5min_merge_nan.h5')
+# path_to_ppt_hdf_data = (r'X:\exchange\ElHachem'
+#                         r'\niederschlag_deutschland'
+#                         r'\1993_2016_5min_merge_nan.h5')
+
+path_to_ppt_hdf_data = (r'E:\download_DWD_data_recent'
+                        r'\DWD_60Min_ppt_stns_19950101000000_20190715000000_new.h5')
+
 assert os.path.exists(path_to_ppt_hdf_data), 'wrong DWD Ppt file'
 
 distance_matrix_netatmo_dwd_df_file = (
@@ -112,7 +116,7 @@ if not os.path.exists(out_save_dir_orig):
     os.mkdir(out_save_dir_orig)
 
 
-# fr = r"E:\download_DWD_data_recent\DWD_1D_ppt_stns_20180101000000_20190711000000.h5"
+# fr = r"E:\download_DWD_data_recent\DWD_60Min_ppt_stns_19950101000000_20190715000000_new.h5"
 # hdf2 = HDF5(infile=fr)
 #
 # df_dwd = hdf2.get_pandas_dataframe(ids=['07372'])
@@ -128,11 +132,10 @@ min_dist_thr_temp = 5000  # m
 
 # threshold for max ppt value per hour
 max_ppt_thr = 100.
-ppt_min_thr = 5  # used when calculating p1 = 1-p0
+ppt_min_thr = 1  # used when calculating p1 = 1-p0
 
-# aggregation_frequencies = ['60min', '120min', '180min', '240min',
-#                            '360min', '720min', '1440min']
-aggregation_frequencies = ['60min']
+aggregation_frequencies = ['60min', '480min', '1440min']
+# aggregation_frequencies = ['60min']
 
 # if True remove all Ppt values where Temp < Temp_thr= 1°C
 temp_thr = 1
@@ -407,19 +410,19 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt(
                                                 'lat'] = lat_stn_netatmo
                     df_results_correlations.loc[
                         ppt_stn_id,
-                        'Orig Pearson Correlation'] = orig_pears_corr
+                        'Orig_Pearson_Correlation'] = orig_pears_corr
 
                     df_results_correlations.loc[
                         ppt_stn_id,
-                        'Orig Spearman Correlation'] = orig_spr_coor
+                        'Orig_Spearman_Correlation'] = orig_spr_coor
 
                     df_results_correlations.loc[
                         ppt_stn_id,
-                        'Bool Pearson Correlation'] = bool_pears_corr
+                        'Bool_Pearson_Correlation'] = bool_pears_corr
 
                     df_results_correlations.loc[
                         ppt_stn_id,
-                        'Bool Spearman Correlation'] = bool_spr_corr
+                        'Bool _Spearman_Correlation'] = bool_spr_corr
 
                     print('\n********\n ADDED DATA TO DF RESULTS')
 
@@ -629,19 +632,19 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_year_by_year(
                             ppt_stn_id, 'lat'] = lat_stn_netatmo
                         df_results_correlations.loc[
                             ppt_stn_id,
-                            'Orig Pearson Correlation'] = orig_pears_corr
+                            'Orig_Pearson_Correlation'] = orig_pears_corr
 
                         df_results_correlations.loc[
                             ppt_stn_id,
-                            'Orig Spearman Correlation'] = orig_spr_coor
+                            'Orig_Spearman_Correlation'] = orig_spr_coor
 
                         df_results_correlations.loc[
                             ppt_stn_id,
-                            'Bool Pearson Correlation'] = bool_pears_corr
+                            'Bool_Pearson_Correlation'] = bool_pears_corr
 
                         df_results_correlations.loc[
                             ppt_stn_id,
-                            'Bool Spearman Correlation'] = bool_spr_corr
+                            'Bool_Spearman_Correlation'] = bool_spr_corr
 
                         print('\n********\n ADDED DATA TO DF RESULTS')
 
@@ -959,47 +962,47 @@ if __name__ == '__main__':
         # call this function to get the two dfs, one containing
         # df_results of comparing p1 (or p5) and average ppt
         # df_correlations comparing correaltions, agreements
-#         (df_results,
-#             df_results_correlations) = compare_netatmo_dwd_p1_or_p5_or_mean_ppt(
-#                 netatmo_ppt_df_file=path_to_ppt_netatmo_data,
-#                 path_to_dwd_data=path_to_ppt_hdf_data,
-#                 netatmo_ppt_coords_df=path_to_netatmo_coords_df_file,
-#                 distance_matrix_netatmo_ppt_dwd_ppt=distance_matrix_netatmo_dwd_df_file,
-#                 min_dist_thr_ppt=min_dist_thr_ppt,
-#                 temp_freq_resample=temp_freq,
-#                 df_min_ppt_thr=ppt_min_thr)
-#
-#         # use this funtion to find how many stations are similar,
-#         # or above, or below neighbouring dwd station
-#         save_how_many_abv_same_below(
-#             df_p1_mean=df_results,
-#             temp_freq=temp_freq,
-#             ppt_thr=ppt_min_thr,
-#             use_temp_thr=use_temp_thr,
-#             out_dir=out_save_dir_orig, year_vals='all years')
-#
-#         # plot the results of df_results
-#         plt_on_map_comparing_p1_ppt_mean_netatmo_dwd(
-#             df_p1_mean=df_results,
-#             shp_de_file=path_to_shpfile,
-#             temp_freq=temp_freq,
-#             ppt_thr=ppt_min_thr,
-#             use_temp_thr=use_temp_thr,
-#             out_dir=out_save_dir_orig, year_vals='all years')
-#
-#         for col_label in df_results_correlations.columns:
-#             if 'Correlation' in col_label:
-#                 # plot the results of df_results_correlations
-#                 plt_on_map_agreements(
-#                     df_correlations=df_results_correlations,
-#                     col_to_plot=col_label,
-#                     shp_de_file=path_to_shpfile,
-#                     temp_freq=temp_freq,
-#                     ppt_thr=ppt_min_thr,
-#                     use_temp_thr=use_temp_thr,
-#                     out_dir=out_save_dir_orig, year_vals='all years')
+        (df_results,
+            df_results_correlations) = compare_netatmo_dwd_p1_or_p5_or_mean_ppt(
+                netatmo_ppt_df_file=path_to_ppt_netatmo_data,
+                path_to_dwd_data=path_to_ppt_hdf_data,
+                netatmo_ppt_coords_df=path_to_netatmo_coords_df_file,
+                distance_matrix_netatmo_ppt_dwd_ppt=distance_matrix_netatmo_dwd_df_file,
+                min_dist_thr_ppt=min_dist_thr_ppt,
+                temp_freq_resample=temp_freq,
+                df_min_ppt_thr=ppt_min_thr)
 
-        for year in ['2015', '2016', '2017']:
+        # use this funtion to find how many stations are similar,
+        # or above, or below neighbouring dwd station
+        save_how_many_abv_same_below(
+            df_p1_mean=df_results,
+            temp_freq=temp_freq,
+            ppt_thr=ppt_min_thr,
+            use_temp_thr=use_temp_thr,
+            out_dir=out_save_dir_orig, year_vals='all years')
+
+        # plot the results of df_results
+        plt_on_map_comparing_p1_ppt_mean_netatmo_dwd(
+            df_p1_mean=df_results,
+            shp_de_file=path_to_shpfile,
+            temp_freq=temp_freq,
+            ppt_thr=ppt_min_thr,
+            use_temp_thr=use_temp_thr,
+            out_dir=out_save_dir_orig, year_vals='all years')
+
+        for col_label in df_results_correlations.columns:
+            if 'Correlation' in col_label:
+                # plot the results of df_results_correlations
+                plt_on_map_agreements(
+                    df_correlations=df_results_correlations,
+                    col_to_plot=col_label,
+                    shp_de_file=path_to_shpfile,
+                    temp_freq=temp_freq,
+                    ppt_thr=ppt_min_thr,
+                    use_temp_thr=use_temp_thr,
+                    out_dir=out_save_dir_orig, year_vals='all years')
+
+        for year in ['2019', '2015', '2016', '2017', '2018']:
             print('\n***\n year is', year)
             (df_results_yearly,
              df_results_correlations_yearly) = compare_netatmo_dwd_p1_or_p5_or_mean_ppt_year_by_year(

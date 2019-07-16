@@ -1,7 +1,6 @@
-
-# coding: utf-8
-
-# In[2]:
+#==============================================================================
+# TODO: ADD DOCUMENATION ORGANIZE
+#==============================================================================
 
 
 import datetime
@@ -14,7 +13,6 @@ import requests
 import zipfile
 import numpy as np
 import math
-import h5py
 
 
 #==============================================================================
@@ -23,32 +21,34 @@ import h5py
 # tageswerte_RR_00001_19120101_19860630_hist.zip
 #==============================================================================
 download_data = False
-
 delete_zip_files = True
-delete_df_files = True
 
-make_hdf5_dataset = True
 
-temporal_freq = '1_minute'  # '10_minutes' 'hourly' 'daily'
-time_period = 'recent'  # 'historical'
-temp_accr = '1minuten'  # '10minuten' 'stundenwerte'  'tages'
+build_one_df = False
+delete_df_files = False
 
-ppt_act = 'nieder'  # 'rr' 'RR' 'RR'
+make_hdf5_dataset_new = True
+
+temporal_freq = 'hourly'  # '1_minute' '10_minutes' 'hourly' 'daily'
+time_period = 'recent'  # 'recent' ''
+temp_accr = 'stundenwerte'  # '1minuten' '10minuten' 'stundenwerte'  'tages'
+
+ppt_act = 'RR'  # nieder 'rr' 'RR' 'RR'
 
 stn_name_len = 5  # length of dwd stns Id, ex: 00023
 
-start_date = '2018-01-01 00:00:00'
-end_date = '2019-07-11 00:00:00'
+start_date = '1995-01-01 00:00:00'
+end_date = '2019-07-15 00:00:00'
 
-temp_freq = 'Min'  # '10Min' 'H' 'D'
+temp_freq = '60Min'  # 'Min' '10Min' 'H' 'D'
 
-time_fmt = '%Y%m%d%H%M'  # when reading download dwd station df
+time_fmt = '%Y%m%d%H'  # when reading download dwd station df '%Y%m%d%H%M'
 
 # name of station id and rainfall column name in df
 stn_id_col_name = 'STATIONS_ID'
-ppt_col_name = 'RS_01'  # 'RWS_10' 'R1' 'RS'
+ppt_col_name = '  R1'  # RS_01 'RWS_10' '  R1' 'RS'
 
-temp_freq_resample = '1D'
+freqs_list = ['60Min']  # '1D' '5Min',
 #==============================================================================
 #
 #==============================================================================
@@ -123,16 +123,15 @@ def firstNonNan(listfloats):
     '''return first non NaN value in python list'''
     idx_not_nan = np.argwhere(math.isnan(listfloats) == False)[0]
     return idx_not_nan
-#     for item in listfloats:
-#         if math.isnan(item) == False:
-#             return item
 
 
 #==============================================================================
 # # TODO:
 #==============================================================================
 # download station coordinates name (maybe do it seperat later)
-stn_names_files = os.path.join(main_dir, r'station_coordinates_names.csv')
+# stn_names_files = os.path.join(main_dir, r'station_coordinates_names.csv')
+stn_names_files = os.path.join(
+    main_dir, r'station_coordinates_names_hourly.csv')
 assert os.path.exists(stn_names_files)
 
 stn_names_df = pd.read_csv(
@@ -151,50 +150,80 @@ for stn_id in stations_id:
 #==============================================================================
 # DOWNLOAD ALL ZIP FILES
 #==============================================================================
-base_url = (r'https://opendata.dwd.de/climate_environment/CDC'
-            r'/observations_germany/climate/%s/precipitation/%s/'
-            % (temporal_freq, time_period))
-
 
 # generate url
 if download_data:  # download all zip files
-    urls_list = []
+    base_url = (r'https://opendata.dwd.de/climate_environment/CDC'
+                r'/observations_germany/climate/%s/precipitation/%s/'
+                % (temporal_freq, time_period))
 
-    # generate file_names, which files to download
-    file_names = []
-    for stn_id_stn in stations_id_str_lst:
-        filename_template = '%swerte_%s_%s_akt.zip' % (temp_accr,
-                                                       ppt_act, stn_id_stn)
-    file_names.append(filename_template)
-    for file_name in file_names:
+    out_dir = os.path.join(main_dir, 'DWD_data_%s_%s_%s'
+                           % (temporal_freq, time_period, temp_accr))
+    if not os.path.exists(out_dir):
+        os.mkdir(out_dir)
+
+    os.chdir(out_dir)
+
+    r = requests.get(base_url, stream=True)
+
+    all_urls = r.content.split(b'\n')
+
+    all_urls_zip = [url_zip.split(b'>')[-2].replace(b'</a', b'').decode('utf-8')
+                    for url_zip in all_urls if b'.zip' in url_zip]
+
+    for file_name in all_urls_zip:
+
+        print('getting data for', file_name)
+
         file_url = base_url + file_name
-        r = requests.get(file_url, stream=True)
+        zip_url = requests.get(file_url)
+
         local_filename = file_url.split('/')[-1]
 
         with open(local_filename, 'wb') as f:
-            for chunk in r.iter_content(chunk_size=1024):
+            for chunk in zip_url.iter_content(chunk_size=1024):
                 if chunk:  # filter out keep-alive new chunks
                     f.write(chunk)
-            r.close()
+        zip_url.close()
+
+    r.close()
+    print('\n####\n Done Getting all Data \n#####\n')
     #==========================================================================
     #
     #==========================================================================
 
     # get all zip files as list
-    all_zip_files = list_all_full_path('.zip', main_dir)
+    all_zip_files = list_all_full_path('.zip', out_dir)
+
+    out_extract_df_dir = ('DWD_extracted_zip_%s_%s_%s' %
+                          (temporal_freq, time_period, temp_accr))
 
     # extract all zip files, dfs in zip files
     for zip_file in all_zip_files:
         with zipfile.ZipFile(zip_file, "r") as zip_ref:
-            zip_ref.extractall('targetdir')
+            # Get a list of all archived file names from the zip
+            listOfFileNames = zip_ref.namelist()
+
+            for fileName in listOfFileNames:
+                # Check filename endswith csv
+                if 'produkt' in fileName and fileName.endswith('.txt'):
+                    # Extract a single file from zip
+                    zip_ref.extract(fileName, out_extract_df_dir)
+
+    for zip_file in all_zip_files:
         if delete_zip_files:
             os.remove(zip_file)
-
     #==========================================================================
     #
     #==========================================================================
-    # get all df files as list
-    all_df_files = list_all_full_path('.txt', main_dir)
+
+# get all df files as list
+if build_one_df:
+    #     all_df_files = list_all_full_path('.txt', out_extract_df_dir)
+
+    all_df_files = list_all_full_path(
+        '.txt',
+        r'E:\download_DWD_data_recent\DWD_data_hourly_recent_plus_historical')
 
     # get all downloaded station ids, used as columns for df_final
     available_stns = []
@@ -202,13 +231,14 @@ if download_data:  # download all zip files
     for df_txt_file in all_df_files:
         stn_name = df_txt_file.split('_')[-1].split('.')[0]
         assert len(stn_name) == 5
-        available_stns.append(stn_name)
+        if stn_name not in available_stns:
+            available_stns.append(stn_name)
 
     # create daterange and df full of nans
 
     date_range = pd.date_range(start=start_date, end=end_date, freq=temp_freq)
 
-    data = np.zeros(shape=(date_range.shape[0], len(all_df_files)))
+    data = np.zeros(shape=(date_range.shape[0], len(available_stns)))
     data[data == 0] = np.nan
 
     final_df_combined = pd.DataFrame(data=data,
@@ -216,141 +246,81 @@ if download_data:  # download all zip files
                                      columns=available_stns)
 
     # read df stn file and fill final df for all stns
-
+    all_files_len = len(all_df_files)
     for df_txt_file in all_df_files:
+        print('\n++\n Total number of files is \n++\n', all_files_len)
+
         stn_name = df_txt_file.split('_')[-1].split('.')[0]
 
-        print(stn_name)
+        print('\n##\n Station ID is \n##\n', stn_name)
         in_df = pd.read_csv(df_txt_file, sep=';', index_col=1, engine='c')
         assert int(stn_name) == in_df.loc[:, stn_id_col_name].values[0]
         assert stn_name in final_df_combined.columns
 
         in_df.index = pd.to_datetime(in_df.index, format=time_fmt)
         ppt_data = in_df[ppt_col_name].values.ravel()
+        print('\n++\n  Data shape is \n++\n', ppt_data.shape)
+
         final_df_combined.loc[in_df.index, stn_name] = ppt_data
+
+        all_files_len -= 1
 
         if delete_df_files:
             os.remove(df_txt_file)
-
-    final_df_combined.to_csv('all_ppt_data_combined.csv', sep=';')
+    final_df_combined = final_df_combined[final_df_combined >= 0]
+    final_df_combined.to_csv('all_dwd_hourly_ppt_data_combined_1995_2019.csv',
+                             sep=';')
 
 
 #==============================================================================
 # # In[129]:
 #==============================================================================
 
-if make_hdf5_dataset:
+
+if make_hdf5_dataset_new:
+    from a_functions import create_hdf5
+
     print('\n+++\n reading df \n+++\n')
     final_df_combined = pd.read_csv(
-        os.path.join(main_dir, r'1D_all_ppt_data_combined.csv'),
-        #                      r'all_ppt_data_combined.csv'),
+        os.path.join(
+            main_dir, r'all_dwd_hourly_ppt_data_combined_1995_2019.csv'),
+        #                             r'all_ppt_data_combined.csv'),
         sep=';',
         index_col=0)
     final_df_combined.index = pd.to_datetime(final_df_combined.index,
                                              format='%Y-%m-%d %H:%M:%S')
     print('\n+++\n resampling df \n+++\n')
 
-    df_60min = resampleDf(
-        final_df_combined,
-        temp_freq=temp_freq_resample,
-        df_sep_=';', out_save_dir=main_dir,
-        df_save_name='%s_all_ppt_data_combined.csv' % temp_freq_resample)
-    ppt_data_all = np.array(df_60min.values)
+    for temp_freq_resample in freqs_list:
+        if temp_freq_resample == '60Min':
+            df_resampled = final_df_combined
+        else:
+            print(temp_freq_resample)
+            df_resampled = resampleDf(
+                final_df_combined,
+                temp_freq=temp_freq_resample,
+                df_sep_=';', out_save_dir=main_dir,
+                df_save_name=('%all_dwd_hourly_ppt_data_combined_1995_2019.csv'
+                              % temp_freq_resample))
+    #     ppt_data_all = np.array(df_60min.values)
+        df_resampled = df_resampled[df_resampled >= 0]
+        print('\n+++\n creating HDF5 file \n+++\n')
 
-    print('\n+++\n creating HDF5 file \n+++\n')
+        str_date = str(df_resampled.index[0]).replace(
+            '-', '').replace(':', '').replace(' ', '')
+        ed_date = str(df_resampled.index[-1]).replace(
+            '-', '').replace(':', '').replace(' ', '')
 
-    str_date = start_date.replace('-', '').replace(':', '').replace(' ', '')
-    ed_date = end_date.replace('-', '').replace(':', '').replace(' ', '')
-    hf = h5py.File("DWD_%s_ppt_stns_%s_%s.h5"
-                   % (temp_freq_resample, str_date, ed_date), "w")
+        output_hdf5_file = r"DWD_%s_ppt_stns_%s_%s_new.h5" % (
+            temp_freq_resample, str_date, ed_date)
 
-    #hf.create_dataset('data', data=ppt_data_all, dtype='f8')
-    stns_int = []
-    for stn_str in final_df_combined.columns:
-        stns_int.append(int(stn_str))
-
-    stns_coords_lon = stn_names_df.loc[stns_int, 'geoBreite'].values
-    stns_coords_lat = stn_names_df.loc[stns_int, 'geoLaenge'].values
-    stns_coords_z = stn_names_df.loc[stns_int, 'Stationshoehe'].values
-    # stns_name = stn_names_df.loc[stns_int, 'Stationsname'].values
-    stns_bundesland = stn_names_df.loc[stns_int, 'Bundesland'].values
-
-    start_idx_values, last_idx_values = [], []
-    for stn_id in final_df_combined.columns:
-        stn_vals = final_df_combined.loc[:, stn_id].values.ravel()
-        stn_idx = final_df_combined.loc[:, stn_id].index.values
-
-        idx_and_val_not_nan = next((ix, x)
-                                   for ix, x in zip(stn_idx, stn_vals)
-                                   if not math.isnan(x))
-        first_time_ix = idx_and_val_not_nan[0]  # get time index of start
-        # get arg of idx and append to list
-        first_time_ix_ix = np.where(stn_idx == first_time_ix)[0][0]
-        start_idx_values.append(first_time_ix_ix)
-
-        idx_and_val_is_nan = next((ix, x)
-                                  for ix, x in zip(stn_idx[::-1], stn_vals[::-1])
-                                  if not math.isnan(x))
-        last_time_ix = idx_and_val_is_nan[0]
-        last_time_ix_ix = np.where(stn_idx == last_time_ix)[0][0]
-        last_idx_values.append(last_time_ix_ix)
-
-    start_end_idx_df = pd.DataFrame(index=final_df_combined.columns,
-                                    data=start_idx_values,
-                                    columns=['start_idx'])
-    start_end_idx_df['end_idx'] = last_idx_values
-
-    # assign ppt data as dataset
-    hf.create_dataset('data', data=ppt_data_all, dtype='f8')
-
-    dt = h5py.special_dtype(vlen=str)
-    dset = hf.create_dataset("Bundesland", data=stns_bundesland, dtype=dt)
-
-    hf.create_dataset("id", data=final_df_combined.columns, dtype=dt)
-
-    g2 = hf.create_group('coords')
-    g2.create_dataset('lon', data=stns_coords_lon, dtype='f8')
-    g2.create_dataset('lat', data=stns_coords_lat, dtype='f8')
-    g2.create_dataset('z', data=stns_coords_z, dtype='f8')
-
-    # get time index as string
-    time_ix_str_lst = []
-    for ix_time in df_60min.index:
-        #         time_ix_str_lst.append(ix_time.strftime('%Y-%m-%d %H:%M:%S'))
-        time_ix_str_lst.append(ix_time.isoformat())
-
-#     ix0 = df_60min.index[0]
-#     d = ix0.strftime('%Y-%m-%d %H:%M:%S')
-    g3 = hf.create_group('timestamps')
-    g3.create_dataset('day',
-                      data=df_60min.index.day,
-                      dtype='i4')
-    g3.create_dataset('isoformat',
-                      data=np.array(time_ix_str_lst).astype(np.object_),
-                      dtype=dt)
-    g3.create_dataset('start_idx',
-                      data=start_end_idx_df.loc[:, 'start_idx'].values,
-                      dtype='i4')
-    g3.create_dataset('end_idx',
-                      data=start_end_idx_df.loc[:, 'end_idx'].values,
-                      dtype='i4')
-
-    g3.create_dataset('month',
-                      data=df_60min.index.month,
-                      dtype='i4')
-    g3.create_dataset('yday',
-                      data=df_60min.index.dayofyear,
-                      dtype='i4')
-    g3.create_dataset('year',
-                      data=df_60min.index.year,
-                      dtype='i4')
-    g3.create_dataset('Start_Date',
-                      data=np.string_(df_60min.index[0]))
-    g3.create_dataset('End_Date',
-                      data=np.string_(df_60min.index[-1]))
-    g3.create_dataset('Index_%s_Freq' % temp_freq_resample,
-                      data=np.arange(0, len(df_60min.index), 1),
-                      dtype='i4')
-    hf.close()
-
-    print('\n+++\n saved HDF5 file \n+++\n')
+        create_hdf5(hf5_file=output_hdf5_file,
+                    start_dt=df_resampled.index[0],
+                    end_dt=df_resampled.index[-1],
+                    nstats=len(df_resampled.columns),
+                    freq=temp_freq_resample,
+                    data_title=(r'Precipitation DWD Data Historical and Recent'
+                                r'Aggregation %s') % temp_freq_resample,
+                    in_ppt_df=df_resampled,
+                    in_stns_df=stn_names_df,
+                    utm=False)
