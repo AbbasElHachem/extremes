@@ -36,7 +36,8 @@ from scipy.stats import pearsonr as pears
 from matplotlib import rc
 from matplotlib import rcParams
 
-from _00_additional_functions import (resample_intersect_2_dfs, resampleDf,
+from _00_additional_functions import (resample_intersect_2_dfs,
+                                      resampleDf,
                                       calculate_probab_ppt_below_thr)
 
 
@@ -185,13 +186,14 @@ def plot_2_stns_statisitcs_with_time_aggregations(stn1_id,
 #==============================================================================
 
 
-def calculate_statistics_2_stns_per_temp_freq(netatmo_ppt_df_file,  # path to combined netatmo ppt df
-                                              path_to_ppt_hdf_data,  # path to combined dwd ppt df
-                                              distance_matrix_df_file,  # path to distances netatmo-dwd stns
-                                              aggregation_frequencies_list,  # list of temporal aggregations
-                                              ppt_thrs_list,  # list of precipitation thresholds
-                                              out_dir  # path to out save directory
-                                              ):
+def calculate_statistics_2_stns_per_temp_freq(
+    netatmo_ppt_df_file,  # path to combined netatmo ppt df
+    path_to_ppt_hdf_data,  # path to combined dwd ppt df
+    distance_matrix_df_file,  # path to distances netatmo-dwd stns
+    aggregation_frequencies_list,  # list of temporal aggregations
+    ppt_thrs_list,  # list of precipitation thresholds
+    out_dir  # path to out save directory
+):
     '''
     calcualte for every temporal frequency (aggregation) the BS value,
     the spearman correlation, pearson correlation and p0 for every

@@ -40,6 +40,7 @@ from matplotlib import rc
 from matplotlib import rcParams
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 from collections import OrderedDict
+
 from _00_additional_functions import (resample_intersect_2_dfs,
                                       get_cdf_part_abv_thr,
                                       calculate_probab_ppt_below_thr,
@@ -714,34 +715,34 @@ def compare_two_dwd_stns(stns_ids):
 
                     try:
                         #====================================================
-                        pass
-#                         plt_bar_plot_2_stns(iid, stn_near, distance_near,
-#                                             df_common1, df_common2, tem_freq,
-#                                             out_save_dir)
-#
-#                         plt_scatter_plot_2_stns(iid, stn_near, distance_near,
-#                                                 df_common1, df_common2, ppt_thr_min,
-#                                                 tem_freq,
-#                                                 out_save_dir)
-#                         plot_end_tail_cdf_2_stns(iid, stn_near, distance_near,
-#                                                  df_common1, df_common2,
-#                                                  tem_freq, ppt_thr_min,
-#                                                  out_save_dir)
-#                         plot_normalized_ranked_stns(iid, stn_near,
-#                                                     distance_near,
-#                                                     df_common1, df_common2,
-#                                                     tem_freq,
-#                                                     out_save_dir)
-#                         plot_normalized_sorted_ranked_stns(iid, stn_near,
-#                                                            distance_near,
-#                                                            df_common1,
-#                                                            df_common2,
-#                                                            tem_freq,
-#                                                            out_save_dir)
-#                         plot_sorted_stns_vals(iid, stn_near, distance_near,
-#                                               df_common1, df_common2,
-#                                               tem_freq,
-#                                               out_save_dir)
+
+                        plt_bar_plot_2_stns(iid, stn_near, distance_near,
+                                            df_common1, df_common2, tem_freq,
+                                            out_save_dir)
+
+                        plt_scatter_plot_2_stns(iid, stn_near, distance_near,
+                                                df_common1, df_common2, ppt_thr_min,
+                                                tem_freq,
+                                                out_save_dir)
+                        plot_end_tail_cdf_2_stns(iid, stn_near, distance_near,
+                                                 df_common1, df_common2,
+                                                 tem_freq, ppt_thr_min,
+                                                 out_save_dir)
+                        plot_normalized_ranked_stns(iid, stn_near,
+                                                    distance_near,
+                                                    df_common1, df_common2,
+                                                    tem_freq,
+                                                    out_save_dir)
+                        plot_normalized_sorted_ranked_stns(iid, stn_near,
+                                                           distance_near,
+                                                           df_common1,
+                                                           df_common2,
+                                                           tem_freq,
+                                                           out_save_dir)
+                        plot_sorted_stns_vals(iid, stn_near, distance_near,
+                                              df_common1, df_common2,
+                                              tem_freq,
+                                              out_save_dir)
                     except Exception as msg:
                         print('error while plotting', msg, tem_freq)
                         continue

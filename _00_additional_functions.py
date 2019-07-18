@@ -2,12 +2,19 @@ import os
 
 import fnmatch
 import pyproj
-
-import matplotlib.colors as mcolors
+import shapefile
 
 import numpy as np
 import pandas as pd
+
 import scipy.spatial as spatial
+import matplotlib.colors as mcolors
+import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
+
+from scipy.stats import spearmanr as spr
+from scipy.stats import pearsonr as pears
+
 #==============================================================================
 #
 #==============================================================================
@@ -509,7 +516,6 @@ def select_ppt_vals_abv_temp_thr(
     distance_matrix_netatmo_ppt_netatmo_temp,
     min_dist_thr_temp,  # distance threshold, selecting netatmo neigbours
     temp_thr,  # temp threshold, below assume ppt is snow
-    year_by_year  # if True do it year by year and check tendency
 ):
     '''
     could be USED IN SCRIPT NUMBER  19
@@ -581,6 +587,211 @@ def select_ppt_vals_abv_temp_thr(
                            df_netatmo_ppt_cmn.shape[0]), '%')
             netatmo_ppt_stn1 = df_ppt_abv_temp_thr
 
+#==============================================================================
+#
+#==============================================================================
+
+
+def select_convective_season(
+    df,  # df to slice
+    month_lst  # list of month for convective season
+):
+    '''
+    return dataframe without the data corresponding to the winter season
+    '''
+    df = df.copy()
+    df_conv_season = df[~df.index.month.isin(month_lst)]
+
+    return df_conv_season
+#==============================================================================
+#
+#==============================================================================
+
+
+def compare_p1_dwd_p1_netatmo(
+    val_dwd,  # p1 or ppt_mean  for df_DWD
+    val_netatmo  # p1 or ppt_mean for df_Netatmo
+):
+    '''
+    use this function to compare two values from two different stations
+    find if the values are equal +-10% , if smaller or if bigger
+    return the result for being saved in a dataframe
+    plot the result as scatter plots
+
+    Return:
+        marker, color 
+    '''
+    _10_percent_dwd = 0.1 * val_dwd
+
+    if val_dwd - _10_percent_dwd <= val_netatmo <= val_dwd + _10_percent_dwd:
+        return 's', 'b'  # '='
+    if val_netatmo < val_dwd - _10_percent_dwd:
+        return '_', 'g'  # '-'
+    if val_dwd + _10_percent_dwd < val_netatmo:
+        return '+', 'r'  # '+'
+    return
+
+#==============================================================================
+#
+#==============================================================================
+
+
+def look_agreement_df1_df2(stn_dwd_id,  # id of dwd station
+                           stn_netatmo_id,  # if of netatmo station
+                           df_dwd,  # df dwd intersected with netatmo
+                           df_netatmo,  # df netatmo intersected with dwd
+                           ppt_thr,  # ppt thr to check agreement
+                           ):
+    '''
+    read two dataframes, one for dwd and one for netatmo
+    replace all values above threshold with 1 and below with 0
+
+    calculate coorelation between the two
+    look for agreement or disagreement
+    try it with or without considering temperature threshold
+    '''
+    df_dwd_copy = df_dwd.copy()
+    df_netatmo_copy = df_netatmo.copy()
+
+    # calculate pearson and spearman between original values
+    orig_pear_corr = np.round(
+        pears(df_dwd_copy.values.ravel(),
+              df_netatmo_copy.values.ravel())[0], 2)
+
+    orig_spr_corr = np.round(spr(df_dwd_copy.values.ravel(),
+                                 df_netatmo_copy.values.ravel())[0], 2)
+
+    # transform values to booleans
+    df_dwd_copy['Bool'] = (df_dwd_copy.values > ppt_thr).astype(int)
+    df_netatmo_copy['Bool'] = (df_netatmo_copy.values > ppt_thr).astype(int)
+
+    # calculate correlations of booleans 1, 0 (pearson and spearman)
+    pearson_corr = np.round(pears(df_dwd_copy.Bool.values.ravel(),
+                                  df_netatmo_copy.Bool.values.ravel())[0], 2)
+
+    spearman_corr = np.round(spr(df_dwd_copy.Bool.values.ravel(),
+                                 df_netatmo_copy.Bool.values.ravel())[0], 2)
+
+    # find nbr of events above thr
+    events_dwd_abv_thr = df_dwd_copy[df_dwd_copy.values > ppt_thr].shape[0]
+    events_netatmo_abv_thr = df_netatmo_copy[df_netatmo_copy.values >
+                                             ppt_thr].shape[0]
+    ratio_netatmo_dwd = np.round(
+        (events_netatmo_abv_thr / events_dwd_abv_thr) * 100, 1)
+
+    return (orig_pear_corr, orig_spr_corr, pearson_corr, spearman_corr,
+            events_dwd_abv_thr, events_netatmo_abv_thr, ratio_netatmo_dwd)
+#==============================================================================
+#
+#==============================================================================
+
+
+def plot_subplot_fig(df_to_plot,    # dataframe to plot, coords-vals
+                     col_var_to_plot,  # name of variable to plot, Marker value
+                     col_color_of_marker,  # color of marker to use
+                     plot_title,  # title of plot
+                     lon_col_name='lon',  # name of longitude column
+                     lat_col_name='lat',  # name of latitude column
+                     shapefile_path=None,  # if Tur, plot Shapefile
+                     table_to_plot=None,  # table with statistics, add to plot
+                     out_save_name=None,  # Name of out figure
+                     out_dir=None,  # out dir to use for saving
+                     ):
+    '''
+        Read the df_results containing for every netatmo station
+        the coordinates (lon, lat) and the comparision between
+        the p1 and the mean value, between netatmo and nearest dwd
+
+        plot the reults on a map, either with or without temp_thr
+        use the shapefile of BW
+    '''
+
+    plt.ioff()
+
+    gridsize = (4, 2)
+    fig = plt.figure(figsize=(16, 12), dpi=150)
+    fig.subplots_adjust(wspace=0.005, hspace=0.005)
+    ax = plt.subplot2grid(gridsize, (0, 0), colspan=2, rowspan=3)
+    ax2 = plt.subplot2grid(gridsize, (3, 0), colspan=2, rowspan=1)
+
+    gs1 = gridspec.GridSpec(gridsize[0], gridsize[1])
+    gs1.update(wspace=0.005, hspace=0.005)
+    # set the spacing between axes.
+
+    if shapefile_path is not None:
+        # read and plot shapefile (BW or Germany) should be lon lat
+        shp_de = shapefile.Reader(shapefile_path)
+        for shape_ in shp_de.shapeRecords():
+            lon = [i[0] for i in shape_.shape.points[:][::-1]]
+            lat = [i[1] for i in shape_.shape.points[:][::-1]]
+            ax.scatter(lon, lat, marker='.', c='lightgrey', alpha=0.25, s=2)
+
+    # plot the stations in shapefile, look at the results of p1 comparasion
+    for i in range(df_to_plot.shape[0]):
+        ax.scatter(df_to_plot.loc[:, lon_col_name].values[i],
+                   df_to_plot.loc[:, lat_col_name].values[i],
+                   marker=df_to_plot.loc[:, col_var_to_plot].values[i],
+                   c=df_to_plot.loc[:, col_color_of_marker].values[i],
+                   alpha=1,
+                   s=15,
+                   label=str(col_var_to_plot))
+
+    if table_to_plot is not None:
+        table_to_plot = table_to_plot.T
+        columns_to_plot = []
+        for table_col in table_to_plot.columns:
+            if col_var_to_plot in table_col:
+                columns_to_plot.append(table_col)
+        assert len(columns_to_plot) > 0, 'no columns found for table'
+        table_col_to_plot = table_to_plot.loc[:, columns_to_plot]
+        ax2.axis('tight')
+        ax2.axis('off')
+        table_plot = ax2.table(cellText=np.array([table_col_to_plot.values[0]]),
+                               rowLabels=table_col_to_plot.index,
+                               cellLoc='right',
+                               colWidths=[0.1] * 3,
+                               colColours=['b', 'g', 'r'],
+                               colLabels=table_col_to_plot.columns,
+                               clip_on=True,
+                               in_layout=True,
+                               snap=True,
+                               loc='center')
+        table_plot.auto_set_font_size(False)
+        table_plot.set_fontsize(10)
+        table_plot.scale(2, 2)
+
+    ax.grid(alpha=0.5)
+    ax.set_title(plot_title)
+
+#     ax.set_aspect(1.0)
+    ax.set_xlabel('Longitude')
+    ax.set_ylabel('Latitude')
+    fig.tight_layout()
+    plt.savefig(os.path.join(out_dir, out_save_name),
+                frameon=True, papertype='a4',
+                bbox_inches='tight', pad_inches=.2)
+    plt.close('all')
+
+    return df_to_plot
+
+#==============================================================================
+#
+#==============================================================================
+
+
+def select_vals_abv_percentile(data_arr,  # numpy array of values
+                               percentile_val  # percentile keep all values above
+                               ):
+    '''
+    select all values above a threshold
+    '''
+    # TODO: CHECK AGAIN PROBABILITY THRESHOLD
+    max_val = np.max(data_arr)
+    start_upper_tail_val = max_val * (percentile_val / 100)
+#     start_upper_tail_val = np.percentile(data_arr, percentile_val)
+    print(start_upper_tail_val)
+    data_arr_abv_percent = data_arr[data_arr > start_upper_tail_val]
+    return data_arr_abv_percent
 #==============================================================================
 #
 #==============================================================================

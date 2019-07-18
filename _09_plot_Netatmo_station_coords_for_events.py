@@ -24,7 +24,7 @@ from scipy import spatial
 from adjustText import adjust_text
 
 from _00_additional_functions import (list_all_full_path)
-from _06_get_data_simultaneous_Netatmo_events import get_netatmo_events_stn_data
+from _07_get_data_simultaneous_Netatmo_events import get_netatmo_events_stn_data
 
 
 # plt.style.use('fast')

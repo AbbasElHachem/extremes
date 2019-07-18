@@ -25,14 +25,14 @@ from scipy import spatial
 
 
 from _00_additional_functions import (list_all_full_path, resampleDf)
-from _06_get_data_simultaneous_Netatmo_events import get_netatmo_events_stn_data
+from _07_get_data_simultaneous_Netatmo_events import get_netatmo_events_stn_data
 
-from _09_aggregate_do_cdf_compare_2_DWD_stns import (plt_bar_plot_2_stns,
+from _10_aggregate_do_cdf_compare_2_DWD_stns import (plt_bar_plot_2_stns,
                                                      plt_scatter_plot_2_stns,
                                                      plot_end_tail_cdf_2_stns,
                                                      plot_normalized_ranked_stns)
 
-from _10_aggregate_do_cdf_compare_2_NetAtmo_stns import aggregation_frequencies
+from _11_aggregate_do_cdf_compare_2_NetAtmo_stns import aggregation_frequencies
 
 # plt.style.use('fast')
 plt.rcParams.update({'font.size': 14})

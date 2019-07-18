@@ -18,7 +18,7 @@ __email__ = "abbas.el-hachem@iws.uni-stuttgart.de"
 import pandas as pd
 
 from _00_additional_functions import get_stns_ids_coords_file
-from _05_NetatmoData_get_simultaneous_events import time_shifts_arr_floats
+from _06_NetatmoData_get_simultaneous_events import time_shifts_arr_floats
 
 
 #==============================================================================

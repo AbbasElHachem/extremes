@@ -41,7 +41,7 @@ import pandas as pd
 
 from _00_additional_functions import (resample_intersect_2_dfs)
 
-from _09_aggregate_plot_compare_2_DWD_stns import (plt_bar_plot_2_stns,
+from _10_aggregate_plot_compare_2_DWD_stns import (plt_bar_plot_2_stns,
                                                    plt_scatter_plot_2_stns,
                                                    plot_end_tail_cdf_2_stns,
                                                    plot_normalized_ranked_stns,
@@ -164,53 +164,53 @@ def compare_cdf_two_stns(netatmo_ppt_df_file, path_to_ppt_hdf_data,
                                 columns=[stn_2_id])
                             try:
                                 pass
-#                                 plt_bar_plot_2_stns(stn_id,
-#                                                     stn_2_id,
-#                                                     min_dist,
-#                                                     df_common1,
-#                                                     df_common2,
-#                                                     tem_freq,
-#                                                     out_save_dir)
-#
-#                                 plt_scatter_plot_2_stns(stn_id,
-#                                                         stn_2_id,
-#                                                         min_dist,
-#                                                         df_common1,
-#                                                         df_common2,
-#                                                         ppt_thr_min,
-#                                                         tem_freq,
-#                                                         out_save_dir)
-#
-#                                 plot_end_tail_cdf_2_stns(stn_id,
-#                                                          stn_2_id,
-#                                                          min_dist,
-#                                                          df_common1,
-#                                                          df_common2,
-#                                                          tem_freq,
-#                                                          ppt_thr_min,
-#                                                          out_save_dir)
-#
-#                                 plot_normalized_sorted_ranked_stns(stn_id,
-#                                                                    stn_2_id,
-#                                                                    min_dist,
-#                                                                    df_common1,
-#                                                                    df_common2,
-#                                                                    tem_freq,
-#                                                                    out_save_dir)
-#                                 plot_normalized_ranked_stns(stn_id,
-#                                                             stn_2_id,
-#                                                             min_dist,
-#                                                             df_common1,
-#                                                             df_common2,
-#                                                             tem_freq,
-#                                                             out_save_dir)
-#                                 plot_sorted_stns_vals(stn_id,
-#                                                       stn_2_id,
-#                                                       min_dist,
-#                                                       df_common1,
-#                                                       df_common2,
-#                                                       tem_freq,
-#                                                       out_save_dir)
+                                plt_bar_plot_2_stns(stn_id,
+                                                    stn_2_id,
+                                                    min_dist,
+                                                    df_common1,
+                                                    df_common2,
+                                                    tem_freq,
+                                                    out_save_dir)
+
+                                plt_scatter_plot_2_stns(stn_id,
+                                                        stn_2_id,
+                                                        min_dist,
+                                                        df_common1,
+                                                        df_common2,
+                                                        ppt_thr_min,
+                                                        tem_freq,
+                                                        out_save_dir)
+
+                                plot_end_tail_cdf_2_stns(stn_id,
+                                                         stn_2_id,
+                                                         min_dist,
+                                                         df_common1,
+                                                         df_common2,
+                                                         tem_freq,
+                                                         ppt_thr_min,
+                                                         out_save_dir)
+
+                                plot_normalized_sorted_ranked_stns(stn_id,
+                                                                   stn_2_id,
+                                                                   min_dist,
+                                                                   df_common1,
+                                                                   df_common2,
+                                                                   tem_freq,
+                                                                   out_save_dir)
+                                plot_normalized_ranked_stns(stn_id,
+                                                            stn_2_id,
+                                                            min_dist,
+                                                            df_common1,
+                                                            df_common2,
+                                                            tem_freq,
+                                                            out_save_dir)
+                                plot_sorted_stns_vals(stn_id,
+                                                      stn_2_id,
+                                                      min_dist,
+                                                      df_common1,
+                                                      df_common2,
+                                                      tem_freq,
+                                                      out_save_dir)
                             except Exception as msg:
                                 print('error while plotting', msg, tem_freq)
                                 continue
