@@ -475,8 +475,8 @@ def get_for_netatmo_nearest_dwd_station(first_stn_id, dwd_coords_df_file,
 def constrcut_contingency_table(stn1_id, stn2_id,
                                 dataframe1, dataframe2, thr1, thr2):
     ''' return percentage of values below or above a threshold'''
-    df_1 = dataframe1.values.ravel()
-    df_2 = dataframe2.values.ravel()
+    df_1 = dataframe1.values.ravel().copy()
+    df_2 = dataframe2.values.ravel().copy()
 
     assert df_1.shape[0] == df_2.shape[0], 'values should have same shape'
 
@@ -484,6 +484,7 @@ def constrcut_contingency_table(stn1_id, stn2_id,
                                data=dataframe1.values,
                                columns=[stn1_id])
 
+    # when two different stations (dwd-netatmo and not netatmo-netatmo)
     if stn1_id != stn2_id:
         df_combined.loc[:, stn2_id] = df_2
     else:
@@ -677,7 +678,7 @@ def look_agreement_df1_df2(stn_dwd_id,  # id of dwd station
     events_netatmo_abv_thr = df_netatmo_copy[df_netatmo_copy.values >
                                              ppt_thr].shape[0]
     ratio_netatmo_dwd = np.round(
-        (events_netatmo_abv_thr / events_dwd_abv_thr) * 100, 1)
+        (events_netatmo_abv_thr / events_dwd_abv_thr) * 100, 0)
 
     return (orig_pear_corr, orig_spr_corr, pearson_corr, spearman_corr,
             events_dwd_abv_thr, events_netatmo_abv_thr, ratio_netatmo_dwd)
@@ -779,19 +780,19 @@ def plot_subplot_fig(df_to_plot,    # dataframe to plot, coords-vals
 #==============================================================================
 
 
-def select_vals_abv_percentile(data_arr,  # numpy array of values
+def select_vals_abv_percentile(df,  # df to select all vals abv percentile
                                percentile_val  # percentile keep all values above
                                ):
     '''
     select all values above a threshold
     '''
     # TODO: CHECK AGAIN PROBABILITY THRESHOLD
-    max_val = np.max(data_arr)
-    start_upper_tail_val = max_val * (percentile_val / 100)
-#     start_upper_tail_val = np.percentile(data_arr, percentile_val)
-    print(start_upper_tail_val)
-    data_arr_abv_percent = data_arr[data_arr > start_upper_tail_val]
-    return data_arr_abv_percent
+
+    sorted_df = df.sort_values(by=df.columns[0])
+    start_upper_tail_val = int((percentile_val / 100) * sorted_df.shape[0])
+    df_data_arr_abv_percent = sorted_df.iloc[start_upper_tail_val:, :]
+
+    return df_data_arr_abv_percent
 #==============================================================================
 #
 #==============================================================================

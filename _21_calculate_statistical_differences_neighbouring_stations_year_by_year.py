@@ -54,12 +54,12 @@ __email__ = "abbas.el-hachem@iws.uni-stuttgart.de"
 import os
 import timeit
 import time
-import shapefile
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-from adjustText import adjust_text
+
 from pathlib import Path
 from matplotlib import rc
 from matplotlib import rcParams
@@ -370,14 +370,17 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_year_by_year(
                                                      'lat'] = lat_stn_netatmo
                         df_results_nbr_of_events.loc[
                             ppt_stn_id,
-                            'dwd_abv_thr_p%d' % df_min_ppt_thr] = events_dwd_abv_thr
+                            'dwd_abv_thr_p%d' %
+                            df_min_ppt_thr] = events_dwd_abv_thr
 
                         df_results_nbr_of_events.loc[
                             ppt_stn_id,
-                            'netatmo_abv_thr_p%d' % df_min_ppt_thr] = events_netatmo_abv_thr
+                            'netatmo_abv_thr_p%d'
+                            % df_min_ppt_thr] = events_netatmo_abv_thr
                         df_results_nbr_of_events.loc[
                             ppt_stn_id,
-                            'ratio_netatmo_dwd_abv_thr_p%d' % df_min_ppt_thr] = ratio_netatmo_dwd
+                            'ratio_netatmo_dwd_abv_thr_p%d'
+                            % df_min_ppt_thr] = ratio_netatmo_dwd
 
                         print('\n********\n ADDED DATA TO DF RESULTS')
 

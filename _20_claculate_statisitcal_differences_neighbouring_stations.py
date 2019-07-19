@@ -59,6 +59,7 @@ import shapefile
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sn
 
 from adjustText import adjust_text
 from pathlib import Path
@@ -70,6 +71,7 @@ from pandas.plotting import register_matplotlib_converters
 from _00_additional_functions import (calculate_probab_ppt_below_thr,
                                       resample_intersect_2_dfs,
                                       select_convective_season,
+                                      constrcut_contingency_table,
                                       compare_p1_dwd_p1_netatmo,
                                       look_agreement_df1_df2,
                                       plot_subplot_fig,
@@ -152,7 +154,7 @@ if not os.path.exists(out_save_dir_orig):
 #==============================================================================
 #
 #==============================================================================
-# in Netatmo coords df
+# used in Netatmo coords df
 x_col_name = ' lon'
 y_col_name = ' lat'
 
@@ -162,14 +164,16 @@ min_dist_thr_ppt = 5000  # m
 # threshold for max ppt value per hour
 max_ppt_thr = 100.
 ppt_min_thr = 1  # used when calculating p1 = 1-p0
+lower_percentile_val = 80  # only highest x% of the values are selected
 
-aggregation_frequencies = ['60min', '480min', '1440min']
-# aggregation_frequencies = ['60min']
+# aggregation_frequencies = ['60min', '480min', '1440min']
+aggregation_frequencies = ['60min']
 
 
 # this is used to keep only data where month is not in this list
 not_convective_season = [10, 11, 12, 1, 2, 3, 4]  # oct till april
 
+plot_contingency_maps_all_stns = True
 #==============================================================================
 #
 #==============================================================================
@@ -183,6 +187,8 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt(
         min_dist_thr_ppt,  # distance threshold when selecting dwd neigbours
         temp_freq_resample,  # temp freq to resample dfs
         df_min_ppt_thr,  # ppt_thr, select all values above thr
+        val_thr_percent,  # value in percentage, select all values above it
+        flag_plot_contingency_maps,
 ):
     '''
     For every netatmo precipitation station,
@@ -271,6 +277,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt(
 
                 if (df_netatmo_cmn.values.shape[0] > 0 and
                         df_dwd_cmn.values.shape[0] > 0):
+
                     # change everything to dataframes
                     df_netatmo_cmn = pd.DataFrame(
                         data=df_netatmo_cmn.values,
@@ -282,13 +289,76 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt(
                         index=df_dwd_cmn.index,
                         columns=[stn_2_dwd])
 
-#                     netatmo_ppt_stn1_2 = select_vals_abv_percentile(
-#                     df_netatmo_cmn.values, 20)
-#
-#                     dwd_ppt_stn1_2 = select_vals_abv_percentile(
-#                     df_dwd_cmn.values, 20)
-#
-                    # get coordinates of netatmo station
+                    # select only upper tail of values
+                    df_netatmo_cmn = select_vals_abv_percentile(
+                        df_netatmo_cmn, val_thr_percent)
+
+                    df_dwd_cmn = select_vals_abv_percentile(
+                        df_dwd_cmn, val_thr_percent)
+
+                    if flag_plot_contingency_maps:
+                        # construct continegency table
+                        (df_both_below_thr,
+                         df_first_abv_second_below_thr,
+                         df_first_below_second_abv_thr,
+                         df_both_abv_thr) = constrcut_contingency_table(
+                            ppt_stn_id,
+                            stn_2_dwd,
+                            df_netatmo_cmn,
+                            df_dwd_cmn,
+                            df_min_ppt_thr,
+                            df_min_ppt_thr)
+
+                        conf_arr = np.array([[df_both_below_thr,
+                                              df_first_abv_second_below_thr],
+                                             [df_first_below_second_abv_thr,
+                                              df_both_abv_thr]])
+    #                     df_contingeny=pd.DataFrame(data=conf_arr,
+    #                         index=)
+                        if conf_arr.shape[0] > 0:
+                            print('\n++++ plotting contingency table++++\n')
+                            plt.ioff()
+                            fig = plt.figure(figsize=(16, 12), dpi=100)
+                            ax = fig.add_subplot(111)
+                            ax2 = ax.twinx()
+                            ax.set_aspect(1)
+
+                            _ = sn.heatmap(conf_arr, annot=True,
+                                           vmin=0.0, cmap=plt.get_cmap('jet'),
+                                           vmax=100.0, fmt='.2f')
+
+                            ax.set_title(
+                                'Contingency table \n Data above %d percent \n'
+                                'Rainfall Threshold %0.1fmm '
+                                '%s vs %s \n distance: %0.1f m, time freq: %s\n'
+                                % (val_thr_percent, df_min_ppt_thr,
+                                   ppt_stn_id, stn_2_dwd,
+                                   min_dist_ppt_dwd, temp_freq_resample))
+
+                            ax.set_yticks([0.25, 1.25])
+                            ax.set_yticklabels(
+                                ['Netatmo below and DWD above',
+                                    'Netatmo below and DWD below'],
+                                rotation=90, color='g')
+                            ax.set_xticks([])
+
+                            ax2.set_yticks([0.25, 1.25])
+                            ax2.set_yticklabels(
+                                ['Netatmo above and DWD below',
+                                 'Netatmo above and DWD above'],
+                                rotation=-90, color='m')
+                            plt.savefig(
+                                os.path.join(
+                                    out_save_dir_orig,
+                                    'contingency_table_as_a_sequence'
+                                    '_%s_%s_%s_%0.1fmm_data_abv_%dpercent_.png'
+                                    % (ppt_stn_id, stn_2_dwd,
+                                        temp_freq_resample,
+                                       df_min_ppt_thr, val_thr_percent)))
+
+                            plt.close(fig)
+                            plt.clf()
+                        # get coordinates of netatmo station
                     lon_stn_netatmo = in_netatmo_df_coords.loc[
                         ppt_stn_id_name_orig, x_col_name]
                     lat_stn_netatmo = in_netatmo_df_coords.loc[
@@ -396,32 +466,31 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt(
 
     assert alls_stns_len == 0, 'not all stations were considered'
 
-    # TODO: add year as parameter
     # drop all netatmo stns with no data
     df_results.dropna(axis=0, how='any', inplace=True)
     df_results_correlations.dropna(axis=0, how='any', inplace=True)
     df_results_nbr_of_events.dropna(axis=0, how='any', inplace=True)
 
-    # save both dataframes
+    # save all dataframes
     df_results.to_csv(
         os.path.join(out_save_dir_orig,
                      'year_allyears_df_comparing_p%d_and_mean_freq_%s_'
-                     'dwd_netatmo.csv'
-                     % (df_min_ppt_thr, temp_freq_resample)),
+                     'dwd_netatmo_upper_%d_percent_data_considered.csv'
+                     % (df_min_ppt_thr, temp_freq_resample, val_thr_percent)),
         sep=';')
 
     df_results_correlations.to_csv(
         os.path.join(out_save_dir_orig,
                      'year_allyears_df_comparing_correlations_p%d_'
-                     'freq_%s_dwd_netatmo.csv'
-                     % (df_min_ppt_thr, temp_freq_resample)),
+                     'freq_%s_dwd_netatmo_upper_%d_percent_data_considered.csv'
+                     % (df_min_ppt_thr, temp_freq_resample, val_thr_percent)),
         sep=';')
 
     df_results_nbr_of_events.to_csv(
         os.path.join(out_save_dir_orig,
                      'year_allyears_df_comparing_nbr_of_events_p%d_'
-                     'freq_%s_dwd_netatmo.csv'
-                     % (df_min_ppt_thr, temp_freq_resample)),
+                     'freq_%s_dwd_netatmo_upper_%d_percent_data_considered.csv'
+                     % (df_min_ppt_thr, temp_freq_resample, val_thr_percent)),
         sep=';')
     return df_results, df_results_correlations, df_results_nbr_of_events
 
@@ -460,10 +529,10 @@ def save_how_many_abv_same_below(
     df_out.loc['count_vals_abv_mean_ppt',
                'Result'] = df_p1_mean[df_p1_mean['mean_ppt'] == '+'].shape[0]
 
-    df_out.to_csv(os.path.join(
-        out_dir,
-        'year_%s_df_similarities_%s_%dmm_.csv'
-        % (year_vals, temp_freq, ppt_thr)))
+#     df_out.to_csv(os.path.join(
+#         out_dir,
+#         'year_%s_df_similarities_%s_%dmm_.csv'
+#         % (year_vals, temp_freq, ppt_thr)))
     return df_out
 
 
@@ -479,7 +548,8 @@ def plt_on_map_agreements(
     temp_freq,  # temp freq of df
     ppt_thr,  # min ppt df, select all vals abv thr
     out_dir,  # out save dir for plots
-    year_vals  # if all years or year by year
+    year_vals,  # if all years or year by year
+    val_thr_percent  # consider all values above it
 ):
     '''
     Read the df_results containing for every netatmo station
@@ -488,8 +558,10 @@ def plt_on_map_agreements(
     between netatmo and nearest dwd station
     plot the reults on a map, either with or with temp_thr
     '''
-
-    title_add = '_'
+    if 'Bool' in col_to_plot:
+        title_add = '_%dmm_' % ppt_thr
+    else:
+        title_add = 'all_data'
 
     print('plotting comparing %s' % col_to_plot)
     plt.ioff()
@@ -521,9 +593,10 @@ def plt_on_map_agreements(
 
     adjust_text(texts, ax=ax,
                 arrowprops=dict(arrowstyle='->', color='red', lw=0.25))
-    ax.set_title('%s  '
+    ax.set_title('%s %s Data above %dpercent'
                  ' Netatmo and DWD %s data year %s'
-                 % (col_to_plot, temp_freq, year_vals))
+                 % (col_to_plot, title_add, val_thr_percent,
+                     temp_freq, year_vals))
     ax.grid(alpha=0.5)
 
     ax.set_xlabel('Longitude')
@@ -532,8 +605,8 @@ def plt_on_map_agreements(
     plt.savefig(
         os.path.join(
             out_dir,
-            'year_%s_%s_%s_%s_p%d_netatmo_ppt_dwd_station.png'
-            % (year_vals, title_add, temp_freq, col_to_plot, ppt_thr)),
+            'year_%s_%s_%s_p%d_netatmo_ppt_dwd_station_above_%dpercent_.png'
+            % (year_vals, temp_freq, col_to_plot, ppt_thr, val_thr_percent)),
         frameon=True, papertype='a4',
         bbox_inches='tight', pad_inches=.2)
     plt.close()
@@ -558,24 +631,26 @@ if __name__ == '__main__':
 
         path_to_df_results = os.path.join(
             out_save_dir_orig,
-            'df_comparing_p%d_and_mean_freq_%s_dwd_netatmo.csv'
-            % (ppt_min_thr, temp_freq))
+            'year_allyears_df_comparing_p%d_and_mean_freq_%s_'
+            'dwd_netatmo_upper_%d_percent_data_considered.csv'
+            % (ppt_min_thr, temp_freq, lower_percentile_val))
 
         path_to_df_correlations = os.path.join(
             out_save_dir_orig,
-            'df_comparing_correlations_p%d_'
-            'freq_%s_dwd_netatmo.csv'
-            % (ppt_min_thr, temp_freq))
+            'year_allyears_df_comparing_correlations_p%d_'
+            'freq_%s_dwd_netatmo_upper_%d_percent_data_considered.csv'
+            % (ppt_min_thr, temp_freq, lower_percentile_val))
 
         path_to_df_nbr_of_events = os.path.join(
             out_save_dir_orig,
-            'df_comparing_nbr_of_events_p%d_'
-            'freq_%s_dwd_netatmo.csv'
-            % (ppt_min_thr, temp_freq))
+            'year_allyears_df_comparing_nbr_of_events_p%d_'
+            'freq_%s_dwd_netatmo_upper_%d_percent_data_considered.csv'
+            % (ppt_min_thr, temp_freq, lower_percentile_val))
 
         if (not os.path.exists(path_to_df_results) or not
                 os.path.exists(path_to_df_correlations) or not
-                os.path.exists(path_to_df_nbr_of_events)):
+                os.path.exists(path_to_df_nbr_of_events) or
+                plot_contingency_maps_all_stns):
 
             print('\n Data frames do not exist, creating them\n')
 
@@ -588,7 +663,9 @@ if __name__ == '__main__':
                     distance_matrix_netatmo_ppt_dwd_ppt=distance_matrix_netatmo_dwd_df_file,
                     min_dist_thr_ppt=min_dist_thr_ppt,
                     temp_freq_resample=temp_freq,
-                    df_min_ppt_thr=ppt_min_thr)
+                    df_min_ppt_thr=ppt_min_thr,
+                    val_thr_percent=lower_percentile_val,
+                    flag_plot_contingency_maps=plot_contingency_maps_all_stns)
         else:
             print('\n Data frames do exist, reading them\n')
             df_results = pd.read_csv(path_to_df_results,
@@ -606,11 +683,11 @@ if __name__ == '__main__':
             ppt_thr=ppt_min_thr,
             out_dir=out_save_dir_orig, year_vals='all_years')
 
-#     #     plot the reults on a map, either with or without temp_thr
+    #     plot the reults on a map, either with or without temp_thr
         print('\n********\n Plotting Prob maps')
         plot_subplot_fig(df_to_plot=df_results,
                          col_var_to_plot='p%d' % ppt_min_thr,
-                         col_color_of_marker='colorp1',
+                         col_color_of_marker='colorp%d' % ppt_min_thr,
                          plot_title=('Difference in Probability P%d (Ppt>%dmm)'
                                      ' Netatmo and DWD %s data year %s'
                                      % (ppt_min_thr,
@@ -640,7 +717,7 @@ if __name__ == '__main__':
                                         % ('all_years', temp_freq)),
                          out_dir=out_save_dir_orig
                          )
-#         print('\n********\n Plotting Correlation maps')
+        print('\n********\n Plotting Correlation maps')
         for col_label in df_results_correlations.columns:
             if 'Correlation' in col_label:
                 # plot the results of df_results_correlations
@@ -650,16 +727,17 @@ if __name__ == '__main__':
                     shp_de_file=path_to_shpfile,
                     temp_freq=temp_freq,
                     ppt_thr=ppt_min_thr,
-                    out_dir=out_save_dir_orig, year_vals='all_years')
+                    out_dir=out_save_dir_orig, year_vals='all_years',
+                    val_thr_percent=lower_percentile_val)
 
-        plt_on_map_agreements(
-            df_correlations=df_results_nbr_of_events,
-            col_to_plot='ratio_netatmo_dwd_abv_thr_p%d' % ppt_min_thr,
-            shp_de_file=path_to_shpfile,
-            temp_freq=temp_freq,
-            ppt_thr=ppt_min_thr,
-            out_dir=out_save_dir_orig, year_vals='all_years')
-        break
+#         plt_on_map_agreements(
+#             df_correlations=df_results_nbr_of_events,
+#             col_to_plot='ratio_netatmo_dwd_abv_thr_p%d' % ppt_min_thr,
+#             shp_de_file=path_to_shpfile,
+#             temp_freq=temp_freq,
+#             ppt_thr=ppt_min_thr,
+#             out_dir=out_save_dir_orig, year_vals='all_years')
+
     STOP = timeit.default_timer()  # Ending time
     print(('\n****Done with everything on %s.\nTotal run time was'
            ' about %0.4f seconds ***' % (time.asctime(), STOP - START)))

@@ -210,8 +210,8 @@ if download_data:  # download all zip files
                     # Extract a single file from zip
                     zip_ref.extract(fileName, out_extract_df_dir)
 
-    for zip_file in all_zip_files:
-        if delete_zip_files:
+    if delete_zip_files:
+        for zip_file in all_zip_files:
             os.remove(zip_file)
     #==========================================================================
     #
