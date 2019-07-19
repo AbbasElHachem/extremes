@@ -57,9 +57,12 @@ path_to_ppt_netatmo_data = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
                             r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_.csv')
 assert os.path.exists(path_to_ppt_netatmo_data), 'wrong NETATMO Ppt file'
 
-path_to_ppt_hdf_data = (r'X:\exchange\ElHachem'
-                        r'\niederschlag_deutschland'
-                        r'\1993_2016_5min_merge_nan.h5')
+# path_to_ppt_hdf_data = (r'X:\exchange\ElHachem'
+#                         r'\niederschlag_deutschland'
+#                         r'\1993_2016_5min_merge_nan.h5')
+path_to_ppt_hdf_data = (r'E:\download_DWD_data_recent'
+                        r'\DWD_60Min_ppt_stns_19950101000000_20190715000000_new.h5')
+
 assert os.path.exists(path_to_ppt_hdf_data), 'wrong DWD Ppt file'
 
 distance_matrix_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
@@ -326,7 +329,7 @@ def construct_netatmo_dwd_daily_dfs(netatmo_ppt_df_file,
                     idf1,
                     idf2,
                     '60min')
-#                 df_dwd_hourly['Time'] = df_dwd_hourly.index
+
                 if len(df_netatmo_hourly.values) > 0:
                     #                     raise Exception
 
@@ -338,20 +341,26 @@ def construct_netatmo_dwd_daily_dfs(netatmo_ppt_df_file,
 
                     df_disaggregated = pd.DataFrame(data=empty_data_arr,
                                                     index=df_dwd_hourly.index)
+                    # TODO: don't hard code
+                    df_to_disagg = df_dwd_hourly
+                    df_sum_daily_df_to_disagg = df_dwd_daily
+                    df_sum_daily_df_ref = df_netatmo_daily
 
-                    for idx, val in zip(df_dwd_hourly.index,
-                                        df_dwd_hourly.values):
+                    for idx, val in zip(df_to_disagg.index,
+                                        df_to_disagg.values):
                         daily_idx = datetime.date(idx.year, idx.month, idx.day)
                         if val == 0:
                             #                             print('Val is 0')
                             df_disaggregated.loc[idx] = val
 
                         if val != 0:
-                            if daily_idx in df_dwd_daily.index:
-                                #                                 print('val is', val, 'at ', daily_idx)
-                                sum_daily_dwd = df_dwd_daily.loc[daily_idx].values
-                                sum_daily_netatmo = df_netatmo_daily.loc[daily_idx].values
-                                # TODO FIX ME
+                            if daily_idx in df_sum_daily_df_to_disagg.index:
+                                # print('val is', val, 'at ', daily_idx)
+                                sum_daily_dwd = df_sum_daily_df_to_disagg.loc[
+                                    daily_idx].values
+                                sum_daily_netatmo = df_sum_daily_df_ref.loc[
+                                    daily_idx].values
+
 #                                 print('sum dwd is ', sum_daily_dwd)
 #                                 print('sum netatmo is', sum_daily_netatmo)
                                 if sum_daily_dwd == 0:
