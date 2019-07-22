@@ -162,7 +162,7 @@ y_col_name = ' lat'
 min_dist_thr_ppt = 5000  # m
 
 # threshold for max ppt value per hour
-max_ppt_thr = 100.
+max_ppt_thr = 100.  # ppt above this value are not considered
 ppt_min_thr = 1  # used when calculating p1 = 1-p0
 lower_percentile_val = 80  # only highest x% of the values are selected
 
@@ -188,7 +188,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt(
         temp_freq_resample,  # temp freq to resample dfs
         df_min_ppt_thr,  # ppt_thr, select all values above thr
         val_thr_percent,  # value in percentage, select all values above it
-        flag_plot_contingency_maps,
+        flag_plot_contingency_maps,  # if True, plot contingency maps 2 stns
 ):
     '''
     For every netatmo precipitation station,
@@ -313,8 +313,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt(
                                               df_first_abv_second_below_thr],
                                              [df_first_below_second_abv_thr,
                                               df_both_abv_thr]])
-    #                     df_contingeny=pd.DataFrame(data=conf_arr,
-    #                         index=)
+
                         if conf_arr.shape[0] > 0:
                             print('\n++++ plotting contingency table++++\n')
                             plt.ioff()
@@ -358,7 +357,8 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt(
 
                             plt.close(fig)
                             plt.clf()
-                        # get coordinates of netatmo station
+
+                    # get coordinates of netatmo station for plotting
                     lon_stn_netatmo = in_netatmo_df_coords.loc[
                         ppt_stn_id_name_orig, x_col_name]
                     lat_stn_netatmo = in_netatmo_df_coords.loc[
@@ -435,7 +435,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt(
 
                     df_results_correlations.loc[
                         ppt_stn_id,
-                        'Bool _Spearman_Correlation'] = bool_spr_corr
+                        'Bool_Spearman_Correlation'] = bool_spr_corr
                     #==========================================================
                     # find events above threshold
                     #==========================================================
@@ -445,14 +445,17 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt(
                                                  'lat'] = lat_stn_netatmo
                     df_results_nbr_of_events.loc[
                         ppt_stn_id,
-                        'dwd_abv_thr_p%d' % df_min_ppt_thr] = events_dwd_abv_thr
+                        'dwd_abv_thr_p%d'
+                        % df_min_ppt_thr] = events_dwd_abv_thr
 
                     df_results_nbr_of_events.loc[
                         ppt_stn_id,
-                        'netatmo_abv_thr_p%d' % df_min_ppt_thr] = events_netatmo_abv_thr
+                        'netatmo_abv_thr_p%d'
+                        % df_min_ppt_thr] = events_netatmo_abv_thr
                     df_results_nbr_of_events.loc[
                         ppt_stn_id,
-                        'ratio_netatmo_dwd_abv_thr_p%d' % df_min_ppt_thr] = ratio_netatmo_dwd
+                        'ratio_netatmo_dwd_abv_thr_p%d'
+                        % df_min_ppt_thr] = ratio_netatmo_dwd
 
                     print('\n********\n ADDED DATA TO DF RESULTS')
 
@@ -683,7 +686,7 @@ if __name__ == '__main__':
             ppt_thr=ppt_min_thr,
             out_dir=out_save_dir_orig, year_vals='all_years')
 
-    #     plot the reults on a map, either with or without temp_thr
+        #  plot the reults on a map
         print('\n********\n Plotting Prob maps')
         plot_subplot_fig(df_to_plot=df_results,
                          col_var_to_plot='p%d' % ppt_min_thr,

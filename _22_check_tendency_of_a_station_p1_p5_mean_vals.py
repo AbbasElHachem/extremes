@@ -10,15 +10,14 @@ Created on: 2019-07-18
 
 Parameters
 ----------
-file_loc : str
-    The file location of the spreadsheet
-print_cols : bool, optional
-    A flag used to print the columns to the console (default is False)
+    input all station files generated from script number 20
+    combine for every year the station data and construct
+    one dataframe containing all the sations and years
+    find how the correaltion of the p-value change from year to year
 
 Returns
 -------
-list
-    a list of strings representing the header columns
+    plot the result  
 """
 
 
@@ -26,7 +25,7 @@ __author__ = "Abbas El Hachem"
 __copyright__ = 'Institut fuer Wasser- und Umweltsystemmodellierung - IWS'
 __email__ = "abbas.el-hachem@iws.uni-stuttgart.de"
 
-# =============================================================
+# =============================================================================
 
 from pathlib import Path
 
@@ -48,7 +47,11 @@ path_to_netatmo_df = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
                       '\plots_NetAtmo_ppt_NetAtmo_temperature')
 
 
-ppt_thr = 1
+ppt_thr = 1  # 5
+
+# 'Orig_Spearman_Correlation';'p%d' % ppt_thr; mean_ppt
+var_to_plot = 'Orig_Pearson_Correlation'
+
 dfs = list_all_full_path('.csv', path_to_netatmo_df)
 
 dfs_tendency_p1_p5 = [df_file for df_file in dfs
@@ -57,34 +60,50 @@ dfs_tendency_p1_p5 = [df_file for df_file in dfs
 dfs_tendency_correlations = [df_file for df_file in dfs
                              if ('correlations_p%d' % ppt_thr) in df_file]
 
+#==============================================================================
+# # get all stations in a list
+#==============================================================================
 stations_all = []
 for df_file in dfs_tendency_p1_p5:
     df_c = pd.read_csv(df_file, sep=';', index_col=0)
     for index, row in df_c.iterrows():
         stations_all.append(index)
-        #print(row['p1'], row['mean_ppt'])
-        #print(row['Orig_Pearson_Correlation'], row['Orig_Spearman_Correlation'] , Bool_Pearson_Correlation)
+        # print(row['p1'], row['mean_ppt'])
+        # print(row['Orig_Pearson_Correlation'],
+        # row['Orig_Spearman_Correlation'] , Bool_Pearson_Correlation)
 
-
+#==============================================================================
+# # keep unique stations and make new dataframe
+#==============================================================================
 stations_all_uniq = np.unique(stations_all).astype(str)
 dfs_years = pd.DataFrame(index=stations_all_uniq,
-                         columns=['all_years', '2015', '2016', '2017', '2018', '2019'])
+                         columns=['all_years', '2015', '2016',
+                                  '2017', '2018', '2019'])
 
+#==============================================================================
+# # append data to dataframe, for every statuib get all correlations of p values
+#==============================================================================
 for year in dfs_years.columns:
     for df_f in dfs_tendency_p1_p5:
         if year in df_f:
             print(year, df_f)
             df_c = pd.read_csv(df_f, sep=';', index_col=0)
             for index, row in df_c.iterrows():
-                if index not in dfs_years.index:
-                    print(df_c.loc['70_ee_50_00_42_e2', :])
-                dfs_years.loc[index, year] = row['Orig_Pearson_Correlation']
+                dfs_years.loc[index, year] = row[var_to_plot]
 
-dfs_year_num = dfs_years.replace('_', -1).replace('s', 0).replace('+', 1)
+if var_to_plot == 'p1' or var_to_plot == 'p5':
+    # change markers  to numericals for p1 or p5
+    dfs_year_num = dfs_years.replace('_', -1).replace('s', 0).replace('+', 1)
+
+# save df
 dfs_year_num.to_csv(
-    r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\plots_NetAtmo_ppt_NetAtmo_temperature\dfs_comparing\df_tendency_Orig_Pearson_Correlation.csv', sep=';')
+    r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
+    '\plots_NetAtmo_ppt_NetAtmo_temperature\dfs_comparing'
+    '\df_tendency_Orig_Pearson_Correlation.csv', sep=';')
 
-
+#==============================================================================
+# Plot results
+#==============================================================================
 plt.ioff()
 fig = plt.figure(figsize=(16, 8), dpi=200)
 

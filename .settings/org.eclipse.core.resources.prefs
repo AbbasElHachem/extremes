@@ -21,4 +21,5 @@ encoding/_19_calculate_Brier_score_do_statistics_2_stns.py=utf-8
 encoding/_20_claculate_statisitcal_differences_neighbouring_stations.py=utf-8
 encoding/_21_calculate_statistical_differences_neighbouring_stations_year_by_year.py=utf-8
 encoding/_22_check_tendency_of_a_station_p1_p5_mean_vals.py=utf-8
+encoding/_23_inverse_distance_method_interpolation.py=utf-8
 encoding/_a0_download_dwd_historical_and_recent_data.py=utf-8

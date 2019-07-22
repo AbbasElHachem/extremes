@@ -549,13 +549,13 @@ if __name__ == '__main__':
                         ppt_thr=ppt_min_thr,
                         out_dir=out_save_dir_orig,
                         year_vals=year)
-            plt_on_map_agreements(
-                df_correlations=df_results_nbr_of_events,
-                col_to_plot='ratio_netatmo_dwd_abv_thr_p%d' % ppt_min_thr,
-                shp_de_file=path_to_shpfile,
-                temp_freq=temp_freq,
-                ppt_thr=ppt_min_thr,
-                out_dir=out_save_dir_orig, year_vals=year)
+#             plt_on_map_agreements(
+#                 df_correlations=df_results_nbr_of_events,
+#                 col_to_plot='ratio_netatmo_dwd_abv_thr_p%d' % ppt_min_thr,
+#                 shp_de_file=path_to_shpfile,
+#                 temp_freq=temp_freq,
+#                 ppt_thr=ppt_min_thr,
+#                 out_dir=out_save_dir_orig, year_vals=year)
     STOP = timeit.default_timer()  # Ending time
     print(('\n****Done with everything on %s.\nTotal run time was'
            ' about %0.4f seconds ***' % (time.asctime(), STOP - START)))
