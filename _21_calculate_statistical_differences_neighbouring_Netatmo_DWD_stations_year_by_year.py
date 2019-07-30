@@ -128,9 +128,6 @@ path_to_netatmo_coords_df_file = (
     r"\netatmo_bw_1hour_coords.csv")
 assert os.path.exists(path_to_netatmo_coords_df_file), 'wrong DWD coords file'
 
-dwd_coords_df_file = (r'X:\exchange\ElHachem\niederschlag_deutschland'
-                      r'\1993_2016_5min_merge_nan.csv')
-assert os.path.exists(dwd_coords_df_file), 'wrong DWD coords file'
 
 path_to_shpfile = (r'X:\exchange\ElHachem\Netatmo'
                    r'\Landesgrenze_ETRS89\Landesgrenze_10000_ETRS89_lon_lat.shp')

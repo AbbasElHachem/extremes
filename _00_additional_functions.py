@@ -6,7 +6,7 @@ import shapefile
 
 import numpy as np
 import pandas as pd
-
+import seaborn as sn
 import scipy.spatial as spatial
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
@@ -218,11 +218,12 @@ def resampleDf(data_frame,  # dataframe to resample (or series)
 
     if fillnan:
         df_res.fillna(value=fillnan_value, inplace=True)
+    if not isinstance(df_res, pd.DataFrame):
+        df_res = pd.DataFrame(index=df_res.index, data=df_res.values)
     if df_save_name is not None and out_save_dir is not None:
         df_res.to_csv(os.path.join(out_save_dir, df_save_name),
                       sep=df_sep_)
-    if not isinstance(df_res, pd.DataFrame):
-        df_res = pd.DataFrame(index=df_res.index, data=df_res.values)
+
     return df_res
 
 #==============================================================================
@@ -594,7 +595,7 @@ def select_ppt_vals_abv_temp_thr(
 
 
 def select_convective_season(
-    df,  # df to slice
+    df,  # df to slice, index should be datetime
     month_lst  # list of month for convective season
 ):
     '''
@@ -655,32 +656,21 @@ def look_agreement_df1_df2(stn_dwd_id,  # id of dwd station
     df_netatmo_copy = df_netatmo.copy()
 
     # calculate pearson and spearman between original values
-    orig_pear_corr = np.round(
-        pears(df_dwd_copy.values.ravel(),
-              df_netatmo_copy.values.ravel())[0], 2)
+    abv_per_pear_corr = np.round(
+        pears(df_dwd_copy.values,
+              df_netatmo_copy.values)[0], 2)
 
-    orig_spr_corr = np.round(spr(df_dwd_copy.values.ravel(),
-                                 df_netatmo_copy.values.ravel())[0], 2)
-
-    # transform values to booleans
-    df_dwd_copy['Bool'] = (df_dwd_copy.values > ppt_thr).astype(int)
-    df_netatmo_copy['Bool'] = (df_netatmo_copy.values > ppt_thr).astype(int)
-
-    # calculate correlations of booleans 1, 0 (pearson and spearman)
-    pearson_corr = np.round(pears(df_dwd_copy.Bool.values.ravel(),
-                                  df_netatmo_copy.Bool.values.ravel())[0], 2)
-
-    spearman_corr = np.round(spr(df_dwd_copy.Bool.values.ravel(),
-                                 df_netatmo_copy.Bool.values.ravel())[0], 2)
+    abv_per_spr_corr = np.round(spr(df_dwd_copy.values,
+                                    df_netatmo_copy.values)[0], 2)
 
     # find nbr of events above thr
-    events_dwd_abv_thr = df_dwd_copy[df_dwd_copy.values > ppt_thr].shape[0]
-    events_netatmo_abv_thr = df_netatmo_copy[df_netatmo_copy.values >
+    events_dwd_abv_thr = df_dwd_copy[df_dwd_copy > ppt_thr].shape[0]
+    events_netatmo_abv_thr = df_netatmo_copy[df_netatmo_copy >
                                              ppt_thr].shape[0]
     ratio_netatmo_dwd = np.round(
         (events_netatmo_abv_thr / events_dwd_abv_thr) * 100, 0)
 
-    return (orig_pear_corr, orig_spr_corr, pearson_corr, spearman_corr,
+    return (abv_per_pear_corr, abv_per_spr_corr,
             events_dwd_abv_thr, events_netatmo_abv_thr, ratio_netatmo_dwd)
 #==============================================================================
 #
@@ -780,19 +770,185 @@ def plot_subplot_fig(df_to_plot,    # dataframe to plot, coords-vals
 #==============================================================================
 
 
-def select_vals_abv_percentile(df,  # df to select all vals abv percentile
-                               percentile_val  # percentile keep all values above
-                               ):
+def calc_plot_contingency_table_2_stations(
+    first_stn_id,  # id of first stations
+    second_stn_id,  # id of second station
+    first_df,  # df of first station
+    second_df,  # df of second station
+    first_thr,  # threshhold for first df
+    second_thr,  # threshhold for second df
+    seperating_dist,  # distance between 2 stations
+    temp_freq,  # temporal resolution of data
+    df_append_resutl,  # df containing all stations as idx, append result
+    out_plot_dir,  # out save dir for plot
+    plot_figures,  # flag is True plot all plots
+):
     '''
-    select all values above a threshold
+    construct and save contingency table between two stations
+    usually a DWD and a Netatmo Station used in script number _20_
     '''
-    # TODO: CHECK AGAIN PROBABILITY THRESHOLD
+    # construct continegency table
+    (df_both_below_thr,
+     df_first_abv_second_below_thr,
+     df_first_below_second_abv_thr,
+     df_both_abv_thr) = constrcut_contingency_table(
+        first_stn_id,
+        second_stn_id,
+        first_df,
+        second_df,
+        first_thr,
+        second_thr)
 
-    sorted_df = df.sort_values(by=df.columns[0])
-    start_upper_tail_val = int((percentile_val / 100) * sorted_df.shape[0])
-    df_data_arr_abv_percent = sorted_df.iloc[start_upper_tail_val:, :]
+    conf_arr = np.array([[df_both_below_thr,
+                          df_first_abv_second_below_thr],
+                         [df_first_below_second_abv_thr,
+                          df_both_abv_thr]])
+    #======================================================
+    if conf_arr.shape[0] > 0:
+        print('\n++++ Filling DF contingency table++++\n')
+        # append to df, used later for analysis,
+        df_append_resutl.loc[
+            first_stn_id, 'DWD neighbour'
+        ] = second_stn_id
 
-    return df_data_arr_abv_percent
+        df_append_resutl.loc[
+            first_stn_id, 'Both below %0.1fmm'
+            % first_thr
+        ] = np.round(df_both_below_thr, 2)
+
+        df_append_resutl.loc[
+            first_stn_id,
+            'Netatmo below DWD'
+        ] = np.round(df_first_below_second_abv_thr, 2)
+
+        df_append_resutl.loc[
+            first_stn_id,
+            'Netatmo above DWD'
+        ] = np.round(df_first_abv_second_below_thr, 2)
+
+        df_append_resutl.loc[
+            first_stn_id, 'Both above %0.1fmm'
+            % first_thr
+        ] = np.round(df_both_abv_thr, 2)
+
+        if plot_figures:
+            print('\n++++ plotting contingency table++++\n')
+            plt.ioff()
+            fig = plt.figure(figsize=(16, 12), dpi=100)
+            ax = fig.add_subplot(111)
+            ax2 = ax.twinx()
+            ax.set_aspect(1)
+
+            _ = sn.heatmap(conf_arr, annot=True,
+                           vmin=0.0, cmap=plt.get_cmap('jet'),
+                           vmax=100.0, fmt='.2f')
+
+            ax.set_title(
+                'Contingency table \n '
+                'Rainfall Threshold %0.1fmm '
+                '%s vs %s \n distance: %0.1f m, time freq: %s\n'
+                % (first_thr,
+                   first_stn_id, second_stn_id,
+                   seperating_dist, temp_freq))
+
+            ax.set_yticks([0.25, 1.25])
+            ax.set_yticklabels(
+                ['Netatmo below and DWD above',
+                    'Netatmo below and DWD below'],
+                rotation=90, color='g')
+            ax.set_xticks([])
+
+            ax2.set_yticks([0.25, 1.25])
+            ax2.set_yticklabels(
+                ['Netatmo above and DWD below',
+                 'Netatmo above and DWD above'],
+                rotation=-90, color='m')
+            plt.savefig(
+                os.path.join(
+                    out_plot_dir,
+                    'contingency_table_as_a_sequence'
+                    '_%s_%s_%s_data_abv_%0.1fmm_.png'
+                    % (first_stn_id, second_stn_id,
+                        temp_freq,
+                       first_thr)))
+
+            plt.close(fig)
+            plt.clf()
+
+        return df_append_resutl
+
+#==============================================================================
+#
+#==============================================================================
+
+
+def plt_correlation_with_distance(
+    df_correlations,  # df with netatmo stns, result of correlations
+    dist_col_to_plot,  # name of column with distance values
+    corr_col_to_plot,  # which column to plot , str_label_of_col
+    temp_freq,  # temp freq of df
+    out_dir,  # out save dir for plots
+    year_vals,  # if all years or year by year
+    val_thr_percent,  # consider all values above it
+    neighbor_nbr  # which neighbor was chosen
+):
+    '''
+    Read the df_results containing for every netatmo station
+    the coordinates (lon, lat) and the comparision between 
+    the pearson and spearman correlations,
+    between netatmo and nearest dwd station
+    plot the reults, correlation vs distance
+    '''
+    if 'Bool' in corr_col_to_plot:
+        percent_add = '_above_%dpercent' % val_thr_percent
+    else:
+        percent_add = '_'
+    print('plotting comparing %s' % corr_col_to_plot)
+    # select values only for column and dron nans
+    df_correlations = df_correlations.loc[:, [
+        'lon', 'lat', dist_col_to_plot, corr_col_to_plot]].dropna()
+
+    plt.ioff()
+    fig = plt.figure(figsize=(16, 12), dpi=150)
+
+    ax = fig.add_subplot(111)
+
+    # plot the stations in shapefile, look at the results of agreements
+    colors_arr = (df_correlations.loc[:, corr_col_to_plot].values /
+                  max(df_correlations.loc[:, corr_col_to_plot].values))
+    colors_arr[colors_arr < 0] = 0
+    ax.scatter(df_correlations.loc[:, dist_col_to_plot].values,
+               df_correlations.loc[:, corr_col_to_plot].values,
+               alpha=.8,
+               c=colors_arr,
+               s=15,
+               marker='d',
+               cmap=plt.get_cmap('viridis'),
+               label='Number of Stations %d' %
+               df_correlations.loc[:, dist_col_to_plot].values.shape[0])
+
+    ax.set_title('%s Data %s Neighbor number %d'
+                 ' Netatmo and DWD %s data year %s'
+                 % (corr_col_to_plot,  percent_add, neighbor_nbr,
+                     temp_freq, year_vals))
+    ax.grid(alpha=0.25)
+    ax.set_ylim([-0.1, 1.1])
+    ax.set_xlim([0, max(df_correlations.loc[:, dist_col_to_plot].values)])
+    ax.set_xlabel('Distance to neighbour (m)')
+    ax.legend(loc=0)
+    ax.set_ylabel('Indicator Spearman Correlation')
+
+#     ax.set_aspect(1.0)
+    plt.savefig(
+        os.path.join(
+            out_dir,
+            'indic_corr_with_dist_%s_%s_%s_netatmo_ppt_dwd_above_%s_neighbor_nbr_%d_.png'
+            % (year_vals, temp_freq, corr_col_to_plot, percent_add, neighbor_nbr)),
+        frameon=True, papertype='a4',
+        bbox_inches='tight', pad_inches=.2)
+    plt.close()
+    return df_correlations
+
 #==============================================================================
 #
 #==============================================================================

@@ -85,12 +85,16 @@ if use_new_dwd_data:
     in_df_dwd_coords = pd.read_csv(coords_dwd_df_file, index_col=0, sep=',',
                                    encoding='latin-1')
     # get all station ids, make them a string for generating file_names
-    stations_id_str_lst = []
-    for stn_id in in_df_dwd_coords.index:
-        stn_id = str(stn_id)
-        if len(stn_id) < 5:
-            stn_id = '0' * (5 - len(stn_id)) + stn_id
-        stations_id_str_lst.append(stn_id)
+#     stations_id_str_lst = []
+#     for stn_id in in_df_dwd_coords.index:
+#         stn_id = str(stn_id)
+#         if len(stn_id) < 5:
+#             stn_id = '0' * (5 - len(stn_id)) + stn_id
+#         stations_id_str_lst.append(stn_id)
+    stations_id_str_lst = ['0' * (5 - len(str(stn_id))) + stn_id
+                           if len(stn_id) < 5 else str(stn_id)
+                           for stn_id in in_df_dwd_coords.index]
+
     in_df_dwd_coords.index = stations_id_str_lst
 
     lon_dwd, lat_dwd = (in_df_dwd_coords.loc[:, x_col_name].values.ravel(),
