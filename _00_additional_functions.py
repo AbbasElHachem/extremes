@@ -214,7 +214,7 @@ def resampleDf(data_frame,  # dataframe to resample (or series)
                                  axis=0,
                                  label='left',
                                  closed='right',
-                                 convention='end').apply(lambda x: x.values.sum())
+                                 convention='end').apply(lambda x: np.nansum(x.values))
 
     if fillnan:
         df_res.fillna(value=fillnan_value, inplace=True)
@@ -492,17 +492,17 @@ def constrcut_contingency_table(stn1_id, stn2_id,
         stn2_id = stn2_id + '_'
         df_combined.loc[:, stn2_id] = df_2
 
-    df_both_below_thr = ((df_combined[stn1_id].values <= thr1) & (
-        df_combined[stn2_id].values <= thr2)).sum() / df_1.shape[0]
+    df_both_below_thr = np.nansum((df_combined[stn1_id].values <= thr1) & (
+        df_combined[stn2_id].values <= thr2)) / df_1.shape[0]
 
-    df_first_abv_second_below_thr = ((df_combined[stn1_id].values > thr1) & (
-        df_combined[stn2_id].values <= thr2)).sum() / df_1.shape[0]
+    df_first_abv_second_below_thr = np.nansum((df_combined[stn1_id].values > thr1) & (
+        df_combined[stn2_id].values <= thr2)) / df_1.shape[0]
 
-    df_first_below_second_abv_thr = ((df_combined[stn1_id].values <= thr1) & (
-        df_combined[stn2_id].values > thr2)).sum() / df_1.shape[0]
+    df_first_below_second_abv_thr = np.nansum((df_combined[stn1_id].values <= thr1) & (
+        df_combined[stn2_id].values > thr2)) / df_1.shape[0]
 
-    df_both_abv_thr = ((df_combined[stn1_id].values > thr1) & (
-        df_combined[stn2_id].values > thr2)).sum() / df_1.shape[0]
+    df_both_abv_thr = np.nansum((df_combined[stn1_id].values > thr1) & (
+        df_combined[stn2_id].values > thr2)) / df_1.shape[0]
 
     return (100 * df_both_below_thr, 100 * df_first_abv_second_below_thr,
             100 * df_first_below_second_abv_thr, 100 * df_both_abv_thr)
@@ -920,10 +920,10 @@ def plt_correlation_with_distance(
     ax.scatter(df_correlations.loc[:, dist_col_to_plot].values,
                df_correlations.loc[:, corr_col_to_plot].values,
                alpha=.8,
-               c=colors_arr,
+               c='b',  # colors_arr,
                s=15,
                marker='d',
-               cmap=plt.get_cmap('viridis'),
+               # cmap=plt.get_cmap('viridis'),
                label='Number of Stations %d' %
                df_correlations.loc[:, dist_col_to_plot].values.shape[0])
 

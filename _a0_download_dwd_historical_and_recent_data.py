@@ -20,12 +20,12 @@ import math
 # stundenwerte_RR_00003_19950901_20110401_hist.zip
 # tageswerte_RR_00001_19120101_19860630_hist.zip
 #==============================================================================
-download_data = False
+download_data = True
 delete_zip_files = True
 
 
-build_one_df = False
-delete_df_files = False
+build_one_df = True
+delete_df_files = True
 
 make_hdf5_dataset_new = True
 
@@ -103,7 +103,7 @@ def resampleDf(data_frame,  # dataframe to resample (or series)
                                  axis=0,
                                  label='left',
                                  closed='right',
-                                 convention='end').apply(lambda x: x.values.sum())
+                                 convention='end').apply(lambda x: np.nansum(x.values))
 
     if fillnan:
         df_res.fillna(value=fillnan_value, inplace=True)

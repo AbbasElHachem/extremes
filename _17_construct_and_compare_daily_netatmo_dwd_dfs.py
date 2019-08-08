@@ -372,6 +372,7 @@ def construct_netatmo_dwd_daily_dfs(netatmo_ppt_df_file,
                                      parse_dates=True,
                                      infer_datetime_format=True,
                                      engine='c')
+
     netatmo_stns_ids = in_netatmo_stns_df.columns
 
     in_df_distance_netatmo_dwd = pd.read_csv(distance_matrix_df_file,

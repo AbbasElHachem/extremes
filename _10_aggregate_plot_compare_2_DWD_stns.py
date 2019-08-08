@@ -128,7 +128,7 @@ def get_nearest_dwd_station(first_stn_id, coords_df_file,
     xstn = in_coords_df.loc[int(first_stn_id), x_col_name]
     ystn = in_coords_df.loc[int(first_stn_id), y_col_name]
 
-    distances, indices = points_tree.query([xstn, ystn], k=2)
+    distances, indices = points_tree.query([xstn, ystn], k=4)
     coords_nearest_nbr = coords_tuples[indices[neighbor_to_chose]]
     stn_near = str(stn_ids[indices[neighbor_to_chose]])
     distance_near = distances[neighbor_to_chose]

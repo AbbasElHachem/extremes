@@ -27,6 +27,8 @@ __email__ = "abbas.el-hachem@iws.uni-stuttgart.de"
 
 # =============================================================================
 
+# TODO: MAKE SCRIPT FASTER USE FEATHER
+
 from pathlib import Path
 
 import os
@@ -57,6 +59,10 @@ from _20_claculate_statisitcal_differences_neighbouring_Netatmo_DWD_stations imp
 
 main_dir = Path(os.getcwd())
 os.chdir(main_dir)
+
+path_to_ppt_dwd_data = (
+    r"E:\download_DWD_data_recent\all_dwd_hourly_ppt_data_combined_1995_2019.fk")
+assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
 
 
 path_to_ppt_hdf_data = (
@@ -89,14 +95,14 @@ utm32 = "+init=EPSG:32632"
 x_col_name = 'X'
 y_col_name = 'Y'
 
-neighbor_to_chose = 1  # 1 refers to first neighbor
-val_thr_percent = 80
+neighbor_to_chose = 2  # 1 refers to first neighbor
+val_thr_percent = 95
 aggregation_frequencies = ['60min']
 
 not_convective_season = [10, 11, 12, 1, 2, 3, 4]
 # TODO: MAKE ME FASTER
 
-start_date = '2014-01-01 00:00:00'
+start_date = '2012-01-01 00:00:00'
 end_date = '2019-07-01 00:00:00'
 
 #==============================================================================
@@ -104,6 +110,7 @@ end_date = '2019-07-01 00:00:00'
 #==============================================================================
 
 
+# @profile
 def calc_indicator_correlatione_two_dwd_stns(stns_ids, tem_freq):
 
     in_coords_df, _, _, _ = get_dwd_stns_coords(
@@ -179,7 +186,7 @@ def calc_indicator_correlatione_two_dwd_stns(stns_ids, tem_freq):
                     columns=[stn_near])
                 print('enough data are available for plotting')
 
-                # get coordinates of netatmo station for plotting
+                # get coordinates of dwd station for plotting
                 x_stn_dwd = in_coords_df_bw.loc[
                     iid, x_col_name]
                 y_stn_dwd = in_coords_df_bw.loc[
@@ -256,6 +263,15 @@ def calc_indicator_correlatione_two_dwd_stns(stns_ids, tem_freq):
             print(msg)
             continue
     # assert len(all_distances) == len(stns_bw), 'smtg went wrong'
+    df_results_correlations_bw.to_csv(
+        os.path.join(out_save_dir_orig,
+                     'year_allyears_df_dwd_correlations'
+                     'freq_%s_dwd_netatmo_upper_%d_percent_data_considered'
+                     '_neighbor_%d_.csv'
+                     % (tem_freq,
+                        val_thr_percent, neighbor_to_chose)),
+        sep=';')
+
     return df_results_correlations_bw
 
 
