@@ -140,7 +140,7 @@ path_to_netatmo_coords_df_file = (
 assert os.path.exists(path_to_netatmo_coords_df_file), 'wrong DWD coords file'
 
 
-path_to_shpfile = (r'X:\exchange\ElHachem\Netatmo'
+path_to_shpfile = (r'F:\data_from_exchange\Netatmo'
                    r'\Landesgrenze_ETRS89\Landesgrenze_10000_ETRS89_lon_lat.shp')
 
 assert os.path.exists(path_to_shpfile), 'wrong shapefile path'
@@ -161,23 +161,24 @@ x_col_name = ' lon'
 y_col_name = ' lat'
 
 # min distance threshold used for selecting neighbours
-min_dist_thr_ppt = 5000  # 5000  # m
+min_dist_thr_ppt = 500000  # 5000  # m
 
 # threshold for max ppt value per hour
 max_ppt_thr = 100.  # ppt above this value are not considered
-ppt_min_thr_lst = [5]  # , 5, 10 used when calculating p1 = 1-p0
-lower_percentile_val = 90  # only highest x% of the values are selected
+ppt_min_thr_lst = [1]  # , 5, 10 used when calculating p1 = 1-p0
+
+lower_percentile_val = 80  # only highest x% of the values are selected
 
 # aggregation_frequencies = ['60min', '720min', '1440min']
 aggregation_frequencies = ['60min']
 
-neighbor_to_chose = 0  # refers to DWD neighbot (0=first)
+neighbor_to_chose = 3  # refers to DWD neighbot (0=first)
 
 # this is used to keep only data where month is not in this list
 not_convective_season = [10, 11, 12, 1, 2, 3, 4]  # oct till april
 
-plot_contingency_maps_all_stns = False
-plot_figures = True
+plot_contingency_maps_all_stns = True
+plot_figures = False
 
 date_fmt = '%Y-%m-%d %H:%M:%S'
 
@@ -229,7 +230,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
         distance_matrix_netatmo_ppt_dwd_ppt, sep=';', index_col=0)
 
     # read netatmo ppt coords df (for plotting)
-    in_netatmo_df_coords = pd.read_csv(netatmo_ppt_coords_df, sep=';',
+    in_netatmo_df_coords = pd.read_csv(netatmo_ppt_coords_df, sep=',',
                                        index_col=0, engine='c')
     print('\n######\n done reading all dfs \n#######\n')
     # create df to append results of comparing two stns
@@ -323,8 +324,8 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                         df_netatmo_cmn = netatmo_ppt_stn1.loc[new_idx_common]
                         df_dwd_cmn = df_dwd.loc[new_idx_common]
 
-                if (df_netatmo_cmn.values.shape[0] > 0 and
-                        df_dwd_cmn.values.shape[0] > 0):
+                if (df_netatmo_cmn.values.shape[0] > 30 and
+                        df_dwd_cmn.values.shape[0] > 30):
 
                     # change everything to dataframes with stn Id as column
                     df_netatmo_cmn = pd.DataFrame(
@@ -483,9 +484,10 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
             os.path.join(
                 out_save_dir_orig,
                 'df_contingency_table'
-                '_%s_ppt_thr_%0.1fmm_.csv'
+                '_%s_ppt_thr_%0.1fmm_sep_dist_%d_neighbor_%d_.csv'
                 % (temp_freq_resample,
-                    df_min_ppt_thr)))
+                    df_min_ppt_thr, min_dist_thr_ppt,
+                    neighbor_to_chose)))
 
     # save all dataframes
     df_results.to_csv(
@@ -632,7 +634,7 @@ def plt_on_map_agreements(
     plt.savefig(
         os.path.join(
             out_dir,
-            'year_%s_%s_%s_netatmo_ppt_dwd_station_above_%s.png'
+            'year_%s_%s_%s_netatmo_ppt_dwd_station_%s.png'
             % (year_vals, temp_freq, col_to_plot, percent_add)),
         frameon=True, papertype='a4',
         bbox_inches='tight', pad_inches=.2)
@@ -717,6 +719,7 @@ if __name__ == '__main__':
                 year_vals='all_years',
                 val_thr_percent=lower_percentile_val,
                 neighbor_nbr=neighbor_to_chose)
+
             if plot_figures:
 
                 # use this funtion to find how many stations are similar,
@@ -772,7 +775,8 @@ if __name__ == '__main__':
                             temp_freq=temp_freq,
                             ppt_thr=ppt_min_thr,
                             out_dir=out_save_dir_orig,
-                            year_vals='all_years_15km_distance',
+                            year_vals=('all_years_%d_m_distance_neighbor_%d_'
+                                       % (min_dist_thr_ppt, neighbor_to_chose)),
                             val_thr_percent=lower_percentile_val)
 
     STOP = timeit.default_timer()  # Ending time

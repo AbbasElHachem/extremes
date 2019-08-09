@@ -61,12 +61,12 @@ main_dir = Path(os.getcwd())
 os.chdir(main_dir)
 
 path_to_ppt_dwd_data = (
-    r"E:\download_DWD_data_recent\all_dwd_hourly_ppt_data_combined_1995_2019.fk")
+    r"F:\download_DWD_data_recent\all_dwd_hourly_ppt_data_combined_1995_2019.fk")
 assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
 
 
 path_to_ppt_hdf_data = (
-    r'E:\download_DWD_data_recent'
+    r'F:\download_DWD_data_recent'
     r'\DWD_60Min_ppt_stns_19950101000000_20190715000000_new.h5')
 
 assert os.path.exists(path_to_ppt_hdf_data), 'wrong DWD Ppt file'
@@ -75,7 +75,7 @@ coords_df_file = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
                   r"\station_coordinates_names_hourly_only_in_BW_utm32.csv")
 assert os.path.exists(coords_df_file), 'wrong DWD coords file'
 
-path_to_shpfile = (r'X:\exchange\ElHachem\Netatmo'
+path_to_shpfile = (r'F:\data_from_exchange\Netatmo'
                    r'\Landesgrenze_ETRS89\Landesgrenze_10000_ETRS89_lon_lat.shp')
 
 assert os.path.exists(path_to_shpfile), 'wrong shapefile path'
@@ -95,16 +95,17 @@ utm32 = "+init=EPSG:32632"
 x_col_name = 'X'
 y_col_name = 'Y'
 
-neighbor_to_chose = 2  # 1 refers to first neighbor
-val_thr_percent = 95
+neighbor_to_chose = 4  # 1 refers to first neighbor
+val_thr_percent = 90
 aggregation_frequencies = ['60min']
 
 not_convective_season = [10, 11, 12, 1, 2, 3, 4]
-# TODO: MAKE ME FASTER
 
-start_date = '2012-01-01 00:00:00'
+
+start_date = '2014-01-01 00:00:00'
 end_date = '2019-07-01 00:00:00'
 
+date_fmt = '%Y-%m-%d %H:%M:%S'
 #==============================================================================
 #
 #==============================================================================
@@ -141,7 +142,15 @@ def calc_indicator_correlatione_two_dwd_stns(stns_ids, tem_freq):
 
         print('First Stn Id is', iid)
         try:
-            idf1 = HDF52.get_pandas_dataframe(ids=[iid])
+            #idf1 = HDF52.get_pandas_dataframe(ids=[iid])
+            idf1 = pd.read_feather(path_to_ppt_dwd_data,
+                                   columns=['Time', iid],
+                                   use_threads=True)
+            idf1.set_index('Time', inplace=True)
+
+            idf1.index = pd.to_datetime(
+                idf1.index, format=date_fmt)
+
             idf1.dropna(axis=0, inplace=True)
 
             # select only convective season
@@ -169,9 +178,23 @@ def calc_indicator_correlatione_two_dwd_stns(stns_ids, tem_freq):
             print('Second Stn Id is', stn_near, 'distance is', distance_near)
             all_distances.append(distance_near)
 
-            df_common1, df_common2 = resample_intersect_2_dfs(idf1,
-                                                              idf2,
-                                                              tem_freq)
+#             df_common1, df_common2 = resample_intersect_2_dfs(idf1,
+#                                                               idf2,
+#                                                               tem_freq)
+            # intersect dwd and netatmo ppt data
+            if tem_freq != '60min':
+                df_common1, df_common2 = resample_intersect_2_dfs(
+                    idf1, idf2, tem_freq)
+            else:
+                new_idx_common = idf1.index.intersection(
+                    idf2.index)
+
+                try:
+                    df_common1 = idf1.loc[new_idx_common, :]
+                    df_common2 = idf2.loc[new_idx_common, :]
+                except Exception:
+                    df_common1 = idf1.loc[new_idx_common]
+                    df_common2 = idf2.loc[new_idx_common]
 
             if (df_common1.values.shape[0] > 0 and
                     df_common2.values.shape[0] > 0):
@@ -304,7 +327,8 @@ if __name__ == '__main__':
                               temp_freq=temp_freq,
                               ppt_thr=np.nan,
                               out_dir=out_save_dir_orig,
-                              year_vals='all_years',
+                              year_vals=('all_years_neighbor_%d_'
+                                         % (neighbor_to_chose)),
                               val_thr_percent=val_thr_percent)
 
     STOP = timeit.default_timer()  # Ending time
