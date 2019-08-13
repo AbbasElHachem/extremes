@@ -32,14 +32,20 @@ from _00_additional_functions import (convert_coords_fr_wgs84_to_utm32_)
 #                                    r'\netatmo_bw_1hour_coords.csv')
 # assert os.path.exists(coords_netatmo_humidity_df_file), 'wrong Hum coords file'
 
+# coords_netatmo_temp_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
+#                                r'\NetAtmo_BW\temperature_bw_1hour'
+#                                r'\netatmo_bw_1hour_coords.csv')
+# assert os.path.exists(coords_netatmo_temp_df_file), 'wrong Temp coords file'
+
 coords_netatmo_temp_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-                               r'\NetAtmo_BW\temperature_bw_1hour'
-                               r'\netatmo_bw_1hour_coords.csv')
-assert os.path.exists(coords_netatmo_temp_df_file), 'wrong Temp coords file'
+                               r'\NetAtmo_BW\rain_bw_1hour'
+                               r'\netatmo_bw_1hour_coords_with_duplicates.csv')
+
+assert os.path.exists(coords_netatmo_temp_df_file), 'wrong NETATMO coords file'
 
 coords_netatmo_ppt_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
                               r'\NetAtmo_BW\rain_bw_1hour'
-                              r'\netatmo_bw_1hour_coords.csv')
+                              r'\netatmo_bw_1hour_coords_with_duplicates.csv')
 
 assert os.path.exists(coords_netatmo_ppt_df_file), 'wrong NETATMO coords file'
 
@@ -52,13 +58,15 @@ if not os.path.exists(out_save_dir):
 lon_col_name = ' lon'
 lat_col_name = ' lat'
 
+df_sep = ','
+
 # def epsg wgs84 and utm32 for coordinates conversion
 wgs82 = "+init=EPSG:4326"
 utm32 = "+init=EPSG:32632"
 
 in_df_ppt_netatmo_coords = pd.read_csv(coords_netatmo_ppt_df_file,
                                        index_col=0,
-                                       sep=';')
+                                       sep=df_sep)
 
 x_ppt_netatmo, y_ppt_netatmo = convert_coords_fr_wgs84_to_utm32_(
     wgs82, utm32,
@@ -68,7 +76,7 @@ x_ppt_netatmo, y_ppt_netatmo = convert_coords_fr_wgs84_to_utm32_(
 
 in_df_temp_netatmo_coords = pd.read_csv(coords_netatmo_temp_df_file,
                                         index_col=0,
-                                        sep=';')
+                                        sep=df_sep)
 in_df_temp_netatmo_coords.drop_duplicates(keep='first', inplace=True)
 
 x_hum_netatmo, y_hum_netatmo = convert_coords_fr_wgs84_to_utm32_(
@@ -125,7 +133,7 @@ for stn_mac in in_df_ppt_netatmo_coords.index:
         raise Exception
 
 df_distance.to_csv(os.path.join(out_save_dir,
-                                'distance_mtx_in_m_NetAtmo_ppt_Netatmo_temp.csv'),
+                                'distance_mtx_in_m_NetAtmo_ppt_Netatmo_ppt.csv'),
                    sep=';')
 
 print('Done with everything')

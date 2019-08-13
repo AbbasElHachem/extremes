@@ -21,10 +21,9 @@ Parameters
 ----------
 
 Input Files
-    DWD HDF5 station data
     Netatmo precipitation station data
     Netatmo station coordinates data
-    Distance matrix between DWD and Netatmo stations
+    Distance matrix between Netatmo and Netatmo stations
     Shapefile of BW area
 
 Returns
@@ -113,25 +112,11 @@ assert os.path.exists(
     path_to_ppt_netatmo_data_feather), 'wrong NETATMO Ppt file'
 
 
-# path_to_ppt_hdf_data = (r'X:\exchange\ElHachem'
-#                         r'\niederschlag_deutschland'
-#                         r'\1993_2016_5min_merge_nan.h5')
-
-# path_to_ppt_hdf_data = (
-#     r'E:\download_DWD_data_recent'
-#     r'\DWD_60Min_ppt_stns_19950101000000_20190715000000_new.h5')
-
-# assert os.path.exists(path_to_ppt_hdf_data), 'wrong DWD Ppt file'
-
-path_to_ppt_dwd_data = (
-    r"F:\download_DWD_data_recent\all_dwd_hourly_ppt_data_combined_1995_2019.fk")
-assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
-
-distance_matrix_netatmo_dwd_df_file = (
+distance_matrix_netatmo_netatmo_df_file = (
     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-    r'\NetAtmo_BW\distance_mtx_in_m_NetAtmo_DWD.csv')
+    r'\NetAtmo_BW\distance_mtx_in_m_NetAtmo_ppt_Netatmo_ppt.csv')
 assert os.path.exists(
-    distance_matrix_netatmo_dwd_df_file), 'wrong Distance MTX  file'
+    distance_matrix_netatmo_netatmo_df_file), 'wrong Distance MTX  file'
 
 path_to_netatmo_coords_df_file = (
     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
@@ -177,9 +162,9 @@ ppt_min_thr_lst = [1]  # , 5, 10 used when calculating p1 = 1-p0
 lower_percentile_val = 95  # only highest x% of the values are selected
 
 # aggregation_frequencies = ['60min', '720min', '1440min']
-aggregation_frequencies = ['120min', '480min', '720min']  # , '1440min']
+aggregation_frequencies = ['60min']
 
-neighbor_to_chose = 3  # refers to DWD neighbot (0=first)
+neighbor_to_chose = 4  # refers to neighbor (0=first)
 
 # this is used to keep only data where month is not in this list
 not_convective_season = [10, 11, 12, 1, 2, 3, 4]  # oct till april
@@ -198,11 +183,11 @@ date_fmt = '%Y-%m-%d %H:%M:%S'
 def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
         path_netatmo_ppt_df_feather,  # path to df of all netatmo ppt stations
         pth_to_netatmo_cols_df_csv,  # path to csv file, get all columns
-        path_to_dwd_data,  # path to dwd ppt hdf5 data
+        # path_to_dwd_data,  # path to dwd ppt hdf5 data
         path_netatmo_gd_stns,  # path to netatmo stns with high rank correls
         netatmo_ppt_coords_df,  # path to netatmo ppt coords df
         neighbor_to_chose,  # which DWD station neighbor to chose
-        distance_matrix_netatmo_ppt_dwd_ppt,  # distance all netatmo-dwd stns
+        distance_matrix_netatmo_ppt_netatmo_ppt,  # distance all netatmo-netatmo stns
         min_dist_thr_ppt,  # distance threshold when selecting dwd neigbours
         temp_freq_resample,  # temp freq to resample dfs
         df_min_ppt_thr,  # ppt_thr, select all values above thr
@@ -212,7 +197,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
     '''
     For every netatmo precipitation station,
      find nearest netatmo temperature station, intersect
-     both stations and remove all days where temperature < 1°C
+     both stations and remove all days where temperature < 1�C
 
      Find then for the netatmo station the neares DWD station
      intersect both stations, calculate the difference in the
@@ -233,8 +218,8 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
         print(msg)
 
     # read distance matrix dwd-netamot ppt
-    in_df_distance_netatmo_dwd = pd.read_csv(
-        distance_matrix_netatmo_ppt_dwd_ppt, sep=';', index_col=0)
+    in_df_distance_netatmo_netatmo = pd.read_csv(
+        distance_matrix_netatmo_ppt_netatmo_ppt, sep=';', index_col=0)
 
     # read netatmo ppt coords df (for plotting)
     in_netatmo_df_coords = pd.read_csv(netatmo_ppt_coords_df, sep=',',
@@ -283,62 +268,63 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                 df=netatmo_ppt_stn1,
                 month_lst=not_convective_season)
 
-            # find distance to all dwd stations, sort them, select minimum
-            distances_dwd_to_stn1 = in_df_distance_netatmo_dwd.loc[
-                ppt_stn_id, :]
-            sorted_distances_ppt_dwd = distances_dwd_to_stn1.sort_values(
+            # find distance to all netatmo stations, sort them, select minimum
+            distances_netatmo_to_stn1 = in_df_distance_netatmo_netatmo.loc[
+                ppt_stn_id,
+                in_df_distance_netatmo_netatmo.columns != ppt_stn_id]
+            sorted_distances_ppt_netatmo = distances_netatmo_to_stn1.sort_values(
                 ascending=True)
 
             # select only from neighbor to chose
-            sorted_distances_ppt_dwd = sorted_distances_ppt_dwd.iloc[
+            sorted_distances_ppt_netatmo = sorted_distances_ppt_netatmo.iloc[
                 neighbor_to_chose:]
 
             # select the DWD station neighbor
-            min_dist_ppt_dwd = np.round(
-                sorted_distances_ppt_dwd.values[0], 2)
+            min_dist_ppt_netatmo = np.round(
+                sorted_distances_ppt_netatmo.values[0], 2)
 
-            if min_dist_ppt_dwd <= min_dist_thr_ppt:
+            if min_dist_ppt_netatmo <= min_dist_thr_ppt:
                 # check if dwd station is near, select and read dwd stn
-                stn_2_dwd = sorted_distances_ppt_dwd.index[0]
+                stn_2_netatmo = sorted_distances_ppt_netatmo.index[0]
 
-                df_dwd = pd.read_feather(path_to_dwd_data,
-                                         columns=['Time', stn_2_dwd],
-                                         use_threads=True)
-                df_dwd.set_index('Time', inplace=True)
+                df_netatmo2 = pd.read_feather(path_netatmo_ppt_df_feather,
+                                              columns=['Time', stn_2_netatmo],
+                                              use_threads=True)
+                df_netatmo2.set_index('Time', inplace=True)
 
-                df_dwd.index = pd.to_datetime(
-                    df_dwd.index, format=date_fmt)
+                df_netatmo2.index = pd.to_datetime(
+                    df_netatmo2.index, format=date_fmt)
 
-                df_dwd.dropna(axis=0, inplace=True)
+                df_netatmo2.dropna(axis=0, inplace=True)
 #                 df_dwd = HDF52.get_pandas_dataframe(ids=[stn_2_dwd])
 
-                df_dwd = df_dwd[df_dwd < max_ppt_thr]
+                df_netatmo2 = df_netatmo2[df_netatmo2 < max_ppt_thr]
 
                 # select convective season
-                df_dwd = select_convective_season(
-                    df=df_dwd,
+                df_netatmo2 = select_convective_season(
+                    df=df_netatmo2,
                     month_lst=not_convective_season)
 
-                print('\n********\n Second DWD Stn Id is', stn_2_dwd,
-                      'distance is ', min_dist_ppt_dwd)
+                print('\n********\n Second DWD Stn Id is', stn_2_netatmo,
+                      'distance is ', min_dist_ppt_netatmo)
 
                 # intersect dwd and netatmo ppt data
                 if temp_freq_resample != '60min':
-                    df_netatmo_cmn, df_dwd_cmn = resample_intersect_2_dfs(
-                        netatmo_ppt_stn1, df_dwd, temp_freq_resample)
+                    df_netatmo_cmn, df_netatmo2_cmn = resample_intersect_2_dfs(
+                        netatmo_ppt_stn1, df_netatmo2, temp_freq_resample)
                 else:
                     new_idx_common = netatmo_ppt_stn1.index.intersection(
-                        df_dwd.index)
+                        df_netatmo2.index)
 
                     try:
                         df_netatmo_cmn = netatmo_ppt_stn1.loc[new_idx_common, :]
-                        df_dwd_cmn = df_dwd.loc[new_idx_common, :]
+                        df_netatmo2_cmn = df_netatmo2.loc[new_idx_common, :]
                     except Exception:
                         df_netatmo_cmn = netatmo_ppt_stn1.loc[new_idx_common]
-                        df_dwd_cmn = df_dwd.loc[new_idx_common]
+                        df_netatmo2_cmn = df_netatmo2.loc[new_idx_common]
 
                 if (df_netatmo_cmn.values.shape[0] > 30 and
-                        df_dwd_cmn.values.shape[0] > 30):
+                        df_netatmo2_cmn.values.shape[0] > 30):
 
                     # change everything to dataframes with stn Id as column
                     df_netatmo_cmn = pd.DataFrame(
@@ -346,10 +332,10 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                         index=df_netatmo_cmn.index,
                         columns=[ppt_stn_id])
 
-                    df_dwd_cmn = pd.DataFrame(
-                        data=df_dwd_cmn.values,
-                        index=df_dwd_cmn.index,
-                        columns=[stn_2_dwd])
+                    df_netatmo2_cmn = pd.DataFrame(
+                        data=df_netatmo2_cmn.values,
+                        index=df_netatmo2_cmn.index,
+                        columns=[stn_2_netatmo])
 
                     # get coordinates of netatmo station for plotting
                     lon_stn_netatmo = in_netatmo_df_coords.loc[
@@ -364,12 +350,12 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
 
                         df_contingency_table = calc_plot_contingency_table_2_stations(
                             first_stn_id=ppt_stn_id,  # id of first stations
-                            second_stn_id=stn_2_dwd,  # id of second station
+                            second_stn_id=stn_2_netatmo,  # id of second station
                             first_df=df_netatmo_cmn,  # df of first station
-                            second_df=df_dwd_cmn,  # df of second station
+                            second_df=df_netatmo2_cmn,  # df of second station
                             first_thr=df_min_ppt_thr,  # threshhold for first df
                             second_thr=df_min_ppt_thr,  # threshhold for second df
-                            seperating_dist=min_dist_ppt_dwd,  # distance between 2 stations
+                            seperating_dist=min_dist_ppt_netatmo,  # distance between 2 stations
                             temp_freq=temp_freq_resample,  # temporal resolution of data
                             # df containing all stations as idx, append result
                             df_append_resutl=df_contingency_table,
@@ -383,16 +369,16 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                     # calculate prob(ppt > 1 mm) for netatmo and dwd
                     p1_netatmo = 1 - calculate_probab_ppt_below_thr(
                         df_netatmo_cmn.values, df_min_ppt_thr)
-                    p1_dwd = 1 - calculate_probab_ppt_below_thr(
-                        df_dwd_cmn.values, df_min_ppt_thr)
+                    p1_netatmo2 = 1 - calculate_probab_ppt_below_thr(
+                        df_netatmo2_cmn.values, df_min_ppt_thr)
                     # compare p1 for both stns
                     (compare_p1_str,
                         colorp1) = compare_p1_dwd_p1_netatmo(
-                        p1_dwd,  p1_netatmo)
+                        p1_netatmo2,  p1_netatmo)
                     # compare the mean of ppt for netatmo and dwd
                     (compare_mean_str,
                         colormean) = compare_p1_dwd_p1_netatmo(
-                        np.nanmean(df_dwd_cmn.values),
+                        np.nanmean(df_netatmo2_cmn.values),
                         np.nanmean(df_netatmo_cmn.values))
                     #==========================================================
                     # append the result to df_result, for each stn
@@ -403,7 +389,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                     df_results.loc[ppt_stn_id,
                                    'lat'] = lat_stn_netatmo
                     df_results.loc[ppt_stn_id,
-                                   'Distance to neighbor'] = min_dist_ppt_dwd
+                                   'Distance to neighbor'] = min_dist_ppt_netatmo
                     df_results.loc[ppt_stn_id,
                                    'p%d' % df_min_ppt_thr] = compare_p1_str
                     df_results.loc[ppt_stn_id,
@@ -418,11 +404,11 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
 
                     # calculate pearson and spearman between original values
                     orig_pears_corr = np.round(
-                        pears(df_dwd_cmn.values,
+                        pears(df_netatmo2_cmn.values,
                               df_netatmo_cmn.values)[0], 2)
 
                     orig_spr_corr = np.round(
-                        spr(df_dwd_cmn.values,
+                        spr(df_netatmo2_cmn.values,
                             df_netatmo_cmn.values)[0], 2)
 
                     #==========================================================
@@ -436,24 +422,24 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                     netatmo_ppt_thr_per = netatmo_cdf_x[np.where(
                         netatmo_cdf_y >= val_thr_float)][0]
 
-                    dwd_cdf_x, dwd_cdf_y = get_cdf_part_abv_thr(
-                        df_dwd_cmn.values.ravel(), -0.1)
+                    netatmo2_cdf_x, netatmo2_cdf_y = get_cdf_part_abv_thr(
+                        df_netatmo2_cmn.values.ravel(), -0.1)
 
                     # get dwd ppt thr from cdf
-                    dwd_ppt_thr_per = dwd_cdf_x[np.where(
-                        dwd_cdf_y >= val_thr_float)][0]
+                    netatmo2_ppt_thr_per = netatmo2_cdf_x[np.where(
+                        netatmo2_cdf_y >= val_thr_float)][0]
 
                     print('\n****transform values to booleans*****\n')
 
                     df_netatmo_cmn_Bool = (
                         df_netatmo_cmn > netatmo_ppt_thr_per).astype(int)
-                    df_dwd_cmn_Bool = (
-                        df_dwd_cmn > dwd_ppt_thr_per).astype(int)
+                    df_netatmo2_cmn_Bool = (
+                        df_netatmo2_cmn > netatmo2_ppt_thr_per).astype(int)
 
                     # calculate spearman correlations of booleans 1, 0
 
                     bool_spr_corr = np.round(
-                        spr(df_dwd_cmn_Bool.values.ravel(),
+                        spr(df_netatmo2_cmn_Bool.values.ravel(),
                             df_netatmo_cmn_Bool.values.ravel())[0], 2)
 
                     #==========================================================
@@ -465,7 +451,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                                                 'lat'] = lat_stn_netatmo
                     df_results_correlations.loc[
                         ppt_stn_id,
-                        'Distance to neighbor'] = min_dist_ppt_dwd
+                        'Distance to neighbor'] = min_dist_ppt_netatmo
 
                     df_results_correlations.loc[
                         ppt_stn_id,
@@ -497,7 +483,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
             os.path.join(
                 out_save_dir_orig,
                 'df_contingency_table'
-                '_%s_ppt_thr_%0.1fmm_sep_dist_%d_neighbor_%d_.csv'
+                '_%s_ppt_netatmo_netamo_thr_%0.1fmm_sep_dist_%d_neighbor_%d_.csv'
                 % (temp_freq_resample,
                     df_min_ppt_thr, min_dist_thr_ppt,
                     neighbor_to_chose)))
@@ -506,7 +492,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
     df_results.to_csv(
         os.path.join(out_save_dir_orig,
                      'year_allyears_df_comparing_p%d_and_mean_freq_%s_'
-                     'max_sep_dist_%d_dwd_netatmo_data_considering'
+                     'max_sep_dist_%d_netatmo_netatmo_data_considering'
                      '_neighbor_%d_.csv'
                      % (df_min_ppt_thr, temp_freq_resample, min_dist_thr_ppt,
                         neighbor_to_chose)),
@@ -515,7 +501,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
     df_results_correlations.to_csv(
         os.path.join(out_save_dir_orig,
                      'year_allyears_df_comparing_correlations_max_sep_dist_%d_'
-                     'freq_%s_dwd_netatmo_upper_%d_percent_data_considered'
+                     'freq_%s_netatmo_netatmo_upper_%d_percent_data_considered'
                      '_neighbor_%d_.csv'
                      % (min_dist_thr_ppt, temp_freq_resample,
                         val_thr_percent, neighbor_to_chose)),
@@ -633,7 +619,7 @@ def plt_on_map_agreements(
                              color='k'))
 
     ax.set_title('%s Data %s'
-                 ' Netatmo and DWD %s data year %s'
+                 ' Netatmo and Netatmo %s data year %s'
                  % (col_to_plot,  percent_add,
                      temp_freq, year_vals))
     ax.grid(alpha=0.5)
@@ -647,7 +633,7 @@ def plt_on_map_agreements(
     plt.savefig(
         os.path.join(
             out_dir,
-            'year_%s_%s_%s_netatmo_ppt_dwd_station_%s.png'
+            'year_%s_%s_%s_netatmo_ppt_netatmo_station_%s.png'
             % (year_vals, temp_freq, col_to_plot, percent_add)),
         frameon=True, papertype='a4',
         bbox_inches='tight', pad_inches=.2)
@@ -675,14 +661,14 @@ if __name__ == '__main__':
             path_to_df_results = os.path.join(
                 out_save_dir_orig,
                 'year_allyears_df_comparing_p%d_and_mean_freq_%s_'
-                'max_sep_dist_%d_dwd_netatmo_data_considering'
+                'max_sep_dist_%d_netatmo_netatmo_data_considering'
                 '_neighbor_%d_.csv'
                 % (ppt_min_thr, temp_freq, min_dist_thr_ppt, neighbor_to_chose))
 
             path_to_df_correlations = os.path.join(
                 out_save_dir_orig,
                 'year_allyears_df_comparing_correlations_max_sep_dist_%d_'
-                'freq_%s_dwd_netatmo_upper_%d_percent_data_considered'
+                'freq_%s_netatmo_netatmo_upper_%d_percent_data_considered'
                 '_neighbor_%d_.csv'
                 % (min_dist_thr_ppt, temp_freq, lower_percentile_val, neighbor_to_chose))
 
@@ -697,11 +683,12 @@ if __name__ == '__main__':
                  ) = compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                     path_netatmo_ppt_df_feather=path_to_ppt_netatmo_data_feather,
                     pth_to_netatmo_cols_df_csv=path_to_ppt_netatmo_data_csv,
-                    path_to_dwd_data=path_to_ppt_dwd_data,  # path_to_ppt_hdf_data,
+                    # path_to_dwd_data=path_to_ppt_dwd_data,  #
+                    # path_to_ppt_hdf_data,
                     path_netatmo_gd_stns=path_to_netatmo_gd_stns_file,
                     netatmo_ppt_coords_df=path_to_netatmo_coords_df_file,
                     neighbor_to_chose=neighbor_to_chose,
-                    distance_matrix_netatmo_ppt_dwd_ppt=distance_matrix_netatmo_dwd_df_file,
+                    distance_matrix_netatmo_ppt_netatmo_ppt=distance_matrix_netatmo_netatmo_df_file,
                     min_dist_thr_ppt=min_dist_thr_ppt,
                     temp_freq_resample=temp_freq,
                     df_min_ppt_thr=ppt_min_thr,
@@ -750,7 +737,7 @@ if __name__ == '__main__':
                                  col_var_to_plot='p%d' % ppt_min_thr,
                                  col_color_of_marker='colorp%d' % ppt_min_thr,
                                  plot_title=('Difference in Probability P%d (Ppt>%dmm)'
-                                             ' Netatmo and DWD %s data year %s'
+                                             ' Netatmo and Netatmo %s data year %s'
                                              % (ppt_min_thr,
                                                  ppt_min_thr, temp_freq, 'all_years')),
                                  lon_col_name='lon',
@@ -758,7 +745,7 @@ if __name__ == '__main__':
                                  shapefile_path=path_to_shpfile,
                                  table_to_plot=df_table,
                                  out_save_name=('year_%s_%s_differece_in_p%d_netatmo'
-                                                '_ppt_dwd_station.png'
+                                                '_ppt_netatmo_station.png'
                                                 % ('all_years', temp_freq, ppt_min_thr)),
                                  out_dir=out_save_dir_orig
                                  )
@@ -767,14 +754,14 @@ if __name__ == '__main__':
                                  col_var_to_plot='mean_ppt',
                                  col_color_of_marker='color_mean_ppt',
                                  plot_title=('Difference in Average Rainfall values'
-                                             ' Netatmo and DWD %s data year %s'
+                                             ' Netatmo and Netatmo %s data year %s'
                                              % (temp_freq, 'all_years')),
                                  lon_col_name='lon',
                                  lat_col_name='lat',
                                  shapefile_path=path_to_shpfile,
                                  table_to_plot=df_table,
                                  out_save_name=('year_%s_%s_difference'
-                                                '_in_mean_station_ppt_dwd_station.png'
+                                                '_in_mean_station_ppt_netatmo_station.png'
                                                 % ('all_years', temp_freq)),
                                  out_dir=out_save_dir_orig
                                  )

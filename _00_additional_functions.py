@@ -373,13 +373,37 @@ def calculate_probab_ppt_below_thr(ppt_data, ppt_thr):
 
 
 def build_edf_fr_vals(ppt_data):
-    # Construct EDF
+    # Construct EDF, need to check if it works
     ''' construct empirical distribution function given data values '''
     data_sorted = np.sort(ppt_data, axis=0)[::-1]
     x0 = np.squeeze(data_sorted)[::-1]
     y0 = (np.arange(data_sorted.size) / len(data_sorted))
     return x0, y0
 
+#==============================================================================
+
+
+# def build_edf_fr_vals(data):
+#     ''' construct empirical distribution function given data values '''
+#     # create a sorted series of unique data
+#     # cdfx = np.sort(np.unique(data))
+#     # x-data for the ECDF: evenly spaced sequence of the uniques
+#     data_sorted = np.sort(data, axis=0)
+#     # size of the x_values
+#     size_data = data.size
+#     # y-data for the ECDF:
+#     y_values = []
+#
+#     for i in data_sorted:
+#         # all the values in raw data less than the ith value in x_values
+#         temp = data[data <= i]
+#         # fraction of that value with respect to the size of the x_values
+#         value = np.round(temp.size / size_data, 3)
+#         # pushing the value in the y_values
+#         y_values.append(value)
+#
+#     # return both x and y values
+#     return data_sorted, np.array(y_values)
 
 #==============================================================================
 #
@@ -892,6 +916,7 @@ def plt_correlation_with_distance(
     val_thr_percent,  # consider all values above it
     neighbor_nbr  # which neighbor was chosen
 ):
+    # TODO: ADD STATION TYPE AS ARGUMENT
     '''
     Read the df_results containing for every netatmo station
     the coordinates (lon, lat) and the comparision between 
@@ -928,7 +953,7 @@ def plt_correlation_with_distance(
                df_correlations.loc[:, dist_col_to_plot].values.shape[0])
 
     ax.set_title('%s Data %s Neighbor number %d'
-                 ' Netatmo and DWD %s data year %s'
+                 ' Netatmo and Netamto %s data year %s'
                  % (corr_col_to_plot,  percent_add, neighbor_nbr,
                      temp_freq, year_vals))
     ax.grid(alpha=0.25)
@@ -942,7 +967,7 @@ def plt_correlation_with_distance(
     plt.savefig(
         os.path.join(
             out_dir,
-            'indic_corr_with_dist_%s_%s_%s_netatmo_ppt_dwd_above_%s_neighbor_nbr_%d_.png'
+            'indic_corr_with_dist_%s_%s_%s_netatmo_ppt_netatmo_above_%s_neighbor_nbr_%d_.png'
             % (year_vals, temp_freq, corr_col_to_plot, percent_add, neighbor_nbr)),
         frameon=True, papertype='a4',
         bbox_inches='tight', pad_inches=.2)
