@@ -199,33 +199,126 @@ def remove_one_elt_lst(elt, lst):
 #==============================================================================
 
 
-def resampleDf(data_frame,  # dataframe to resample (or series)
-               temp_freq,  # temp frequency to resample
-               df_sep_=None,  # sep used if saving dataframe
-               out_save_dir=None,  # out direcory for saving df
-               fillnan=False,  # if True, fill nans with fill_value
-               fillnan_value=0,  # if True, replace nans with 0
-               df_save_name=None  # name of outpot df
-               ):
-    ''' sample DF based on freq and time shift and label shift '''
+# def resampleDf(data_frame,  # dataframe to resample (or series)
+#                temp_freq,  # temp frequency to resample
+#                df_sep_=None,  # sep used if saving dataframe
+#                out_save_dir=None,  # out direcory for saving df
+#                fillnan=False,  # if True, fill nans with fill_value
+#                fillnan_value=0,  # if True, replace nans with 0
+#                df_save_name=None  # name of outpot df
+#                ):
+#     ''' sample DF based on freq and time shift and label shift '''
+#
+#     # data_frame = data_frame[data_frame >= 0]
+#     df_res = data_frame.resample(rule=temp_freq,
+#                                  axis=0,
+#                                  label='left',
+#                                  closed='right',
+#                                  convention='end').apply(lambda x: np.nansum(x.values))
+#
+#     if fillnan:
+#         df_res.fillna(value=fillnan_value, inplace=True)
+#     if not isinstance(df_res, pd.DataFrame):
+#         df_res = pd.DataFrame(index=df_res.index, data=df_res.values)
+#     if df_save_name is not None and out_save_dir is not None:
+#         df_res.to_csv(os.path.join(out_save_dir, df_save_name),
+#                       sep=df_sep_)
+#
+#     return df_res
 
-    # data_frame = data_frame[data_frame >= 0]
-    df_res = data_frame.resample(rule=temp_freq,
-                                 axis=0,
-                                 label='left',
-                                 closed='right',
-                                 convention='end').apply(lambda x: np.nansum(x.values))
 
-    if fillnan:
-        df_res.fillna(value=fillnan_value, inplace=True)
-    if not isinstance(df_res, pd.DataFrame):
-        df_res = pd.DataFrame(index=df_res.index, data=df_res.values)
-    if df_save_name is not None and out_save_dir is not None:
-        df_res.to_csv(os.path.join(out_save_dir, df_save_name),
-                      sep=df_sep_)
+def resampleDf(df, agg, closed='right', label='right',
+               shift=False, leave_nan=True,
+               max_nan=0):
+    """Aggregate precipitation data
 
-    return df_res
+    Parameters:
+    -----------
+    Df: Pandas DataFrame Object
+        Data set
+    agg: string
+        Aggregation 'M':Monthly 'D': Daily, 'H': Hourly, 'Min': Minutely
+    closed: string
+        'left' or 'right' defines the aggregation interval
+    label: string
+        'left' or 'right' defines the related timestamp
+    shift: boolean, optional
+        Shift the values by 6 hours according to the dwd daily station.
+        Only valid for aggregation into daily aggregations
+        True, data is aggregated from 06:00 - 06:00
+        False, data is aggregated from 00:00 - 00:00
+        Default is False
 
+    leave_nan: boolean, optional
+        True, if the nan values should remain in the aggregated data set.
+        False, if the nan values should be treated as zero values for the
+        aggregation. Default is True
+
+    Remark:
+    -------
+        If the timestamp is at the end of the timeperiod:
+
+        Input: daily        Output: daily+
+            >> closed='right', label='right'
+
+        Input: subdaily     Output: subdaily
+            >> closed='right', label='right'
+
+        Input: subdaily     Output: daily
+            >> closed='right', label='left'
+
+        Input: subdaily     Output: monthly
+            >> closed='right', label='right'
+
+
+        ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! !
+        ! ! Always check, if aggregation is correct ! !
+        ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! !
+
+
+
+    """
+
+    if shift == True:
+        df_copy = df.copy()
+        if agg != 'D':
+            raise Exception('Shift can only be applied to daily aggregations')
+        df = df.shift(-6, 'H')
+
+    # To respect the nan values
+    if leave_nan == True:
+        # for max_nan == 0, the code runs faster if implemented as follows
+        if max_nan == 0:
+            # Fill the nan values with values very great negative values and later
+            # get the out again, if the sum is still negative
+            df = df.fillna(-100000000000.)
+            df_agg = df.resample(agg,
+                                 closed=closed,
+                                 label=label).sum()
+            # Replace negative values with nan values
+            df_agg.values[df_agg.values[:] < 0.] = np.nan
+        else:
+            df_agg = df.resample(rule=agg,
+                                 closed=closed,
+                                 label=label).sum()
+            # find data with nan in original aggregation
+            g_agg = df.groupby(pd.Grouper(freq=agg,
+                                          closed=closed,
+                                          label=label))
+            n_nan_agg = g_agg.aggregate(lambda x: pd.isnull(x).sum())
+
+            # set aggregated data to nan if more than max_nan values occur in the
+            # data to be aggregated
+            filter_nan = (n_nan_agg > max_nan)
+            df_agg[filter_nan] = np.nan
+
+    elif leave_nan == False:
+        df_agg = df.resample(agg,
+                             closed=closed,
+                             label=label).sum()
+    if shift == True:
+        df = df_copy
+    return df_agg
 #==============================================================================
 #
 #==============================================================================
@@ -296,8 +389,8 @@ def resample_intersect_2_dfs(df1,  # first dataframe to resample
     Some workaround was done to deal with pandas Series and Dataframes
     as the Netatmo and DWD stations are different
     '''
-    df_resample1 = resampleDf(data_frame=df1, temp_freq=temp_freq)
-    df_resample2 = resampleDf(data_frame=df2, temp_freq=temp_freq)
+    df_resample1 = resampleDf(df=df1, agg=temp_freq)
+    df_resample2 = resampleDf(df=df2, agg=temp_freq)
 
     idx_common = df_resample1.index.intersection(df_resample2.index)
 
@@ -372,38 +465,38 @@ def calculate_probab_ppt_below_thr(ppt_data, ppt_thr):
 #==============================================================================
 
 
-def build_edf_fr_vals(ppt_data):
-    # Construct EDF, need to check if it works
-    ''' construct empirical distribution function given data values '''
-    data_sorted = np.sort(ppt_data, axis=0)[::-1]
-    x0 = np.squeeze(data_sorted)[::-1]
-    y0 = (np.arange(data_sorted.size) / len(data_sorted))
-    return x0, y0
+# def build_edf_fr_vals(ppt_data):
+#     # Construct EDF, need to check if it works
+#     ''' construct empirical distribution function given data values '''
+#     data_sorted = np.sort(ppt_data, axis=0)[::-1]
+#     x0 = np.squeeze(data_sorted)[::-1]
+#     y0 = (np.arange(data_sorted.size) / len(data_sorted))
+#     return x0, y0
 
 #==============================================================================
 
 
-# def build_edf_fr_vals(data):
-#     ''' construct empirical distribution function given data values '''
-#     # create a sorted series of unique data
-#     # cdfx = np.sort(np.unique(data))
-#     # x-data for the ECDF: evenly spaced sequence of the uniques
-#     data_sorted = np.sort(data, axis=0)
-#     # size of the x_values
-#     size_data = data.size
-#     # y-data for the ECDF:
-#     y_values = []
-#
-#     for i in data_sorted:
-#         # all the values in raw data less than the ith value in x_values
-#         temp = data[data <= i]
-#         # fraction of that value with respect to the size of the x_values
-#         value = np.round(temp.size / size_data, 3)
-#         # pushing the value in the y_values
-#         y_values.append(value)
-#
-#     # return both x and y values
-#     return data_sorted, np.array(y_values)
+def build_edf_fr_vals(data):
+    ''' construct empirical distribution function given data values '''
+    # create a sorted series of unique data
+    # cdfx = np.sort(np.unique(data))
+    # x-data for the ECDF: evenly spaced sequence of the uniques
+    data_sorted = np.sort(data, axis=0)
+    # size of the x_values
+    size_data = data.size
+    # y-data for the ECDF:
+    y_values = []
+
+    for i in data_sorted:
+        # all the values in raw data less than the ith value in x_values
+        temp = data[data <= i]
+        # fraction of that value with respect to the size of the x_values
+        value = np.round(temp.size / size_data, 3)
+        # pushing the value in the y_values
+        y_values.append(value)
+
+    # return both x and y values
+    return data_sorted, np.array(y_values)
 
 #==============================================================================
 #
@@ -418,7 +511,7 @@ def get_cdf_part_abv_thr(ppt_data, ppt_thr):
     x0, y0 = build_edf_fr_vals(ppt_data)
     x_abv_thr = x0[x0 > ppt_thr]
     y_abv_thr = y0[np.where(x0 > ppt_thr)]
-    assert y_abv_thr[0] == p0, 'something is wrong with probability cal'
+    # assert y_abv_thr[0] == p0, 'something is wrong with probability cal'
 
     return x_abv_thr, y_abv_thr
 #==============================================================================

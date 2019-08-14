@@ -79,7 +79,6 @@ from _00_additional_functions import (calculate_probab_ppt_below_thr,
                                       get_cdf_part_abv_thr,
                                       plt_correlation_with_distance)
 
-from b_get_data import HDF5
 
 #==============================================================================
 #
@@ -112,17 +111,6 @@ path_to_ppt_netatmo_data_feather = (
 assert os.path.exists(
     path_to_ppt_netatmo_data_feather), 'wrong NETATMO Ppt file'
 
-
-# path_to_ppt_hdf_data = (r'X:\exchange\ElHachem'
-#                         r'\niederschlag_deutschland'
-#                         r'\1993_2016_5min_merge_nan.h5')
-
-# path_to_ppt_hdf_data = (
-#     r'E:\download_DWD_data_recent'
-#     r'\DWD_60Min_ppt_stns_19950101000000_20190715000000_new.h5')
-
-# assert os.path.exists(path_to_ppt_hdf_data), 'wrong DWD Ppt file'
-
 path_to_ppt_dwd_data = (
     r"F:\download_DWD_data_recent\all_dwd_hourly_ppt_data_combined_1995_2019.fk")
 assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
@@ -144,8 +132,6 @@ path_to_netatmo_gd_stns_file = (
     r"\filter_Netamo_data_basedon_indicator_correlation"
     r"\keep_stns_all_neighbors_combined_95_per_.csv")
 assert os.path.exists(path_to_netatmo_gd_stns_file), 'wrong netatmo stns file'
-
-# %%
 
 path_to_shpfile = (r'F:\data_from_exchange\Netatmo'
                    r'\Landesgrenze_ETRS89\Landesgrenze_10000_ETRS89_lon_lat.shp')
@@ -174,12 +160,13 @@ min_dist_thr_ppt = 500000  # 5000  # m
 max_ppt_thr = 100.  # ppt above this value are not considered
 ppt_min_thr_lst = [1]  # , 5, 10 used when calculating p1 = 1-p0
 
-lower_percentile_val = 95  # only highest x% of the values are selected
+lower_percentile_val = 99  # only highest x% of the values are selected
 
 # aggregation_frequencies = ['60min', '720min', '1440min']
-aggregation_frequencies = ['120min', '480min', '720min']  # , '1440min']
+# '120min', '480min', '720min', '1440min', 'M']
+aggregation_frequencies = ['60min', '120min', '480min', '720min', '1440min']
 
-neighbor_to_chose = 3  # refers to DWD neighbot (0=first)
+neighbor_to_chose = 2  # refers to DWD neighbot (0=first)
 
 # this is used to keep only data where month is not in this list
 not_convective_season = [10, 11, 12, 1, 2, 3, 4]  # oct till april
@@ -254,8 +241,8 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
         # append all stns with lower simultaneous values than dwd
         df_contingency_table = pd.DataFrame(index=stns_ppt_ids)
 
-    alls_stns_len = len(good_stns)
-    for ppt_stn_id in good_stns:
+    alls_stns_len = len(stns_ppt_ids)
+    for ppt_stn_id in stns_ppt_ids:
         print('\n********\n Total number of Netatmo stations is\n********\n',
               alls_stns_len)
         alls_stns_len -= 1
@@ -337,8 +324,8 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                         df_netatmo_cmn = netatmo_ppt_stn1.loc[new_idx_common]
                         df_dwd_cmn = df_dwd.loc[new_idx_common]
 
-                if (df_netatmo_cmn.values.shape[0] > 30 and
-                        df_dwd_cmn.values.shape[0] > 30):
+                if (df_netatmo_cmn.values.shape[0] > 10 and
+                        df_dwd_cmn.values.shape[0] > 10):
 
                     # change everything to dataframes with stn Id as column
                     df_netatmo_cmn = pd.DataFrame(
@@ -418,8 +405,8 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
 
                     # calculate pearson and spearman between original values
                     orig_pears_corr = np.round(
-                        pears(df_dwd_cmn.values,
-                              df_netatmo_cmn.values)[0], 2)
+                        pears(df_dwd_cmn.values.ravel(),
+                              df_netatmo_cmn.values.ravel())[0], 2)
 
                     orig_spr_corr = np.round(
                         spr(df_dwd_cmn.values,
@@ -714,27 +701,27 @@ if __name__ == '__main__':
                 df_results_correlations = pd.read_csv(path_to_df_correlations,
                                                       sep=';', index_col=0)
 
-            plt_correlation_with_distance(
-                df_correlations=df_results_correlations,
-                dist_col_to_plot='Distance to neighbor',
-                corr_col_to_plot='Bool_Spearman_Correlation',
-                temp_freq=temp_freq,
-                out_dir=out_save_dir_orig,
-                year_vals='all_years',
-                val_thr_percent=lower_percentile_val,
-                neighbor_nbr=neighbor_to_chose)
-
-            plt_correlation_with_distance(
-                df_correlations=df_results_correlations,
-                dist_col_to_plot='Distance to neighbor',
-                corr_col_to_plot='Orig_Spearman_Correlation',
-                temp_freq=temp_freq,
-                out_dir=out_save_dir_orig,
-                year_vals='all_years',
-                val_thr_percent=lower_percentile_val,
-                neighbor_nbr=neighbor_to_chose)
-
             if plot_figures:
+
+                plt_correlation_with_distance(
+                    df_correlations=df_results_correlations,
+                    dist_col_to_plot='Distance to neighbor',
+                    corr_col_to_plot='Bool_Spearman_Correlation',
+                    temp_freq=temp_freq,
+                    out_dir=out_save_dir_orig,
+                    year_vals='all_years',
+                    val_thr_percent=lower_percentile_val,
+                    neighbor_nbr=neighbor_to_chose)
+
+                plt_correlation_with_distance(
+                    df_correlations=df_results_correlations,
+                    dist_col_to_plot='Distance to neighbor',
+                    corr_col_to_plot='Orig_Spearman_Correlation',
+                    temp_freq=temp_freq,
+                    out_dir=out_save_dir_orig,
+                    year_vals='all_years',
+                    val_thr_percent=lower_percentile_val,
+                    neighbor_nbr=neighbor_to_chose)
 
                 # use this funtion to find how many stations are similar,
                 # or above, or below neighbouring dwd station

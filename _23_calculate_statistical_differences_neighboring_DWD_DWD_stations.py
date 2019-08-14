@@ -27,8 +27,6 @@ __email__ = "abbas.el-hachem@iws.uni-stuttgart.de"
 
 # =============================================================================
 
-# TODO: MAKE SCRIPT FASTER USE FEATHER
-
 from pathlib import Path
 
 import os
@@ -43,7 +41,6 @@ from scipy.stats import pearsonr as pears
 
 from b_get_data import HDF5
 
-
 from _00_additional_functions import (convert_coords_fr_wgs84_to_utm32_,
                                       select_df_within_period,
                                       select_convective_season,
@@ -56,7 +53,7 @@ from _10_aggregate_plot_compare_2_DWD_stns import (get_dwd_stns_coords,
 from _20_claculate_statisitcal_differences_neighbouring_Netatmo_DWD_stations import (
     plt_on_map_agreements)
 
-
+# =============================================================================
 main_dir = Path(os.getcwd())
 os.chdir(main_dir)
 
@@ -88,6 +85,9 @@ out_save_dir_orig = (
 if not os.path.exists(out_save_dir_orig):
     os.mkdir(out_save_dir_orig)
 
+#==============================================================================
+#
+#==============================================================================
 # def epsg wgs84 and utm32 for coordinates conversion
 wgs82 = "+init=EPSG:4326"
 utm32 = "+init=EPSG:32632"
@@ -95,8 +95,8 @@ utm32 = "+init=EPSG:32632"
 x_col_name = 'X'
 y_col_name = 'Y'
 
-neighbor_to_chose = 4  # 1 refers to first neighbor
-val_thr_percent = 90
+neighbor_to_chose = 5  # 1 refers to first neighbor
+val_thr_percent = 95
 aggregation_frequencies = ['60min']
 
 not_convective_season = [10, 11, 12, 1, 2, 3, 4]
@@ -106,6 +106,8 @@ start_date = '2014-01-01 00:00:00'
 end_date = '2019-07-01 00:00:00'
 
 date_fmt = '%Y-%m-%d %H:%M:%S'
+
+plt_figures = False  # if true plot correlations seperatly and on map
 #==============================================================================
 #
 #==============================================================================
@@ -311,25 +313,27 @@ if __name__ == '__main__':
         df_results_correlations = calc_indicator_correlatione_two_dwd_stns(dwd_ids,
                                                                            temp_freq)
 
-        plt_correlation_with_distance(
-            df_correlations=df_results_correlations,
-            dist_col_to_plot='Distance to neighbor',
-            corr_col_to_plot='Bool_Spearman_Correlation',
-            temp_freq=temp_freq,
-            out_dir=out_save_dir_orig,
-            year_vals='all_years',
-            val_thr_percent=val_thr_percent,
-            neighbor_nbr=neighbor_to_chose)
+        if plt_figures:
+            print('Plotting figures')
+            plt_correlation_with_distance(
+                df_correlations=df_results_correlations,
+                dist_col_to_plot='Distance to neighbor',
+                corr_col_to_plot='Bool_Spearman_Correlation',
+                temp_freq=temp_freq,
+                out_dir=out_save_dir_orig,
+                year_vals='all_years',
+                val_thr_percent=val_thr_percent,
+                neighbor_nbr=neighbor_to_chose)
 
-        plt_on_map_agreements(df_correlations=df_results_correlations,
-                              col_to_plot='Bool_Spearman_Correlation',
-                              shp_de_file=path_to_shpfile,
-                              temp_freq=temp_freq,
-                              ppt_thr=np.nan,
-                              out_dir=out_save_dir_orig,
-                              year_vals=('all_years_neighbor_%d_'
-                                         % (neighbor_to_chose)),
-                              val_thr_percent=val_thr_percent)
+            plt_on_map_agreements(df_correlations=df_results_correlations,
+                                  col_to_plot='Bool_Spearman_Correlation',
+                                  shp_de_file=path_to_shpfile,
+                                  temp_freq=temp_freq,
+                                  ppt_thr=np.nan,
+                                  out_dir=out_save_dir_orig,
+                                  year_vals=('all_years_neighbor_%d_'
+                                             % (neighbor_to_chose)),
+                                  val_thr_percent=val_thr_percent)
 
     STOP = timeit.default_timer()  # Ending time
     print(('\n****Done with everything on %s.\nTotal run time was'
