@@ -14,7 +14,7 @@ import matplotlib.gridspec as gridspec
 
 from scipy.stats import spearmanr as spr
 from scipy.stats import pearsonr as pears
-
+from statsmodels.distributions.empirical_distribution import ECDF
 #==============================================================================
 #
 #==============================================================================
@@ -464,40 +464,20 @@ def calculate_probab_ppt_below_thr(ppt_data, ppt_thr):
 #
 #==============================================================================
 
-
-# def build_edf_fr_vals(ppt_data):
-#     # Construct EDF, need to check if it works
-#     ''' construct empirical distribution function given data values '''
-#     data_sorted = np.sort(ppt_data, axis=0)[::-1]
-#     x0 = np.squeeze(data_sorted)[::-1]
-#     y0 = (np.arange(data_sorted.size) / len(data_sorted))
-#     return x0, y0
-
-#==============================================================================
-
-
-def build_edf_fr_vals(data):
+# both correct
+def build_edf_fr_vals(ppt_data):
+    # Construct EDF, need to check if it works
     ''' construct empirical distribution function given data values '''
-    # create a sorted series of unique data
-    # cdfx = np.sort(np.unique(data))
-    # x-data for the ECDF: evenly spaced sequence of the uniques
-    data_sorted = np.sort(data, axis=0)
-    # size of the x_values
-    size_data = data.size
-    # y-data for the ECDF:
-    y_values = []
+    data_sorted = np.sort(ppt_data, axis=0)[::-1]
+    x0 = np.squeeze(data_sorted)[::-1]
+    y0 = (np.arange(data_sorted.size) / len(data_sorted))
+    return x0, y0
 
-    for i in data_sorted:
-        # all the values in raw data less than the ith value in x_values
-        temp = data[data <= i]
-        # fraction of that value with respect to the size of the x_values
-        value = np.round(temp.size / size_data, 3)
-        # pushing the value in the y_values
-        y_values.append(value)
 
-    # return both x and y values
-    return data_sorted, np.array(y_values)
-
+# def build_edf_fr_vals(data):
+#     ''' construct empirical distribution function given data values '''
+#     cdf = ECDF(data)
+#     return cdf.x, cdf.y
 #==============================================================================
 #
 #==============================================================================
@@ -511,7 +491,7 @@ def get_cdf_part_abv_thr(ppt_data, ppt_thr):
     x0, y0 = build_edf_fr_vals(ppt_data)
     x_abv_thr = x0[x0 > ppt_thr]
     y_abv_thr = y0[np.where(x0 > ppt_thr)]
-    # assert y_abv_thr[0] == p0, 'something is wrong with probability cal'
+    assert y_abv_thr[0] == p0, 'something is wrong with probability cal'
 
     return x_abv_thr, y_abv_thr
 #==============================================================================
