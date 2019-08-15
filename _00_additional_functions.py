@@ -14,7 +14,7 @@ import matplotlib.gridspec as gridspec
 
 from scipy.stats import spearmanr as spr
 from scipy.stats import pearsonr as pears
-from statsmodels.distributions.empirical_distribution import ECDF
+
 #==============================================================================
 #
 #==============================================================================
@@ -197,34 +197,6 @@ def remove_one_elt_lst(elt, lst):
 #==============================================================================
 #
 #==============================================================================
-
-
-# def resampleDf(data_frame,  # dataframe to resample (or series)
-#                temp_freq,  # temp frequency to resample
-#                df_sep_=None,  # sep used if saving dataframe
-#                out_save_dir=None,  # out direcory for saving df
-#                fillnan=False,  # if True, fill nans with fill_value
-#                fillnan_value=0,  # if True, replace nans with 0
-#                df_save_name=None  # name of outpot df
-#                ):
-#     ''' sample DF based on freq and time shift and label shift '''
-#
-#     # data_frame = data_frame[data_frame >= 0]
-#     df_res = data_frame.resample(rule=temp_freq,
-#                                  axis=0,
-#                                  label='left',
-#                                  closed='right',
-#                                  convention='end').apply(lambda x: np.nansum(x.values))
-#
-#     if fillnan:
-#         df_res.fillna(value=fillnan_value, inplace=True)
-#     if not isinstance(df_res, pd.DataFrame):
-#         df_res = pd.DataFrame(index=df_res.index, data=df_res.values)
-#     if df_save_name is not None and out_save_dir is not None:
-#         df_res.to_csv(os.path.join(out_save_dir, df_save_name),
-#                       sep=df_sep_)
-#
-#     return df_res
 
 
 def resampleDf(df, agg, closed='right', label='right',
@@ -476,6 +448,7 @@ def build_edf_fr_vals(ppt_data):
 
 # def build_edf_fr_vals(data):
 #     ''' construct empirical distribution function given data values '''
+#     from statsmodels.distributions.empirical_distribution import ECDF
 #     cdf = ECDF(data)
 #     return cdf.x, cdf.y
 #==============================================================================
@@ -979,6 +952,55 @@ def calc_plot_contingency_table_2_stations(
 #==============================================================================
 
 
+def save_how_many_abv_same_below(
+    df_p1_mean,  # df with netatmo stns and result of comparing
+    temp_freq,  # temporal freq of df
+    ppt_thr,  # used for calculating p1 or p5
+    out_dir,  # out save dir for plots
+    year_vals  # if all years or year by year
+):
+    '''
+    use this funcion to find how many stations have similar values for p1 and
+    for the average, how many are netatmo are below dwd and how many 
+    netatmo are above dwd
+
+    return the result in a dataframe
+    '''
+    # drop all netatmo stns with no data
+    df_p1_mean.dropna(axis=0, how='any', inplace=True)
+
+    df_out = pd.DataFrame()
+
+    df_out.loc['count_vals_same_p%d' % ppt_thr,
+               'Result'] = df_p1_mean[
+                   df_p1_mean['p%d' % ppt_thr] == 's'].shape[0]
+    df_out.loc['count_vals_less_p%d' % ppt_thr,
+               'Result'] = df_p1_mean[
+                   df_p1_mean['p%d' % ppt_thr] == '_'].shape[0]
+    df_out.loc['count_vals_abv_p%d' % ppt_thr,
+               'Result'] = df_p1_mean[
+                   df_p1_mean['p%d' % ppt_thr] == '+'].shape[0]
+
+    df_out.loc['count_vals_same_mean_ppt',
+               'Result'] = df_p1_mean[
+                   df_p1_mean['mean_ppt'] == 's'].shape[0]
+    df_out.loc['count_vals_less_mean_ppt',
+               'Result'] = df_p1_mean[
+                   df_p1_mean['mean_ppt'] == '_'].shape[0]
+    df_out.loc['count_vals_abv_mean_ppt',
+               'Result'] = df_p1_mean[
+                   df_p1_mean['mean_ppt'] == '+'].shape[0]
+
+    df_out.to_csv(os.path.join(
+        out_dir,
+        'year_%s_df_similarities_%s_%dmm_.csv'
+        % (year_vals, temp_freq, ppt_thr)))
+    return df_out
+
+
+#==============================================================================
+#
+#==============================================================================
 def plt_correlation_with_distance(
     df_correlations,  # df with netatmo stns, result of correlations
     dist_col_to_plot,  # name of column with distance values

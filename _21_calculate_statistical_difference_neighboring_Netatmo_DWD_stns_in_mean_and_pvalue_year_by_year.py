@@ -51,6 +51,7 @@ __email__ = "abbas.el-hachem@iws.uni-stuttgart.de"
 
 # =============================================================================
 
+# TODO: CHECK IF NEEDED, IF SO THEN BREAK INTO MANY SCRIPTS
 import os
 import timeit
 import time
