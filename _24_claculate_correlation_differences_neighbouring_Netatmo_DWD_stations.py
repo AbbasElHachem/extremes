@@ -9,11 +9,13 @@ Created on: 2019-07-16
 
 For every Netatmo precipitation station select the
 convective season period (Mai till Ocotber), find the nearest
-DWD station, intersect both stations, and calcualte for the 
-staions the values of P1 and the mean and the Spearman and Pearson 
-coorealtions and compare the two (if above, below or equal (+-10 %))
-save and plot the results on a map,
-see if the Netatmo stations behave similar or not.
+DWD station, intersect both stations, based on a percentage threshold,
+select for every station seperatly the corresponding rainfall value based
+on the CDF, using the threshold, make all values above a 1 and below a 0,
+making everything boolean, calculate the spearman rank correlation between
+the two stations and save the result in a df, do it considering different
+neighbors and percentage threhsold ( a probabilistic threshold),
+this allows capturing the change of rank correlation with distance and thr 
 
 Do it on using all data for a station
 
@@ -29,19 +31,14 @@ Input Files
 
 Returns
 -------
-Df_results: df containing for every Netamo station, the statistical difference
-    in terms of P1 (1-Prob(ppt<=1) and the average value to the nearest DWD
-    station. Only stations with available neighoubrs are included
+
     
 Df_correlations: df containing for every Netamo station,
     the statistical difference in terms of Pearson and Spearman 
     Correlations for original data and boolean transfomed data
     compared with the nearest DWD station.
     
-Df_table: df containing the number of Netatmo Stations with similar,
-    bigger or smaller P1 and Mean values
-    
-Plot everything on a map using shapefile boundaries
+Plot and save everything on a map using shapefile boundaries
 """
 
 
@@ -55,13 +52,12 @@ __email__ = "abbas.el-hachem@iws.uni-stuttgart.de"
 import os
 import timeit
 import time
-import shapefile
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
 
-from adjustText import adjust_text
 from pathlib import Path
 from matplotlib import rc
 from matplotlib import rcParams
@@ -73,7 +69,9 @@ from scipy.stats import pearsonr as pears
 from _00_additional_functions import (resample_intersect_2_dfs,
                                       select_convective_season,
                                       get_cdf_part_abv_thr,
-                                      plt_correlation_with_distance)
+                                      plt_on_map_agreements,
+                                      plt_correlation_with_distance
+                                      )
 
 
 #==============================================================================
@@ -157,12 +155,12 @@ max_ppt_thr = 100.  # ppt above this value are not considered
 
 lower_percentile_val = 94  # only highest x% of the values are selected
 
-# aggregation_frequencies = ['60min', '720min', '1440min']
-# '120min', '480min', '720min', '1440min', 'M']
 # , '120min', '480min', '720min', '1440min']
-aggregation_frequencies = ['60min']
+aggregation_frequencies = ['60min']  # temporal aggregation of df
 
-neighbors_to_chose_lst = [0]  # refers to DWD neighbot (0=first)
+neighbors_to_chose_lst = [0, 1]  # refers to DWD neighbot (0=first)
+
+min_req_ppt_vals = 10  # minimum values that should be available per station
 
 # this is used to keep only data where month is not in this list
 not_convective_season = [10, 11, 12, 1, 2, 3, 4]  # oct till april
@@ -188,18 +186,18 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
         min_dist_thr_ppt,  # distance threshold when selecting dwd neigbours
         temp_freq_resample,  # temp freq to resample dfs
         val_thr_percent,  # value in percentage, select all values above it
+        min_req_ppt_vals  # threshold, minimum ppt values per station
 ):
     '''
-    For every netatmo precipitation station,
-     find nearest netatmo temperature station, intersect
-     both stations and remove all days where temperature < 1°C
-
-     Find then for the netatmo station the neares DWD station
-     intersect both stations, calculate the difference in the
-     probability that P>1mm and in the mean value
+     Find then for the netatmo station the neighboring DWD station
+     intersect both stations, for the given probabilistic percentage
+     threshold find the corresponding ppt_thr from the CDF of each station
+     seperatly, make all values boolean (> 1, < 0) and calculate the spearman
+     rank correlation between the two stations
 
      Add the result to a new dataframe and return it
 
+    # TODO: add documentation
     '''
     print('\n######\n getting all station names, reading dfs \n#######\n')
 
@@ -287,7 +285,6 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                     df_dwd.index, format=date_fmt)
 
                 df_dwd.dropna(axis=0, inplace=True)
-#                 df_dwd = HDF52.get_pandas_dataframe(ids=[stn_2_dwd])
 
                 df_dwd = df_dwd[df_dwd < max_ppt_thr]
 
@@ -314,8 +311,8 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                         df_netatmo_cmn = netatmo_ppt_stn1.loc[new_idx_common]
                         df_dwd_cmn = df_dwd.loc[new_idx_common]
 
-                if (df_netatmo_cmn.values.shape[0] > 10 and
-                        df_dwd_cmn.values.shape[0] > 10):
+                if (df_netatmo_cmn.values.shape[0] > min_req_ppt_vals and
+                        df_dwd_cmn.values.shape[0] > min_req_ppt_vals):
 
                     # change everything to dataframes with stn Id as column
                     df_netatmo_cmn = pd.DataFrame(
@@ -429,85 +426,6 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
 #==============================================================================
 
 
-def plt_on_map_agreements(
-    df_correlations,  # df with netatmo stns, result of correlations
-    col_to_plot,  # which column to plot , str_label_of_col
-    shp_de_file,  # shapefile of BW
-    temp_freq,  # temp freq of df
-    out_dir,  # out save dir for plots
-    year_vals,  # if all years or year by year
-    val_thr_percent  # consider all values above it
-):
-    '''
-    Read the df_results containing for every netatmo station
-    the coordinates (lon, lat) and the comparision between 
-    the pearson and spearman correlations,
-    between netatmo and nearest dwd station
-    plot the reults on a map, either with or with temp_thr
-    '''
-    if 'Bool' in col_to_plot:
-        percent_add = '_above_%dpercent' % val_thr_percent
-    else:
-        percent_add = '_'
-    print('plotting comparing %s' % col_to_plot)
-    # select values only for column and dron nans
-    df_correlations = df_correlations.loc[:, [
-        'lon', 'lat', col_to_plot]].dropna()
-
-    plt.ioff()
-    fig = plt.figure(figsize=(15, 15), dpi=150)
-
-    ax = fig.add_subplot(111)
-
-    shp_de = shapefile.Reader(shp_de_file)
-    # read and plot shapefile (BW or Germany) should be lon lat
-    for shape_ in shp_de.shapeRecords():
-        lon = [i[0] for i in shape_.shape.points[:][::-1]]
-        lat = [i[1] for i in shape_.shape.points[:][::-1]]
-        ax.scatter(lon, lat, marker='.', c='lightgrey',
-                   alpha=0.25, s=2)
-
-    # plot the stations in shapefile, look at the results of agreements
-    texts = []
-    for i in range(df_correlations.shape[0]):
-        ax.scatter(df_correlations.lon.values[i],
-                   df_correlations.lat.values[i],
-                   alpha=1,
-                   c='b',
-                   s=15,
-                   label=df_correlations[col_to_plot].values[i])
-        texts.append(ax.text(df_correlations.lon.values[i],
-                             df_correlations.lat.values[i],
-                             str(df_correlations[col_to_plot].values[i]),
-                             color='k'))
-
-    ax.set_title('%s Data %s'
-                 ' Netatmo and DWD %s data year %s'
-                 % (col_to_plot,  percent_add,
-                     temp_freq, year_vals))
-    ax.grid(alpha=0.5)
-
-    ax.set_xlabel('Longitude')
-    ax.set_ylabel('Latitude')
-    ax.set_aspect(1.0)
-    adjust_text(texts, ax=ax,
-                arrowprops=dict(arrowstyle='->', color='red', lw=0.25))
-
-    plt.savefig(
-        os.path.join(
-            out_dir,
-            'year_%s_%s_%s_netatmo_ppt_dwd_station_%s.png'
-            % (year_vals, temp_freq, col_to_plot, percent_add)),
-        frameon=True, papertype='a4',
-        bbox_inches='tight', pad_inches=.2)
-    plt.close()
-    return df_correlations
-
-#==============================================================================
-#
-#==============================================================================
-
-
 if __name__ == '__main__':
 
     print('**** Started on %s ****\n' % time.asctime())
@@ -527,7 +445,8 @@ if __name__ == '__main__':
                 'year_allyears_df_comparing_correlations_max_sep_dist_%d_'
                 'freq_%s_dwd_netatmo_upper_%d_percent_data_considered'
                 '_neighbor_%d_.csv'
-                % (min_dist_thr_ppt, temp_freq, lower_percentile_val, neighbor_to_chose))
+                % (min_dist_thr_ppt, temp_freq,
+                    lower_percentile_val, neighbor_to_chose))
 
             if (not os.path.exists(path_to_df_correlations)):
 
@@ -544,14 +463,15 @@ if __name__ == '__main__':
                     distance_matrix_netatmo_ppt_dwd_ppt=distance_matrix_netatmo_dwd_df_file,
                     min_dist_thr_ppt=min_dist_thr_ppt,
                     temp_freq_resample=temp_freq,
-                    val_thr_percent=lower_percentile_val)
+                    val_thr_percent=lower_percentile_val,
+                    min_req_ppt_vals=min_req_ppt_vals)
             else:
 
                 df_results_correlations = pd.read_csv(path_to_df_correlations,
                                                       sep=';', index_col=0)
 
             if plot_figures:
-
+                print('\n********\n Plotting Correlation with distance')
                 plt_correlation_with_distance(
                     df_correlations=df_results_correlations,
                     dist_col_to_plot='Distance to neighbor',

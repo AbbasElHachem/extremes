@@ -2,24 +2,42 @@
 # -*- coding: utf-8 -*-
 
 """
-Name:    ADD SCRIPT MAIN NAME
-Purpose: ADD SCRIPT PURPSOSE
+Name:    Calculate and plot statistical differences between neighbours
+Purpose: Find validity of Netatmo Station compared to DWD station
 
-Created on: 2019-07-30
+Created on: 2019-07-16
+
+For every DWD precipitation station select the
+convective season period (Mai till Ocotber), find the nearest
+DWD station, intersect both stations, based on a percentage threshold,
+select for every station seperatly the corresponding rainfall value based
+on the CDF, using the threshold, make all values above a 1 and below a 0,
+making everything boolean, calculate the spearman rank correlation between
+the two stations and save the result in a df, do it considering different
+neighbors and percentage threhsold ( a probabilistic threshold),
+this allows capturing the change of rank correlation with distance and thr 
+
+Do it on using all data for a station
 
 Parameters
 ----------
-file_loc : str
-    The file location of the spreadsheet
-print_cols : bool, optional
-    A flag used to print the columns to the console (default is False)
+
+Input Files
+    DWD precipitation station data
+    DWD station coordinates data
+    Shapefile of BW area
 
 Returns
 -------
-list
-    a list of strings representing the header columns
-"""
 
+    
+Df_correlations: df containing for every DWD station,
+    the statistical difference in terms of Pearson and Spearman 
+    Correlations for original data and boolean transfomed data
+    compared with the nearest DWD station.
+    
+Plot and save everything on a map using shapefile boundaries
+"""
 
 __author__ = "Abbas El Hachem"
 __copyright__ = 'Institut fuer Wasser- und Umweltsystemmodellierung - IWS'
@@ -46,12 +64,12 @@ from _00_additional_functions import (convert_coords_fr_wgs84_to_utm32_,
                                       select_convective_season,
                                       resample_intersect_2_dfs,
                                       get_cdf_part_abv_thr,
+                                      plt_on_map_agreements,
                                       plt_correlation_with_distance)
+
 from _10_aggregate_plot_compare_2_DWD_stns import (get_dwd_stns_coords,
                                                    get_nearest_dwd_station)
 
-from _20_claculate_statisitcal_differences_neighbouring_Netatmo_DWD_stations import (
-    plt_on_map_agreements)
 
 # =============================================================================
 main_dir = Path(os.getcwd())
@@ -78,8 +96,8 @@ path_to_shpfile = (r'F:\data_from_exchange\Netatmo'
 assert os.path.exists(path_to_shpfile), 'wrong shapefile path'
 
 
-out_save_dir_orig = (
-    r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\plots_indicator_correlations_DWD_DWD_ppt_')
+out_save_dir_orig = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
+                     r'\plots_indicator_correlations_DWD_DWD_ppt_')
 
 
 if not os.path.exists(out_save_dir_orig):
@@ -96,12 +114,18 @@ x_col_name = 'X'
 y_col_name = 'Y'
 
 neighbor_to_chose = 5  # 1 refers to first neighbor
+
 val_thr_percent = 95
+
+min_req_ppt_vals = 10  # minimum number of values per station
+
 aggregation_frequencies = ['60min']
 
 not_convective_season = [10, 11, 12, 1, 2, 3, 4]
 
+neighbors_to_chose_lst = [0]  # list of which neighbors to chose
 
+# select data only within this period (same as netatmo)
 start_date = '2014-01-01 00:00:00'
 end_date = '2019-07-01 00:00:00'
 
@@ -114,7 +138,11 @@ plt_figures = False  # if true plot correlations seperatly and on map
 
 
 # @profile
-def calc_indicator_correlatione_two_dwd_stns(stns_ids, tem_freq):
+def calc_indicator_correlatione_two_dwd_stns(
+    stns_ids,  # list of all DWD stns
+    tem_freq,  # temporal frequency of dataframe
+    neighbor_to_chose  # which DWD neighbor to chose (starts with 1)
+):
 
     in_coords_df, _, _, _ = get_dwd_stns_coords(
         coords_df_file, x_col_name, y_col_name, index_col=0,
@@ -144,7 +172,7 @@ def calc_indicator_correlatione_two_dwd_stns(stns_ids, tem_freq):
 
         print('First Stn Id is', iid)
         try:
-            #idf1 = HDF52.get_pandas_dataframe(ids=[iid])
+            # read for DWD station
             idf1 = pd.read_feather(path_to_ppt_dwd_data,
                                    columns=['Time', iid],
                                    use_threads=True)
@@ -158,8 +186,11 @@ def calc_indicator_correlatione_two_dwd_stns(stns_ids, tem_freq):
             # select only convective season
             idf1 = select_convective_season(idf1, not_convective_season)
             # select df recent years
-            idf1 = select_df_within_period(idf1, start_date,
+            idf1 = select_df_within_period(idf1,
+                                           start_date,
                                            end_date)
+
+            # get id, coordinates and distances of neighbor
             _, stn_near, distance_near = get_nearest_dwd_station(
                 first_stn_id=iid,
                 coords_df_file=coords_df_file,

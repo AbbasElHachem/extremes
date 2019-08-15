@@ -21,7 +21,7 @@ Parameters
 ----------
 
 Input Files
-    DWD HDF5 station data
+    DWD precipitation station data
     Netatmo precipitation station data
     Netatmo station coordinates data
     Distance matrix between DWD and Netatmo stations
@@ -37,7 +37,7 @@ Df_results: df containing for every Netamo station, the statistical difference
 Df_table: df containing the number of Netatmo Stations with similar,
     bigger or smaller P1 and Mean values
     
-Plot everything on a map using shapefile boundaries
+Plot everything on a map using a shapefile boundaries
 """
 
 
@@ -86,6 +86,7 @@ rc('font', size=13)
 rc('font', family='serif')
 rc('axes', labelsize=13)
 rcParams['axes.labelpad'] = 13
+
 #==============================================================================
 #
 #==============================================================================
@@ -131,7 +132,7 @@ path_to_shpfile = (r'F:\data_from_exchange\Netatmo'
 assert os.path.exists(path_to_shpfile), 'wrong shapefile path'
 
 out_save_dir_orig = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-                     r'\plots_NetAtmo_ppt_NetAtmo_temperature')
+                     r'\plots_NetAtmo_ppt_DWD_ppt_neighbors_mean_and_pvals')
 
 
 if not os.path.exists(out_save_dir_orig):
@@ -157,7 +158,7 @@ min_req_ppt_vals = 10  # minimum values that a station should have
 # '120min', '480min', '720min', '1440min', 'M']
 aggregation_frequencies = ['60min']
 
-neighbor_to_chose = 1  # refers to DWD neighbot (0=first)
+neighbors_to_chose_lst = [0, 1]  # refers to DWD neighbot (0=first)
 
 # this is used to keep only data where month is not in this list
 not_convective_season = [10, 11, 12, 1, 2, 3, 4]  # oct till april
@@ -188,16 +189,13 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
         flag_plot_contingency_maps,  # if True, plot contingency maps 2 stns
 ):
     '''
-    For every netatmo precipitation station,
-     find nearest netatmo temperature station, intersect
-     both stations and remove all days where temperature < 1�C
-
-     Find then for the netatmo station the neares DWD station
+     Find then the netatmo station the neares DWD station
      intersect both stations, calculate the difference in the
      probability that P > ppt_thr and in the mean value
 
      Add the result to a new dataframe and return it
 
+    #TODO: add documenation about parameters
     '''
     print('\n######\n getting all station names, reading dfs \n#######\n')
 
@@ -433,90 +431,102 @@ if __name__ == '__main__':
 
     print('**** Started on %s ****\n' % time.asctime())
     START = timeit.default_timer()  # to get the runtime of the program
-    for ppt_min_thr in ppt_min_thr_lst:
-        print('\n********\n Ppt Threshold is', ppt_min_thr, ' mm')
-        for temp_freq in aggregation_frequencies:
-            print('\n********\n Time aggregation is', temp_freq)
 
-            # call this function to get the two dfs, one containing
-            # df_results of comparing p1 (or p5) and average ppt
-            # df_correlations comparing correaltions, agreements
+    for neighbor_to_chose in neighbors_to_chose_lst:
+        print('\n********\n DWD Neighbor is ', neighbor_to_chose)
 
-            path_to_df_results = os.path.join(
-                out_save_dir_orig,
-                'year_allyears_df_comparing_p%d_and_mean_freq_%s_'
-                'max_sep_dist_%d_dwd_netatmo_data_considering'
-                '_neighbor_%d_.csv'
-                % (ppt_min_thr, temp_freq, min_dist_thr_ppt, neighbor_to_chose))
+        for ppt_min_thr in ppt_min_thr_lst:
+            print('\n********\n Ppt Threshold is', ppt_min_thr, ' mm')
 
-            if (not os.path.exists(path_to_df_results) or
-                    plot_contingency_maps_all_stns):
+            for temp_freq in aggregation_frequencies:
+                print('\n********\n Time aggregation is', temp_freq)
 
-                print('\n Data frames do not exist, creating them\n')
+                # call this function to get the two dfs, one containing
+                # df_results of comparing p1 (or p5) and average ppt
+                # df_correlations comparing correaltions, agreements
 
-                (df_results
-                 ) = compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
-                    path_netatmo_ppt_df_feather=path_to_ppt_netatmo_data_feather,
-                    pth_to_netatmo_cols_df_csv=path_to_ppt_netatmo_data_csv,
-                    path_to_dwd_data=path_to_ppt_dwd_data,  # path_to_ppt_hdf_data,
-                    path_netatmo_gd_stns=path_to_netatmo_gd_stns_file,
-                    netatmo_ppt_coords_df=path_to_netatmo_coords_df_file,
-                    neighbor_to_chose=neighbor_to_chose,
-                    distance_matrix_netatmo_ppt_dwd_ppt=distance_matrix_netatmo_dwd_df_file,
-                    min_dist_thr_ppt=min_dist_thr_ppt,
-                    temp_freq_resample=temp_freq,
-                    df_min_ppt_thr=ppt_min_thr,
-                    min_req_ppt_vals=min_req_ppt_vals,
-                    flag_plot_contingency_maps=plot_contingency_maps_all_stns)
-            else:
-                print('\n Data frames do exist, reading them\n')
-                df_results = pd.read_csv(path_to_df_results,
-                                         sep=';', index_col=0)
+                path_to_df_results = os.path.join(
+                    out_save_dir_orig,
+                    'year_allyears_df_comparing_p%d_and_mean_freq_%s_'
+                    'max_sep_dist_%d_dwd_netatmo_data_considering'
+                    '_neighbor_%d_.csv'
+                    % (ppt_min_thr, temp_freq,
+                        min_dist_thr_ppt, neighbor_to_chose))
 
-            if plot_figures:
+                if (not os.path.exists(path_to_df_results) or
+                        plot_contingency_maps_all_stns):
 
-                # use this funtion to find how many stations are similar,
-                # or above, or below neighbouring dwd station
-                df_table = save_how_many_abv_same_below(
-                    df_p1_mean=df_results,
-                    temp_freq=temp_freq,
-                    ppt_thr=ppt_min_thr,
-                    out_dir=out_save_dir_orig, year_vals='all_years')
+                    print('\n Data frames do not exist, creating them\n')
 
-                #  plot the reults on a map
-                print('\n********\n Plotting Prob maps')
-                plot_subplot_fig(df_to_plot=df_results,
-                                 col_var_to_plot='p%d' % ppt_min_thr,
-                                 col_color_of_marker='colorp%d' % ppt_min_thr,
-                                 plot_title=('Difference in Probability P%d (Ppt>%dmm)'
-                                             ' Netatmo and DWD %s data year %s'
-                                             % (ppt_min_thr,
-                                                 ppt_min_thr, temp_freq, 'all_years')),
-                                 lon_col_name='lon',
-                                 lat_col_name='lat',
-                                 shapefile_path=path_to_shpfile,
-                                 table_to_plot=df_table,
-                                 out_save_name=('year_%s_%s_differece_in_p%d_netatmo'
-                                                '_ppt_dwd_station.png'
-                                                % ('all_years', temp_freq, ppt_min_thr)),
-                                 out_dir=out_save_dir_orig
-                                 )
-                print('\n********\n Plotting Mean maps')
-                plot_subplot_fig(df_to_plot=df_results,
-                                 col_var_to_plot='mean_ppt',
-                                 col_color_of_marker='color_mean_ppt',
-                                 plot_title=('Difference in Average Rainfall values'
-                                             ' Netatmo and DWD %s data year %s'
-                                             % (temp_freq, 'all_years')),
-                                 lon_col_name='lon',
-                                 lat_col_name='lat',
-                                 shapefile_path=path_to_shpfile,
-                                 table_to_plot=df_table,
-                                 out_save_name=('year_%s_%s_difference'
-                                                '_in_mean_station_ppt_dwd_station.png'
-                                                % ('all_years', temp_freq)),
-                                 out_dir=out_save_dir_orig
-                                 )
+                    (df_results
+                     ) = compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
+                        path_netatmo_ppt_df_feather=path_to_ppt_netatmo_data_feather,
+                        pth_to_netatmo_cols_df_csv=path_to_ppt_netatmo_data_csv,
+                        path_to_dwd_data=path_to_ppt_dwd_data,  # path_to_ppt_hdf_data,
+                        path_netatmo_gd_stns=path_to_netatmo_gd_stns_file,
+                        netatmo_ppt_coords_df=path_to_netatmo_coords_df_file,
+                        neighbor_to_chose=neighbor_to_chose,
+                        distance_matrix_netatmo_ppt_dwd_ppt=distance_matrix_netatmo_dwd_df_file,
+                        min_dist_thr_ppt=min_dist_thr_ppt,
+                        temp_freq_resample=temp_freq,
+                        df_min_ppt_thr=ppt_min_thr,
+                        min_req_ppt_vals=min_req_ppt_vals,
+                        flag_plot_contingency_maps=plot_contingency_maps_all_stns)
+                else:
+                    print('\n Data frames do exist, reading them\n')
+                    df_results = pd.read_csv(path_to_df_results,
+                                             sep=';',
+                                             index_col=0)
+
+                if plot_figures:
+
+                    # use these plots to find how many stations are similar,
+                    # or above, or below neighbouring dwd station
+                    df_table = save_how_many_abv_same_below(
+                        df_p1_mean=df_results,
+                        temp_freq=temp_freq,
+                        ppt_thr=ppt_min_thr,
+                        out_dir=out_save_dir_orig,
+                        year_vals='all_years'
+                    )
+
+                    #  plot the reults on a map
+                    print('\n********\n Plotting Prob maps')
+                    plot_subplot_fig(
+                        df_to_plot=df_results,
+                        col_var_to_plot='p%d' % ppt_min_thr,
+                        col_color_of_marker='colorp%d' % ppt_min_thr,
+                        plot_title=('Difference in Probability P%d (Ppt>%dmm)'
+                                    ' Netatmo and DWD %s data year %s'
+                                    % (ppt_min_thr, ppt_min_thr,
+                                       temp_freq, 'all_years')),
+                        lon_col_name='lon',
+                        lat_col_name='lat',
+                        shapefile_path=path_to_shpfile,
+                        table_to_plot=df_table,
+                        out_save_name=('year_%s_%s_differece_in_p%d_netatmo'
+                                       '_ppt_dwd_station.png'
+                                       % ('all_years', temp_freq, ppt_min_thr)),
+                        out_dir=out_save_dir_orig
+                    )
+
+                    print('\n********\n Plotting Mean maps')
+                    plot_subplot_fig(
+                        df_to_plot=df_results,
+                        col_var_to_plot='mean_ppt',
+                        col_color_of_marker='color_mean_ppt',
+                        plot_title=('Difference in Average Rainfall values'
+                                    ' Netatmo and DWD %s data year %s'
+                                    % (temp_freq, 'all_years')),
+                        lon_col_name='lon',
+                        lat_col_name='lat',
+                        shapefile_path=path_to_shpfile,
+                        table_to_plot=df_table,
+                        out_save_name=('year_%s_%s_difference'
+                                       '_in_mean_station_ppt_dwd_station.png'
+                                       % ('all_years', temp_freq)),
+                        out_dir=out_save_dir_orig
+                    )
 
     STOP = timeit.default_timer()  # Ending time
     print(('\n****Done with everything on %s.\nTotal run time was'

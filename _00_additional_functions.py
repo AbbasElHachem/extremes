@@ -12,6 +12,8 @@ import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
+from adjustText import adjust_text
+
 from scipy.stats import spearmanr as spr
 from scipy.stats import pearsonr as pears
 
@@ -997,11 +999,90 @@ def save_how_many_abv_same_below(
         'year_%s_df_similarities_%s_%dmm_.csv'
         % (year_vals, temp_freq, ppt_thr)))
     return df_out
+#==============================================================================
+#
+#==============================================================================
 
+
+def plt_on_map_agreements(
+    df_correlations,  # df with netatmo stns, result of correlations
+    col_to_plot,  # which column to plot , str_label_of_col
+    shp_de_file,  # shapefile of BW
+    temp_freq,  # temp freq of df
+    out_dir,  # out save dir for plots
+    year_vals,  # if all years or year by year
+    val_thr_percent  # consider all values above it
+):
+    '''
+    Read the df_results containing for every netatmo station
+    the coordinates (lon, lat) and the comparision between 
+    the pearson and spearman correlations,
+    between netatmo and nearest dwd station
+    plot the reults on a map, either with or with temp_thr
+    '''
+    if 'Bool' in col_to_plot:
+        percent_add = '_above_%dpercent' % val_thr_percent
+    else:
+        percent_add = '_'
+    print('plotting comparing %s' % col_to_plot)
+    # select values only for column and dron nans
+    df_correlations = df_correlations.loc[:, [
+        'lon', 'lat', col_to_plot]].dropna()
+
+    plt.ioff()
+    fig = plt.figure(figsize=(15, 15), dpi=150)
+
+    ax = fig.add_subplot(111)
+
+    shp_de = shapefile.Reader(shp_de_file)
+    # read and plot shapefile (BW or Germany) should be lon lat
+    for shape_ in shp_de.shapeRecords():
+        lon = [i[0] for i in shape_.shape.points[:][::-1]]
+        lat = [i[1] for i in shape_.shape.points[:][::-1]]
+        ax.scatter(lon, lat, marker='.', c='lightgrey',
+                   alpha=0.25, s=2)
+
+    # plot the stations in shapefile, look at the results of agreements
+    texts = []
+    for i in range(df_correlations.shape[0]):
+        ax.scatter(df_correlations.lon.values[i],
+                   df_correlations.lat.values[i],
+                   alpha=1,
+                   c='b',
+                   s=15,
+                   label=df_correlations[col_to_plot].values[i])
+        texts.append(ax.text(df_correlations.lon.values[i],
+                             df_correlations.lat.values[i],
+                             str(df_correlations[col_to_plot].values[i]),
+                             color='k'))
+
+    ax.set_title('%s Data %s'
+                 ' Netatmo and DWD %s data year %s'
+                 % (col_to_plot,  percent_add,
+                     temp_freq, year_vals))
+    ax.grid(alpha=0.5)
+
+    ax.set_xlabel('Longitude')
+    ax.set_ylabel('Latitude')
+    ax.set_aspect(1.0)
+    adjust_text(texts, ax=ax,
+                arrowprops=dict(arrowstyle='->', color='red', lw=0.25))
+
+    plt.savefig(
+        os.path.join(
+            out_dir,
+            'year_%s_%s_%s_netatmo_ppt_dwd_station_%s.png'
+            % (year_vals, temp_freq, col_to_plot, percent_add)),
+        frameon=True, papertype='a4',
+        bbox_inches='tight', pad_inches=.2)
+    plt.close()
+    return df_correlations
 
 #==============================================================================
 #
 #==============================================================================
+
+
 def plt_correlation_with_distance(
     df_correlations,  # df with netatmo stns, result of correlations
     dist_col_to_plot,  # name of column with distance values

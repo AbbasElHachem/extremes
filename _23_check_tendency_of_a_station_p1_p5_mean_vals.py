@@ -27,6 +27,7 @@ __email__ = "abbas.el-hachem@iws.uni-stuttgart.de"
 
 # =============================================================================
 
+# TODO: CHECK IF NEEDED, IF YES THEN NEED FIXING
 from pathlib import Path
 
 import os
@@ -44,7 +45,7 @@ main_dir = Path(os.getcwd())
 os.chdir(main_dir)
 
 path_to_netatmo_df = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-                      '\plots_NetAtmo_ppt_NetAtmo_temperature')
+                      r'\plots_NetAtmo_ppt_DWD_ppt_neighbors_mean_and_pvals')
 
 
 ppt_thr = 1  # 5
@@ -98,7 +99,7 @@ if var_to_plot == 'p1' or var_to_plot == 'p5':
 # save df
 dfs_year_num.to_csv(
     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-    '\plots_NetAtmo_ppt_NetAtmo_temperature\dfs_comparing'
+    '\plots_NetAtmo_ppt_DWD_ppt_neighbors_mean_and_pvals\dfs_comparing'
     '\df_tendency_Orig_Pearson_Correlation.csv', sep=';')
 
 #==============================================================================
