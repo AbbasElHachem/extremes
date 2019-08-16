@@ -133,7 +133,7 @@ path_to_shpfile = (r'F:\data_from_exchange\Netatmo'
 assert os.path.exists(path_to_shpfile), 'wrong shapefile path'
 
 out_save_dir_orig = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-                     r'\plots_NetAtmo_ppt_NetAtmo_temperature')
+                     r'\plots_NetAtmo_ppt_DWD_ppt_correlation_')
 
 
 if not os.path.exists(out_save_dir_orig):
@@ -153,19 +153,21 @@ min_dist_thr_ppt = 500000  # 5000  # m
 # threshold for max ppt value per hour
 max_ppt_thr = 100.  # ppt above this value are not considered
 
-lower_percentile_val = 94  # only highest x% of the values are selected
+# only highest x% of the values are selected
+lower_percentile_val_lst = [80, 85, 90, 95, 99]
 
 # , '120min', '480min', '720min', '1440min']
-aggregation_frequencies = ['60min']  # temporal aggregation of df
+aggregation_frequencies = ['60min', '120min', '480min', '720min', '1440min']
+# temporal aggregation of df
 
-neighbors_to_chose_lst = [0, 1]  # refers to DWD neighbot (0=first)
+neighbors_to_chose_lst = [0, 1, 2, 3, 4]  # refers to DWD neighbot (0=first)
 
 min_req_ppt_vals = 10  # minimum values that should be available per station
 
 # this is used to keep only data where month is not in this list
 not_convective_season = [10, 11, 12, 1, 2, 3, 4]  # oct till april
 
-plot_figures = True
+plot_figures = False
 
 date_fmt = '%Y-%m-%d %H:%M:%S'
 
@@ -431,80 +433,84 @@ if __name__ == '__main__':
     print('**** Started on %s ****\n' % time.asctime())
     START = timeit.default_timer()  # to get the runtime of the program
 
-    for neighbor_to_chose in neighbors_to_chose_lst:
-        print('\n********\n DWD Neighbor is', neighbor_to_chose)
+    for lower_percentile_val in lower_percentile_val_lst:
+        print('\n********\n Lower_percentile_val', lower_percentile_val)
 
         for temp_freq in aggregation_frequencies:
             print('\n********\n Time aggregation is', temp_freq)
 
-            # call this function to get the df, one containing
-            # df_correlations comparing correlations
+            for neighbor_to_chose in neighbors_to_chose_lst:
+                print('\n********\n DWD Neighbor is', neighbor_to_chose)
 
-            path_to_df_correlations = os.path.join(
-                out_save_dir_orig,
-                'year_allyears_df_comparing_correlations_max_sep_dist_%d_'
-                'freq_%s_dwd_netatmo_upper_%d_percent_data_considered'
-                '_neighbor_%d_.csv'
-                % (min_dist_thr_ppt, temp_freq,
-                    lower_percentile_val, neighbor_to_chose))
+                # call this function to get the df, one containing
+                # df_correlations comparing correlations
 
-            if (not os.path.exists(path_to_df_correlations)):
+                path_to_df_correlations = os.path.join(
+                    out_save_dir_orig,
+                    'year_allyears_df_comparing_correlations_max_sep_dist_%d_'
+                    'freq_%s_dwd_netatmo_upper_%d_percent_data_considered'
+                    '_neighbor_%d_.csv'
+                    % (min_dist_thr_ppt, temp_freq,
+                        lower_percentile_val, neighbor_to_chose))
 
-                print('\n Data frames do not exist, creating them\n')
+                if (not os.path.exists(path_to_df_correlations)):
 
-                (df_results_correlations
-                 ) = compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
-                    path_netatmo_ppt_df_feather=path_to_ppt_netatmo_data_feather,
-                    pth_to_netatmo_cols_df_csv=path_to_ppt_netatmo_data_csv,
-                    path_to_dwd_data=path_to_ppt_dwd_data,  # path_to_ppt_hdf_data,
-                    path_netatmo_gd_stns=path_to_netatmo_gd_stns_file,
-                    netatmo_ppt_coords_df=path_to_netatmo_coords_df_file,
-                    neighbor_to_chose=neighbor_to_chose,
-                    distance_matrix_netatmo_ppt_dwd_ppt=distance_matrix_netatmo_dwd_df_file,
-                    min_dist_thr_ppt=min_dist_thr_ppt,
-                    temp_freq_resample=temp_freq,
-                    val_thr_percent=lower_percentile_val,
-                    min_req_ppt_vals=min_req_ppt_vals)
-            else:
+                    print('\n Data frames do not exist, creating them\n')
 
-                df_results_correlations = pd.read_csv(path_to_df_correlations,
-                                                      sep=';', index_col=0)
+                    (df_results_correlations
+                     ) = compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
+                        path_netatmo_ppt_df_feather=path_to_ppt_netatmo_data_feather,
+                        pth_to_netatmo_cols_df_csv=path_to_ppt_netatmo_data_csv,
+                        path_to_dwd_data=path_to_ppt_dwd_data,
+                        path_netatmo_gd_stns=path_to_netatmo_gd_stns_file,
+                        netatmo_ppt_coords_df=path_to_netatmo_coords_df_file,
+                        neighbor_to_chose=neighbor_to_chose,
+                        distance_matrix_netatmo_ppt_dwd_ppt=distance_matrix_netatmo_dwd_df_file,
+                        min_dist_thr_ppt=min_dist_thr_ppt,
+                        temp_freq_resample=temp_freq,
+                        val_thr_percent=lower_percentile_val,
+                        min_req_ppt_vals=min_req_ppt_vals)
+                else:
 
-            if plot_figures:
-                print('\n********\n Plotting Correlation with distance')
-                plt_correlation_with_distance(
-                    df_correlations=df_results_correlations,
-                    dist_col_to_plot='Distance to neighbor',
-                    corr_col_to_plot='Bool_Spearman_Correlation',
-                    temp_freq=temp_freq,
-                    out_dir=out_save_dir_orig,
-                    year_vals='all_years',
-                    val_thr_percent=lower_percentile_val,
-                    neighbor_nbr=neighbor_to_chose)
+                    df_results_correlations = pd.read_csv(path_to_df_correlations,
+                                                          sep=';', index_col=0)
 
-                plt_correlation_with_distance(
-                    df_correlations=df_results_correlations,
-                    dist_col_to_plot='Distance to neighbor',
-                    corr_col_to_plot='Orig_Spearman_Correlation',
-                    temp_freq=temp_freq,
-                    out_dir=out_save_dir_orig,
-                    year_vals='all_years',
-                    val_thr_percent=lower_percentile_val,
-                    neighbor_nbr=neighbor_to_chose)
+                if plot_figures:
+                    print('\n********\n Plotting Correlation with distance')
+                    plt_correlation_with_distance(
+                        df_correlations=df_results_correlations,
+                        dist_col_to_plot='Distance to neighbor',
+                        corr_col_to_plot='Bool_Spearman_Correlation',
+                        temp_freq=temp_freq,
+                        out_dir=out_save_dir_orig,
+                        year_vals='all_years',
+                        val_thr_percent=lower_percentile_val,
+                        neighbor_nbr=neighbor_to_chose)
 
-                print('\n********\n Plotting Correlation maps')
-                for col_label in df_results_correlations.columns:
-                    if 'Correlation' in col_label and 'Bool_Spearman' in col_label:
-                        # plot the results of df_results_correlations
-                        plt_on_map_agreements(
-                            df_correlations=df_results_correlations,
-                            col_to_plot=col_label,
-                            shp_de_file=path_to_shpfile,
-                            temp_freq=temp_freq,
-                            out_dir=out_save_dir_orig,
-                            year_vals=('all_years_%d_m_distance_neighbor_%d_'
-                                       % (min_dist_thr_ppt, neighbor_to_chose)),
-                            val_thr_percent=lower_percentile_val)
+                    plt_correlation_with_distance(
+                        df_correlations=df_results_correlations,
+                        dist_col_to_plot='Distance to neighbor',
+                        corr_col_to_plot='Orig_Spearman_Correlation',
+                        temp_freq=temp_freq,
+                        out_dir=out_save_dir_orig,
+                        year_vals='all_years',
+                        val_thr_percent=lower_percentile_val,
+                        neighbor_nbr=neighbor_to_chose)
+
+                    print('\n********\n Plotting Correlation maps')
+                    for col_label in df_results_correlations.columns:
+                        if ('Correlation' in col_label
+                                and 'Bool_Spearman' in col_label):
+                            # plot the results of df_results_correlations
+                            plt_on_map_agreements(
+                                df_correlations=df_results_correlations,
+                                col_to_plot=col_label,
+                                shp_de_file=path_to_shpfile,
+                                temp_freq=temp_freq,
+                                out_dir=out_save_dir_orig,
+                                year_vals=('all_years_%d_m_distance_neighbor_%d_'
+                                           % (min_dist_thr_ppt, neighbor_to_chose)),
+                                val_thr_percent=lower_percentile_val)
 
     STOP = timeit.default_timer()  # Ending time
     print(('\n****Done with everything on %s.\nTotal run time was'

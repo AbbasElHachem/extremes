@@ -45,8 +45,12 @@ from pathlib import Path
 
 main_dir = Path(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes')
 
-data_dir_Netamto_dfs = main_dir / r'plots_NetAtmo_ppt_NetAtmo_temperature'
-data_dir_DWD_dfs = main_dir / r'plots_indicator_correlations_DWD_DWD_ppt_'
+data_dir_Netamto_dfs = main_dir / \
+    r'plots_NetAtmo_ppt_DWD_ppt_correlation_'
+data_dir_DWD_dfs = main_dir / r'plots_DWD_ppt_DWD_ppt_correlation_'
+
+data_dir_Netamto_netatmo_dfs = main_dir / \
+    r'plots_NetAtmo_ppt_Netatmo_ppt_correlation_'
 
 netatmo_path_acc = r'year_allyears_df_comparing_correlations_max_sep_dist_500000_'
 dwd_path_Acc = r'year_allyears_df_dwd_correlations'
@@ -55,9 +59,8 @@ dwd_path_Acc = r'year_allyears_df_dwd_correlations'
 percent = '95'
 time_freq = '60min'
 
-data_source0 = 'Netatmo'  # reference station 'Netatmo'
-data_source = 'netatmo'  # compare to station 'netatmo'
-
+data_source0 = 'Netatmo'  # 'DWD'  # reference station 'Netatmo'
+data_source = 'netatmo'  # 'dwd'  # compare to station 'netatmo'
 
 # =============================================================================
 
@@ -72,7 +75,8 @@ def gen_path_df_file(main_path, start_path_acc, time_freq,
 
 
 # =============================================================================
-if data_source0 == 'Netatmo':
+if data_source0 == 'Netatmo' and data_source == 'dwd':
+    # for Netatmo stations neighbors start from 0 !
     df0 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
                            data_source, percent, 0)
     df1 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
@@ -84,8 +88,8 @@ if data_source0 == 'Netatmo':
     df4 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
                            data_source, percent, 4)
     save_dir = data_dir_Netamto_dfs
-if data_source0 == 'DWD':
-    # for DWD stations neighbors start from 1 not 0 !
+if data_source0 == 'DWD' and data_source == 'dwd':
+    # for DWD stations neighbors start from 1 not 0  (1 is first)!
     df0 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
                            data_source, percent, 1)
     df1 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
@@ -97,6 +101,25 @@ if data_source0 == 'DWD':
     df4 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
                            data_source, percent, 5)
     save_dir = data_dir_DWD_dfs
+
+if data_source0 == 'Netatmo' and data_source == 'netatmo':
+    # for Netatmo stations neighbors start from 0 !
+    df0 = gen_path_df_file(data_dir_Netamto_netatmo_dfs,
+                           netatmo_path_acc, time_freq,
+                           data_source, percent, 0)
+    df1 = gen_path_df_file(data_dir_Netamto_netatmo_dfs,
+                           netatmo_path_acc, time_freq,
+                           data_source, percent, 1)
+    df2 = gen_path_df_file(data_dir_Netamto_netatmo_dfs,
+                           netatmo_path_acc, time_freq,
+                           data_source, percent, 2)
+    df3 = gen_path_df_file(data_dir_Netamto_netatmo_dfs,
+                           netatmo_path_acc, time_freq,
+                           data_source, percent, 3)
+    df4 = gen_path_df_file(data_dir_Netamto_netatmo_dfs,
+                           netatmo_path_acc, time_freq,
+                           data_source, percent, 4)
+    save_dir = data_dir_Netamto_netatmo_dfs
 # =============================================================================
 
 in_df0 = pd.read_csv(df0, index_col=0, sep=';').dropna(how='all')
@@ -145,7 +168,7 @@ plt.title('%s %s stations %s: Indicator correlation'
           ' with distance for upper %s percent of data values'
           % (data_source0, data_source, time_freq, percent))
 plt.savefig(save_dir /
-            (r'_%s_%s_%s_percent_indic_corr_freq_%s_filtred.png'
+            (r'_%s_%s_%s_percent_indic_corr_freq_%s_.png'
              % (data_source0, data_source, percent, time_freq)),
             frameon=True, papertype='a4',
             bbox_inches='tight', pad_inches=.2)

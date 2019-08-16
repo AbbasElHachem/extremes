@@ -11,6 +11,7 @@ import scipy.spatial as spatial
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+import scipy.stats
 
 from adjustText import adjust_text
 
@@ -1150,6 +1151,20 @@ def plt_correlation_with_distance(
         bbox_inches='tight', pad_inches=.2)
     plt.close()
     return df_correlations
+
+#==============================================================================
+#
+#==============================================================================
+
+
+def mean_confidence_interval(data, confidence=0.95):
+    ''' get data within confidence interval, asuming a T distribution'''
+
+    a = 1.0 * np.array(data)
+    n = len(a)
+    m, se = np.mean(a), scipy.stats.sem(a)
+    h = se * scipy.stats.t.ppf((1 + confidence) / 2., n - 1)
+    return m, m - h, m + h
 
 #==============================================================================
 #

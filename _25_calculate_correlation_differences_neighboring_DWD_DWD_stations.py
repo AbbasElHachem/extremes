@@ -97,7 +97,7 @@ assert os.path.exists(path_to_shpfile), 'wrong shapefile path'
 
 
 out_save_dir_orig = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-                     r'\plots_indicator_correlations_DWD_DWD_ppt_')
+                     r'\plots_DWD_ppt_DWD_ppt_correlation_')
 
 
 if not os.path.exists(out_save_dir_orig):
@@ -106,24 +106,26 @@ if not os.path.exists(out_save_dir_orig):
 #==============================================================================
 #
 #==============================================================================
-# def epsg wgs84 and utm32 for coordinates conversion
+# def epsg wgs84 and utm32 for coordinates conversion and plotting coordinates
 wgs82 = "+init=EPSG:4326"
 utm32 = "+init=EPSG:32632"
 
 x_col_name = 'X'
 y_col_name = 'Y'
 
-neighbor_to_chose = 5  # 1 refers to first neighbor
-
-val_thr_percent = 95
+# only highest x% of the values are selected
+lower_percentile_val_lst = [80, 85, 90, 95, 99]
 
 min_req_ppt_vals = 10  # minimum number of values per station
 
-aggregation_frequencies = ['60min']
+# temporal aggregation of df
+aggregation_frequencies = ['60min', '120min', '480min', '720min', '1440min']
 
+# month number, no need to change
 not_convective_season = [10, 11, 12, 1, 2, 3, 4]
 
-neighbors_to_chose_lst = [0]  # list of which neighbors to chose
+# starts with one
+neighbors_to_chose_lst = [1, 2, 3, 4, 5]  # list of which neighbors to chose
 
 # select data only within this period (same as netatmo)
 start_date = '2014-01-01 00:00:00'
@@ -141,7 +143,8 @@ plt_figures = False  # if true plot correlations seperatly and on map
 def calc_indicator_correlatione_two_dwd_stns(
     stns_ids,  # list of all DWD stns
     tem_freq,  # temporal frequency of dataframe
-    neighbor_to_chose  # which DWD neighbor to chose (starts with 1)
+    neighbor_to_chose,  # which DWD neighbor to chose (starts with 1)
+    val_thr_percent  # probabilistic percentage threshold
 ):
 
     in_coords_df, _, _, _ = get_dwd_stns_coords(
@@ -339,32 +342,43 @@ if __name__ == '__main__':
     HDF52 = HDF5(infile=path_to_ppt_hdf_data)
     dwd_ids = HDF52.get_all_ids()
 
-    for temp_freq in aggregation_frequencies:
+    for lower_percentile_val in lower_percentile_val_lst:
+        print('\n***** lower_percentile_val: ', lower_percentile_val)
 
-        df_results_correlations = calc_indicator_correlatione_two_dwd_stns(dwd_ids,
-                                                                           temp_freq)
+        for temp_freq in aggregation_frequencies:
+            print('\n***** Temp frequency: ', temp_freq, '****')
 
-        if plt_figures:
-            print('Plotting figures')
-            plt_correlation_with_distance(
-                df_correlations=df_results_correlations,
-                dist_col_to_plot='Distance to neighbor',
-                corr_col_to_plot='Bool_Spearman_Correlation',
-                temp_freq=temp_freq,
-                out_dir=out_save_dir_orig,
-                year_vals='all_years',
-                val_thr_percent=val_thr_percent,
-                neighbor_nbr=neighbor_to_chose)
+            for neighbor_to_chose in neighbors_to_chose_lst:
+                print('\n***** DWD Neighbor is: ', neighbor_to_chose, '****')
 
-            plt_on_map_agreements(df_correlations=df_results_correlations,
-                                  col_to_plot='Bool_Spearman_Correlation',
-                                  shp_de_file=path_to_shpfile,
-                                  temp_freq=temp_freq,
-                                  ppt_thr=np.nan,
-                                  out_dir=out_save_dir_orig,
-                                  year_vals=('all_years_neighbor_%d_'
-                                             % (neighbor_to_chose)),
-                                  val_thr_percent=val_thr_percent)
+                df_results_correlations = calc_indicator_correlatione_two_dwd_stns(
+                    stns_ids=dwd_ids,
+                    tem_freq=temp_freq,
+                    neighbor_to_chose=neighbor_to_chose,
+                    val_thr_percent=lower_percentile_val)
+
+                if plt_figures:
+                    print('Plotting figures')
+                    plt_correlation_with_distance(
+                        df_correlations=df_results_correlations,
+                        dist_col_to_plot='Distance to neighbor',
+                        corr_col_to_plot='Bool_Spearman_Correlation',
+                        temp_freq=temp_freq,
+                        out_dir=out_save_dir_orig,
+                        year_vals='all_years',
+                        val_thr_percent=lower_percentile_val,
+                        neighbor_nbr=neighbor_to_chose)
+
+                    plt_on_map_agreements(
+                        df_correlations=df_results_correlations,
+                        col_to_plot='Bool_Spearman_Correlation',
+                        shp_de_file=path_to_shpfile,
+                        temp_freq=temp_freq,
+                        ppt_thr=np.nan,
+                        out_dir=out_save_dir_orig,
+                        year_vals=('all_years_neighbor_%d_'
+                                   % (neighbor_to_chose)),
+                        val_thr_percent=lower_percentile_val)
 
     STOP = timeit.default_timer()  # Ending time
     print(('\n****Done with everything on %s.\nTotal run time was'

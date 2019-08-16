@@ -45,12 +45,12 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from pathlib import Path
 
-from _24_plot_indicator_correlation_with_distance_ import gen_path_df_file
+from _27_plot_indicator_correlation_with_distance_ import gen_path_df_file
 
 main_dir = Path(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes')
 
-data_dir_Netamto_dfs = main_dir / r'plots_NetAtmo_ppt_NetAtmo_temperature'
-data_dir_DWD_dfs = main_dir / r'plots_indicator_correlations_DWD_DWD_ppt_'
+data_dir_Netamto_dfs = main_dir / r'plots_NetAtmo_ppt_DWD_ppt_correlation_'
+data_dir_DWD_dfs = main_dir / r'plots_DWD_ppt_DWD_ppt_correlation_'
 
 netatmo_path_acc = r'year_allyears_df_comparing_correlations_max_sep_dist_500000_'
 dwd_path_Acc = r'year_allyears_df_dwd_correlations'
