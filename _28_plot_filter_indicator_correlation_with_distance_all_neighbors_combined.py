@@ -66,8 +66,6 @@ data_source = 'dwd'  # compare to station 'netatmo'
 #==============================================================================
 
 # %%
-# def func(x, a, b, c):
-#    return a * np.exp(-b * x) + c
 
 
 def func(x, a, b, c, d):
@@ -77,11 +75,17 @@ def func(x, a, b, c, d):
 
 def fit_curve_get_vals_below_curve(x, y, func, stns):
     ''' fit function to data and shifted 10% downwards'''
+    # bounds=[[a1,b1],[a2,b2]]
 
-    popt, _ = curve_fit(func, x, y)
+    popt, _ = curve_fit(
+        func, x, y)
+#         bounds=[[None, None, None, None, ],
+#                 [None, None, 0, None]])
+
+    print('fitted parameters are ', popt[0], popt[1], popt[2])  # , popt[3])
     y_fitted = func(x, *popt)
 
-    lower_bound = y_fitted.max() * 0.10
+    lower_bound = y_fitted.max() * 0.12
     y_fitted_shifted = y_fitted - lower_bound
 
     xvals_below_curve = x[np.where(y <= y_fitted_shifted)]

@@ -468,6 +468,7 @@ def get_cdf_part_abv_thr(ppt_data, ppt_thr):
     x0, y0 = build_edf_fr_vals(ppt_data)
     x_abv_thr = x0[x0 > ppt_thr]
     y_abv_thr = y0[np.where(x0 > ppt_thr)]
+
     assert y_abv_thr[0] == p0, 'something is wrong with probability cal'
 
     return x_abv_thr, y_abv_thr
@@ -1163,7 +1164,7 @@ def mean_confidence_interval(data, confidence=0.95):
     a = 1.0 * np.array(data)
     n = len(a)
     m, se = np.mean(a), scipy.stats.sem(a)
-    h = se * scipy.stats.t.ppf((1 + confidence) / 2., n - 1)
+    h = se * scipy.stats.t.ppf((1 - confidence) / 2., n - 1)
     return m, m - h, m + h
 
 #==============================================================================

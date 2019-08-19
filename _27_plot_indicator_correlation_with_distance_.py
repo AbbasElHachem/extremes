@@ -45,22 +45,28 @@ from pathlib import Path
 
 main_dir = Path(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes')
 
-data_dir_Netamto_dfs = main_dir / \
-    r'plots_NetAtmo_ppt_DWD_ppt_correlation_'
+data_dir_Netamto_dfs = main_dir / r'plots_NetAtmo_ppt_DWD_ppt_correlation_'
+
+assert data_dir_Netamto_dfs.exists(), 'Wrong Netatmo path'
+
+
 data_dir_DWD_dfs = main_dir / r'plots_DWD_ppt_DWD_ppt_correlation_'
+assert data_dir_DWD_dfs.exists(), 'Wrong dwd path'
 
 data_dir_Netamto_netatmo_dfs = main_dir / \
     r'plots_NetAtmo_ppt_Netatmo_ppt_correlation_'
+
+assert data_dir_Netamto_netatmo_dfs.exists(), 'Wrong Netatmo Netatmo path'
 
 netatmo_path_acc = r'year_allyears_df_comparing_correlations_max_sep_dist_500000_'
 dwd_path_Acc = r'year_allyears_df_dwd_correlations'
 
 # def percentage threshold, time frequency and data source
-percent = '95'
-time_freq = '60min'
+percent = '85'
+time_freq = '1440min'
 
-data_source0 = 'Netatmo'  # 'DWD'  # reference station 'Netatmo'
-data_source = 'netatmo'  # 'dwd'  # compare to station 'netatmo'
+data_source0 = 'DWD'  # 'Netatmo'  #   # reference station 'Netatmo'
+data_source = 'dwd'  # 'netatmo'  #   # compare to station 'netatmo'
 
 # =============================================================================
 
@@ -88,6 +94,7 @@ if data_source0 == 'Netatmo' and data_source == 'dwd':
     df4 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
                            data_source, percent, 4)
     save_dir = data_dir_Netamto_dfs
+
 if data_source0 == 'DWD' and data_source == 'dwd':
     # for DWD stations neighbors start from 1 not 0  (1 is first)!
     df0 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
