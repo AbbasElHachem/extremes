@@ -14,7 +14,7 @@ import matplotlib.gridspec as gridspec
 import scipy.stats
 
 from adjustText import adjust_text
-
+from scipy.optimize import curve_fit
 from scipy.stats import spearmanr as spr
 from scipy.stats import pearsonr as pears
 
@@ -1152,6 +1152,82 @@ def plt_correlation_with_distance(
         bbox_inches='tight', pad_inches=.2)
     plt.close()
     return df_correlations
+
+#==============================================================================
+#
+#==============================================================================
+
+
+def func(x, a, b, c, d):
+    ''' 3degree polynomial function used for fitting and as filter'''
+    return a * x**3 + b * x**2 + c * x + d
+
+
+def fit_curve_get_vals_below_curve(x, y, func, stns, df_data):
+    ''' fit function to data and shifted 10% downwards'''
+    # bounds=[[a1,b1],[a2,b2]]
+
+    popt, _ = curve_fit(
+        func, x, y)
+#         bounds=[[None, None, None, None, ],
+#                 [None, None, 0, None]])
+
+    print('fitted parameters are ', popt[0], popt[1], popt[2])  # , popt[3])
+    y_fitted = func(x, *popt)
+
+    lower_bound = y_fitted.max() * 0.12
+    y_fitted_shifted = y_fitted - lower_bound
+
+    xvals_below_curve = x[np.where(y <= y_fitted_shifted)]
+    yvals_below_curve = y[np.where(y <= y_fitted_shifted)]
+
+    stns_below_curve = stns[np.where(y <= y_fitted_shifted)]
+
+    xvals_above_curve = x[np.where(y > y_fitted_shifted)]
+    yvals_above_curve = y[np.where(y > y_fitted_shifted)]
+
+    stns_above_curve = stns[np.where(y > y_fitted_shifted)]
+
+#     xvals_above_curve = df_data.loc[stns_above_curve,
+#                                     'Distance to neighbor'].values
+#     yvals_above_curve = df_data.loc[stns_above_curve,
+#                                     'Bool_Spearman_Correlation'].values
+
+#     xvals_below_curve2 = df_data.loc[stns,
+#                                      'Distance to neighbor'].values
+#     df_below_curve = df_data[df_data['Bool_Spearman_Correlation'].values
+#          <= y_fitted_shifted]
+#
+#     yvals_below_curve2 = df_below_curve['Bool_Spearman_Correlation'].values
+#     xvals_below_curve2= df_below_curve['Distance to neighbor'].values
+#
+#     df_above_curve = df_data[df_data['Bool_Spearman_Correlation'].values
+#          > y_fitted_shifted]
+#
+#     yvals_abv_curve2 = df_above_curve['Bool_Spearman_Correlation'].values
+#     xvals_abv_curve2= df_above_curve['Distance to neighbor'].values
+#
+#
+#     plt.scatter(xvals_below_curve, yvals_below_curve)
+#     plt.scatter(xvals_below_curve2, yvals_below_curve2)
+#     plt.scatter(xvals_above_curve, yvals_above_curve)
+#     plt.scatter(xvals_abv_curve2, yvals_abv_curve2)
+
+    return (y_fitted_shifted, xvals_below_curve, yvals_below_curve,
+            xvals_above_curve, yvals_above_curve, stns_below_curve,
+            stns_above_curve)
+
+
+#==============================================================================
+#
+#==============================================================================
+def gen_path_df_file(main_path, start_path_acc, time_freq,
+                     data_source, percent, neighbor):
+    ''' use this funtion to get the path to the dfs for different neighbors'''
+
+    return main_path / (
+        r'%sfreq_%s_%s_netatmo_upper_%s_percent_data_considered_neighbor_%d_.csv'
+        % (start_path_acc, time_freq, data_source, percent, neighbor))
 
 #==============================================================================
 #

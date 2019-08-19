@@ -37,12 +37,16 @@ __copyright__ = 'Institut fuer Wasser- und Umweltsystemmodellierung - IWS'
 __email__ = "abbas.el-hachem@iws.uni-stuttgart.de"
 
 # =============================================================================
-
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
 from pathlib import Path
 
+from _00_additional_functions import gen_path_df_file
+#==============================================================================
+#
+#==============================================================================
 main_dir = Path(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes')
 
 data_dir_Netamto_dfs = main_dir / r'plots_NetAtmo_ppt_DWD_ppt_correlation_'
@@ -58,29 +62,29 @@ data_dir_Netamto_netatmo_dfs = main_dir / \
 
 assert data_dir_Netamto_netatmo_dfs.exists(), 'Wrong Netatmo Netatmo path'
 
+
 netatmo_path_acc = r'year_allyears_df_comparing_correlations_max_sep_dist_500000_'
 dwd_path_Acc = r'year_allyears_df_dwd_correlations'
 
+
+path_to_netatmo_gd_stns_file = data_dir_Netamto_dfs / \
+    r'keep_stns_all_neighbors_combined_95_per_.csv'
+
+assert path_to_netatmo_gd_stns_file.exists(), 'wrong netatmo good stns file'
+
 # def percentage threshold, time frequency and data source
-percent = '85'
-time_freq = '1440min'
+percent = '95'
+time_freq = '60min'
 
-data_source0 = 'DWD'  # 'Netatmo'  #   # reference station 'Netatmo'
-data_source = 'dwd'  # 'netatmo'  #   # compare to station 'netatmo'
+data_source0 = 'Netatmo'  # 'DWD'  # 'Netatmo'  #   # reference station 'Netatmo'
+data_source = 'dwd'  # 'dwd'  # 'netatmo'  #   # compare to station 'netatmo'
 
+use_good_netatmo_stns = False
+
+save_acc = ''
 # =============================================================================
 
 
-def gen_path_df_file(main_path, start_path_acc, time_freq,
-                     data_source, percent, neighbor):
-    ''' use this funtion to get the path to the dfs for different neighbors'''
-
-    return main_path / (
-        r'%sfreq_%s_%s_netatmo_upper_%s_percent_data_considered_neighbor_%d_.csv'
-        % (start_path_acc, time_freq, data_source, percent, neighbor))
-
-
-# =============================================================================
 if data_source0 == 'Netatmo' and data_source == 'dwd':
     # for Netatmo stations neighbors start from 0 !
     df0 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
@@ -135,6 +139,17 @@ in_df2 = pd.read_csv(df2, index_col=0, sep=';').dropna(how='all')
 in_df3 = pd.read_csv(df3, index_col=0, sep=';').dropna(how='all')
 in_df4 = pd.read_csv(df4, index_col=0, sep=';').dropna(how='all')
 
+if use_good_netatmo_stns:
+    df_good_stns = pd.read_csv(path_to_netatmo_gd_stns_file, sep=';',
+                               index_col=0).dropna(how='any')
+    # assert np.all(df_good_stns.values.ravel()) in in_df0.index
+    in_df0 = in_df0.loc[df_good_stns.values.ravel(), :].dropna(how='all')
+    in_df1 = in_df1.loc[df_good_stns.values.ravel(), :].dropna(how='all')
+    in_df2 = in_df2.loc[df_good_stns.values.ravel(), :].dropna(how='all')
+    in_df3 = in_df3.loc[df_good_stns.values.ravel(), :].dropna(how='all')
+    in_df4 = in_df4.loc[df_good_stns.values.ravel(), :].dropna(how='all')
+
+    save_acc = 'filtered'
 # =============================================================================
 
 x0 = in_df0.loc[:, 'Distance to neighbor'].values.ravel()
@@ -175,8 +190,8 @@ plt.title('%s %s stations %s: Indicator correlation'
           ' with distance for upper %s percent of data values'
           % (data_source0, data_source, time_freq, percent))
 plt.savefig(save_dir /
-            (r'_%s_%s_%s_percent_indic_corr_freq_%s_.png'
-             % (data_source0, data_source, percent, time_freq)),
+            (r'_%s_%s_%s_percent_indic_corr_freq_%s_%s.png'
+             % (data_source0, data_source, percent, time_freq, save_acc)),
             frameon=True, papertype='a4',
             bbox_inches='tight', pad_inches=.2)
 plt.close()

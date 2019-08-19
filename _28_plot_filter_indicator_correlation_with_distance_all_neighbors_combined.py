@@ -42,11 +42,13 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from scipy.optimize import curve_fit
 from pathlib import Path
 
-from _27_plot_indicator_correlation_with_distance_ import gen_path_df_file
-
+from _00_additional_functions import (func, fit_curve_get_vals_below_curve,
+                                      gen_path_df_file)
+#==============================================================================
+#
+#==============================================================================
 main_dir = Path(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes')
 
 data_dir_Netamto_dfs = main_dir / r'plots_NetAtmo_ppt_DWD_ppt_correlation_'
@@ -61,47 +63,6 @@ time_freq = '60min'
 
 data_source0 = 'DWD'  # reference station 'Netatmo'
 data_source = 'dwd'  # compare to station 'netatmo'
-#==============================================================================
-#
-#==============================================================================
-
-# %%
-
-
-def func(x, a, b, c, d):
-    ''' 3degree polynomial function used for fitting and as filter'''
-    return a * x**3 + b * x**2 + c * x + d
-
-
-def fit_curve_get_vals_below_curve(x, y, func, stns):
-    ''' fit function to data and shifted 10% downwards'''
-    # bounds=[[a1,b1],[a2,b2]]
-
-    popt, _ = curve_fit(
-        func, x, y)
-#         bounds=[[None, None, None, None, ],
-#                 [None, None, 0, None]])
-
-    print('fitted parameters are ', popt[0], popt[1], popt[2])  # , popt[3])
-    y_fitted = func(x, *popt)
-
-    lower_bound = y_fitted.max() * 0.12
-    y_fitted_shifted = y_fitted - lower_bound
-
-    xvals_below_curve = x[np.where(y <= y_fitted_shifted)]
-    yvals_below_curve = y[np.where(y <= y_fitted_shifted)]
-
-    stns_below_curve = stns[np.where(y <= y_fitted_shifted)]
-
-    xvals_above_curve = x[np.where(y > y_fitted_shifted)]
-    yvals_above_curve = y[np.where(y > y_fitted_shifted)]
-
-    stns_above_curve = stns[np.where(y > y_fitted_shifted)]
-
-    return (y_fitted_shifted, xvals_below_curve, yvals_below_curve,
-            xvals_above_curve, yvals_above_curve, stns_below_curve,
-            stns_above_curve)
-
 
 #==============================================================================
 #

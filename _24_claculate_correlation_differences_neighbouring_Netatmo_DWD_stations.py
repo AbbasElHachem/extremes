@@ -123,7 +123,7 @@ assert os.path.exists(path_to_netatmo_coords_df_file), 'wrong DWD coords file'
 
 path_to_netatmo_gd_stns_file = (
     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes"
-    r"\filter_Netamo_data_basedon_indicator_correlation"
+    r"\plots_NetAtmo_ppt_DWD_ppt_correlation_"
     r"\keep_stns_all_neighbors_combined_95_per_.csv")
 assert os.path.exists(path_to_netatmo_gd_stns_file), 'wrong netatmo stns file'
 
@@ -154,15 +154,16 @@ min_dist_thr_ppt = 500000  # 5000  # m
 max_ppt_thr = 100.  # ppt above this value are not considered
 
 # only highest x% of the values are selected
-lower_percentile_val_lst = [80, 85, 90, 95, 99]
+lower_percentile_val_lst = [95]  # [80, 85, 90, 95, 99]
 
 # , '120min', '480min', '720min', '1440min']
+# ['60min', '120min', '480min', '720min', '1440min']
 aggregation_frequencies = ['60min', '120min', '480min', '720min', '1440min']
 # temporal aggregation of df
 
 neighbors_to_chose_lst = [0, 1, 2, 3, 4]  # refers to DWD neighbot (0=first)
 
-min_req_ppt_vals = 10  # minimum values that should be available per station
+min_req_ppt_vals = 30  # minimum values that should be available per station
 
 # this is used to keep only data where month is not in this list
 not_convective_season = [10, 11, 12, 1, 2, 3, 4]  # oct till april

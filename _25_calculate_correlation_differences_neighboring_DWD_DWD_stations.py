@@ -116,7 +116,6 @@ y_col_name = 'Y'
 # only highest x% of the values are selected
 lower_percentile_val_lst = [80, 85, 90, 95, 99]
 
-min_req_ppt_vals = 10  # minimum number of values per station
 
 # temporal aggregation of df
 aggregation_frequencies = ['60min', '120min', '480min', '720min', '1440min']
@@ -126,6 +125,8 @@ not_convective_season = [10, 11, 12, 1, 2, 3, 4]
 
 # starts with one
 neighbors_to_chose_lst = [1, 2, 3, 4, 5]  # list of which neighbors to chose
+
+min_req_ppt_vals = 30  # stations minimum required ppt values
 
 # select data only within this period (same as netatmo)
 start_date = '2014-01-01 00:00:00'
@@ -144,7 +145,8 @@ def calc_indicator_correlatione_two_dwd_stns(
     stns_ids,  # list of all DWD stns
     tem_freq,  # temporal frequency of dataframe
     neighbor_to_chose,  # which DWD neighbor to chose (starts with 1)
-    val_thr_percent  # probabilistic percentage threshold
+    val_thr_percent,  # probabilistic percentage threshold
+    min_req_ppt_vals  # stations minimum required ppt values
 ):
 
     in_coords_df, _, _, _ = get_dwd_stns_coords(
@@ -232,8 +234,8 @@ def calc_indicator_correlatione_two_dwd_stns(
                     df_common1 = idf1.loc[new_idx_common]
                     df_common2 = idf2.loc[new_idx_common]
 
-            if (df_common1.values.shape[0] > 0 and
-                    df_common2.values.shape[0] > 0):
+            if (df_common1.values.shape[0] > min_req_ppt_vals and
+                    df_common2.values.shape[0] > min_req_ppt_vals):
                 df_common1 = pd.DataFrame(
                     data=df_common1.values,
                     index=df_common1.index,
@@ -355,7 +357,8 @@ if __name__ == '__main__':
                     stns_ids=dwd_ids,
                     tem_freq=temp_freq,
                     neighbor_to_chose=neighbor_to_chose,
-                    val_thr_percent=lower_percentile_val)
+                    val_thr_percent=lower_percentile_val,
+                    min_req_ppt_vals=min_req_ppt_vals)
 
                 if plt_figures:
                     print('Plotting figures')
