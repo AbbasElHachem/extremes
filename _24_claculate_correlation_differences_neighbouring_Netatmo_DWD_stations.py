@@ -68,6 +68,7 @@ from scipy.stats import pearsonr as pears
 
 from _00_additional_functions import (resample_intersect_2_dfs,
                                       select_convective_season,
+                                      select_df_within_period,
                                       get_cdf_part_abv_thr,
                                       plt_on_map_agreements,
                                       plt_correlation_with_distance
@@ -124,7 +125,7 @@ assert os.path.exists(path_to_netatmo_coords_df_file), 'wrong DWD coords file'
 path_to_netatmo_gd_stns_file = (
     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes"
     r"\plots_NetAtmo_ppt_DWD_ppt_correlation_"
-    r"\keep_stns_all_neighbors_combined_95_per_.csv")
+    r"\keep_stns_1st_neighbor_95_per_60min_.csv")
 assert os.path.exists(path_to_netatmo_gd_stns_file), 'wrong netatmo stns file'
 
 path_to_shpfile = (r'F:\data_from_exchange\Netatmo'
@@ -154,14 +155,16 @@ min_dist_thr_ppt = 500000  # 5000  # m
 max_ppt_thr = 100.  # ppt above this value are not considered
 
 # only highest x% of the values are selected
-lower_percentile_val_lst = [95]  # [80, 85, 90, 95, 99]
+lower_percentile_val_lst = [95, 99]  # [80, 85, 90, 95, 99]
 
 # , '120min', '480min', '720min', '1440min']
+# ['60min', '120min', '480min', '720min', '1440min']
 # ['60min', '120min', '480min', '720min', '1440min']
 aggregation_frequencies = ['60min', '120min', '480min', '720min', '1440min']
 # temporal aggregation of df
 
-neighbors_to_chose_lst = [0, 1, 2, 3, 4]  # refers to DWD neighbot (0=first)
+# , 1, 2, 3, 4]  # refers to DWD neighbot (0=first)
+neighbors_to_chose_lst = [0, 1, 2, 3, 4]
 
 min_req_ppt_vals = 30  # minimum values that should be available per station
 
@@ -223,7 +226,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
 
     # read netatmo good stns df
     in_df_stns = pd.read_csv(path_netatmo_gd_stns, index_col=0,
-                             sep=';', header=None)
+                             sep=';')
     good_stns = list(in_df_stns.values.ravel())
 
     print('\n######\n done reading all dfs \n#######\n')
@@ -296,23 +299,16 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                     df=df_dwd,
                     month_lst=not_convective_season)
 
+                # select only data within same range
+                df_dwd = select_df_within_period(df_dwd,
+                                                 netatmo_ppt_stn1.index[0],
+                                                 netatmo_ppt_stn1.index[-1])
                 print('\n********\n Second DWD Stn Id is', stn_2_dwd,
                       'distance is ', min_dist_ppt_dwd)
 
                 # intersect dwd and netatmo ppt data
-                if temp_freq_resample != '60min':
-                    df_netatmo_cmn, df_dwd_cmn = resample_intersect_2_dfs(
-                        netatmo_ppt_stn1, df_dwd, temp_freq_resample)
-                else:
-                    new_idx_common = netatmo_ppt_stn1.index.intersection(
-                        df_dwd.index)
-
-                    try:
-                        df_netatmo_cmn = netatmo_ppt_stn1.loc[new_idx_common, :]
-                        df_dwd_cmn = df_dwd.loc[new_idx_common, :]
-                    except Exception:
-                        df_netatmo_cmn = netatmo_ppt_stn1.loc[new_idx_common]
-                        df_dwd_cmn = df_dwd.loc[new_idx_common]
+                df_netatmo_cmn, df_dwd_cmn = resample_intersect_2_dfs(
+                    netatmo_ppt_stn1, df_dwd, temp_freq_resample)
 
                 if (df_netatmo_cmn.values.shape[0] > min_req_ppt_vals and
                         df_dwd_cmn.values.shape[0] > min_req_ppt_vals):
@@ -391,6 +387,20 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
 
                     df_results_correlations.loc[
                         ppt_stn_id,
+                        'DWD neighbor ID'] = stn_2_dwd
+
+                    df_results_correlations.loc[
+                        ppt_stn_id,
+                        'Netatmo_%s_Per_ppt_thr'
+                        % val_thr_percent] = netatmo_ppt_thr_per
+
+                    df_results_correlations.loc[
+                        ppt_stn_id,
+                        'DWD_%s_Per_ppt_thr'
+                        % val_thr_percent] = dwd_ppt_thr_per
+
+                    df_results_correlations.loc[
+                        ppt_stn_id,
                         'Orig_Pearson_Correlation'] = orig_pears_corr
 
                     df_results_correlations.loc[
@@ -413,6 +423,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
             continue
     assert alls_stns_len == 0, 'not all stations were considered'
 
+    df_results_correlations.dropna(how='all', inplace=True)
     df_results_correlations.to_csv(
         os.path.join(out_save_dir_orig,
                      'year_allyears_df_comparing_correlations_max_sep_dist_%d_'

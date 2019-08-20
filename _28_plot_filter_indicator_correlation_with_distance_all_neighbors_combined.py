@@ -46,6 +46,9 @@ from pathlib import Path
 
 from _00_additional_functions import (func, fit_curve_get_vals_below_curve,
                                       gen_path_df_file)
+
+plt.rcParams.update({'font.size': 14})
+plt.rcParams.update({'axes.labelsize': 12})
 #==============================================================================
 #
 #==============================================================================

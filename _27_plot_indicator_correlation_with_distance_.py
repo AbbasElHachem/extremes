@@ -44,6 +44,9 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 
 from _00_additional_functions import gen_path_df_file
+
+plt.rcParams.update({'font.size': 12})
+plt.rcParams.update({'axes.labelsize': 12})
 #==============================================================================
 #
 #==============================================================================
@@ -68,15 +71,15 @@ dwd_path_Acc = r'year_allyears_df_dwd_correlations'
 
 
 path_to_netatmo_gd_stns_file = data_dir_Netamto_dfs / \
-    r'keep_stns_all_neighbors_combined_95_per_.csv'
+    r'keep_stns_all_neighbor_95_per_60min_.csv'
 
 assert path_to_netatmo_gd_stns_file.exists(), 'wrong netatmo good stns file'
 
 # def percentage threshold, time frequency and data source
-percent = '95'
+percent = '90'
 time_freq = '60min'
 
-data_source0 = 'Netatmo'  # 'DWD'  # 'Netatmo'  #   # reference station 'Netatmo'
+data_source0 = 'DWD'  # 'DWD'  # 'Netatmo'  #   # reference station 'Netatmo'
 data_source = 'dwd'  # 'dwd'  # 'netatmo'  #   # compare to station 'netatmo'
 
 use_good_netatmo_stns = False
@@ -149,7 +152,7 @@ if use_good_netatmo_stns:
     in_df3 = in_df3.loc[df_good_stns.values.ravel(), :].dropna(how='all')
     in_df4 = in_df4.loc[df_good_stns.values.ravel(), :].dropna(how='all')
 
-    save_acc = 'filtered'
+    save_acc = 'filtered_using_stns_abv_curve_all_neighbor'
 # =============================================================================
 
 x0 = in_df0.loc[:, 'Distance to neighbor'].values.ravel()
@@ -167,30 +170,33 @@ y4 = in_df4.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
 # =============================================================================
 
 plt.ioff()
-plt.figure(figsize=(12, 8), dpi=300)
+plt.figure(figsize=(16, 12), dpi=300)
+
 plt.scatter(x0, y0, c='r', alpha=0.5, marker='x',
-            label='First Neighbor Stn nbr %d' % y0.shape[0], s=28)
+            label='First Neighbor Stn nbr %d' % y0.shape[0], s=34)
 plt.scatter(x1, y1, c='b', alpha=0.5, marker='.',
-            label='Second Neighbor Stn nbr %d' % y1.shape[0], s=28)
+            label='Second Neighbor Stn nbr %d' % y1.shape[0], s=34)
 plt.scatter(x2, y2, c='g', alpha=0.5, marker='d',
-            label='Third Neighbor Stn nbr %d' % y2.shape[0], s=28)
-plt.scatter(x3, y3, c='orange', alpha=0.5, marker='1',
-            label='Fourth Neighbor Stn nbr %d' % y3.shape[0], s=28)
-plt.scatter(x4, y4, c='m', alpha=0.5, marker='2',
-            label='Fifth Neighbor Stn nbr %d' % y4.shape[0], s=28)
+            label='Third Neighbor Stn nbr %d' % y2.shape[0], s=34)
+plt.scatter(x3, y3, c='darkorange', alpha=0.5, marker='*',
+            label='Fourth Neighbor Stn nbr %d' % y3.shape[0], s=34)
+plt.scatter(x4, y4, c='m', alpha=0.5, marker='+',
+            label='Fifth Neighbor Stn nbr %d' % y4.shape[0], s=34)
 
 plt.xlim([0, max(x3.max(), x4.max()) + 1000])
+#plt.xticks(np.arange(0, 36000, 5000))
 plt.ylim([-0.1, 1.1])
 plt.xlabel('Distance (m)')
 plt.ylabel('Indicator Spearman Correlation')
 plt.legend(loc=0)
 plt.grid(alpha=.25)
 plt.tight_layout()
+
 plt.title('%s %s stations %s: Indicator correlation'
           ' with distance for upper %s percent of data values'
           % (data_source0, data_source, time_freq, percent))
 plt.savefig(save_dir /
-            (r'_%s_%s_%s_percent_indic_corr_freq_%s_%s.png'
+            (r'_%s_%s_%s_percent_indic_corr_freq_%s_%s_orig.png'
              % (data_source0, data_source, percent, time_freq, save_acc)),
             frameon=True, papertype='a4',
             bbox_inches='tight', pad_inches=.2)

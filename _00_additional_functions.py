@@ -70,6 +70,8 @@ by_hsv = sorted((tuple(mcolors.rgb_to_hsv(mcolors.to_rgba(color)[:3])), name)
                 for name, color in colors.items())
 sorted_names_all = [name for hsv, name in by_hsv]
 
+# for every 5min time period define a color, an ugly way of doing it, but easy
+
 
 def pltcolor():
     cols_time_dict = {i: [] for i in np.arange(-60, 61, 5)}
@@ -385,8 +387,8 @@ def resample_intersect_2_dfs(df1,  # first dataframe to resample
         df_common2 = pd.DataFrame(index=df_common2.index,
                                   data=df_common2.values)
         print('\n********\n After resampling sum of NaN values is')
-        print('first station has ', df_common1.isna().sum(), 'NaN values')
-        print('second station has ', df_common2.isna().sum(), 'NaN values')
+        print('first station has ', df_common1.isna().sum()[0], 'NaN values')
+        print('second station has ', df_common2.isna().sum()[0], 'NaN values')
 
         try:
             if df_common1.isna().sum()[0] > 0:
@@ -550,7 +552,8 @@ def get_for_netatmo_nearest_dwd_station(first_stn_id, dwd_coords_df_file,
 
 def constrcut_contingency_table(stn1_id, stn2_id,
                                 dataframe1, dataframe2, thr1, thr2):
-    ''' return percentage of values below or above a threshold'''
+    ''' return percentage of values below or above a threshold
+    return a matrix that is the contingency table'''
     df_1 = dataframe1.values.ravel().copy()
     df_2 = dataframe2.values.ravel().copy()
 
@@ -595,7 +598,7 @@ def select_ppt_vals_abv_temp_thr(
     temp_thr,  # temp threshold, below assume ppt is snow
 ):
     '''
-    could be USED IN SCRIPT NUMBER  19
+    could be USED IN SCRIPT NUMBER  19, currently NOT USED
     '''
     in_netatmo_temperature_stns_df = pd.read_csv(netatmo_temperature_df_file,
                                                  index_col=0, sep=';',
@@ -1095,7 +1098,6 @@ def plt_correlation_with_distance(
     val_thr_percent,  # consider all values above it
     neighbor_nbr  # which neighbor was chosen
 ):
-    # TODO: ADD STATION TYPE AS ARGUMENT
     '''
     Read the df_results containing for every netatmo station
     the coordinates (lon, lat) and the comparision between 
@@ -1142,7 +1144,6 @@ def plt_correlation_with_distance(
     ax.legend(loc=0)
     ax.set_ylabel('Indicator Spearman Correlation')
 
-#     ax.set_aspect(1.0)
     plt.savefig(
         os.path.join(
             out_dir,
@@ -1163,14 +1164,16 @@ def func(x, a, b, c, d):
     return a * x**3 + b * x**2 + c * x + d
 
 
-def fit_curve_get_vals_below_curve(x, y, func, stns, df_data):
-    ''' fit function to data and shifted 10% downwards'''
+def fit_curve_get_vals_below_curve(x, y, func, stns):
+    ''' fit function to data and shifted 10% downwards
+    return all data above and below function with 
+    corresponding distance and correlation values and station ids
+    '''
+
     # bounds=[[a1,b1],[a2,b2]]
 
     popt, _ = curve_fit(
         func, x, y)
-#         bounds=[[None, None, None, None, ],
-#                 [None, None, 0, None]])
 
     print('fitted parameters are ', popt[0], popt[1], popt[2])  # , popt[3])
     y_fitted = func(x, *popt)
@@ -1187,31 +1190,6 @@ def fit_curve_get_vals_below_curve(x, y, func, stns, df_data):
     yvals_above_curve = y[np.where(y > y_fitted_shifted)]
 
     stns_above_curve = stns[np.where(y > y_fitted_shifted)]
-
-#     xvals_above_curve = df_data.loc[stns_above_curve,
-#                                     'Distance to neighbor'].values
-#     yvals_above_curve = df_data.loc[stns_above_curve,
-#                                     'Bool_Spearman_Correlation'].values
-
-#     xvals_below_curve2 = df_data.loc[stns,
-#                                      'Distance to neighbor'].values
-#     df_below_curve = df_data[df_data['Bool_Spearman_Correlation'].values
-#          <= y_fitted_shifted]
-#
-#     yvals_below_curve2 = df_below_curve['Bool_Spearman_Correlation'].values
-#     xvals_below_curve2= df_below_curve['Distance to neighbor'].values
-#
-#     df_above_curve = df_data[df_data['Bool_Spearman_Correlation'].values
-#          > y_fitted_shifted]
-#
-#     yvals_abv_curve2 = df_above_curve['Bool_Spearman_Correlation'].values
-#     xvals_abv_curve2= df_above_curve['Distance to neighbor'].values
-#
-#
-#     plt.scatter(xvals_below_curve, yvals_below_curve)
-#     plt.scatter(xvals_below_curve2, yvals_below_curve2)
-#     plt.scatter(xvals_above_curve, yvals_above_curve)
-#     plt.scatter(xvals_abv_curve2, yvals_abv_curve2)
 
     return (y_fitted_shifted, xvals_below_curve, yvals_below_curve,
             xvals_above_curve, yvals_above_curve, stns_below_curve,
@@ -1234,15 +1212,46 @@ def gen_path_df_file(main_path, start_path_acc, time_freq,
 #==============================================================================
 
 
-def mean_confidence_interval(data, confidence=0.95):
-    ''' get data within confidence interval, asuming a T distribution'''
+def read_filter_df_corr_return_stns_x_y_vals(df_file, thr_low=0, thr_high=1,
+                                             x_col_name='Distance to neighbor',
+                                             y_col_name='Bool_Spearman_Correlation'):
+    ''' read df with correlation values, select all between 0 and 1 and 
+        return station_ids, distance_values, correlation_values, and df'''
+    in_df = pd.read_csv(df_file, index_col=0, sep=';').dropna(how='any')
+    in_df = in_df[(thr_low < in_df.loc[:, y_col_name]) &
+                  (in_df.loc[:, y_col_name] < thr_high)]
+    stn_ids = in_df.index
+    x_vals = in_df.loc[:, x_col_name].values.ravel()
+    y_vals = in_df.loc[:, y_col_name].values.ravel()
+    return stn_ids, x_vals, y_vals, in_df
+#==============================================================================
+#
+#==============================================================================
 
-    a = 1.0 * np.array(data)
-    n = len(a)
-    m, se = np.mean(a), scipy.stats.sem(a)
-    h = se * scipy.stats.t.ppf((1 - confidence) / 2., n - 1)
-    return m, m - h, m + h
 
+def remove_all_low_corr_short_dist(x, y, xthr, ythr, stns, df,
+                                   x_col_name='Distance to neighbor',
+                                   y_col_name='Bool_Spearman_Correlation'):
+    '''
+    for all distances below x_thr remove the correlation values
+    these are outliers that will affect the fitting of the curve
+    get stations with high correlations and drop nans and reselect data
+    return x_good, y_good, stns_good, df_good
+    '''
+    df = df.copy()
+    for i, dist in enumerate(x):
+        if dist <= xthr:
+            if y[i] <= ythr:
+                y[i] = np.nan
+                x[i] = np.nan
+    # remove nans and get all stations and data
+    s_gd_corr = stns[np.where(y > 0) and np.where(x > 0)]
+    df_gd_corr = df.loc[s_gd_corr, :].dropna(how='any')
+    x_gd_corr = df_gd_corr.loc[s_gd_corr, x_col_name].values.ravel()
+    y_gd_corr = df_gd_corr.loc[s_gd_corr, y_col_name].values.ravel()
+
+    assert np.isnan(x_gd_corr).sum() == 0, 'nans in data'
+    return x_gd_corr, y_gd_corr, s_gd_corr, df_gd_corr
 #==============================================================================
 #
 #==============================================================================

@@ -121,7 +121,7 @@ assert os.path.exists(path_to_netatmo_coords_df_file), 'wrong DWD coords file'
 path_to_netatmo_gd_stns_file = (
     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes"
     r"\plots_NetAtmo_ppt_DWD_ppt_correlation_"
-    r"\keep_stns_all_neighbors_combined_95_per_.csv")
+    r"\keep_stns_1st_neighbor_95_per_60min_.csv")
 assert os.path.exists(path_to_netatmo_gd_stns_file), 'wrong netatmo stns file'
 
 path_to_shpfile = (r'F:\data_from_exchange\Netatmo'
@@ -151,7 +151,7 @@ min_dist_thr_ppt = 500000  # 5000  # m
 max_ppt_thr = 100.  # ppt above this value are not considered
 
 
-lower_percentile_val_lst = [95]  # 80, 85, 90,, 99
+lower_percentile_val_lst = [95, 85, 99]  # 80, 85, 90,, 99
 # only highest x% of the values are selected
 
 # aggregation_frequencies = ['60min', '720min', '1440min']
@@ -185,7 +185,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
         min_dist_thr_ppt,  # distance threshold when selecting dwd neigbours
         temp_freq_resample,  # temp freq to resample dfs
         val_thr_percent,  # value in percentage, select all values above it
-        min_req_ppt_vals,  # min required ppt values per station
+        min_req_ppt_vals  # min required ppt values per station
 ):
     '''
     For every netatmo precipitation station,
@@ -297,19 +297,9 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                       'distance is ', min_dist_ppt_netatmo)
 
                 # intersect dwd and netatmo ppt data
-                if temp_freq_resample != '60min':
-                    df_netatmo_cmn, df_netatmo2_cmn = resample_intersect_2_dfs(
-                        netatmo_ppt_stn1, df_netatmo2, temp_freq_resample)
-                else:
-                    new_idx_common = netatmo_ppt_stn1.index.intersection(
-                        df_netatmo2.index)
 
-                    try:
-                        df_netatmo_cmn = netatmo_ppt_stn1.loc[new_idx_common, :]
-                        df_netatmo2_cmn = df_netatmo2.loc[new_idx_common, :]
-                    except Exception:
-                        df_netatmo_cmn = netatmo_ppt_stn1.loc[new_idx_common]
-                        df_netatmo2_cmn = df_netatmo2.loc[new_idx_common]
+                df_netatmo_cmn, df_netatmo2_cmn = resample_intersect_2_dfs(
+                    netatmo_ppt_stn1, df_netatmo2, temp_freq_resample)
 
                 if (df_netatmo_cmn.values.shape[0] > min_req_ppt_vals and
                         df_netatmo2_cmn.values.shape[0] > min_req_ppt_vals):
@@ -388,6 +378,20 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
 
                     df_results_correlations.loc[
                         ppt_stn_id,
+                        'Netatmo neighbor ID'] = stn_2_netatmo
+
+                    df_results_correlations.loc[
+                        ppt_stn_id,
+                        'Netatmo_orig_%s_Per_ppt_thr'
+                        % val_thr_percent] = netatmo_ppt_thr_per
+
+                    df_results_correlations.loc[
+                        ppt_stn_id,
+                        'Netatmo_neigh_%s_Per_ppt_thr'
+                        % val_thr_percent] = netatmo2_ppt_thr_per
+
+                    df_results_correlations.loc[
+                        ppt_stn_id,
                         'Orig_Pearson_Correlation'] = orig_pears_corr
 
                     df_results_correlations.loc[
@@ -411,7 +415,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
     assert alls_stns_len == 0, 'not all stations were considered'
 
     # save all dataframes
-
+    df_results_correlations.dropna(how='all', inplace=True)
     df_results_correlations.to_csv(
         os.path.join(out_save_dir_orig,
                      'year_allyears_df_comparing_correlations_max_sep_dist_%d_'

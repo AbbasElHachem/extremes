@@ -45,14 +45,14 @@ import numpy as np
 
 from pathlib import Path
 
-from _00_additional_functions import mean_confidence_interval
-
-from _27_plot_indicator_correlation_with_distance_ import gen_path_df_file
-
-from _28_plot_filter_indicator_correlation_with_distance_all_neighbors_combined import (
-    func, fit_curve_get_vals_below_curve)
+from _00_additional_functions import (gen_path_df_file)
 
 
+plt.rcParams.update({'font.size': 14})
+plt.rcParams.update({'axes.labelsize': 12})
+#==============================================================================
+#
+#==============================================================================
 main_dir = Path(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes')
 
 data_dir_Netamto_dfs = main_dir / \

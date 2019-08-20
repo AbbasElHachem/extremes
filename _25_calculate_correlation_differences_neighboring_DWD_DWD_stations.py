@@ -53,7 +53,7 @@ import time
 
 import pandas as pd
 import numpy as np
-
+import matplotlib.pyplot as plt
 from scipy.stats import spearmanr as spr
 from scipy.stats import pearsonr as pears
 
@@ -114,10 +114,11 @@ x_col_name = 'X'
 y_col_name = 'Y'
 
 # only highest x% of the values are selected
-lower_percentile_val_lst = [80, 85, 90, 95, 99]
+lower_percentile_val_lst = [90, 85, 95, 99]  # 80, 85, 90,
 
 
 # temporal aggregation of df
+# , '120min', '480min', '720min', '1440min']
 aggregation_frequencies = ['60min', '120min', '480min', '720min', '1440min']
 
 # month number, no need to change
@@ -166,11 +167,16 @@ def calc_indicator_correlatione_two_dwd_stns(
     stns_bw = df_results_correlations.index.intersection(in_coords_df.index)
 
     in_coords_df_bw = in_coords_df.loc[stns_bw, :]
+
     df_results_correlations_bw = df_results_correlations.loc[stns_bw, :]
 
     alls_stns_len = len(stns_bw)
     all_distances = []
     for iid in stns_bw:
+
+        #         if iid == '03362':
+        #             raise Exception
+
         print('\n********\n Total number of Netatmo stations is\n********\n',
               alls_stns_len)
         alls_stns_len -= 1
@@ -210,29 +216,35 @@ def calc_indicator_correlatione_two_dwd_stns(
             if len(stn_near) < 5:
                 stn_near = '0' * (5 - len(str(stn_near))) + str(stn_near)
             try:
-                idf2 = HDF52.get_pandas_dataframe(ids=stn_near)
+                #                 idf2 = HDF52.get_pandas_dataframe(ids=stn_near)
+                idf2 = pd.read_feather(path_to_ppt_dwd_data,
+                                       columns=['Time', stn_near],
+                                       use_threads=True)
+                idf2.set_index('Time', inplace=True)
+
+                idf2.index = pd.to_datetime(
+                    idf2.index, format=date_fmt)
+
+                idf2.dropna(axis=0, inplace=True)
+
+                idf2 = select_convective_season(idf2, not_convective_season)
+
+                idf2 = select_df_within_period(idf2,
+                                               start_date,
+                                               end_date)
+
             except Exception:
                 raise Exception
+
             print('Second Stn Id is', stn_near, 'distance is', distance_near)
             all_distances.append(distance_near)
 
-#             df_common1, df_common2 = resample_intersect_2_dfs(idf1,
-#                                                               idf2,
-#                                                               tem_freq)
-            # intersect dwd and netatmo ppt data
-            if tem_freq != '60min':
-                df_common1, df_common2 = resample_intersect_2_dfs(
-                    idf1, idf2, tem_freq)
-            else:
-                new_idx_common = idf1.index.intersection(
-                    idf2.index)
+            print('\n resampling data')
 
-                try:
-                    df_common1 = idf1.loc[new_idx_common, :]
-                    df_common2 = idf2.loc[new_idx_common, :]
-                except Exception:
-                    df_common1 = idf1.loc[new_idx_common]
-                    df_common2 = idf2.loc[new_idx_common]
+            df_common1, df_common2 = resample_intersect_2_dfs(
+                idf1, idf2, tem_freq)
+
+            print('\n done resampling data')
 
             if (df_common1.values.shape[0] > min_req_ppt_vals and
                     df_common2.values.shape[0] > min_req_ppt_vals):
@@ -245,6 +257,20 @@ def calc_indicator_correlatione_two_dwd_stns(
                     data=df_common2.values,
                     index=df_common2.index,
                     columns=[stn_near])
+#
+#                 plt.ioff()
+#                 fig = plt.figure(figsize=(16, 12), dpi=150)
+#                 plt.plot(df_common1.index, df_common1.values,
+#                          c='b', alpha=0.35)
+#                 plt.plot(df_common2.index, df_common2.values,
+#                          c='r', alpha=0.35)
+#
+#                 fig.savefig(os.path.join(out_save_dir_orig,
+#                                          r'dwd_%s_dwd_%s_time_%s.png'
+#                                          % (iid, stn_near, tem_freq)),
+#                             frameon=True, papertype='a4',
+#                             bbox_inches='tight', pad_inches=.2)
+#                 plt.close()
                 print('enough data are available for plotting')
 
                 # get coordinates of dwd station for plotting
@@ -310,6 +336,19 @@ def calc_indicator_correlatione_two_dwd_stns(
 
                 df_results_correlations_bw.loc[
                     iid,
+                    'DWD neighbor ID'] = stn_near
+                df_results_correlations_bw.loc[
+                    iid,
+                    'DWD_orig_%s_Per_ppt_thr'
+                    % val_thr_percent] = dwd1_ppt_thr_per
+
+                df_results_correlations_bw.loc[
+                    iid,
+                    'DWD_neighb_%s_Per_ppt_thr'
+                    % val_thr_percent] = dwd2_ppt_thr_per
+
+                df_results_correlations_bw.loc[
+                    iid,
                     'Orig_Pearson_Correlation'] = orig_pears_corr
 
                 df_results_correlations_bw.loc[
@@ -319,11 +358,15 @@ def calc_indicator_correlatione_two_dwd_stns(
                 df_results_correlations_bw.loc[
                     iid,
                     'Bool_Spearman_Correlation'] = bool_spr_corr
-
+            else:
+                print('not enough data')
+                continue
         except Exception as msg:
             print(msg)
             continue
+    print('SAVING DF')
     # assert len(all_distances) == len(stns_bw), 'smtg went wrong'
+    df_results_correlations_bw.dropna(how='all', inplace=True)
     df_results_correlations_bw.to_csv(
         os.path.join(out_save_dir_orig,
                      'year_allyears_df_dwd_correlations'
