@@ -71,18 +71,18 @@ dwd_path_Acc = r'year_allyears_df_dwd_correlations'
 
 
 path_to_netatmo_gd_stns_file = data_dir_Netamto_dfs / \
-    r'keep_stns_all_neighbor_95_per_60min_.csv'
+    r'keep_stns_1st_neighbor_95_per_60min_.csv'
 
 assert path_to_netatmo_gd_stns_file.exists(), 'wrong netatmo good stns file'
 
 # def percentage threshold, time frequency and data source
-percent = '90'
-time_freq = '60min'
+percent = '95'
+time_freq = '5min'
 
-data_source0 = 'DWD'  # 'DWD'  # 'Netatmo'  #   # reference station 'Netatmo'
-data_source = 'dwd'  # 'dwd'  # 'netatmo'  #   # compare to station 'netatmo'
+data_source0 = 'Netatmo'  # 'DWD'  # 'Netatmo'  #   # reference station 'Netatmo'
+data_source = 'netatmo'  # 'dwd'  # 'netatmo'  #   # compare to station 'netatmo'
 
-use_good_netatmo_stns = False
+use_good_netatmo_stns = True
 
 save_acc = ''
 # =============================================================================
@@ -152,7 +152,7 @@ if use_good_netatmo_stns:
     in_df3 = in_df3.loc[df_good_stns.values.ravel(), :].dropna(how='all')
     in_df4 = in_df4.loc[df_good_stns.values.ravel(), :].dropna(how='all')
 
-    save_acc = 'filtered_using_stns_abv_curve_all_neighbor'
+    save_acc = 'filtered_using_stns_abv_curve_1st_neighbor'
 # =============================================================================
 
 x0 = in_df0.loc[:, 'Distance to neighbor'].values.ravel()

@@ -98,13 +98,18 @@ path_to_ppt_netatmo_data_csv = (
     r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_.csv')
 assert os.path.exists(path_to_ppt_netatmo_data_csv), 'wrong NETATMO Ppt file'
 
-# for reading ppt data station by station
+# # for reading ppt data station by station
+# path_to_ppt_netatmo_data_feather = (
+#     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
+#     r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_.fk')
+# assert os.path.exists(
+#     path_to_ppt_netatmo_data_feather), 'wrong NETATMO Ppt file'
+
 path_to_ppt_netatmo_data_feather = (
-    r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-    r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_.fk')
+    r'F:\Netatmo_5min_data'
+    r'\ppt_all_netatmo_5min_stns_combined_.fk')
 assert os.path.exists(
     path_to_ppt_netatmo_data_feather), 'wrong NETATMO Ppt file'
-
 
 distance_matrix_netatmo_netatmo_df_file = (
     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
@@ -156,7 +161,8 @@ lower_percentile_val_lst = [95, 85, 99]  # 80, 85, 90,, 99
 
 # aggregation_frequencies = ['60min', '720min', '1440min']
 # ['60min', '120min', '480min', '720min', '1440min']
-aggregation_frequencies = ['60min', '120min', '480min', '720min', '1440min']
+# ,'60min', '120min', '480min', '720min', '1440min']
+aggregation_frequencies = ['5min']
 
 neighbors_to_chose_lst = [0, 1, 2, 3, 4]  # refers to neighbor (0=first)
 
@@ -283,7 +289,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                 df_netatmo2.index = pd.to_datetime(
                     df_netatmo2.index, format=date_fmt)
 
-                df_netatmo2.dropna(axis=0, inplace=True)
+
 #                 df_dwd = HDF52.get_pandas_dataframe(ids=[stn_2_dwd])
 
                 df_netatmo2 = df_netatmo2[df_netatmo2 < max_ppt_thr]
@@ -293,17 +299,38 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                     df=df_netatmo2,
                     month_lst=not_convective_season)
 
+                df_netatmo2.dropna(axis=0, inplace=True)
                 print('\n********\n Second DWD Stn Id is', stn_2_netatmo,
                       'distance is ', min_dist_ppt_netatmo)
 
                 # intersect dwd and netatmo ppt data
+                if temp_freq_resample != '5min':
+                    df_netatmo_cmn, df_netatmo2_cmn = resample_intersect_2_dfs(
+                        netatmo_ppt_stn1, df_netatmo2, temp_freq_resample)
+                else:
+                    if (netatmo_ppt_stn1.values.shape[1] != 0 and
+                            df_netatmo2.values.shape[1] != 0):
 
-                df_netatmo_cmn, df_netatmo2_cmn = resample_intersect_2_dfs(
-                    netatmo_ppt_stn1, df_netatmo2, temp_freq_resample)
+                        netatmo_ppt_stn1.dropna(how='any', inplace=True)
+                        df_netatmo2.dropna(how='any', inplace=True)
+                        idx_common = netatmo_ppt_stn1.index.intersection(
+                            df_netatmo2.index)
 
+                        if idx_common.shape[0] > 0:
+                            print(
+                                '\n********\n common index is found, interescting dataframes')
+                            try:
+                                df_netatmo_cmn = netatmo_ppt_stn1.loc[idx_common, :]
+                                df_netatmo2_cmn = df_netatmo2.loc[idx_common, :]
+                            except Exception:
+                                df_netatmo_cmn = netatmo_ppt_stn1.loc[idx_common]
+                                df_netatmo2_cmn = df_netatmo2.loc[idx_common]
+                    else:
+                        print('not enough data for intersecting 5min data')
+                        continue
                 if (df_netatmo_cmn.values.shape[0] > min_req_ppt_vals and
                         df_netatmo2_cmn.values.shape[0] > min_req_ppt_vals):
-
+                    pass
                     # change everything to dataframes with stn Id as column
                     df_netatmo_cmn = pd.DataFrame(
                         data=df_netatmo_cmn.values,
@@ -405,9 +432,9 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                     print('\n********\n ADDED DATA TO DF RESULTS')
 
                 else:
-                    print('DWD Station is near but not enough data')
+                    print('Netatmo Station is near but not enough data')
             else:
-                print('\n********\n DWD station is not near')
+                print('\n********\n Netatmo station is not near')
 
         except Exception as msg:
             print('error while finding neighbours ', msg)

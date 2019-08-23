@@ -14,7 +14,7 @@ import zipfile
 import numpy as np
 import math
 
-
+from _00_additional_functions import resampleDf
 #==============================================================================
 # 10minutenwerte_rr_00003_19930428_19991231_hist.zip
 # stundenwerte_RR_00003_19950901_20110401_hist.zip
@@ -25,36 +25,37 @@ delete_zip_files = True
 
 
 build_one_df = True
-delete_df_files = True
+delete_df_files = False
 
-make_hdf5_dataset_new = True
+make_hdf5_dataset_new = False
 
-temporal_freq = 'hourly'  # '1_minute' '10_minutes' 'hourly' 'daily'
+temporal_freq = '1_minute'  # '1_minute' '10_minutes' 'hourly' 'daily'
 time_period = 'recent'  # 'recent' ''
-temp_accr = 'stundenwerte'  # '1minuten' '10minuten' 'stundenwerte'  'tages'
+temp_accr = '1minuten'  # '1minuten' '10minuten' 'stundenwerte'  'tages'
 
 ppt_act = 'RR'  # nieder 'rr' 'RR' 'RR'
 
 stn_name_len = 5  # length of dwd stns Id, ex: 00023
 
-start_date = '1995-01-01 00:00:00'
-end_date = '2019-07-15 00:00:00'
+start_date = '2014-01-01 00:00:00'
+end_date = '2019-08-20 00:00:00'
 
-temp_freq = '60Min'  # 'Min' '10Min' 'H' 'D'
+temp_freq = 'Min'  # '60Min'  # 'Min' '10Min' 'H' 'D'
 
-time_fmt = '%Y%m%d%H'  # when reading download dwd station df '%Y%m%d%H%M'
+# '%Y%m%d%H'  # when reading download dwd station df '%Y%m%d%H%M'
+time_fmt = '%Y%m%d%H%M'
 
 # name of station id and rainfall column name in df
 stn_id_col_name = 'STATIONS_ID'
-ppt_col_name = '  R1'  # RS_01 'RWS_10' '  R1' 'RS'
+ppt_col_name = 'RS_01'  # '  R1'  # RS_01 'RWS_10' '  R1' 'RS'
 
-freqs_list = ['60Min']  # '1D' '5Min',
+freqs_list = ['5Min']  # '60Min']  # '1D' '5Min',
 #==============================================================================
 #
 #==============================================================================
 # main_dir = os.path.join(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\download_DWD_data_recent')
 
-main_dir = r'E:\download_DWD_data_recent'
+main_dir = r'F:\download_DWD_data_recent'
 os.chdir(main_dir)
 
 
@@ -88,31 +89,31 @@ def list_all_full_path(ext, file_dir):
 #==============================================================================
 
 
-def resampleDf(data_frame,  # dataframe to resample (or series)
-               temp_freq,  # temp frequency to resample
-               df_sep_=None,  # sep used if saving dataframe
-               out_save_dir=None,  # out direcory for saving df
-               fillnan=False,  # if True, fill nans with fill_value
-               fillnan_value=0,  # if True, replace nans with 0
-               df_save_name=None  # name of outpot df
-               ):
-    ''' sample DF based on freq and time shift and label shift '''
-
-    # data_frame = data_frame[data_frame >= 0]
-    df_res = data_frame.resample(rule=temp_freq,
-                                 axis=0,
-                                 label='left',
-                                 closed='right',
-                                 convention='end').apply(lambda x: np.nansum(x.values))
-
-    if fillnan:
-        df_res.fillna(value=fillnan_value, inplace=True)
-    if df_save_name is not None and out_save_dir is not None:
-        df_res.to_csv(os.path.join(out_save_dir, df_save_name),
-                      sep=df_sep_)
-    if not isinstance(df_res, pd.DataFrame):
-        df_res = pd.DataFrame(index=df_res.index, data=df_res.values)
-    return df_res
+# def resampleDf(data_frame,  # dataframe to resample (or series)
+#                temp_freq,  # temp frequency to resample
+#                df_sep_=None,  # sep used if saving dataframe
+#                out_save_dir=None,  # out direcory for saving df
+#                fillnan=False,  # if True, fill nans with fill_value
+#                fillnan_value=0,  # if True, replace nans with 0
+#                df_save_name=None  # name of outpot df
+#                ):
+#     ''' sample DF based on freq and time shift and label shift '''
+#
+#     # data_frame = data_frame[data_frame >= 0]
+#     df_res = data_frame.resample(rule=temp_freq,
+#                                  axis=0,
+#                                  label='left',
+#                                  closed='right',
+#                                  convention='end').apply(lambda x: np.nansum(x.values))
+#
+#     if fillnan:
+#         df_res.fillna(value=fillnan_value, inplace=True)
+#     if df_save_name is not None and out_save_dir is not None:
+#         df_res.to_csv(os.path.join(out_save_dir, df_save_name),
+#                       sep=df_sep_)
+#     if not isinstance(df_res, pd.DataFrame):
+#         df_res = pd.DataFrame(index=df_res.index, data=df_res.values)
+#     return df_res
 
 
 #==============================================================================
@@ -200,6 +201,7 @@ if download_data:  # download all zip files
 
     # extract all zip files, dfs in zip files
     for zip_file in all_zip_files:
+        print('exctracting data from ', zip_file)
         with zipfile.ZipFile(zip_file, "r") as zip_ref:
             # Get a list of all archived file names from the zip
             listOfFileNames = zip_ref.namelist()
@@ -211,6 +213,7 @@ if download_data:  # download all zip files
                     zip_ref.extract(fileName, out_extract_df_dir)
 
     if delete_zip_files:
+        print('deleting downloaded zip files')
         for zip_file in all_zip_files:
             os.remove(zip_file)
     #==========================================================================
@@ -223,13 +226,15 @@ if build_one_df:
 
     all_df_files = list_all_full_path(
         '.txt',
-        r'E:\download_DWD_data_recent\DWD_data_hourly_recent_plus_historical')
+        r'F:\download_DWD_data_recent\DWD_data_1_minute_recent_1minuten')
 
     # get all downloaded station ids, used as columns for df_final
     available_stns = []
 
     for df_txt_file in all_df_files:
+
         stn_name = df_txt_file.split('_')[-1].split('.')[0]
+        print('getting station name from file ', stn_name)
         assert len(stn_name) == 5
         if stn_name not in available_stns:
             available_stns.append(stn_name)
@@ -268,10 +273,16 @@ if build_one_df:
         if delete_df_files:
             os.remove(df_txt_file)
     final_df_combined = final_df_combined[final_df_combined >= 0]
-    final_df_combined.to_csv('all_dwd_hourly_ppt_data_combined_1995_2019.csv',
-                             sep=';')
+    final_df_combined_resampled = resampleDf(final_df_combined, '5min')
+    final_df_combined_resampled.to_csv(
+        'all_dwd_5min_ppt_data_combined_2015_2019.csv',
+        sep=';')
+    final_df_combined.reset_index()
+    final_df_combined.rename({'index': 'Time'})
+    final_df_combined.to_feather(
+        'all_dwd_5min_ppt_data_combined_2015_2019.csv',)
 
-
+    print('done creating df')
 #==============================================================================
 # # In[129]:
 #==============================================================================
@@ -298,10 +309,7 @@ if make_hdf5_dataset_new:
             print(temp_freq_resample)
             df_resampled = resampleDf(
                 final_df_combined,
-                temp_freq=temp_freq_resample,
-                df_sep_=';', out_save_dir=main_dir,
-                df_save_name=('%all_dwd_hourly_ppt_data_combined_1995_2019.csv'
-                              % temp_freq_resample))
+                temp_freq_resample)
     #     ppt_data_all = np.array(df_60min.values)
         df_resampled = df_resampled[df_resampled >= 0]
         print('\n+++\n creating HDF5 file \n+++\n')

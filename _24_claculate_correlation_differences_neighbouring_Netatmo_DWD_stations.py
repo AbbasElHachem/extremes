@@ -100,9 +100,15 @@ path_to_ppt_netatmo_data_csv = (
 assert os.path.exists(path_to_ppt_netatmo_data_csv), 'wrong NETATMO Ppt file'
 
 # for reading ppt data station by station
+# path_to_ppt_netatmo_data_feather = (
+#     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
+#     r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_.fk')
+# assert os.path.exists(
+#     path_to_ppt_netatmo_data_feather), 'wrong NETATMO Ppt file'
+
 path_to_ppt_netatmo_data_feather = (
-    r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-    r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_.fk')
+    r'F:\Netatmo_5min_data'
+    r'\ppt_all_netatmo_5min_stns_combined_.fk')
 assert os.path.exists(
     path_to_ppt_netatmo_data_feather), 'wrong NETATMO Ppt file'
 
@@ -155,7 +161,7 @@ min_dist_thr_ppt = 500000  # 5000  # m
 max_ppt_thr = 100.  # ppt above this value are not considered
 
 # only highest x% of the values are selected
-lower_percentile_val_lst = [95, 99]  # [80, 85, 90, 95, 99]
+lower_percentile_val_lst = [85, 90]  # ,95, 99]  # [80, 85, 90, 95, 99]
 
 # , '120min', '480min', '720min', '1440min']
 # ['60min', '120min', '480min', '720min', '1440min']
