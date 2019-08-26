@@ -387,8 +387,8 @@ def resample_intersect_2_dfs(df1,  # first dataframe to resample
         df_common2 = pd.DataFrame(index=df_common2.index,
                                   data=df_common2.values)
         print('\n********\n After resampling sum of NaN values is')
-        print('first station has ', df_common1.isna().sum()[0], 'NaN values')
-        print('second station has ', df_common2.isna().sum()[0], 'NaN values')
+        print('first station has ', df_common1.isna().sum(), 'NaN values')
+        print('second station has ', df_common2.isna().sum(), 'NaN values')
 
         try:
             if df_common1.isna().sum()[0] > 0:

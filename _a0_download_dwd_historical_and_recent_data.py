@@ -14,7 +14,9 @@ import zipfile
 import numpy as np
 import math
 
-from _00_additional_functions import resampleDf
+from _00_additional_functions import (list_all_full_path, resampleDf,
+                                      select_df_within_period)
+
 #==============================================================================
 # 10minutenwerte_rr_00003_19930428_19991231_hist.zip
 # stundenwerte_RR_00003_19950901_20110401_hist.zip
@@ -29,27 +31,27 @@ delete_df_files = False
 
 make_hdf5_dataset_new = False
 
-temporal_freq = '1_minute'  # '1_minute' '10_minutes' 'hourly' 'daily'
-time_period = 'recent'  # 'recent' ''
-temp_accr = '1minuten'  # '1minuten' '10minuten' 'stundenwerte'  'tages'
+temporal_freq = '10_minutes'  # '1_minute' '10_minutes' 'hourly' 'daily'
+time_period = 'recent'  # 'recent' 'historical'
+temp_accr = '10minuten'  # '1minuten' '10minuten' 'stundenwerte'  'tages'
 
-ppt_act = 'RR'  # nieder 'rr' 'RR' 'RR'
+ppt_act = 'nieder'  # nieder 'rr' 'RR' 'RR'
 
 stn_name_len = 5  # length of dwd stns Id, ex: 00023
 
-start_date = '2014-01-01 00:00:00'
-end_date = '2019-08-20 00:00:00'
+start_date = '2018-01-01 00:00:00'
+end_date = '2019-08-31 23:59:00'
 
-temp_freq = 'Min'  # '60Min'  # 'Min' '10Min' 'H' 'D'
+temp_freq = '10Min'  # '60Min'  # 'Min' '10Min' 'H' 'D'
 
 # '%Y%m%d%H'  # when reading download dwd station df '%Y%m%d%H%M'
-time_fmt = '%Y%m%d%H%M'
+time_fmt = '%Y%m%d%H%M'  # :%S' # for 10Min data use: '%Y%m%d%H%M:%S'
 
 # name of station id and rainfall column name in df
 stn_id_col_name = 'STATIONS_ID'
-ppt_col_name = 'RS_01'  # '  R1'  # RS_01 'RWS_10' '  R1' 'RS'
+ppt_col_name = 'RWS_10'  # '  R1'  # RS_01 'RWS_10' '  R1' 'RS'
 
-freqs_list = ['5Min']  # '60Min']  # '1D' '5Min',
+freqs_list = ['10Min']  # '60Min']  # '1D' '5Min',
 #==============================================================================
 #
 #==============================================================================
@@ -57,63 +59,6 @@ freqs_list = ['5Min']  # '60Min']  # '1D' '5Min',
 
 main_dir = r'F:\download_DWD_data_recent'
 os.chdir(main_dir)
-
-
-#==============================================================================
-#
-#==============================================================================
-
-
-def list_all_full_path(ext, file_dir):
-    """
-    Purpose: To return full path of files in all dirs of a 
-            given folder with a
-            given extension in ascending order.
-    Description of the arguments:
-        ext (string) = Extension of the files to list
-            e.g. '.txt', '.tif'.
-        file_dir (string) = Full path of the folder in which the files
-            reside.
-    """
-    new_list = []
-    patt = '*' + ext
-    for root, _, files in os.walk(file_dir):
-        for elm in files:
-            if fnmatch.fnmatch(elm, patt):
-                full_path = os.path.join(root, elm)
-                new_list.append(full_path)
-    return(sorted(new_list))
-
-#==============================================================================
-#
-#==============================================================================
-
-
-# def resampleDf(data_frame,  # dataframe to resample (or series)
-#                temp_freq,  # temp frequency to resample
-#                df_sep_=None,  # sep used if saving dataframe
-#                out_save_dir=None,  # out direcory for saving df
-#                fillnan=False,  # if True, fill nans with fill_value
-#                fillnan_value=0,  # if True, replace nans with 0
-#                df_save_name=None  # name of outpot df
-#                ):
-#     ''' sample DF based on freq and time shift and label shift '''
-#
-#     # data_frame = data_frame[data_frame >= 0]
-#     df_res = data_frame.resample(rule=temp_freq,
-#                                  axis=0,
-#                                  label='left',
-#                                  closed='right',
-#                                  convention='end').apply(lambda x: np.nansum(x.values))
-#
-#     if fillnan:
-#         df_res.fillna(value=fillnan_value, inplace=True)
-#     if df_save_name is not None and out_save_dir is not None:
-#         df_res.to_csv(os.path.join(out_save_dir, df_save_name),
-#                       sep=df_sep_)
-#     if not isinstance(df_res, pd.DataFrame):
-#         df_res = pd.DataFrame(index=df_res.index, data=df_res.values)
-#     return df_res
 
 
 #==============================================================================
@@ -132,11 +77,13 @@ def firstNonNan(listfloats):
 # download station coordinates name (maybe do it seperat later)
 # stn_names_files = os.path.join(main_dir, r'station_coordinates_names.csv')
 stn_names_files = os.path.join(
-    main_dir, r'station_coordinates_names_hourly.csv')
+    main_dir, r'station_coordinates_names_hourly_only_in_BW_utm32.csv')
 assert os.path.exists(stn_names_files)
+#     in_stn_coords_df_loc = os.path.join(
+#         r"F:\download_DWD_data_recent\station_coordinates_names_hourly_only_in_BW_utm32.csv")
 
 stn_names_df = pd.read_csv(
-    stn_names_files, index_col=0, sep=',', encoding='latin-1')
+    stn_names_files, index_col=0, sep=';', encoding='latin-1')
 stations_id = stn_names_df.index
 
 # get all station ids, make them a string for generating file_names
@@ -151,6 +98,12 @@ for stn_id in stations_id:
 #==============================================================================
 # DOWNLOAD ALL ZIP FILES
 #==============================================================================
+out_dir = os.path.join(main_dir, 'DWD_data_%s_%s_%s'
+                       % (temporal_freq, time_period, temp_accr))
+if not os.path.exists(out_dir):
+    os.mkdir(out_dir)
+
+os.chdir(out_dir)
 
 # generate url
 if download_data:  # download all zip files
@@ -158,22 +111,22 @@ if download_data:  # download all zip files
                 r'/observations_germany/climate/%s/precipitation/%s/'
                 % (temporal_freq, time_period))
 
-    out_dir = os.path.join(main_dir, 'DWD_data_%s_%s_%s'
-                           % (temporal_freq, time_period, temp_accr))
-    if not os.path.exists(out_dir):
-        os.mkdir(out_dir)
-
-    os.chdir(out_dir)
-
     r = requests.get(base_url, stream=True)
 
     all_urls = r.content.split(b'\n')
+
+#     if time_period == 'historical':
+#         _zip_file = -3
+#     if time_period == 'recent':
+#         _zip_file = -2
 
     all_urls_zip = [url_zip.split(b'>')[-2].replace(b'</a', b'').decode('utf-8')
                     for url_zip in all_urls if b'.zip' in url_zip]
 
     for file_name in all_urls_zip:
 
+        #         if time_period == 'historical':
+        #             file_name = file_name.split('=')[1].replace('"', '')
         print('getting data for', file_name)
 
         file_url = base_url + file_name
@@ -225,9 +178,10 @@ if build_one_df:
     #     all_df_files = list_all_full_path('.txt', out_extract_df_dir)
 
     all_df_files = list_all_full_path(
-        '.txt',
-        r'F:\download_DWD_data_recent\DWD_data_1_minute_recent_1minuten')
+        '.txt', out_dir)
 
+    all_df_files_bw = [_df_f for stn_name in stations_id_str_lst
+                       for _df_f in all_df_files if stn_name in _df_f]
     # get all downloaded station ids, used as columns for df_final
     available_stns = []
 
@@ -239,6 +193,9 @@ if build_one_df:
         if stn_name not in available_stns:
             available_stns.append(stn_name)
 
+    # for stations only in BW do this
+    available_stns = stations_id_str_lst
+
     # create daterange and df full of nans
 
     date_range = pd.date_range(start=start_date, end=end_date, freq=temp_freq)
@@ -249,38 +206,75 @@ if build_one_df:
     final_df_combined = pd.DataFrame(data=data,
                                      index=date_range,
                                      columns=available_stns)
-
+#     final_df_combined = pd.DataFrame(columns=available_stns)
     # read df stn file and fill final df for all stns
     all_files_len = len(all_df_files)
+    stns_bw_len = len(all_df_files_bw)
+
     for df_txt_file in all_df_files:
-        print('\n++\n Total number of files is \n++\n', all_files_len)
+        #print('\n++\n Total number of files is \n++\n', all_files_len)
 
         stn_name = df_txt_file.split('_')[-1].split('.')[0]
+        if stn_name in stations_id_str_lst:
+            print('\n##\n Stations in BW \n##\n', stns_bw_len)
+            print('\n##\n Station ID is \n##\n', stn_name)
+            in_df = pd.read_csv(df_txt_file, sep=';', index_col=1, engine='c')
 
-        print('\n##\n Station ID is \n##\n', stn_name)
-        in_df = pd.read_csv(df_txt_file, sep=';', index_col=1, engine='c')
-        assert int(stn_name) == in_df.loc[:, stn_id_col_name].values[0]
-        assert stn_name in final_df_combined.columns
+            assert int(stn_name) == in_df.loc[:, stn_id_col_name].values[0]
+            assert stn_name in final_df_combined.columns
 
-        in_df.index = pd.to_datetime(in_df.index, format=time_fmt)
-        ppt_data = in_df[ppt_col_name].values.ravel()
-        print('\n++\n  Data shape is \n++\n', ppt_data.shape)
+            if temporal_freq == '10_minutes':
+                try:
+                    in_df.index = pd.to_datetime(in_df.index, format=time_fmt)
+                except AttributeError as msg:
+                    print(msg)
+                    in_df.index = [ix.split(":")[0] for ix in in_df.index]
+                    in_df.index = pd.to_datetime(in_df.index, format=time_fmt)
+                    continue
 
-        final_df_combined.loc[in_df.index, stn_name] = ppt_data
+            else:
+                in_df.index = pd.to_datetime(in_df.index, format=time_fmt)
 
-        all_files_len -= 1
+            in_df = select_df_within_period(in_df, start_date, end_date)
+            in_df = in_df[in_df[ppt_col_name] >= 0]
+            ppt_data = in_df[ppt_col_name].values.ravel()
+            print('\n++\n  Data shape is \n++\n', ppt_data.shape)
 
-        if delete_df_files:
-            os.remove(df_txt_file)
+#             try:
+            final_df_combined.loc[in_df.index, stn_name] = ppt_data
+
+            sum_vals = final_df_combined.loc[in_df.index, stn_name].sum()
+            if sum_vals < 0:
+                raise Exception
+            print('**Sum of station data \n**', sum_vals)
+            stns_bw_len -= 1
+
+#             except Exception as msg:
+#                 print(msg)
+#                 continue
+        # break
+            #all_files_len -= 1
+
+        # break
+#             if delete_df_files:
+#                 os.remove(df_txt_file)
     final_df_combined = final_df_combined[final_df_combined >= 0]
-    final_df_combined_resampled = resampleDf(final_df_combined, '5min')
-    final_df_combined_resampled.to_csv(
-        'all_dwd_5min_ppt_data_combined_2015_2019.csv',
+#     print('Resampling Dataframe')
+#     final_df_combined_resampled = resampleDf(final_df_combined, '5min')
+
+    print('Saving Dataframe')
+    final_df_combined.dropna(how='all', inplace=True)
+    #final_df_combined.set_index('Time', inplace=True, drop=True)
+    final_df_combined.to_csv(
+        os.path.join(out_dir,
+                     'all_dwd_10min_ppt_data_combined_2018_2019.csv'),
         sep=';')
-    final_df_combined.reset_index()
-    final_df_combined.rename({'index': 'Time'})
+    final_df_combined.reset_index(inplace=True)
+    final_df_combined.rename({'index': 'Time'}, inplace=True)
+#
     final_df_combined.to_feather(
-        'all_dwd_5min_ppt_data_combined_2015_2019.csv',)
+        os.path.join(out_dir,
+                     'all_dwd_10min_ppt_data_combined_2018_2019.fk'))
 
     print('done creating df')
 #==============================================================================
