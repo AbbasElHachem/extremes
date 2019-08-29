@@ -96,33 +96,33 @@ rcParams['axes.labelpad'] = 13
 # for getting station names
 path_to_ppt_netatmo_data_csv = (
     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-    r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_.csv')
+    r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new.csv')
 assert os.path.exists(path_to_ppt_netatmo_data_csv), 'wrong NETATMO Ppt file'
 
 # for reading ppt data station by station
 # HOURLY DATA
-# path_to_ppt_netatmo_data_feather = (
-#     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-#     r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_.fk')
-# assert os.path.exists(
-#     path_to_ppt_netatmo_data_feather), 'wrong NETATMO Ppt file'
-
-# 10Min DATA
 path_to_ppt_netatmo_data_feather = (
-    r'F:\Netatmo_5min_data'
-    r'\ppt_all_netatmo_5min_stns_combined_.fk')
+    r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
+    r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new.fk')
 assert os.path.exists(
     path_to_ppt_netatmo_data_feather), 'wrong NETATMO Ppt file'
 
+# # 10Min DATA
+# path_to_ppt_netatmo_data_feather = (
+#     r'F:\Netatmo_5min_data'
+#     r'\ppt_all_netatmo_5min_stns_combined_.fk')
+# assert os.path.exists(
+#     path_to_ppt_netatmo_data_feather), 'wrong NETATMO Ppt file'
+
 # HOURLY DATA
-# path_to_ppt_dwd_data = (
-#     r"F:\download_DWD_data_recent\all_dwd_hourly_ppt_data_combined_1995_2019.fk")
-# assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
+path_to_ppt_dwd_data = (
+    r"F:\download_DWD_data_recent\all_dwd_hourly_ppt_data_combined_1995_2019.fk")
+assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
 
 # 10Min DATA
-path_to_ppt_dwd_data = (
-    r"F:\download_DWD_data_recent\all_data_10min_ppt_data_combined_2014_2019.fk")
-assert os.path.exists(path_to_ppt_dwd_data), 'wrong 10 min DWD Ppt file'
+# path_to_ppt_dwd_data = (
+#     r"F:\download_DWD_data_recent\all_data_10min_ppt_data_combined_2014_2019.fk")
+# assert os.path.exists(path_to_ppt_dwd_data), 'wrong 10 min DWD Ppt file'
 
 distance_matrix_netatmo_dwd_df_file = (
     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
@@ -133,7 +133,7 @@ assert os.path.exists(
 path_to_netatmo_coords_df_file = (
     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
     r"\rain_bw_1hour"
-    r"\netatmo_bw_1hour_coords_with_duplicates.csv")  # TODO: CHANGE
+    r"\netatmo_bw_1hour_coords.csv")
 assert os.path.exists(path_to_netatmo_coords_df_file), 'wrong DWD coords file'
 
 path_to_netatmo_gd_stns_file = (
@@ -169,11 +169,11 @@ min_dist_thr_ppt = 500000  # 500000  # m
 max_ppt_thr = 100.  # ppt above this value are not considered
 
 # only highest x% of the values are selected
-lower_percentile_val_lst = [90]  # ,95, 99]  # [80, 85, 90, 95, 99]
+lower_percentile_val_lst = [92]  # ,95, 99]  # [80, 85, 90, 95, 99]
 
 
 # ['10min', '60min', '120min', '480min', '720min', '1440min']
-aggregation_frequencies = ['10min']
+aggregation_frequencies = ['60min']
 # temporal aggregation of df
 
 # [0, 1, 2, 3, 4]  # refers to DWD neighbot (0=first)
@@ -221,22 +221,24 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
     print('\n######\n getting all station names, reading dfs \n#######\n')
 
     # get all station names for netatmo
-    stns_ppt_ids = pd.read_csv(
-        pth_to_netatmo_cols_df_csv, nrows=0, sep=';', engine='c',
-        memory_map=True).columns.tolist()
-    try:
-        stns_ppt_ids = list(filter(lambda x: x != 'Unnamed: 0', stns_ppt_ids))
-    except Exception as msg:
-        print(msg)
+#     stns_ppt_ids = pd.read_csv(
+#         pth_to_netatmo_cols_df_csv, nrows=0, sep=';', engine='c',
+#         memory_map=True).columns.tolist()
+#     try:
+#         stns_ppt_ids = list(filter(lambda x: x != 'Unnamed: 0', stns_ppt_ids))
+#     except Exception as msg:
+#         print(msg)
 
     # read distance matrix dwd-netamot ppt
     in_df_distance_netatmo_dwd = pd.read_csv(
         distance_matrix_netatmo_ppt_dwd_ppt, sep=';', index_col=0)
 
     # read netatmo ppt coords df (for plotting)
-    in_netatmo_df_coords = pd.read_csv(netatmo_ppt_coords_df, sep=',',
+    in_netatmo_df_coords = pd.read_csv(netatmo_ppt_coords_df, sep=';',
                                        index_col=0, engine='c')
 
+    # get all station names for netatmo
+    stns_ppt_ids = [stn_id for stn_id in in_df_distance_netatmo_dwd.index]
     # read netatmo good stns df
     in_df_stns = pd.read_csv(path_netatmo_gd_stns, index_col=0,
                              sep=';')
@@ -249,7 +251,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
 
     alls_stns_len = len(stns_ppt_ids)  # good_stns
 
-    for ppt_stn_id in stns_ppt_ids[1:]:
+    for ppt_stn_id in stns_ppt_ids:
         print('\n********\n Total number of Netatmo stations is\n********\n',
               alls_stns_len)
         alls_stns_len -= 1

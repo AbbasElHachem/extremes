@@ -40,15 +40,22 @@ edf_ppt_0 = 0.44
 
 # create indicator Kriging
 
-df_file = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
-           r"\all_netatmo_ppt_data_monthly_.csv")
+# df_file = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
+#            r"\all_netatmo_ppt_data_monthly_.csv")
 # df_file = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
 #            r"\all_dwd_ppt_data_monthly_.csv")
+
+df_file = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
+           r"\all_netatmo_ppt_data_daily_.csv")
+# df_file = (r"F:\download_DWD_data_recent"
+#            r"\all_dwd_daily_ppt_data_combined_2014_2019_.csv")
+
+
 # list of stations with good indicator correlations
 
-# df_stns = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes"
-#            r"\plots_NetAtmo_ppt_DWD_ppt_correlation_"
-#            r"\keep_stns_all_neighbor_95_per_60min_.csv")
+df_stns = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes"
+           r"\plots_NetAtmo_ppt_DWD_ppt_correlation_"
+           r"\keep_stns_all_neighbor_95_per_60min_.csv")
 
 in_df = pd.read_csv(df_file, index_col=0, sep=';',
                     infer_datetime_format=True, parse_dates=True)
@@ -60,23 +67,23 @@ in_df.dropna(how='all', inplace=True)
 all_stns = in_df.columns.to_list()
 #==============================================================================
 
-# in_df_stns = pd.read_csv(df_stns, index_col=0, sep=';')
-# good_stns = in_df_stns.values.ravel()
+in_df_stns = pd.read_csv(df_stns, index_col=0, sep=';')
+good_stns = in_df_stns.values.ravel()
 
 #==============================================================================
 # create empty dataframe to hold the results
 data_mtx = np.zeros(
-    shape=(in_df.index.shape[0], len(all_stns))).astype('float')  # good_stns
+    shape=(in_df.index.shape[0], len(good_stns))).astype('float')  # good_stns
 data_mtx[data_mtx == 0] = np.nan
 
-df_all = pd.DataFrame(index=in_df.index, columns=all_stns, data=data_mtx)
+df_all = pd.DataFrame(index=in_df.index, columns=good_stns, data=data_mtx)
 
 #==============================================================================
 # select from the original station the staions with 'good' data
-df_stn0 = in_df.loc[:, all_stns].dropna(how='all')
+df_stn0 = in_df.loc[:, good_stns].dropna(how='all')
 
 # try to group data monthly
-df_monthly_grouped = df_stn0.groupby([df_stn0.index.month]).mean().mean(axis=1)
+# df_monthly_grouped = df_stn0.groupby([df_stn0.index.month]).mean().mean(axis=1)
 
 for stn_ in df_stn0.columns:
     print('stn is ', stn_)
@@ -103,7 +110,7 @@ for stn_ in df_stn0.columns:
         #     break
 df_all.dropna(how='all', inplace=True)
 df_all.to_csv((r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
-               r"\edf_ppt_all_netatmo_monthly_all_stns_combined_.csv"),
+               r"\edf_ppt_all_netamo_daily_gd_stns_combined_.csv"),
               sep=';', float_format='%.3f')
 
 print('DONE WITH EVERYTHNG !')

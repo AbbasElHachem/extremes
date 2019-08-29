@@ -114,12 +114,12 @@ x_col_name = 'X'
 y_col_name = 'Y'
 
 # only highest x% of the values are selected
-lower_percentile_val_lst = [90, 85, 95, 99]  # 80, 85, 90,
+lower_percentile_val_lst = [95]  # 80, 85, 90,
 
 
 # temporal aggregation of df
 # , '120min', '480min', '720min', '1440min']
-aggregation_frequencies = ['60min', '120min', '480min', '720min', '1440min']
+aggregation_frequencies = ['720min']
 
 # month number, no need to change
 not_convective_season = [10, 11, 12, 1, 2, 3, 4]

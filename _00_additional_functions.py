@@ -1,3 +1,18 @@
+# !/usr/bin/env python.
+# -*- coding: utf-8 -*-
+
+"""
+GOAL: A combination of differrent functions used along the different scripts
+
+Functions are called in different scripts, refer to the script to know where 
+    it is called and what modifications may be needed
+"""
+
+__author__ = "Abbas El Hachem"
+__copyright__ = 'Institut fuer Wasser- und Umweltsystemmodellierung - IWS'
+__email__ = "abbas.el-hachem@iws.uni-stuttgart.de"
+
+# ============================================================================
 import os
 
 import fnmatch
@@ -11,7 +26,7 @@ import scipy.spatial as spatial
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
-import scipy.stats
+# import scipy.stats
 
 from adjustText import adjust_text
 from scipy.optimize import curve_fit
@@ -26,10 +41,11 @@ from scipy.stats import pearsonr as pears
 
 def list_all_full_path(ext, file_dir):
     """
-    Purpose: To return full path of files in all dirs of a 
-            given folder with a
-            given extension in ascending order.
-    Description of the arguments:
+    Purpose: To return full path of files in all dirs of a given folder with a
+    -------  given extension in ascending order.
+    
+    Keyword arguments:
+    ------------------
         ext (string) = Extension of the files to list
             e.g. '.txt', '.tif'.
         file_dir (string) = Full path of the folder in which the files
@@ -51,7 +67,27 @@ def list_all_full_path(ext, file_dir):
 
 def convert_coords_fr_wgs84_to_utm32_(epgs_initial_str, epsg_final_str,
                                       first_coord, second_coord):
-    '''fct to convert points from wgs 84 to utm32'''
+    """
+    Purpose: Convert points from one reference system to a second
+    --------
+        In our case the function is used to transform WGS84 to UTM32
+        (or vice versa), for transforming the DWD and Netatmo station
+        coordinates to same reference system.
+        
+        Used for calculating the distance matrix between stations
+
+    Keyword argument:
+    -----------------
+        epsg_initial_str: EPSG code as string for initial reference system
+        epsg_final_str: EPSG code as string for final reference system
+        first_coord: numpy array of X or Longitude coordinates
+        second_coord: numpy array of Y or Latitude coordinates
+
+    Returns:
+    -------
+        x, y: two numpy arrays containing the transformed coordinates in 
+        the final coordinates system
+    """
     initial_epsg = pyproj.Proj(epgs_initial_str)
     final_epsg = pyproj.Proj(epsg_final_str)
     x, y = pyproj.transform(initial_epsg, final_epsg,
@@ -136,7 +172,24 @@ def pltcolor():
 
 
 def get_stns_ids_coords_file(netatmo_coords_df_file):
-    ''' get all ids from coords_file'''
+    
+    """
+    Purpose: Get all Netatmo station Ids from coordinates dataframe
+    -------
+        Read the coordinates dataframe of the Netatmo data containing
+        station Ids as index, convert each id to it'S original format
+        (replace '_' with ':'), make it consistent with the original data
+    
+    Keyword arguments:
+    ------------------
+        netatmo:coords_df_file: path to the Netatmo coordinates dataframe
+        make sure the station Ids are in the first column (index=0) and the
+        data are seperated by a semi-column ';'.
+    
+    Returns:
+    --------
+        List of all station Ids in their original form as found in Stn_Mac
+    """
     in_coords_df = pd.read_csv(netatmo_coords_df_file, index_col=0, sep=';')
     ids_lst = [stn_id.replace(':', '_') for stn_id in in_coords_df.index]
     ids_lst_unique = list(set(ids_lst))
@@ -149,7 +202,23 @@ def get_stns_ids_coords_file(netatmo_coords_df_file):
 
 
 def split_df_file_to_get_alls_stn_ids(all_df_files_list):
-    ''' get stn_id from netatmo file'''
+    """
+    Purpose: Get Netatmo station Id from Netatmo data file path 
+    -------
+        Split the Netamo file path to get the station Id.
+        Test to make sure it works
+    
+    Keyword arguments:
+    ------------------
+        all_df_files_list: a list of files (usually from list_all_full_path)
+        each file refers to the path of a Netatmo data file
+    
+    Returns:
+    --------
+        List of all UNIQUE Ids of all stations found in the given Files 
+        
+    """
+    # TODO: add example of file
     stns_ids = []
     for df_file in all_df_files_list:
         try:
@@ -158,8 +227,8 @@ def split_df_file_to_get_alls_stn_ids(all_df_files_list):
         except Exception as msg:
             print(msg)
         stns_ids.append(p3)
-    stns_ids_unique = list(set(stns_ids))
-    return stns_ids_unique
+    stns_ids_unique_lst = list(set(stns_ids))
+    return stns_ids_unique_lst
 
 #==============================================================================
 #
@@ -167,7 +236,16 @@ def split_df_file_to_get_alls_stn_ids(all_df_files_list):
 
 
 def split_one_df_file_to_get_stn_id(df_file):
-    ''' get stn_id from netatmo file'''
+    """
+    Purpose: Get Station Id from Netatmo file path
+    -------
+    Keyword arguments:
+    ------------------
+        df_file: complete path the the Netatmo data file
+    Return:
+    -------
+        Netatmo station ID
+    """
     try:
         _, _, p3 = df_file.split('(')
         p3 = p3.replace(')).csv', '')
@@ -181,7 +259,18 @@ def split_one_df_file_to_get_stn_id(df_file):
 
 
 def ids_list_intersection(lst1, lst2):
-    ''' intersect two lists'''
+    """
+    Purpose: Intersect two lists
+    -------
+        Given two lists, find the intersection and save to a new list
+    Keyword arguments:
+    ------------------
+        lst1: First list
+        lst2: Second list
+    Returns:
+    --------
+        New list containing the intersection of the two previous lists
+    """
     # Use of hybrid method
     temp = set(lst2)
     lst3 = [value for value in lst1 if value in temp]
@@ -193,11 +282,18 @@ def ids_list_intersection(lst1, lst2):
 
 
 def remove_one_elt_lst(elt, lst):
-    ''' remove a specific element from a list'''
-    new_lst = []
-    for el in lst:
-        if el != elt:
-            new_lst.append(el)
+    """ 
+    Purpose: Remove a specific element from a list
+    -------
+        Note: removes all occurrences of the element
+    Keyword arguments:
+        elt: the element to remove (could be string or integer)
+        lst: list containing all the different elements
+    Returns:
+        New list without the given element
+        
+    """
+    new_lst = [el for el in lst if el != elt]
     return new_lst
 
 #==============================================================================
@@ -208,7 +304,8 @@ def remove_one_elt_lst(elt, lst):
 def resampleDf(df, agg, closed='right', label='right',
                shift=False, leave_nan=True,
                max_nan=0):
-    """Aggregate precipitation data
+    """
+    Purpose: Aggregate precipitation data
 
     Parameters:
     -----------
@@ -264,6 +361,7 @@ def resampleDf(df, agg, closed='right', label='right',
         df = df.shift(-6, 'H')
 
     # To respect the nan values
+    # TODO: maybe look how to make it faster
     if leave_nan == True:
         # for max_nan == 0, the code runs faster if implemented as follows
         if max_nan == 0:
@@ -311,8 +409,28 @@ def resample_Humidity_Df(data_frame,
                          fillnan=False,
                          df_save_name=None,
                          method='mean'):
-    ''' sample DF based on freq and time shift and label shift '''
-
+    """
+    Purpose: Sample DF based on freq and time shift and label shift
+    -------
+    
+    Keyword arguments: 
+        data_frame: Netatmo humidity data frame to resample
+        temp_freq: to which temporal frequency dataframe should be resampled
+        temp_shift: shift the data based on timestamps (+- 0 to 5), default: 0
+        label_shift: shift time label by certain values (used for timezones)
+        df_sep_: seperater of the dataframe, used when saving
+        out_save_dir: output location for saved dataframe
+        fillnan: if True, fill nans with a certain value (usually 0 or -999)
+        df_save_name: output name of resampled df
+        method: which aggregation method to use when resampling (default: mean)
+            select either the average or maximum or minimum value of aggregation
+            period, could mean big difference for Humidity
+    
+    Returns:
+    -------
+        Resampled Netatmo Hmidity dataframe
+        
+    """
     # df_ = data_frame.copy()
     if method == 'mean':
         df_res = data_frame.resample(temp_freq,
@@ -344,8 +462,23 @@ def resample_Humidity_Df(data_frame,
 #
 #==============================================================================
 
-def select_df_within_period(df, start, end):
-    ''' a function to select df between two dates'''
+def select_df_within_period(df, # original dataframe
+                            start, # startdate of period
+                            end # enddate of period
+                            ):
+    """ 
+    Purpose: a function to select DF between two dates
+    --------
+    
+    Keyword arguments:
+    ------------------
+        df: original dataframe
+        start: start date of wanted period (should be same format as df index)
+        end: end date of wanted period (should be same format as df index)
+    Return:
+    ------
+        DF between giver start and end date (could return also empty Dataframe)
+    """
     mask = (df.index > start) & (df.index <= end)
     df_period = df.loc[mask]
     return df_period
@@ -359,14 +492,15 @@ def resample_intersect_2_dfs(df1,  # first dataframe to resample
                              df2,  # second dataframe to resample
                              temp_freq  # temporal frequency for resampling
                              ):
-    ''' 
-    a fct to resample and intersect two dataframes
-    also to handle Nans is Nans are found after the stations 
-    have been intersected, nans are removed and reintersection is done
+    """ 
+    Purpose: Eesample and intersect two dataframes
+    -------
+        Also to handle Nans is Nans are found after the stations 
+        have been intersected, nans are removed and reintersection is done
 
-    Some workaround was done to deal with pandas Series and Dataframes
-    as the Netatmo and DWD stations are different
-    '''
+        Some workaround was done to deal with pandas Series and Dataframes
+        as the Netatmo and DWD stations are different
+    """
     df_resample1 = resampleDf(df=df1, agg=temp_freq)
     df_resample2 = resampleDf(df=df2, agg=temp_freq)
 
@@ -431,7 +565,7 @@ def resample_intersect_2_dfs(df1,  # first dataframe to resample
 
 
 def calculate_probab_ppt_below_thr(ppt_data, ppt_thr):
-    ''' calculate probability of values being below threshold '''
+    """ calculate probability of values being below threshold """
     origin_count = ppt_data.shape[0]
     count_below_thr = ppt_data[ppt_data <= ppt_thr].shape[0]
     p0 = np.divide(count_below_thr, origin_count)
@@ -445,7 +579,7 @@ def calculate_probab_ppt_below_thr(ppt_data, ppt_thr):
 # both correct
 def build_edf_fr_vals(ppt_data):
     # Construct EDF, need to check if it works
-    ''' construct empirical distribution function given data values '''
+    """ construct empirical distribution function given data values """
     data_sorted = np.sort(ppt_data, axis=0)[::-1]
     x0 = np.squeeze(data_sorted)[::-1]
     y0 = (np.arange(data_sorted.size) / len(data_sorted))
@@ -453,7 +587,7 @@ def build_edf_fr_vals(ppt_data):
 
 
 # def build_edf_fr_vals(data):
-#     ''' construct empirical distribution function given data values '''
+#     """ construct empirical distribution function given data values """
 #     from statsmodels.distributions.empirical_distribution import ECDF
 #     cdf = ECDF(data)
 #     return cdf.x, cdf.y
@@ -463,7 +597,7 @@ def build_edf_fr_vals(ppt_data):
 
 
 def get_cdf_part_abv_thr(ppt_data, ppt_thr):
-    ''' select part of the CDF that is abv ppt thr '''
+    """ select part of the CDF that is abv ppt thr """
 
     p0 = calculate_probab_ppt_below_thr(ppt_data, ppt_thr)
 
@@ -480,7 +614,7 @@ def get_cdf_part_abv_thr(ppt_data, ppt_thr):
 
 
 def get_dwd_stns_coords(coords_df_file, x_col_name, y_col_name):
-    '''function used to return to coordinates dataframe of the DWD stations'''
+    """function used to return to coordinates dataframe of the DWD stations"""
     in_coords_df = pd.read_csv(coords_df_file, sep=';',
                                index_col=3, engine='c')
     stn_ids = in_coords_df.index
@@ -494,7 +628,7 @@ def get_dwd_stns_coords(coords_df_file, x_col_name, y_col_name):
 
 
 def get_netatmo_stns_coords(coords_df_file, x_col_name, y_col_name):
-    '''function used to return to coordinates dataframe of the DWD stations'''
+    """function used to return to coordinates dataframe of the DWD stations"""
     in_coords_df = pd.read_csv(coords_df_file, sep=';',
                                index_col=0, engine='c')
     stn_ids = list(set([stn_id.replace(':', '_')
@@ -513,7 +647,7 @@ def get_for_netatmo_nearest_dwd_station(first_stn_id, dwd_coords_df_file,
                                         netatmo_coords_df_file,
                                         x_col_name, y_col_name,
                                         lon_col_name, lat_col_name):
-    ''' Find for one netatmo station, the closest DWD neibhouring station'''
+    """ Find for one netatmo station, the closest DWD neibhouring station"""
 
     wgs82 = "+init=EPSG:4326"
     utm32 = "+init=EPSG:32632"
@@ -552,8 +686,8 @@ def get_for_netatmo_nearest_dwd_station(first_stn_id, dwd_coords_df_file,
 
 def constrcut_contingency_table(stn1_id, stn2_id,
                                 dataframe1, dataframe2, thr1, thr2):
-    ''' return percentage of values below or above a threshold
-    return a matrix that is the contingency table'''
+    """ return percentage of values below or above a threshold
+    return a matrix that is the contingency table"""
     df_1 = dataframe1.values.ravel().copy()
     df_2 = dataframe2.values.ravel().copy()
 
@@ -597,9 +731,9 @@ def select_ppt_vals_abv_temp_thr(
     min_dist_thr_temp,  # distance threshold, selecting netatmo neigbours
     temp_thr,  # temp threshold, below assume ppt is snow
 ):
-    '''
+    """
     could be USED IN SCRIPT NUMBER  19, currently NOT USED
-    '''
+    """
     in_netatmo_temperature_stns_df = pd.read_csv(netatmo_temperature_df_file,
                                                  index_col=0, sep=';',
                                                  parse_dates=True,
@@ -676,9 +810,9 @@ def select_convective_season(
     df,  # df to slice, index should be datetime
     month_lst  # list of month for convective season
 ):
-    '''
+    """
     return dataframe without the data corresponding to the winter season
-    '''
+    """
     df = df.copy()
     df_conv_season = df[~df.index.month.isin(month_lst)]
 
@@ -692,7 +826,7 @@ def compare_p1_dwd_p1_netatmo(
     val_dwd,  # p1 or ppt_mean  for df_DWD
     val_netatmo  # p1 or ppt_mean for df_Netatmo
 ):
-    '''
+    """
     use this function to compare two values from two different stations
     find if the values are equal +-10% , if smaller or if bigger
     return the result for being saved in a dataframe
@@ -700,7 +834,7 @@ def compare_p1_dwd_p1_netatmo(
 
     Return:
         marker, color 
-    '''
+    """
     _10_percent_dwd = 0.1 * val_dwd
 
     if val_dwd - _10_percent_dwd <= val_netatmo <= val_dwd + _10_percent_dwd:
@@ -722,14 +856,14 @@ def look_agreement_df1_df2(stn_dwd_id,  # id of dwd station
                            df_netatmo,  # df netatmo intersected with dwd
                            ppt_thr,  # ppt thr to check agreement
                            ):
-    '''
+    """
     read two dataframes, one for dwd and one for netatmo
     replace all values above threshold with 1 and below with 0
 
     calculate coorelation between the two
     look for agreement or disagreement
     try it with or without considering temperature threshold
-    '''
+    """
     df_dwd_copy = df_dwd.copy()
     df_netatmo_copy = df_netatmo.copy()
 
@@ -766,14 +900,14 @@ def plot_subplot_fig(df_to_plot,    # dataframe to plot, coords-vals
                      out_save_name=None,  # Name of out figure
                      out_dir=None,  # out dir to use for saving
                      ):
-    '''
+    """
         Read the df_results containing for every netatmo station
         the coordinates (lon, lat) and the comparision between
         the p1 and the mean value, between netatmo and nearest dwd
 
         plot the reults on a map, either with or without temp_thr
         use the shapefile of BW
-    '''
+    """
 
     plt.ioff()
 
@@ -861,10 +995,10 @@ def calc_plot_contingency_table_2_stations(
     out_plot_dir,  # out save dir for plot
     plot_figures,  # flag is True plot all plots
 ):
-    '''
+    """
     construct and save contingency table between two stations
     usually a DWD and a Netatmo Station used in script number _20_
-    '''
+    """
     # construct continegency table
     (df_both_below_thr,
      df_first_abv_second_below_thr,
@@ -967,13 +1101,13 @@ def save_how_many_abv_same_below(
     out_dir,  # out save dir for plots
     year_vals  # if all years or year by year
 ):
-    '''
+    """
     use this funcion to find how many stations have similar values for p1 and
     for the average, how many are netatmo are below dwd and how many 
     netatmo are above dwd
 
     return the result in a dataframe
-    '''
+    """
     # drop all netatmo stns with no data
     df_p1_mean.dropna(axis=0, how='any', inplace=True)
 
@@ -1018,13 +1152,13 @@ def plt_on_map_agreements(
     year_vals,  # if all years or year by year
     val_thr_percent  # consider all values above it
 ):
-    '''
+    """
     Read the df_results containing for every netatmo station
     the coordinates (lon, lat) and the comparision between 
     the pearson and spearman correlations,
     between netatmo and nearest dwd station
     plot the reults on a map, either with or with temp_thr
-    '''
+    """
     if 'Bool' in col_to_plot:
         percent_add = '_above_%dpercent' % val_thr_percent
     else:
@@ -1098,13 +1232,13 @@ def plt_correlation_with_distance(
     val_thr_percent,  # consider all values above it
     neighbor_nbr  # which neighbor was chosen
 ):
-    '''
+    """
     Read the df_results containing for every netatmo station
     the coordinates (lon, lat) and the comparision between 
     the pearson and spearman correlations,
     between netatmo and nearest dwd station
     plot the reults, correlation vs distance
-    '''
+    """
     if 'Bool' in corr_col_to_plot:
         percent_add = '_above_%dpercent' % val_thr_percent
     else:
@@ -1160,15 +1294,15 @@ def plt_correlation_with_distance(
 
 
 def func(x, a, b, c, d):
-    ''' 3degree polynomial function used for fitting and as filter'''
+    """ 3degree polynomial function used for fitting and as filter"""
     return a * x**3 + b * x**2 + c * x + d
 
 
 def fit_curve_get_vals_below_curve(x, y, func, stns):
-    ''' fit function to data and shifted 10% downwards
+    """ fit function to data and shifted 10% downwards
     return all data above and below function with 
     corresponding distance and correlation values and station ids
-    '''
+    """
 
     # bounds=[[a1,b1],[a2,b2]]
 
@@ -1201,7 +1335,7 @@ def fit_curve_get_vals_below_curve(x, y, func, stns):
 #==============================================================================
 def gen_path_df_file(main_path, start_path_acc, time_freq,
                      data_source, percent, neighbor):
-    ''' use this funtion to get the path to the dfs for different neighbors'''
+    """ use this funtion to get the path to the dfs for different neighbors"""
 
     return main_path / (
         r'%sfreq_%s_%s_netatmo_upper_%s_percent_data_considered_neighbor_%d_.csv'
@@ -1215,8 +1349,8 @@ def gen_path_df_file(main_path, start_path_acc, time_freq,
 def read_filter_df_corr_return_stns_x_y_vals(df_file, thr_low=0, thr_high=1,
                                              x_col_name='Distance to neighbor',
                                              y_col_name='Bool_Spearman_Correlation'):
-    ''' read df with correlation values, select all between 0 and 1 and 
-        return station_ids, distance_values, correlation_values, and df'''
+    """ read df with correlation values, select all between 0 and 1 and 
+        return station_ids, distance_values, correlation_values, and df"""
     in_df = pd.read_csv(df_file, index_col=0, sep=';').dropna(how='any')
     in_df = in_df[(thr_low < in_df.loc[:, y_col_name]) &
                   (in_df.loc[:, y_col_name] < thr_high)]
@@ -1232,12 +1366,12 @@ def read_filter_df_corr_return_stns_x_y_vals(df_file, thr_low=0, thr_high=1,
 def remove_all_low_corr_short_dist(x, y, xthr, ythr, stns, df,
                                    x_col_name='Distance to neighbor',
                                    y_col_name='Bool_Spearman_Correlation'):
-    '''
+    """
     for all distances below x_thr remove the correlation values
     these are outliers that will affect the fitting of the curve
     get stations with high correlations and drop nans and reselect data
     return x_good, y_good, stns_good, df_good
-    '''
+    """
     df = df.copy()
     for i, dist in enumerate(x):
         if dist <= xthr:

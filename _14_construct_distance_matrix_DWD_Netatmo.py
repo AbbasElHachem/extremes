@@ -28,11 +28,11 @@ use_new_dwd_data = True
 
 
 if use_new_dwd_data:
-    coords_dwd_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-                          r'\download_DWD_data_recent\station_coordinates_names_hourly.csv')
+    coords_dwd_df_file = (r'F:\download_DWD_data_recent'
+                          r'\station_coordinates_names_hourly_only_in_BW_utm32.csv')
 
 else:
-    coords_dwd_df_file = (r'X:\exchange\ElHachem\niederschlag_deutschland'
+    coords_dwd_df_file = (r'F:\data_from_exchange\niederschlag_deutschland'
                           r'\1993_2016_5min_merge_nan.csv')
 assert os.path.exists(coords_dwd_df_file), 'wrong DWD coords file'
 
@@ -61,8 +61,8 @@ lat_col_name = ' lat'
 # x_col_name = 'Rechtswert'
 # y_col_name = 'Hochwert'
 
-x_col_name = 'geoLaenge'
-y_col_name = 'geoBreite'
+x_col_name = 'X'  # 'geoLaenge'
+y_col_name = 'Y'  # 'geoBreite'
 
 # def epsg wgs84 and utm32 for coordinates conversion
 wgs82 = "+init=EPSG:4326"
@@ -82,7 +82,7 @@ xnetatmo, ynetatmo = convert_coords_fr_wgs84_to_utm32_(
 
 if use_new_dwd_data:
 
-    in_df_dwd_coords = pd.read_csv(coords_dwd_df_file, index_col=0, sep=',',
+    in_df_dwd_coords = pd.read_csv(coords_dwd_df_file, index_col=0, sep=';',
                                    encoding='latin-1')
     # get all station ids, make them a string for generating file_names
 #     stations_id_str_lst = []
@@ -91,17 +91,17 @@ if use_new_dwd_data:
 #         if len(stn_id) < 5:
 #             stn_id = '0' * (5 - len(stn_id)) + stn_id
 #         stations_id_str_lst.append(stn_id)
-    stations_id_str_lst = ['0' * (5 - len(str(stn_id))) + stn_id
-                           if len(stn_id) < 5 else str(stn_id)
+    stations_id_str_lst = ['0' * (5 - len(str(stn_id))) + str(stn_id)
+                           if len(str(stn_id)) < 5 else str(stn_id)
                            for stn_id in in_df_dwd_coords.index]
 
     in_df_dwd_coords.index = stations_id_str_lst
 
-    lon_dwd, lat_dwd = (in_df_dwd_coords.loc[:, x_col_name].values.ravel(),
-                        in_df_dwd_coords.loc[:, y_col_name].values.ravel())
+    x_dwd, y_dwd = (in_df_dwd_coords.loc[:, x_col_name].values.ravel(),
+                    in_df_dwd_coords.loc[:, y_col_name].values.ravel())
 
-    x_dwd, y_dwd = convert_coords_fr_wgs84_to_utm32_(
-        wgs82, utm32, lon_dwd,  lat_dwd)
+#     x_dwd, y_dwd = convert_coords_fr_wgs84_to_utm32_(
+#         wgs82, utm32, lon_dwd,  lat_dwd)
 
 else:
     in_df_dwd_coords = pd.read_csv(coords_dwd_df_file, index_col=3, sep=';')
@@ -149,6 +149,6 @@ for stn_mac in in_df_netatmo_coords.index:
 
 df_distance.to_csv(os.path.join(out_save_dir,
                                 'distance_mtx_in_m_NetAtmo_DWD.csv'),
-                   sep=';')
+                   sep=';', float_format='%.4f')
 
 print('Done with everything')

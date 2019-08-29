@@ -117,7 +117,7 @@ assert os.path.exists(
 path_to_netatmo_coords_df_file = (
     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
     r"\rain_bw_1hour"
-    r"\netatmo_bw_1hour_coords_with_duplicates.csv")  # TODO: CHANGE
+    r"\netatmo_bw_1hour_coords.csv")
 assert os.path.exists(path_to_netatmo_coords_df_file), 'wrong DWD coords file'
 
 path_to_netatmo_gd_stns_file = (

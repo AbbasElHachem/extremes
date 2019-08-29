@@ -78,6 +78,7 @@ def firstNonNan(listfloats):
 # stn_names_files = os.path.join(main_dir, r'station_coordinates_names.csv')
 stn_names_files = os.path.join(
     main_dir, r'station_coordinates_names_hourly_only_in_BW_utm32.csv')
+
 assert os.path.exists(stn_names_files)
 #     in_stn_coords_df_loc = os.path.join(
 #         r"F:\download_DWD_data_recent\station_coordinates_names_hourly_only_in_BW_utm32.csv")
