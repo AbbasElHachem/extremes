@@ -10,26 +10,90 @@ Created on Thu Aug 29 08:08:15 2019
 import pandas as pd
 import numpy as np
 
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+from pandas.plotting import register_matplotlib_converters
+register_matplotlib_converters()
+
+
+plt.rcParams.update({'font.size': 14})
+plt.rcParams.update({'axes.labelsize': 12})
+
+plt.ioff()
+
+path_to_daily_netatmo_ppt = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\all_netatmo_ppt_data_daily_.csv"
+path_to_daily_dwd_ppt = r"F:\download_DWD_data_recent\all_dwd_daily_ppt_data_combined_2014_2019_.csv"
 
 #%%
-df_netatmo_daily = pd.read_csv(r'/home/abbas/Desktop/data/data/all_netatmo_ppt_data_daily_.csv',
-                               sep=';', index_col=0, parse_dates=True, infer_datetime_format=True,
-                               engine='c').dropna(how='all')
+df_netatmo_daily = pd.read_csv(
+    path_to_daily_netatmo_ppt,
+    sep=';', index_col=0, parse_dates=True,
+    infer_datetime_format=True,
+    engine='c').dropna(how='all')
 #%%
 
-find_maximum_dates = df_netatmo_daily.max(axis=1).sort_values()[::-1]
-
-maximum_100_days = find_maximum_dates[:100]
-#%%
-
-
-#%%
+df_dwd_daily = pd.read_csv(
+    path_to_daily_dwd_ppt,
+    sep=';', index_col=0, parse_dates=True,
+    infer_datetime_format=True,
+    engine='c').dropna(how='all')
 
 
-#%%
+netatmo_maximum_dates = df_netatmo_daily.max(axis=1).sort_values()[::-1]
+dwd_maximum_dates = df_dwd_daily.max(axis=1).sort_values()[::-1]
+
+dwd_corr_netatmo_max = df_dwd_daily.loc[
+    netatmo_maximum_dates.index, :].max(axis=1).sort_values()[::-1].dropna(how='all')
+netatmo_corr_dwd_max = df_netatmo_daily.loc[
+    dwd_maximum_dates.index, :].max(axis=1).sort_values()[::-1].dropna(how='all')
 
 
-#%%
+netatmo_max_100_days = netatmo_maximum_dates[:100].sort_index()
+dwd_corr_netatmo_max_100_days = dwd_corr_netatmo_max[:100].sort_index()
+
+dwd_max_100_days = dwd_maximum_dates[:100].sort_index()
+net_corr_dwd_max_100_days = netatmo_corr_dwd_max[:100].sort_index()
+
+myFmt = mdates.DateFormatter('%Y-%m-%d')
 
 
-#%%
+netatmo_max_100_days.to_csv(
+    r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\netatmo_daily_maximum_100_days.csv",
+    sep=';', header=False)
+dwd_max_100_days.to_csv(
+    r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\dwd_daily_maximum_100_days.csv",
+    sep=';', header=False)
+
+xticks = pd.date_range(start=netatmo_max_100_days.index[0],
+                       end=netatmo_max_100_days.index[-1], freq='1D')
+
+#==============================================================================
+# PLOTTING
+#==============================================================================
+plt.ioff()
+fig, ax = plt.subplots(figsize=(30, 16), dpi=150)
+ax.plot(netatmo_max_100_days.index, netatmo_max_100_days.values,
+        label='Netatmo', color='r', alpha=0.75)
+
+ax.plot(dwd_corr_netatmo_max_100_days.index, dwd_corr_netatmo_max_100_days.values,
+        label='DWD', color='b', alpha=0.75)
+
+
+# ax.set_xticks(xticks)
+
+
+ax.set_xlim([netatmo_max_100_days.index[0], netatmo_max_100_days.index[-1]])
+
+
+ax.tick_params(axis='x', rotation=45)
+ax.xaxis.set_major_formatter(myFmt)
+ax.xaxis.set_ticks(
+    xticks[::int(np.round(xticks.shape[0] / 50))])
+
+plt.title('Highest 100 daily maximum rainfall values')
+plt.ylabel('Rainfall mm/d')
+plt.legend(loc=0)
+plt.grid(alpha=0.5)
+plt.savefig(r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\daily_maximums.png",
+            frameon=True, papertype='a4',
+            bbox_inches='tight', pad_inches=.2)

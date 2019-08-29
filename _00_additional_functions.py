@@ -43,7 +43,7 @@ def list_all_full_path(ext, file_dir):
     """
     Purpose: To return full path of files in all dirs of a given folder with a
     -------  given extension in ascending order.
-    
+
     Keyword arguments:
     ------------------
         ext (string) = Extension of the files to list
@@ -73,7 +73,7 @@ def convert_coords_fr_wgs84_to_utm32_(epgs_initial_str, epsg_final_str,
         In our case the function is used to transform WGS84 to UTM32
         (or vice versa), for transforming the DWD and Netatmo station
         coordinates to same reference system.
-        
+
         Used for calculating the distance matrix between stations
 
     Keyword argument:
@@ -172,20 +172,19 @@ def pltcolor():
 
 
 def get_stns_ids_coords_file(netatmo_coords_df_file):
-    
     """
     Purpose: Get all Netatmo station Ids from coordinates dataframe
     -------
         Read the coordinates dataframe of the Netatmo data containing
         station Ids as index, convert each id to it'S original format
         (replace '_' with ':'), make it consistent with the original data
-    
+
     Keyword arguments:
     ------------------
         netatmo:coords_df_file: path to the Netatmo coordinates dataframe
         make sure the station Ids are in the first column (index=0) and the
         data are seperated by a semi-column ';'.
-    
+
     Returns:
     --------
         List of all station Ids in their original form as found in Stn_Mac
@@ -207,16 +206,16 @@ def split_df_file_to_get_alls_stn_ids(all_df_files_list):
     -------
         Split the Netamo file path to get the station Id.
         Test to make sure it works
-    
+
     Keyword arguments:
     ------------------
         all_df_files_list: a list of files (usually from list_all_full_path)
         each file refers to the path of a Netatmo data file
-    
+
     Returns:
     --------
         List of all UNIQUE Ids of all stations found in the given Files 
-        
+
     """
     # TODO: add example of file
     stns_ids = []
@@ -291,7 +290,7 @@ def remove_one_elt_lst(elt, lst):
         lst: list containing all the different elements
     Returns:
         New list without the given element
-        
+
     """
     new_lst = [el for el in lst if el != elt]
     return new_lst
@@ -412,7 +411,7 @@ def resample_Humidity_Df(data_frame,
     """
     Purpose: Sample DF based on freq and time shift and label shift
     -------
-    
+
     Keyword arguments: 
         data_frame: Netatmo humidity data frame to resample
         temp_freq: to which temporal frequency dataframe should be resampled
@@ -425,11 +424,11 @@ def resample_Humidity_Df(data_frame,
         method: which aggregation method to use when resampling (default: mean)
             select either the average or maximum or minimum value of aggregation
             period, could mean big difference for Humidity
-    
+
     Returns:
     -------
         Resampled Netatmo Hmidity dataframe
-        
+
     """
     # df_ = data_frame.copy()
     if method == 'mean':
@@ -462,14 +461,14 @@ def resample_Humidity_Df(data_frame,
 #
 #==============================================================================
 
-def select_df_within_period(df, # original dataframe
-                            start, # startdate of period
-                            end # enddate of period
+def select_df_within_period(df,  # original dataframe
+                            start,  # startdate of period
+                            end  # enddate of period
                             ):
     """ 
     Purpose: a function to select DF between two dates
     --------
-    
+
     Keyword arguments:
     ------------------
         df: original dataframe
@@ -748,7 +747,7 @@ def select_ppt_vals_abv_temp_thr(
         ~in_df_distance_netatmo_netatmo.index.duplicated(keep='first')]
 
     # Flag if consider Temperature Threshold
-    # remove all days with Temp < temp_thr (1°C)
+    # remove all days with Temp < temp_thr (1ï¿½C)
 
     # get distance netatmo ppt stn to all temp stns, get min
     distances_netatmo_to_stn1 = in_df_distance_netatmo_netatmo.loc[
@@ -1298,7 +1297,7 @@ def func(x, a, b, c, d):
     return a * x**3 + b * x**2 + c * x + d
 
 
-def fit_curve_get_vals_below_curve(x, y, func, stns):
+def fit_curve_get_vals_below_curve(x, y, func, stns, shift_per=0.15):
     """ fit function to data and shifted 10% downwards
     return all data above and below function with 
     corresponding distance and correlation values and station ids
@@ -1312,7 +1311,7 @@ def fit_curve_get_vals_below_curve(x, y, func, stns):
     print('fitted parameters are ', popt[0], popt[1], popt[2])  # , popt[3])
     y_fitted = func(x, *popt)
 
-    lower_bound = y_fitted.max() * 0.12
+    lower_bound = y_fitted.max() * shift_per
     y_fitted_shifted = y_fitted - lower_bound
 
     xvals_below_curve = x[np.where(y <= y_fitted_shifted)]

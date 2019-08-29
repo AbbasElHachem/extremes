@@ -159,54 +159,6 @@ y1_q = in_df1_q.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
 y2_q = in_df2_q.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
 y3_q = in_df3_q.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
 y4_q = in_df4_q.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
-# =============================================================================
-
-# m0, m_h0, mp_h0 = mean_confidence_interval(y0, .95)
-#
-# m1, m_h1, mp_h1 = mean_confidence_interval(y1, .95)
-# m2, m_h2, mp_h2 = mean_confidence_interval(y2, .95)
-# m3, m_h3, mp_h3 = mean_confidence_interval(y3, .95)
-# m4, m_h4, mp_h4 = mean_confidence_interval(y4, .95)
-# #
-# # m_h02 = m_h0 - m_h0 * 0.1
-# # m_h12 = m_h1 - m_h1 * 0.1
-# # m_h22 = m_h2 - m_h2 * 0.1
-# # m_h32 = m_h3 - m_h3 * 0.1
-# # m_h42 = m_h4 - m_h4 * 0.1
-# #
-# y00 = y0[y0 > m_h0]
-# x00 = x0[y0 > m_h0]
-#
-# y10 = y1[y1 > m_h1]
-# x10 = x1[y1 > m_h1]
-#
-# y20 = y2[y2 > m_h2]
-# x20 = x2[y2 > m_h2]
-#
-# y30 = y3[y3 > m_h3]
-# x30 = x3[y3 > m_h3]
-#
-# y40 = y4[y4 > m_h4]
-# x40 = x4[y4 > m_h4]
-# y01 = y0[y0 < mp_h]
-# x01 = x0[y0 < mp_h]
-#
-#
-# y002 = y0[y0 > m_h02]
-# x002 = x0[y0 > m_h02]
-#
-# y102 = y1[y1 > m_h12]
-# x102 = x1[y1 > m_h12]
-#
-# y202 = y2[y2 > m_h22]
-# x202 = x2[y2 > m_h22]
-#
-# y302 = y3[y3 > m_h32]
-# x302 = x3[y3 > m_h32]
-#
-# y402 = y4[y4 > m_h42]
-# x402 = x4[y4 > m_h42]
-
 
 #==============================================================================
 #

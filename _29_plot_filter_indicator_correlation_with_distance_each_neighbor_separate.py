@@ -65,7 +65,7 @@ netatmo_path_acc = r'year_allyears_df_comparing_correlations_max_sep_dist_500000
 dwd_path_Acc = r'year_allyears_df_dwd_correlations'
 
 # def percentage threshold, time frequency and data source
-percent = '99'
+percent = '92'
 time_freq = '60min'
 
 data_source0 = 'Netatmo'  # reference station 'Netatmo'
@@ -133,27 +133,27 @@ x4_gd_corr, y4_gd_corr, s4_gd_corr, df4_gd_corr = remove_all_low_corr_short_dist
 (y_fitted_shifted0, xvals_below_curve0,
  yvals_below_curve0, xvals_above_curve0,
  yvals_above_curve0, stnbelow0, stnabove0) = fit_curve_get_vals_below_curve(
-    x=x0, y=y0, func=func, stns=s0)
+    x=x0, y=y0, func=func, stns=s0, shift_per=0.20)
 
 (y_fitted_shifted1, xvals_below_curve1,
  yvals_below_curve1, xvals_above_curve1,
  yvals_above_curve1, stnbelow1, stnabove1) = fit_curve_get_vals_below_curve(
-    x=x1_gd_corr, y=y1_gd_corr, func=func, stns=s1_gd_corr)
+    x=x1_gd_corr, y=y1_gd_corr, func=func, stns=s1_gd_corr, shift_per=0.25)
 
 (y_fitted_shifted2, xvals_below_curve2,
  yvals_below_curve2, xvals_above_curve2,
  yvals_above_curve2, stnbelow2, stnabove2) = fit_curve_get_vals_below_curve(
-    x=x2_gd_corr, y=y2_gd_corr, func=func, stns=s2_gd_corr)
+    x=x2_gd_corr, y=y2_gd_corr, func=func, stns=s2_gd_corr, shift_per=0.25)
 
 (y_fitted_shifted3, xvals_below_curve3,
  yvals_below_curve3, xvals_above_curve3,
  yvals_above_curve3, stnbelow3, stnabove3) = fit_curve_get_vals_below_curve(
-    x=x3_gd_corr, y=y3_gd_corr, func=func, stns=s3_gd_corr)
+    x=x3_gd_corr, y=y3_gd_corr, func=func, stns=s3_gd_corr, shift_per=0.25)
 
 (y_fitted_shifted4, xvals_below_curve4,
  yvals_below_curve4, xvals_above_curve4,
  yvals_above_curve4, stnbelow4, stnabove4) = fit_curve_get_vals_below_curve(
-    x=x4_gd_corr, y=y4_gd_corr, func=func, stns=s4_gd_corr)
+    x=x4_gd_corr, y=y4_gd_corr, func=func, stns=s4_gd_corr, shift_per=0.25)
 
 # =============================================================================
 
@@ -164,43 +164,43 @@ stns_keep_all = np.intersect1d(np.intersect1d(np.intersect1d(np.intersect1d(
     stnabove0, stnabove1),
     stnabove2), stnabove3), stnabove4)
 
-stns_keep_al_sr = pd.DataFrame(data=stnabove0,
+stns_keep_al_sr = pd.DataFrame(data=stns_keep_all,
                                columns=['Stations'])
 stns_keep_al_sr.to_csv(
     (save_dir /
-        (r'keep_stns_1st_neighbor_%s_per_%s_.csv'
+        (r'keep_stns_all_neighbor_%s_per_%s_.csv'
          % (percent, time_freq))),
     sep=';')
 # # %%
-# x0_abv = in_df0.loc[stns_keep_all, 'Distance to neighbor'].dropna().values
-# y0_abv = in_df0.loc[stns_keep_all, 'Bool_Spearman_Correlation'].dropna().values
+x0_abv = in_df0.loc[stns_keep_all, 'Distance to neighbor'].dropna().values
+y0_abv = in_df0.loc[stns_keep_all, 'Bool_Spearman_Correlation'].dropna().values
+
+x1_abv = in_df1.loc[stns_keep_all, 'Distance to neighbor'].dropna().values
+y1_abv = in_df1.loc[stns_keep_all, 'Bool_Spearman_Correlation'].dropna().values
+
+x2_abv = in_df2.loc[stns_keep_all, 'Distance to neighbor'].dropna().values
+y2_abv = in_df2.loc[stns_keep_all, 'Bool_Spearman_Correlation'].dropna().values
+
+x3_abv = in_df3.loc[stns_keep_all, 'Distance to neighbor'].dropna().values
+y3_abv = in_df3.loc[stns_keep_all, 'Bool_Spearman_Correlation'].dropna().values
+
+x4_abv = in_df4.loc[stns_keep_all, 'Distance to neighbor'].dropna().values
+y4_abv = in_df4.loc[stns_keep_all, 'Bool_Spearman_Correlation'].dropna().values
+
+# x0_abv = in_df0.loc[stnabove0, 'Distance to neighbor'].dropna().values
+# y0_abv = in_df0.loc[stnabove0, 'Bool_Spearman_Correlation'].dropna().values
 #
-# x1_abv = in_df1.loc[stns_keep_all, 'Distance to neighbor'].dropna().values
-# y1_abv = in_df1.loc[stns_keep_all, 'Bool_Spearman_Correlation'].dropna().values
+# x1_abv = in_df1.loc[stnabove1, 'Distance to neighbor'].dropna().values
+# y1_abv = in_df1.loc[stnabove1, 'Bool_Spearman_Correlation'].dropna().values
 #
-# x2_abv = in_df2.loc[stns_keep_all, 'Distance to neighbor'].dropna().values
-# y2_abv = in_df2.loc[stns_keep_all, 'Bool_Spearman_Correlation'].dropna().values
+# x2_abv = in_df2.loc[stnabove2, 'Distance to neighbor'].dropna().values
+# y2_abv = in_df2.loc[stnabove2, 'Bool_Spearman_Correlation'].dropna().values
 #
-# x3_abv = in_df3.loc[stns_keep_all, 'Distance to neighbor'].dropna().values
-# y3_abv = in_df3.loc[stns_keep_all, 'Bool_Spearman_Correlation'].dropna().values
+# x3_abv = in_df3.loc[stnabove3, 'Distance to neighbor'].dropna().values
+# y3_abv = in_df3.loc[stnabove3, 'Bool_Spearman_Correlation'].dropna().values
 #
-# x4_abv = in_df4.loc[stns_keep_all, 'Distance to neighbor'].dropna().values
-# y4_abv = in_df4.loc[stns_keep_all, 'Bool_Spearman_Correlation'].dropna().values
-
-x0_abv = in_df0.loc[stnabove0, 'Distance to neighbor'].dropna().values
-y0_abv = in_df0.loc[stnabove0, 'Bool_Spearman_Correlation'].dropna().values
-
-x1_abv = in_df1.loc[stnabove1, 'Distance to neighbor'].dropna().values
-y1_abv = in_df1.loc[stnabove1, 'Bool_Spearman_Correlation'].dropna().values
-
-x2_abv = in_df2.loc[stnabove2, 'Distance to neighbor'].dropna().values
-y2_abv = in_df2.loc[stnabove2, 'Bool_Spearman_Correlation'].dropna().values
-
-x3_abv = in_df3.loc[stnabove3, 'Distance to neighbor'].dropna().values
-y3_abv = in_df3.loc[stnabove3, 'Bool_Spearman_Correlation'].dropna().values
-
-x4_abv = in_df4.loc[stnabove4, 'Distance to neighbor'].dropna().values
-y4_abv = in_df4.loc[stnabove4, 'Bool_Spearman_Correlation'].dropna().values
+# x4_abv = in_df4.loc[stnabove4, 'Distance to neighbor'].dropna().values
+# y4_abv = in_df4.loc[stnabove4, 'Bool_Spearman_Correlation'].dropna().values
 
 #==============================================================================
 # PLOT
@@ -234,31 +234,31 @@ plt.scatter(x4_abv, y4_abv, c='m', alpha=0.5,
             marker='+', label='Fifth Neighbor Stn nbr %d' % y4_abv.shape[0],
             s=marker_size_abv_curve)
 
-plt.scatter(xvals_below_curve0, yvals_below_curve0, c='grey', alpha=0.65,
-            marker='x', s=marker_size_below_curve)
-plt.scatter(xvals_below_curve1, yvals_below_curve1, c='grey', alpha=0.65,
-            marker='.',  s=marker_size_below_curve)
-plt.scatter(xvals_below_curve2, yvals_below_curve2, c='grey', alpha=0.65,
-            marker='d',  s=marker_size_below_curve)
-plt.scatter(xvals_below_curve3, yvals_below_curve3, c='grey', alpha=0.65,
-            marker='*',  s=marker_size_below_curve)
-plt.scatter(xvals_below_curve4, yvals_below_curve4, c='grey', alpha=0.65,
-            marker='+', s=marker_size_below_curve)
+# plt.scatter(xvals_below_curve0, yvals_below_curve0, c='grey', alpha=0.65,
+#             marker='x', s=marker_size_below_curve)
+# plt.scatter(xvals_below_curve1, yvals_below_curve1, c='grey', alpha=0.65,
+#             marker='.',  s=marker_size_below_curve)
+# plt.scatter(xvals_below_curve2, yvals_below_curve2, c='grey', alpha=0.65,
+#             marker='d',  s=marker_size_below_curve)
+# plt.scatter(xvals_below_curve3, yvals_below_curve3, c='grey', alpha=0.65,
+#             marker='*',  s=marker_size_below_curve)
+# plt.scatter(xvals_below_curve4, yvals_below_curve4, c='grey', alpha=0.65,
+#             marker='+', s=marker_size_below_curve)
 
-plt.scatter(x0, y_fitted_shifted0, c='darkred', alpha=0.25,
-            marker='.',  s=marker_size_curve)  # label='Fitted curve 1',
-
-plt.scatter(x1_gd_corr, y_fitted_shifted1, c='darkblue', alpha=0.25,
-            marker='.', s=marker_size_curve)  # label='Fitted curve 2',
-
-plt.scatter(x2_gd_corr, y_fitted_shifted2, c='darkgreen', alpha=0.25,
-            marker='.', s=marker_size_curve)  # label='Fitted curve 3',
-
-plt.scatter(x3_gd_corr, y_fitted_shifted3, c='darkorange', alpha=0.25,
-            marker='.',  s=marker_size_curve)  # label='Fitted curve 4',
-
-plt.scatter(x4_gd_corr, y_fitted_shifted4, c='purple', alpha=0.25,
-            marker='.', s=marker_size_curve)  # label='Fitted curve 5',
+# plt.scatter(x0, y_fitted_shifted0, c='darkred', alpha=0.25,
+#             marker='.',  s=marker_size_curve)  # label='Fitted curve 1',
+#
+# plt.scatter(x1_gd_corr, y_fitted_shifted1, c='darkblue', alpha=0.25,
+#             marker='.', s=marker_size_curve)  # label='Fitted curve 2',
+#
+# plt.scatter(x2_gd_corr, y_fitted_shifted2, c='darkgreen', alpha=0.25,
+#             marker='.', s=marker_size_curve)  # label='Fitted curve 3',
+#
+# plt.scatter(x3_gd_corr, y_fitted_shifted3, c='darkorange', alpha=0.25,
+#             marker='.',  s=marker_size_curve)  # label='Fitted curve 4',
+#
+# plt.scatter(x4_gd_corr, y_fitted_shifted4, c='purple', alpha=0.25,
+#             marker='.', s=marker_size_curve)  # label='Fitted curve 5',
 # plt.show()
 
 plt.xlim([0, max([x3.max(), x4.max()]) + 1000])
@@ -272,7 +272,7 @@ plt.title('Keeping %s %d stations: Indicator correlation with distance'
           ' for upper %s percent for %s data values (each neighbor)'
           % (data_source0, stns_keep_al_sr.shape[0], percent, time_freq))
 plt.savefig(save_dir /
-            (r'_%s_%s_%s_percent_indic_corr_freq_%s_filtered_each_neighbors_data.png'
+            (r'_%s_%s_%s_percent_indic_corr_freq_%s_filtered_all_neighbors_data_only.png'
              % (data_source0, data_source, percent, time_freq)),
             frameon=True, papertype='a4',
             bbox_inches='tight', pad_inches=.2)
