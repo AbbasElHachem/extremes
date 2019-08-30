@@ -228,37 +228,38 @@ plt.scatter(x2_abv, y2_abv, c='g', alpha=0.5,
             marker='d', label='Third Neighbor Stn nbr %d' % y2_abv.shape[0],
             s=marker_size_abv_curve)
 plt.scatter(x3_abv, y3_abv, c='darkorange', alpha=0.5,
-            marker='*', label='Fourth NeighborStn nbr %d' % y3_abv.shape[0],
+            marker='*', label='Fourth Neighbor Stn nbr %d' % y3_abv.shape[0],
             s=marker_size_abv_curve)
 plt.scatter(x4_abv, y4_abv, c='m', alpha=0.5,
             marker='+', label='Fifth Neighbor Stn nbr %d' % y4_abv.shape[0],
             s=marker_size_abv_curve)
 
-# plt.scatter(xvals_below_curve0, yvals_below_curve0, c='grey', alpha=0.65,
-#             marker='x', s=marker_size_below_curve)
-# plt.scatter(xvals_below_curve1, yvals_below_curve1, c='grey', alpha=0.65,
-#             marker='.',  s=marker_size_below_curve)
-# plt.scatter(xvals_below_curve2, yvals_below_curve2, c='grey', alpha=0.65,
-#             marker='d',  s=marker_size_below_curve)
-# plt.scatter(xvals_below_curve3, yvals_below_curve3, c='grey', alpha=0.65,
-#             marker='*',  s=marker_size_below_curve)
-# plt.scatter(xvals_below_curve4, yvals_below_curve4, c='grey', alpha=0.65,
-#             marker='+', s=marker_size_below_curve)
+plt.scatter(xvals_below_curve0, yvals_below_curve0, c='grey', alpha=0.65,
+            marker='x', s=marker_size_below_curve,
+            label='First Neighbor Stn nbr %d' % yvals_below_curve0.shape[0])
+plt.scatter(xvals_below_curve1, yvals_below_curve1, c='grey', alpha=0.65,
+            marker='.',  s=marker_size_below_curve,
+            label='Second Neighbor Stn nbr %d' % yvals_below_curve1.shape[0])
+plt.scatter(xvals_below_curve2, yvals_below_curve2, c='grey', alpha=0.65,
+            marker='d',  s=marker_size_below_curve,
+            label='Third Neighbor Stn nbr %d' % yvals_below_curve2.shape[0])
+plt.scatter(xvals_below_curve3, yvals_below_curve3, c='grey', alpha=0.65,
+            marker='*',  s=marker_size_below_curve,
+            label='Fourth Neighbor Stn nbr %d' % yvals_below_curve3.shape[0])
+plt.scatter(xvals_below_curve4, yvals_below_curve4, c='grey', alpha=0.65,
+            marker='+', s=marker_size_below_curve,
+            label='Fifth Neighbor Stn nbr %d' % yvals_below_curve4.shape[0])
 
-# plt.scatter(x0, y_fitted_shifted0, c='darkred', alpha=0.25,
-#             marker='.',  s=marker_size_curve)  # label='Fitted curve 1',
-#
-# plt.scatter(x1_gd_corr, y_fitted_shifted1, c='darkblue', alpha=0.25,
-#             marker='.', s=marker_size_curve)  # label='Fitted curve 2',
-#
-# plt.scatter(x2_gd_corr, y_fitted_shifted2, c='darkgreen', alpha=0.25,
-#             marker='.', s=marker_size_curve)  # label='Fitted curve 3',
-#
-# plt.scatter(x3_gd_corr, y_fitted_shifted3, c='darkorange', alpha=0.25,
-#             marker='.',  s=marker_size_curve)  # label='Fitted curve 4',
-#
-# plt.scatter(x4_gd_corr, y_fitted_shifted4, c='purple', alpha=0.25,
-#             marker='.', s=marker_size_curve)  # label='Fitted curve 5',
+plt.scatter(x0, y_fitted_shifted0, c='darkred', alpha=0.25,
+            marker='.',  s=marker_size_curve)  # label='Fitted curve 1',
+plt.scatter(x1_gd_corr, y_fitted_shifted1, c='darkblue', alpha=0.25,
+            marker='.', s=marker_size_curve)  # label='Fitted curve 2',
+plt.scatter(x2_gd_corr, y_fitted_shifted2, c='darkgreen', alpha=0.25,
+            marker='.', s=marker_size_curve)  # label='Fitted curve 3',
+plt.scatter(x3_gd_corr, y_fitted_shifted3, c='darkorange', alpha=0.25,
+            marker='.',  s=marker_size_curve)  # label='Fitted curve 4',
+plt.scatter(x4_gd_corr, y_fitted_shifted4, c='purple', alpha=0.25,
+            marker='.', s=marker_size_curve)  # label='Fitted curve 5',
 # plt.show()
 
 plt.xlim([0, max([x3.max(), x4.max()]) + 1000])
@@ -272,7 +273,7 @@ plt.title('Keeping %s %d stations: Indicator correlation with distance'
           ' for upper %s percent for %s data values (each neighbor)'
           % (data_source0, stns_keep_al_sr.shape[0], percent, time_freq))
 plt.savefig(save_dir /
-            (r'_%s_%s_%s_percent_indic_corr_freq_%s_filtered_all_neighbors_data_only.png'
+            (r'_%s_%s_%s_percent_indic_corr_freq_%s_filtered_all_neighbors_data_.png'
              % (data_source0, data_source, percent, time_freq)),
             frameon=True, papertype='a4',
             bbox_inches='tight', pad_inches=.2)
