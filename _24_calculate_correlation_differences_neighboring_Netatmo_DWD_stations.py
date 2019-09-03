@@ -169,7 +169,7 @@ min_dist_thr_ppt = 500000  # 500000  # m
 max_ppt_thr = 100.  # ppt above this value are not considered
 
 # only highest x% of the values are selected
-lower_percentile_val_lst = [92]  # ,95, 99]  # [80, 85, 90, 95, 99]
+lower_percentile_val_lst = [90]  # ,95, 99]  # [80, 85, 90, 95, 99]
 
 
 # ['10min', '60min', '120min', '480min', '720min', '1440min']

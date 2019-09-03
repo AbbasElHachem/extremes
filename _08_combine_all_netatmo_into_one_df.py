@@ -41,9 +41,9 @@ dfs_list_ppt = list(filter(lambda x: 'coords' not in x, dfs_list))
 stn_ids = split_df_file_to_get_alls_stn_ids(dfs_list_ppt)
 # 2014-04-01 00:00:00 for ppt
 date_range = pd.date_range('2014-01-01 00:00:00',
-                           '2019-08-30 00:00:00',
+                           '2019-09-03 00:00:00',
                            freq='H')  # 'H'
-max_ppt_thr = 100  # maximum ppt values per hour
+max_ppt_thr = 200  # maximum ppt values per hour
 
 data_mtx = np.zeros(shape=(date_range.shape[0], len(stn_ids))).astype('float')
 data_mtx[data_mtx == 0] = np.nan

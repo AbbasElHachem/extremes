@@ -82,16 +82,16 @@ df_dwd_daily = pd.read_csv(
 netatmo_maximum_dates = df_netatmo_daily.max(axis=1).sort_values()[::-1]
 dwd_maximum_dates = df_dwd_daily.max(axis=1).sort_values()[::-1]
 
-dwd_corr_netatmo_max = df_dwd_daily.loc[
-    netatmo_maximum_dates.index, :].max(axis=1).sort_values()[::-1].dropna(how='all')
-netatmo_corr_dwd_max = df_netatmo_daily.loc[
-    dwd_maximum_dates.index, :].max(axis=1).sort_values()[::-1].dropna(how='all')
-
+# dwd_corr_netatmo_max = df_dwd_daily.loc[
+#     netatmo_maximum_dates.index, :].max(axis=1).sort_values()[::-1].dropna(how='all')
+# netatmo_corr_dwd_max = df_netatmo_daily.loc[
+#     dwd_maximum_dates.index, :].max(axis=1).sort_values()[::-1].dropna(how='all')
+#
 netatmo_max_100_days = netatmo_maximum_dates[:100].sort_index()
-dwd_corr_netatmo_max_100_days = dwd_corr_netatmo_max[:100].sort_index()
-
+# dwd_corr_netatmo_max_100_days = dwd_corr_netatmo_max[:100].sort_index()
+#
 dwd_max_100_days = dwd_maximum_dates[:100].sort_index()
-net_corr_dwd_max_100_days = netatmo_corr_dwd_max[:100].sort_index()
+# net_corr_dwd_max_100_days = netatmo_corr_dwd_max[:100].sort_index()
 
 
 netatmo_max_100_days.to_csv(
@@ -106,31 +106,31 @@ dwd_max_100_days.to_csv(
 # PLOTTING
 #==============================================================================
 
-xticks = pd.date_range(start=netatmo_max_100_days.index[0],
-                       end=netatmo_max_100_days.index[-1], freq='1D')
-fig, ax = plt.subplots(figsize=(30, 16), dpi=150)
-ax.plot(netatmo_max_100_days.index, netatmo_max_100_days.values,
-        label='Netatmo', color='r', alpha=0.75)
-
-ax.plot(dwd_corr_netatmo_max_100_days.index, dwd_corr_netatmo_max_100_days.values,
-        label='DWD', color='b', alpha=0.75)
-
-
-# ax.set_xticks(xticks)
-
-
-ax.set_xlim([netatmo_max_100_days.index[0], netatmo_max_100_days.index[-1]])
-
-
-ax.tick_params(axis='x', rotation=45)
-ax.xaxis.set_major_formatter(myFmt)
-ax.xaxis.set_ticks(
-    xticks[::int(np.round(xticks.shape[0] / 50))])
-
-plt.title('Highest 100 daily maximum rainfall values')
-plt.ylabel('Rainfall mm/d')
-plt.legend(loc=0)
-plt.grid(alpha=0.5)
-plt.savefig(r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\daily_maximums.png",
-            frameon=True, papertype='a4',
-            bbox_inches='tight', pad_inches=.2)
+# xticks = pd.date_range(start=netatmo_max_100_days.index[0],
+#                        end=netatmo_max_100_days.index[-1], freq='1D')
+# fig, ax = plt.subplots(figsize=(30, 16), dpi=150)
+# ax.plot(netatmo_max_100_days.index, netatmo_max_100_days.values,
+#         label='Netatmo', color='r', alpha=0.75)
+#
+# ax.plot(dwd_corr_netatmo_max_100_days.index, dwd_corr_netatmo_max_100_days.values,
+#         label='DWD', color='b', alpha=0.75)
+#
+#
+# # ax.set_xticks(xticks)
+#
+#
+# ax.set_xlim([netatmo_max_100_days.index[0], netatmo_max_100_days.index[-1]])
+#
+#
+# ax.tick_params(axis='x', rotation=45)
+# ax.xaxis.set_major_formatter(myFmt)
+# ax.xaxis.set_ticks(
+#     xticks[::int(np.round(xticks.shape[0] / 50))])
+#
+# plt.title('Highest 100 daily maximum rainfall values')
+# plt.ylabel('Rainfall mm/d')
+# plt.legend(loc=0)
+# plt.grid(alpha=0.5)
+# plt.savefig(r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\daily_maximums.png",
+#             frameon=True, papertype='a4',
+#             bbox_inches='tight', pad_inches=.2)

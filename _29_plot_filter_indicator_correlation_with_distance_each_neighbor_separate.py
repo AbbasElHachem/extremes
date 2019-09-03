@@ -65,7 +65,7 @@ netatmo_path_acc = r'year_allyears_df_comparing_correlations_max_sep_dist_500000
 dwd_path_Acc = r'year_allyears_df_dwd_correlations'
 
 # def percentage threshold, time frequency and data source
-percent = '92'
+percent = '90'
 time_freq = '60min'
 
 data_source0 = 'Netatmo'  # reference station 'Netatmo'
@@ -269,9 +269,10 @@ plt.ylabel('Indicator Spearman Correlation')
 plt.legend(loc=0)
 plt.grid(alpha=.25)
 
-plt.title('Keeping %s %d stations: Indicator correlation with distance'
+plt.title('Keeping %s %d / %d stations: Indicator correlation with distance'
           ' for upper %s percent for %s data values (each neighbor)'
-          % (data_source0, stns_keep_al_sr.shape[0], percent, time_freq))
+          % (data_source0, stns_keep_al_sr.shape[0],
+              x0.shape[0], percent, time_freq))
 plt.savefig(save_dir /
             (r'_%s_%s_%s_percent_indic_corr_freq_%s_filtered_all_neighbors_data_.png'
              % (data_source0, data_source, percent, time_freq)),

@@ -38,18 +38,18 @@ plt.ioff()
 # TODO: TALK TO PROF
 edf_ppt_0 = 0.44
 
-netatmo_data = False
+netatmo_data = True
 use_good_netatmo_stns = False
 
-dwd_data = True
+dwd_data = False
 
 # =============================================================================
 
 if netatmo_data:
+    #     df_file = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
+    #                r"\all_netatmo_ppt_data_monthly_.csv")
     df_file = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
-               r"\all_netatmo_ppt_data_monthly_.csv")
-# df_file = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
-#            r"\all_netatmo_ppt_data_daily_.csv")
+               r"\all_netatmo_ppt_data_daily_.csv")
 
 # list of Netatmo stations with good indicator correlations
 if use_good_netatmo_stns:
@@ -129,7 +129,7 @@ for stn_ in df_stn0.columns:
 
 df_all.dropna(how='all', inplace=True)
 df_all.to_csv((r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
-               r"\edf_ppt_all_dwd_hourly_.csv"),
+               r"\edf_ppt_all_netatmo_daily_.csv"),
               sep=';', float_format='%.3f')
 
 print('DONE WITH EVERYTHNG !')
