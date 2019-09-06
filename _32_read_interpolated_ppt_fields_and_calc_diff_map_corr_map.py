@@ -79,47 +79,6 @@ def read_nc_ppt_data(nc_file):
     return x_coords, y_coords, time_ix, ppt_data
 
 
-def generate_correlation_map(x, y):
-    """Correlate each n with each m.
-
-    Parameters
-    ----------
-    x : np.array
-      Shape N X T.
-
-    y : np.array
-      Shape M X T.
-
-    Returns
-    -------
-    np.array
-      N X M array in which each element is a correlation coefficient.
-
-    """
-    mu_x = np.nanmean(x, axis=1)
-    mu_y = np.nanmean(y, axis=1)
-    n = x.shape[1]
-    if n != y.shape[1]:
-        raise ValueError('x and y must ' +
-                         'have the same number of timepoints.')
-    s_x = np.nanstd(x, axis=1, ddof=n - 1)
-    s_y = np.nanstd(y, axis=1, ddof=n - 1)
-    cov = np.dot(x,
-                 y.T) - n * np.dot(mu_x[:, np.newaxis],
-                                   mu_y[np.newaxis, :])
-    return cov / np.dot(s_x[:, np.newaxis], s_y[np.newaxis, :])
-
-
-def correlation_coefficient(T1, T2):
-    numerator = np.mean((T1 - T1.mean()) * (T2 - T2.mean()))
-    denominator = T1.std() * T2.std()
-    if denominator == 0:
-        return 0
-    else:
-        result = numerator / denominator
-        return result
-
-
 if __name__ == '__main__':
 
     print('**** Started on %s ****\n' % time.asctime())

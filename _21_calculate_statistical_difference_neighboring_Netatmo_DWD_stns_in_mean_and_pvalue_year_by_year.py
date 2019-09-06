@@ -146,8 +146,8 @@ if not os.path.exists(out_save_dir_orig):
 #
 #==============================================================================
 # for NEtatmo coords df
-x_col_name = ' lon'
-y_col_name = ' lat'
+x_col_name = 'lon'
+y_col_name = 'lat'
 
 # min distance threshold used for selecting neighbours
 min_dist_thr_ppt = 5000  # m

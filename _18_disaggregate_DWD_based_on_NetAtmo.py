@@ -54,13 +54,13 @@ register_matplotlib_converters()
 #==============================================================================
 
 path_to_ppt_netatmo_data = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-                            r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_.csv')
+                            r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new.csv')
 assert os.path.exists(path_to_ppt_netatmo_data), 'wrong NETATMO Ppt file'
 
 # path_to_ppt_hdf_data = (r'X:\exchange\ElHachem'
 #                         r'\niederschlag_deutschland'
 #                         r'\1993_2016_5min_merge_nan.h5')
-path_to_ppt_hdf_data = (r'E:\download_DWD_data_recent'
+path_to_ppt_hdf_data = (r'F:\download_DWD_data_recent'
                         r'\DWD_60Min_ppt_stns_19950101000000_20190715000000_new.h5')
 
 assert os.path.exists(path_to_ppt_hdf_data), 'wrong DWD Ppt file'
@@ -171,7 +171,7 @@ def scatter_original_disaggregated_values(stn_1_id,
     plt.ioff()
     fig = plt.figure(figsize=(24, 12), dpi=200)
     ax = fig.add_subplot(111)
-    ax2 = ax.twinx()
+#     ax2 = ax.twinx()
 #     ax2.plot(time_arr, df2.values, c='red', marker='+', markersize=2,
 #             alpha=0.25)  # , label=stn2_id)
 
@@ -182,19 +182,19 @@ def scatter_original_disaggregated_values(stn_1_id,
                # linestyle='--',
                # linewidth=2,
                alpha=0.5,
-               s=8,
-               label='DWD Original vs Disaggregated %s' % stn_1_id)
+               s=15,
+               label='Original vs Disaggregated')
 
-    ax2.scatter(df_dwd_hourly_disagg.values.ravel(),
-                df_netatmo_hourly_orig.values.ravel(),
-                c='g',
-                marker='*',
-                # linestyle='--',
-                # linewidth=2,
-                alpha=0.25,
-                s=5,
-                label='Netatmo Original %s vs DWD Disaggregated %s'
-                % (stn_2_id, stn_1_id))
+#     ax2.scatter(df_dwd_hourly_disagg.values.ravel(),
+#                 df_netatmo_hourly_orig.values.ravel(),
+#                 c='g',
+#                 marker='*',
+#                 # linestyle='--',
+#                 # linewidth=2,
+#                 alpha=0.35,
+#                 s=8,
+#                 label='Netatmo Original %s vs DWD Disaggregated %s'
+#                 % (stn_2_id, stn_1_id))
 
     # calculate correlations (pearson and spearman)
     pear_corr_dwd_orig_dwd_disagg = pears(df_dwd_hourly_disagg.values,
@@ -203,77 +203,77 @@ def scatter_original_disaggregated_values(stn_1_id,
     spr_corr_dwd_orig_dwd_disagg = spr(df_dwd_hourly_disagg.values,
                                        df_dwd_hourly_orig.values)[0]
 
-    pear_corr_dwd_orig_netatmo = pears(df_netatmo_hourly_orig.values,
-                                       df_dwd_hourly_orig.values)[0]
-
-    spr_corr_dwd_orig_netatmo = spr(df_netatmo_hourly_orig.values,
-                                    df_dwd_hourly_orig.values)[0]
-
-    pear_corr_netatmo_dwd_disagg = pears(df_dwd_hourly_disagg.values,
-                                         df_netatmo_hourly_orig.values)[0]
-
-    spr_corr_netatmo_dwd_disagg = spr(df_dwd_hourly_disagg.values,
-                                      df_netatmo_hourly_orig.values)[0]
+#     pear_corr_dwd_orig_netatmo = pears(df_netatmo_hourly_orig.values,
+#                                        df_dwd_hourly_orig.values)[0]
+#
+#     spr_corr_dwd_orig_netatmo = spr(df_netatmo_hourly_orig.values,
+#                                     df_dwd_hourly_orig.values)[0]
+#
+#     pear_corr_netatmo_dwd_disagg = pears(df_dwd_hourly_disagg.values,
+#                                          df_netatmo_hourly_orig.values)[0]
+#
+#     spr_corr_netatmo_dwd_disagg = spr(df_dwd_hourly_disagg.values,
+#                                       df_netatmo_hourly_orig.values)[0]
 
     # plot 45 deg line
     _min = min(0, min(df_dwd_hourly_orig.values.min(),
-                      df_dwd_hourly_disagg.values.min(),
-                      df_netatmo_hourly_orig.values.min()))
+                      df_dwd_hourly_disagg.values.min()))
+    # df_netatmo_hourly_orig.values.min()))
 
     _max = max(df_dwd_hourly_orig.values.max(),
-               df_dwd_hourly_disagg.values.max(),
-               df_netatmo_hourly_orig.values.max())
+               df_dwd_hourly_disagg.values.max())
+    # df_netatmo_hourly_orig.values.max())
 
     ax.plot([_min, _max], [_min, _max], c='k', linestyle='--', alpha=0.25)
-    ax2.plot([_min, _max], [_min, _max], c='b', linestyle='--', alpha=0.25)
+    #ax2.plot([_min, _max], [_min, _max], c='b', linestyle='--', alpha=0.25)
 
     # set plot limit
     ax.set_xlim(-0.1, _max + 0.1)
     ax.set_ylim(-0.1, _max + 0.1)
-    ax2.set_ylim(-0.1, _max + 0.1)
+#     ax2.set_ylim(-0.1, _max + 0.1)
 
-    ax.xaxis.set_major_locator(MultipleLocator(2))
-    ax.yaxis.set_major_locator(MultipleLocator(2))
-    ax2.yaxis.set_major_locator(MultipleLocator(2))
+    ax.xaxis.set_major_locator(MultipleLocator(10))
+    ax.yaxis.set_major_locator(MultipleLocator(10))
+#     ax2.yaxis.set_major_locator(MultipleLocator(2))
 
     ax.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
     ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
 
-    ax.set_xlabel('Stn  %s  Disaggregated Precipitation  in mm/hour '
+    ax.set_xlabel('Stn  %s  Disaggregated Netatmo Ppt in mm/hour'
                   % (stn_1_id))
-    ax.set_ylabel('Stn  %s  Orig DWD Ppt in mm/hour ' % (stn_1_id))
-    ax2.set_ylabel('Stn  %s  Netatmo Ppt in mm/hour ' % (stn_2_id))
+    ax.set_ylabel('Stn  %s  Original Netatmo Ppt in mm/hour ' % (stn_1_id))
+#     ax2.set_ylabel('Stn  %s  Netatmo Ppt in mm/hour ' % (stn_2_id))
 
-    ax.tick_params('y', colors='red')
-    ax2.tick_params('y', colors='g')
+    ax.tick_params('y', colors='k')
+#     ax2.tick_params('y', colors='g')
 
     ax.set_title("Hourly Stn: %s vs Stn: %s; Distance: %0.1f m \n "
-                 " DWD Orig- DWD Disagg:"
-                 " Pearson Corr %0.2f ; Spearman Corr %0.2f \n"
+                 " Netatmo Orig - Netatmo Disagg: \n"
+                 " Pearson Corr %0.2f ; Spearman Corr %0.2f "
 
-                 " DWD Orig- Netatmo:"
-                 " Pearson Corr %0.2f ; Spearman Corr %0.2f \n"
-
-                 " Netatmo- DWD Disagg:"
-                 " Pearson Corr %0.2f ; Spearman Corr %0.2f"
+                 #                  " DWD Orig - Netatmo Orig:"
+                 #                  " Pearson Corr %0.2f ; Spearman Corr %0.2f \n"
+                 #
+                 #                  " Netatmo Orig - DWD Disagg:"
+                 #                  " Pearson Corr %0.2f ; Spearman Corr %0.2f"
                  % (stn_1_id, stn_2_id,
                      sep_dist_netatmo_dwd,
                      pear_corr_dwd_orig_dwd_disagg,
-                    spr_corr_dwd_orig_dwd_disagg,
-                    pear_corr_dwd_orig_netatmo,
-                    spr_corr_dwd_orig_netatmo,
-                    pear_corr_netatmo_dwd_disagg,
-                    spr_corr_netatmo_dwd_disagg))
-#     ax.legend(loc=0)
+                    spr_corr_dwd_orig_dwd_disagg))
+#                     pear_corr_dwd_orig_netatmo,
+#                     spr_corr_dwd_orig_netatmo,
+#                     pear_corr_netatmo_dwd_disagg,
+#                     spr_corr_netatmo_dwd_disagg))
+    ax.legend(loc=0)
 #     ax2.legend(loc=0)
-    ax.grid(color='k', linestyle='--', linewidth=0.1, alpha=0.5)
+    ax.grid(color='k', linestyle='--', linewidth=0.25, alpha=0.5)
 
 #     plt.xticks(rotation=45)
 
 #     plt.tight_layout()
     plt.savefig(
         os.path.join(out_dir,
-                     'scatter_orig_vs_disaggregated_ppt_stn_%s_vs_stn_%s_.png'
+                     'scatter_orig_vs_disaggregated_ppt_stn_%s_vs_stn_%s_2.png'
                      % (stn_1_id, stn_2_id)))
     plt.clf()
     plt.close('all')
@@ -342,9 +342,13 @@ def construct_netatmo_dwd_daily_dfs(netatmo_ppt_df_file,
                     df_disaggregated = pd.DataFrame(data=empty_data_arr,
                                                     index=df_dwd_hourly.index)
                     # TODO: don't hard code
-                    df_to_disagg = df_dwd_hourly
-                    df_sum_daily_df_to_disagg = df_dwd_daily
-                    df_sum_daily_df_ref = df_netatmo_daily
+#                     df_to_disagg = df_dwd_hourly
+#                     df_sum_daily_df_to_disagg = df_dwd_daily
+#                     df_sum_daily_df_ref = df_netatmo_daily
+
+                    df_to_disagg = df_netatmo_hourly
+                    df_sum_daily_df_to_disagg = df_netatmo_daily
+                    df_sum_daily_df_ref = df_dwd_daily
 
                     for idx, val in zip(df_to_disagg.index,
                                         df_to_disagg.values):
@@ -377,13 +381,15 @@ def construct_netatmo_dwd_daily_dfs(netatmo_ppt_df_file,
                                 df_disaggregated.loc[idx] = np.nan
                                 print('index not in daily values ppt is nan')
 
-                    plot_original_disaggregated_values(stn_id,
-                                                       stn_2_id,
-                                                       df_dwd_hourly,
-                                                       df_disaggregated,
-                                                       df_netatmo_hourly,
-                                                       min_dist,
-                                                       out_save_dir_orig)
+                    df_disaggregated.dropna(inplace=True)
+
+#                     plot_original_disaggregated_values(stn_id,
+#                                                        stn_2_id,
+#                                                        df_dwd_hourly,
+#                                                        df_disaggregated,
+#                                                        df_netatmo_hourly,
+#                                                        min_dist,
+#                                                        out_save_dir_orig)
                     scatter_original_disaggregated_values(stn_id,
                                                           stn_2_id,
                                                           df_dwd_hourly,

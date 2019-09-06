@@ -38,7 +38,7 @@ from _10_aggregate_plot_compare_2_DWD_stns import (plt_bar_plot_2_stns,
 
 path_to_ppt_netatmo_data = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
                             r'\NetAtmo_BW'
-                            r'\ppt_all_netatmo_hourly_stns_combined_.csv')
+                            r'\ppt_all_netatmo_hourly_stns_combined_new.csv')
 assert os.path.exists(path_to_ppt_netatmo_data), 'wrong NETATMO Ppt file'
 
 coords_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
@@ -53,8 +53,8 @@ out_save_dir = (
 if not os.path.exists(out_save_dir):
     os.mkdir(out_save_dir)
 
-x_col_name = ' lon'
-y_col_name = ' lat'
+x_col_name = 'lon'
+y_col_name = 'lat'
 
 
 # threshold for CDF, consider only above thr, below is P0
@@ -126,7 +126,7 @@ def compare_cdf_two_stns(netatmo_ppt_df_file):
                                      engine='c')
     stns_ids = in_netatmo_stns_df.columns
 
-    for stn_id in stns_ids[5:]:
+    for stn_id in stns_ids[2:]:
         print('First Stn Id is', stn_id)
         try:
             idf1 = in_netatmo_stns_df.loc[:, stn_id]
@@ -143,8 +143,8 @@ def compare_cdf_two_stns(netatmo_ppt_df_file):
                 df_common1, df_common2 = resample_intersect_2_dfs(idf1,
                                                                   idf2,
                                                                   tem_freq)
-                if (df_common1.values.shape[0] > 10 and
-                        df_common2.values.shape[0] > 10):
+                if (df_common1.values.shape[0] > 1 and
+                        df_common2.values.shape[0] > 1):
                     try:
                         plt_bar_plot_2_stns(stn_id,
                                             stn_near,
@@ -169,13 +169,13 @@ def compare_cdf_two_stns(netatmo_ppt_df_file):
                                                  tem_freq,
                                                  ppt_thr,
                                                  out_save_dir)
-                        plot_normalized_ranked_stns(stn_id,
-                                                    stn_near,
-                                                    distance_near,
-                                                    df_common1,
-                                                    df_common2,
-                                                    tem_freq,
-                                                    out_save_dir)
+                        # plot_normalized_ranked_stns(stn_id,
+                        #                            stn_near,
+                        #                            distance_near,
+                        #                            df_common1,
+                        #                            df_common2,
+                        #                            tem_freq,
+                        #                            out_save_dir)
                     except Exception as msg:
                         print('error while plotting', msg, tem_freq)
                         continue

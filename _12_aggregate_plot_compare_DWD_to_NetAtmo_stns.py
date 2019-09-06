@@ -56,7 +56,7 @@ from b_get_data import HDF5
 
 path_to_ppt_hourly_netatmo_data = (
     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-    r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_.csv')
+    r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new.csv')
 assert os.path.exists(
     path_to_ppt_hourly_netatmo_data), 'wrong NETATMO Ppt file'
 
@@ -66,7 +66,7 @@ path_to_ppt_5min_netatmo_data = (
 assert os.path.exists(
     path_to_ppt_5min_netatmo_data), 'wrong NETATMO Ppt file'
 
-path_to_ppt_hdf_data = (r'X:\exchange\ElHachem'
+path_to_ppt_hdf_data = (r'F:\data_from_exchange'
                         r'\niederschlag_deutschland'
                         r'\1993_2016_5min_merge_nan.h5')
 assert os.path.exists(path_to_ppt_hdf_data), 'wrong NETATMO Ppt file'
@@ -190,20 +190,20 @@ def compare_cdf_two_stns(netatmo_ppt_df_file, path_to_ppt_hdf_data,
                                                          ppt_thr_min,
                                                          out_save_dir)
 
-                                plot_normalized_sorted_ranked_stns(stn_id,
-                                                                   stn_2_id,
-                                                                   min_dist,
-                                                                   df_common1,
-                                                                   df_common2,
-                                                                   tem_freq,
-                                                                   out_save_dir)
-                                plot_normalized_ranked_stns(stn_id,
-                                                            stn_2_id,
-                                                            min_dist,
-                                                            df_common1,
-                                                            df_common2,
-                                                            tem_freq,
-                                                            out_save_dir)
+#                                 plot_normalized_sorted_ranked_stns(stn_id,
+#                                                                    stn_2_id,
+#                                                                    min_dist,
+#                                                                    df_common1,
+#                                                                    df_common2,
+#                                                                    tem_freq,
+#                                                                    out_save_dir)
+#                                 plot_normalized_ranked_stns(stn_id,
+#                                                             stn_2_id,
+#                                                             min_dist,
+#                                                             df_common1,
+#                                                             df_common2,
+#                                                             tem_freq,
+#                                                             out_save_dir)
                                 plot_sorted_stns_vals(stn_id,
                                                       stn_2_id,
                                                       min_dist,
@@ -235,15 +235,15 @@ def compare_cdf_two_stns(netatmo_ppt_df_file, path_to_ppt_hdf_data,
                                     print(
                                         True, 'Plotting P0 and Contingency Tables')
 
-#                                     plot_p0_as_a_sequence_two_stns(
-#                                         stn_id,
-#                                         stn_2_id,
-#                                         min_dist,
-#                                         ppt_thrs_list,
-#                                         idf1,
-#                                         idf2,
-#                                         aggregation_frequencies,
-#                                         out_save_dir)
+                                    plot_p0_as_a_sequence_two_stns(
+                                        stn_id,
+                                        stn_2_id,
+                                        min_dist,
+                                        ppt_thrs_list,
+                                        idf1,
+                                        idf2,
+                                        aggregation_frequencies,
+                                        out_save_dir)
 
                                     plot_contingency_tables_as_a_sequence_two_stns(
                                         stn_2_id,

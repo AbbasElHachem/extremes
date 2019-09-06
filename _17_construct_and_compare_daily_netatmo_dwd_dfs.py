@@ -41,15 +41,15 @@ plt.ioff()
 #==============================================================================
 
 path_to_ppt_netatmo_data = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-                            r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_.csv')
+                            r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new.csv')
 assert os.path.exists(path_to_ppt_netatmo_data), 'wrong NETATMO Ppt file'
 
-path_to_ppt_hdf_data = (r'X:\exchange\ElHachem'
+path_to_ppt_hdf_data = (r'F:\data_from_exchange'
                         r'\niederschlag_deutschland'
                         r'\1993_2016_5min_merge_nan.h5')
 assert os.path.exists(path_to_ppt_hdf_data), 'wrong NETATMO Ppt file'
 
-coords_dwd_df_file = (r'X:\exchange\ElHachem\niederschlag_deutschland'
+coords_dwd_df_file = (r'F:\data_from_exchange\niederschlag_deutschland'
                       r'\1993_2016_5min_merge_nan.csv')
 assert os.path.exists(coords_dwd_df_file), 'wrong DWD coords file'
 
@@ -392,7 +392,7 @@ def construct_netatmo_dwd_daily_dfs(netatmo_ppt_df_file,
                 ascending=True)
 
             min_dist = sorted_distances.values[0]
-            if min_dist <= 5000:
+            if min_dist <= 50000:
 
                 stn_2_id = sorted_distances.index[0]
 
@@ -408,7 +408,7 @@ def construct_netatmo_dwd_daily_dfs(netatmo_ppt_df_file,
                     idf2,
                     '60min')
 
-                if (df_netatmo_hourly.values.shape[0] > 1000):
+                if (df_netatmo_hourly.values.shape[0] > 10):
                     if save_df_common:
                         df_combined.loc[:, stn_id] = df_netatmo_hourly
                         df_combined.loc[:, stn_2_id] = df_dwd_hourly
@@ -425,29 +425,29 @@ def construct_netatmo_dwd_daily_dfs(netatmo_ppt_df_file,
                     df_netatmo_daily = resampleDf(df_netatmo_hourly, '1440min')
                     df_dwd_daily = resampleDf(df_dwd_hourly, '1440min')
 
-#                     plot_values_2_stns(stn_id,
-#                                        stn_2_id,
-#                                        df_netatmo_daily,
-#                                        df_dwd_daily,
-#                                        min_dist,
-#                                        '1440min',
-#                                        out_save_dir_orig)
+                    plot_values_2_stns(stn_id,
+                                       stn_2_id,
+                                       df_netatmo_daily,
+                                       df_dwd_daily,
+                                       min_dist,
+                                       '1440min',
+                                       out_save_dir_orig)
 
-#                     plot_ratio_2_stns(stn_id,
-#                                       stn_2_id,
-#                                       df_netatmo_daily,
-#                                       df_dwd_daily,
-#                                       min_dist,
-#                                       '1440min',
-#                                       out_save_dir_orig)
+                    plot_ratio_2_stns(stn_id,
+                                      stn_2_id,
+                                      df_netatmo_daily,
+                                      df_dwd_daily,
+                                      min_dist,
+                                      '1440min',
+                                      out_save_dir_orig)
 
-#                     plot_max_daily_vals_2_stns(stn_id,
-#                                                stn_2_id,
-#                                                df_netatmo_daily,
-#                                                df_dwd_daily,
-#                                                min_dist,
-#                                                '1440min',
-#                                                out_save_dir_orig)
+                    plot_max_daily_vals_2_stns(stn_id,
+                                               stn_2_id,
+                                               df_netatmo_daily,
+                                               df_dwd_daily,
+                                               min_dist,
+                                               '1440min',
+                                               out_save_dir_orig)
 
                     plot_max_monthly_vals_2_stns(stn_id,
                                                  stn_2_id,

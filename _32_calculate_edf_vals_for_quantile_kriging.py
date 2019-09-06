@@ -48,9 +48,10 @@ dwd_data = False
 if netatmo_data:
     #     df_file = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
     #                r"\all_netatmo_ppt_data_monthly_.csv")
+    #     df_file = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
+    #                r"\all_netatmo_ppt_data_daily_.csv")
     df_file = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
-               r"\all_netatmo_ppt_data_daily_.csv")
-
+               r"\ppt_all_netatmo_hourly_stns_combined_new.csv")
 # list of Netatmo stations with good indicator correlations
 if use_good_netatmo_stns:
     df_stns = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes"
@@ -129,7 +130,7 @@ for stn_ in df_stn0.columns:
 
 df_all.dropna(how='all', inplace=True)
 df_all.to_csv((r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
-               r"\edf_ppt_all_netatmo_daily_.csv"),
+               r"\edf_ppt_all_netatmo_hourly_.csv"),
               sep=';', float_format='%.3f')
 
 print('DONE WITH EVERYTHNG !')

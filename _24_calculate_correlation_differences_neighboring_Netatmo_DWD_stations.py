@@ -159,11 +159,11 @@ if not os.path.exists(out_save_dir_orig):
 #
 #==============================================================================
 # used in Netatmo coords df
-x_col_name = ' lon'
-y_col_name = ' lat'
+x_col_name = 'lon'
+y_col_name = 'lat'
 
 # min distance threshold used for selecting neighbours
-min_dist_thr_ppt = 500000  # 500000  # m
+min_dist_thr_ppt = 5000  # 500000  # m
 
 # threshold for max ppt value per hour
 max_ppt_thr = 100.  # ppt above this value are not considered
@@ -184,7 +184,7 @@ min_req_ppt_vals = 30  # minimum values that should be available per station
 # this is used to keep only data where month is not in this list
 not_convective_season = [10, 11, 12, 1, 2, 3, 4]  # oct till april
 
-plot_figures = False
+plot_figures = True
 
 date_fmt = '%Y-%m-%d %H:%M:%S'
 
@@ -531,8 +531,8 @@ if __name__ == '__main__':
 
                     print('\n********\n Plotting Correlation maps')
                     for col_label in df_results_correlations.columns:
-                        if ('Correlation' in col_label
-                                and 'Bool_Spearman' in col_label):
+                        if ('Correlation' in col_label):
+                                # and 'Bool_Spearman' in col_label):
                             # plot the results of df_results_correlations
                             plt_on_map_agreements(
                                 df_correlations=df_results_correlations,

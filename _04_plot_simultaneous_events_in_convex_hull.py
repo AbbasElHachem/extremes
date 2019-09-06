@@ -52,7 +52,7 @@ from _02_get_data_simultaneous_stns import get_events_stn_data
 
 # plt.style.use('fast')
 plt.rcParams.update({'font.size': 14})
-plt.rcParams.update({'axes.labelsize': 12})
+plt.rcParams.update({'axes.labelsize': 14})
 
 #==============================================================================
 #
@@ -61,7 +61,7 @@ path_to_dfs_simultaneous_events = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\thr8
 
 out_plots_dir = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\thr8Plots_DWD'
 
-path_to_ppt_coords_data = (r'X:\exchange\ElHachem'
+path_to_ppt_coords_data = (r'F:\data_from_exchange'
                            r'\niederschlag_deutschland'
                            r'\1993_2016_5min_merge_nan.csv')
 
@@ -174,34 +174,38 @@ def plot_stations_in_convex_hull(path_to_events,
             index=time_vals, columns=stns_2_ids_vals_dict_in_circle.keys())
         save_event_time = event_date.replace(
             ':', '_').replace(' ', '_').replace('-', '_')
+
+        texts = []
+        fig = plt.figure(figsize=(20, 16), dpi=75)
+        ax = fig.add_subplot(111)
+
+        for shape_ in shp_de.shapeRecords():
+            lon = [i[0]
+                   for i in shape_.shape.points[:][::-1]]
+            lat = [i[1]
+                   for i in shape_.shape.points[:][::-1]]
+
+            x0, y0 = convert_coords_fr_wgs84_to_utm32_(
+                wgs82, utm32, lon, lat)
+            ax.scatter(x0, y0, marker='.',
+                       c='lightgrey', alpha=0.5, s=2)
+        # plot first station
+        ax.scatter(stn_one_xcoords,
+                   stn_one_ycoords,
+                   c='red',
+                   marker='X',
+                   s=50,
+                   label=('Stn %s Ppt %0.2f mm'
+                          % (str(int(stn_one_id)),
+                             ppt_stn_one)))
+
+        ppt_stn_one_float_format = '% 0.2f' % ppt_stn_one
+        texts.append(ax.text(stn_one_xcoords,
+                             stn_one_ycoords,
+                             ppt_stn_one_float_format))
         for timeval in time_vals:
             print(timeval)
             # plot all other simultaneous stations
-            texts = []
-
-            fig = plt.figure(figsize=(20, 20), dpi=75)
-            ax = fig.add_subplot(111)
-            for shape_ in shp_de.shapeRecords():
-                lon = [i[0]
-                       for i in shape_.shape.points[:][::-1]]
-                lat = [i[1]
-                       for i in shape_.shape.points[:][::-1]]
-
-                x0, y0 = convert_coords_fr_wgs84_to_utm32_(
-                    wgs82, utm32, lon, lat)
-
-                ax.scatter(x0, y0, marker='.',
-                           c='lightgrey', alpha=0.5, s=2)
-
-                # plot first station
-                ax.scatter(stn_one_xcoords,
-                           stn_one_ycoords,
-                           c='red',
-                           marker='X',
-                           s=50,
-                           label=('Stn %s Ppt %0.2f mm'
-                                  % (str(int(stn_one_id)),
-                                     ppt_stn_one)))
 
             for i, stn2_id in enumerate(stns2_ids_in_circle):
                 stn2_xcoord = stns2_xcoords_in_circle[i]
@@ -217,66 +221,61 @@ def plot_stations_in_convex_hull(path_to_events,
                 df_out.loc['Richtung', stn2_id] = orient
                 if len(time_idx_val) > 0:
                     df_out.loc[timeval, stn2_id] = np.float(time_idx_val[0])
-#
-                    ax.scatter(stn2_xcoord,
-                               stn2_ycoord,
-                               c=colors_dict[timeval][0],
-                               marker=markers_time_dict[timeval],
-                               s=45,
-                               label=('Stn %s Ppt %0.2f at %0.0f min'
-                                      % (str(int(stn2_id)),
-                                         time_idx_val[0],
-                                         timeval)))
 
-#                     val_float_format = '% 0.1f mm %0.0f min' % (
-#                         time_idx_val[0], timeval)
-                    val_float_format = '% 0.1f mm' % (time_idx_val[0])
+                    if time_idx_val[0] > 1:
+                        ax.scatter(stn2_xcoord,
+                                   stn2_ycoord,
+                                   c=colors_dict[timeval][0],
+                                   marker=markers_time_dict[timeval],
+                                   s=45,
+                                   label=('Stn %s Ppt %0.2f at %0.0f min'
+                                          % (str(int(stn2_id)),
+                                             time_idx_val[0],
+                                             timeval)))
 
-                    texts.append(ax.text(stn2_xcoord,
-                                         stn2_ycoord,
-                                         val_float_format,
-                                         color='k'))
-                    # color=colrs_dict[timeval][0]))
+                        val_float_format = '% 0.1f mm %0.0f min' % (
+                            time_idx_val[0], timeval)
+    #                     val_float_format = '% 0.1f mm' % (time_idx_val[0])
 
-            ppt_stn_one_float_format = '% 0.2f' % ppt_stn_one
-            texts.append(ax.text(stn_one_xcoords,
-                                 stn_one_ycoords,
-                                 ppt_stn_one_float_format))
+                        texts.append(ax.text(stn2_xcoord,
+                                             stn2_ycoord,
+                                             val_float_format,
+                                             color=colors_dict[timeval][0]))
+                    # color=colors_dict[timeval][0]))
 
-            adjust_text(texts, ax=ax,
-                        arrowprops=dict(arrowstyle='->', color='red', lw=0.25))
+        adjust_text(texts, ax=ax,
+                    arrowprops=dict(arrowstyle='->', color='red', lw=0.25))
 
-            ax.set_title('Event_at_station_%s_ppt_thr_%smm_at_%s_at_time_%dmin'
-                         % (str(int(stn_one_id)), ppt_thr,
-                             event_date, timeval))
+        ax.set_title('Event_at_station_%s_ppt_thr_%smm_at_%s_neighbors_abv_1mm_shown_'
+                     % (str(int(stn_one_id)), ppt_thr, event_date))
 
-            ax.grid(alpha=0.25)
+        ax.grid(alpha=0.25)
 
-            ax.set_xlabel("Longitude")
-            ax.set_ylabel("Latitude")
+        ax.set_xlabel("Longitude")
+        ax.set_ylabel("Latitude")
 
-            ax.set_xlim([250000, 950000])
-            ax.set_ylim([5200000, 6110000])
-            ax.set_aspect(1.0)
+        ax.set_xlim([250000, 950000])
+        ax.set_ylim([5200000, 6110000])
+        ax.set_aspect(1.0)
 
-            plt.tight_layout()
+        plt.tight_layout()
 
-            plt.savefig(
-                os.path.join(out_event_path,
-                             'station_%s_ppt_thr_%smm_at_%s_2_%dmin_.png'
-                             % (str(int(stn_one_id)),
-                                ppt_thr, save_event_time,
-                                timeval)),
-                frameon=True, papertype='a4',
-                bbox_inches='tight', pad_inches=.2)
-            plt.close()
-            print('Finished plotting')
-        df_out.to_csv(
+        plt.savefig(
             os.path.join(out_event_path,
-                         'station_%s_ppt_thr_%smm_at_%s_2_%dmin_.csv'
+                         'station_%s_ppt_thr_%smm_at_%s_2_%dmin_.png'
                          % (str(int(stn_one_id)),
                             ppt_thr, save_event_time,
-                            timeval)), sep=';', float_format='%.2f')
+                            timeval)),
+            frameon=True, papertype='a4',
+            bbox_inches='tight', pad_inches=.2)
+        plt.close()
+        print('Finished plotting')
+        df_out.to_csv(
+            os.path.join(out_event_path,
+                         'station_%s_ppt_thr_%smm_at_%s_.csv'
+                         % (str(int(stn_one_id)),
+                            ppt_thr, save_event_time
+                            )), sep=';', float_format='%.2f')
 
     return df_out
 #==============================================================================

@@ -678,7 +678,7 @@ def plot_contingency_tables_as_a_sequence_two_stns(stn_id,
 #==============================================================================
 def compare_two_dwd_stns(stns_ids):
 
-    for iid in stns_ids:
+    for iid in stns_ids[1:]:
         print('First Stn Id is', iid)
         try:
             idf1 = HDF52.get_pandas_dataframe(ids=[iid])
@@ -704,8 +704,8 @@ def compare_two_dwd_stns(stns_ids):
                                                                   idf2,
                                                                   tem_freq)
 
-                if (df_common1.values.shape[0] > 1000 and
-                        df_common2.values.shape[0] > 1000):
+                if (df_common1.values.shape[0] > 30 and
+                        df_common2.values.shape[0] > 30):
                     df_common1 = pd.DataFrame(
                         data=df_common1.values,
                         index=df_common1.index,
@@ -732,17 +732,17 @@ def compare_two_dwd_stns(stns_ids):
                                                  df_common1, df_common2,
                                                  tem_freq, ppt_thr_min,
                                                  out_save_dir)
-                        plot_normalized_ranked_stns(iid, stn_near,
-                                                    distance_near,
-                                                    df_common1, df_common2,
-                                                    tem_freq,
-                                                    out_save_dir)
-                        plot_normalized_sorted_ranked_stns(iid, stn_near,
-                                                           distance_near,
-                                                           df_common1,
-                                                           df_common2,
-                                                           tem_freq,
-                                                           out_save_dir)
+                        # plot_normalized_ranked_stns(iid, stn_near,
+                        #                            distance_near,
+                        #                           df_common1, df_common2,
+                        #                            tem_freq,
+                        #                            out_save_dir)
+                        # plot_normalized_sorted_ranked_stns(iid, stn_near,
+                        #                                   distance_near,
+                        #                                   df_common1,
+                        #                                   df_common2,
+                        #                                   tem_freq,
+                        #                                   out_save_dir)
                         plot_sorted_stns_vals(iid, stn_near, distance_near,
                                               df_common1, df_common2,
                                               tem_freq,
@@ -758,8 +758,8 @@ def compare_two_dwd_stns(stns_ids):
                     break
 
             if os.path.exists(out_save_dir):
-                if (idf1.values.shape[0] > 1000 and
-                        idf1.values.shape[0] > 1000):
+                if (idf1.values.shape[0] > 30 and
+                        idf1.values.shape[0] > 30):
                     # TODO: check is it works
                     ppt_thr = ppt_thrs_list[0]
                     print('Testing for Ppt Threshold of', ppt_thr)
@@ -774,15 +774,15 @@ def compare_two_dwd_stns(stns_ids):
                             print(True, 'Plotting P0 and Contingency Tables')
 
                             # CHECK again with out dir
-#                             plot_p0_as_a_sequence_two_stns(
-#                                 iid,
-#                                 stn_near,
-#                                 distance_near,
-#                                 ppt_thrs_list,
-#                                 idf1,
-#                                 idf2,
-#                                 aggregation_frequencies,
-#                                 out_save_dir)
+                            plot_p0_as_a_sequence_two_stns(
+                                iid,
+                                stn_near,
+                                distance_near,
+                                ppt_thrs_list,
+                                idf1,
+                                idf2,
+                                aggregation_frequencies,
+                                out_save_dir)
 
                             plot_contingency_tables_as_a_sequence_two_stns(
                                 iid,
@@ -799,8 +799,8 @@ def compare_two_dwd_stns(stns_ids):
                             break
                 else:
                     print('not enough data for P0, Contnigency tables')
-            if not os.listdir(out_save_dir):
-                os.rmdir(out_save_dir)
+            # if not os.listdir(out_save_dir):
+            #    os.rmdir(out_save_dir)
 
         except Exception as msg:
             print(msg)

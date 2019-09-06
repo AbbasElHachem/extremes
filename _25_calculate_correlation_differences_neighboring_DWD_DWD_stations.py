@@ -114,18 +114,19 @@ x_col_name = 'X'
 y_col_name = 'Y'
 
 # only highest x% of the values are selected
-lower_percentile_val_lst = [95]  # 80, 85, 90,
+lower_percentile_val_lst = [99]  # 80, 85, 90,
 
 
 # temporal aggregation of df
 # , '120min', '480min', '720min', '1440min']
-aggregation_frequencies = ['720min']
+aggregation_frequencies = ['60min']
 
 # month number, no need to change
 not_convective_season = [10, 11, 12, 1, 2, 3, 4]
 
 # starts with one
-neighbors_to_chose_lst = [1, 2, 3, 4, 5]  # list of which neighbors to chose
+# , 2, 3, 4, 5]  # list of which neighbors to chose
+neighbors_to_chose_lst = [1]
 
 min_req_ppt_vals = 30  # stations minimum required ppt values
 
@@ -135,7 +136,7 @@ end_date = '2019-07-01 00:00:00'
 
 date_fmt = '%Y-%m-%d %H:%M:%S'
 
-plt_figures = False  # if true plot correlations seperatly and on map
+plt_figures = True  # if true plot correlations seperatly and on map
 #==============================================================================
 #
 #==============================================================================
@@ -420,7 +421,6 @@ if __name__ == '__main__':
                         col_to_plot='Bool_Spearman_Correlation',
                         shp_de_file=path_to_shpfile,
                         temp_freq=temp_freq,
-                        ppt_thr=np.nan,
                         out_dir=out_save_dir_orig,
                         year_vals=('all_years_neighbor_%d_'
                                    % (neighbor_to_chose)),

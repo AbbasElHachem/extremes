@@ -821,6 +821,22 @@ def select_convective_season(
 #==============================================================================
 
 
+def select_season(df,  # df to slice, index should be datetime
+                  month_lst  # list of month for convective season
+                  ):
+    """
+    return dataframe with the data corresponding to the season
+    """
+    df = df.copy()
+    df_conv_season = df[df.index.month.isin(month_lst)]
+
+    return df_conv_season
+
+#==============================================================================
+#
+#==============================================================================
+
+
 def compare_p1_dwd_p1_netatmo(
     val_dwd,  # p1 or ppt_mean  for df_DWD
     val_netatmo  # p1 or ppt_mean for df_Netatmo

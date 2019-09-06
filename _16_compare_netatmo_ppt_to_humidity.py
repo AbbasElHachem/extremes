@@ -76,8 +76,8 @@ out_save_dir_orig = (
 if not os.path.exists(out_save_dir_orig):
     os.mkdir(out_save_dir_orig)
 
-x_col_name = ' lon'
-y_col_name = ' lat'
+x_col_name = 'lon'
+y_col_name = 'lat'
 
 
 # threshold for CDF, consider only above thr, below is P0
