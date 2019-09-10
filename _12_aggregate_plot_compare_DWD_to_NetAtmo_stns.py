@@ -60,17 +60,20 @@ path_to_ppt_hourly_netatmo_data = (
 assert os.path.exists(
     path_to_ppt_hourly_netatmo_data), 'wrong NETATMO Ppt file'
 
-path_to_ppt_5min_netatmo_data = (
-    r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-    r'\NetAtmo_BW\ppt_all_netatmo_5min_stns_combined_.csv')
-assert os.path.exists(
-    path_to_ppt_5min_netatmo_data), 'wrong NETATMO Ppt file'
+# path_to_ppt_5min_netatmo_data = (
+#     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
+#     r'\NetAtmo_BW\ppt_all_netatmo_5min_stns_combined_.csv')
+# assert os.path.exists(
+#     path_to_ppt_5min_netatmo_data), 'wrong NETATMO Ppt file'
 
-path_to_ppt_hdf_data = (r'F:\data_from_exchange'
-                        r'\niederschlag_deutschland'
-                        r'\1993_2016_5min_merge_nan.h5')
-assert os.path.exists(path_to_ppt_hdf_data), 'wrong NETATMO Ppt file'
+# path_to_ppt_hdf_data = (r'F:\data_from_exchange'
+#                         r'\niederschlag_deutschland'
+#                         r'\1993_2016_5min_merge_nan.h5')
+# assert os.path.exists(path_to_ppt_hdf_data), 'wrong NETATMO Ppt file'
 
+path_to_ppt_dwd_data = (
+    r"F:\download_DWD_data_recent\all_dwd_hourly_ppt_data_combined_1995_2019.fk")
+assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
 
 distance_matrix_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
                            r'\NetAtmo_BW\distance_mtx_in_m_NetAtmo_DWD.csv')
@@ -87,16 +90,15 @@ if not os.path.exists(out_save_dir_orig):
 
 
 # threshold for CDF and scatter, consider only above thr, below is P0
-ppt_thr_min = .1
+ppt_thr_min = .5
 
-ppt_thrs_list = [0.5, 1., 2]
+ppt_thrs_list = [0.5]
 
 max_ppt_thr = 30.
-
+date_fmt = '%Y-%m-%d %H:%M:%S'
 # till 1 day '5min', '10min', '15min', '30min',
-aggregation_frequencies = ['5min', '10min', '15min', '30min', '60min',
-                           '90min', '120min', '180min', '240min',
-                           '360min', '480min', '720min', '1440min']
+aggregation_frequencies = ['60min',
+                           '120min', '480min', '720min', '1440min']
 #==============================================================================
 #
 #==============================================================================
@@ -104,7 +106,7 @@ aggregation_frequencies = ['5min', '10min', '15min', '30min', '60min',
 
 def compare_cdf_two_stns(netatmo_ppt_df_file, path_to_ppt_hdf_data,
                          distance_matrix_df_file, out_dir):
-    HDF52 = HDF5(infile=path_to_ppt_hdf_data)
+    #HDF52 = HDF5(infile=path_to_ppt_hdf_data)
 
     in_netatmo_stns_df = pd.read_csv(netatmo_ppt_df_file,
                                      index_col=0, sep=';',
@@ -129,15 +131,29 @@ def compare_cdf_two_stns(netatmo_ppt_df_file, path_to_ppt_hdf_data,
                 ascending=True)
 
             min_dist = sorted_distances.values[0]
-            if min_dist <= 5000:
+            if min_dist <= 10000:
 
+                #                 stn_2_id = sorted_distances.index[0]
+                #
+                #                 idf2 = HDF52.get_pandas_dataframe(ids=[stn_2_id])
+                #                 idf2 = idf2[idf2 < max_ppt_thr]
+
+                # check if dwd station is near, select and read dwd stn
                 stn_2_id = sorted_distances.index[0]
 
-                idf2 = HDF52.get_pandas_dataframe(ids=[stn_2_id])
-                idf2 = idf2[idf2 < max_ppt_thr]
+                idf2 = pd.read_feather(path_to_ppt_hdf_data,
+                                       columns=['Time', stn_2_id],
+                                       use_threads=True)
+                idf2.set_index('Time', inplace=True)
+
+                idf2.index = pd.to_datetime(
+                    idf2.index, format=date_fmt)
+
+                idf2.dropna(axis=0, inplace=True)
+
                 print('Second DWD Stn Id is', stn_2_id,
                       'distance is ', min_dist)
-                if (idf1.values.shape[0] > 1000) and (idf2.values.shape[0] > 1000):
+                if (idf1.values.shape[0] > 30) and (idf2.values.shape[0] > 30):
                     out_save_dir = os.path.join(out_dir,
                                                 '%s_%s' % (stn_id, stn_2_id))
 
@@ -164,13 +180,13 @@ def compare_cdf_two_stns(netatmo_ppt_df_file, path_to_ppt_hdf_data,
                                 columns=[stn_2_id])
                             try:
                                 pass
-                                plt_bar_plot_2_stns(stn_id,
-                                                    stn_2_id,
-                                                    min_dist,
-                                                    df_common1,
-                                                    df_common2,
-                                                    tem_freq,
-                                                    out_save_dir)
+#                                 plt_bar_plot_2_stns(stn_id,
+#                                                     stn_2_id,
+#                                                     min_dist,
+#                                                     df_common1,
+#                                                     df_common2,
+#                                                     tem_freq,
+#                                                     out_save_dir)
 
                                 plt_scatter_plot_2_stns(stn_id,
                                                         stn_2_id,
@@ -204,13 +220,13 @@ def compare_cdf_two_stns(netatmo_ppt_df_file, path_to_ppt_hdf_data,
 #                                                             df_common2,
 #                                                             tem_freq,
 #                                                             out_save_dir)
-                                plot_sorted_stns_vals(stn_id,
-                                                      stn_2_id,
-                                                      min_dist,
-                                                      df_common1,
-                                                      df_common2,
-                                                      tem_freq,
-                                                      out_save_dir)
+#                                 plot_sorted_stns_vals(stn_id,
+#                                                       stn_2_id,
+#                                                       min_dist,
+#                                                       df_common1,
+#                                                       df_common2,
+#                                                       tem_freq,
+#                                                       out_save_dir)
                             except Exception as msg:
                                 print('error while plotting', msg, tem_freq)
                                 continue
@@ -235,25 +251,25 @@ def compare_cdf_two_stns(netatmo_ppt_df_file, path_to_ppt_hdf_data,
                                     print(
                                         True, 'Plotting P0 and Contingency Tables')
 
-                                    plot_p0_as_a_sequence_two_stns(
-                                        stn_id,
-                                        stn_2_id,
-                                        min_dist,
-                                        ppt_thrs_list,
-                                        idf1,
-                                        idf2,
-                                        aggregation_frequencies,
-                                        out_save_dir)
-
-                                    plot_contingency_tables_as_a_sequence_two_stns(
-                                        stn_2_id,
-                                        stn_id,
-                                        min_dist,
-                                        ppt_thrs_list,
-                                        idf2,
-                                        idf1,
-                                        aggregation_frequencies,
-                                        out_save_dir)
+#                                     plot_p0_as_a_sequence_two_stns(
+#                                         stn_id,
+#                                         stn_2_id,
+#                                         min_dist,
+#                                         ppt_thrs_list,
+#                                         idf1,
+#                                         idf2,
+#                                         aggregation_frequencies,
+#                                         out_save_dir)
+#
+#                                     plot_contingency_tables_as_a_sequence_two_stns(
+#                                         stn_2_id,
+#                                         stn_id,
+#                                         min_dist,
+#                                         ppt_thrs_list,
+#                                         idf2,
+#                                         idf1,
+#                                         aggregation_frequencies,
+#                                         out_save_dir)
 
                 else:
                     print('Station is near but dont have enough data')
@@ -271,8 +287,8 @@ if __name__ == '__main__':
     print('**** Started on %s ****\n' % time.asctime())
     START = timeit.default_timer()  # to get the runtime of the program
 
-    compare_cdf_two_stns(path_to_ppt_5min_netatmo_data,
-                         path_to_ppt_hdf_data,
+    compare_cdf_two_stns(path_to_ppt_hourly_netatmo_data,
+                         path_to_ppt_dwd_data,
                          distance_matrix_df_file,
                          out_save_dir_orig)
 

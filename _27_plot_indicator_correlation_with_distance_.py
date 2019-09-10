@@ -77,12 +77,12 @@ assert path_to_netatmo_gd_stns_file.exists(), 'wrong netatmo good stns file'
 
 # def percentage threshold, time frequency and data source
 percent = '90'
-time_freq = '120min'
+time_freq = '60min'
 
-data_source0 = 'Netatmo'  # 'DWD'  # 'Netatmo'  #   # reference station 'Netatmo'
+data_source0 = 'DWD'  # 'DWD'  # 'Netatmo'  #   # reference station 'Netatmo'
 data_source = 'dwd'  # 'dwd'  # 'netatmo'  #   # compare to station 'netatmo'
 
-use_good_netatmo_stns = True
+use_good_netatmo_stns = False
 
 save_acc = ''
 # =============================================================================

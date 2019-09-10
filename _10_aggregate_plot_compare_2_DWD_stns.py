@@ -67,7 +67,7 @@ path_to_ppt_hdf_data = (r'F:\data_from_exchange'
 
 coords_df_file = (r'F:\data_from_exchange\niederschlag_deutschland'
                   r'\1993_2016_5min_merge_nan.csv')
-assert os.path.exists(coords_df_file), 'wrong DWD coords file'
+# assert os.path.exists(coords_df_file), 'wrong DWD coords file'
 
 out_save_dir_orig = (
     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\cdf_plots_DWD_DWD')
@@ -83,12 +83,12 @@ y_col_name = 'Hochwert'
 ppt_thr_min = .5
 
 # used for P0 calculation
-ppt_thrs_list = [0.5, 1, 2]
+ppt_thrs_list = [0.5]  # , 1, 2]
 
 
 # till 1 day
-aggregation_frequencies = ['5min', '10min', '15min', '30min', '60min', '90min',
-                           '120min', '180min', '240min',  '360min',
+aggregation_frequencies = ['5min', '10min',  '60min',
+                           '120min',
                            '480min', '720min', '1440min']
 
 # which neighbor to chose ,starts with 1
@@ -265,34 +265,45 @@ def plot_end_tail_cdf_2_stns(stn1_id, stn2_id, seperate_distance,
     values_x = df1.values.ravel()
     values_y = df2.values.ravel()
 
+    data_shape_df1 = np.round(df1.values.ravel().shape[0], 0)
+    # data_shape_df2 = np.round(df2.values.ravel().shape[0], 0)
+
     xvals1, yvals1 = get_cdf_part_abv_thr(values_x, ppt_thr)
     xvals2, yvals2 = get_cdf_part_abv_thr(values_y, ppt_thr)
 
     fig = plt.figure(figsize=(20, 12), dpi=150)
     ax = fig.add_subplot(111)
     ax.plot(xvals1, yvals1, c='darkblue', marker='+', markersize=3,
-            alpha=0.5, linestyle='--', label=stn1_id)
+            alpha=0.75, linestyle='--',
+            label=stn1_id
+            )
     ax.plot(xvals2, yvals2, c='darkred', marker='*', markersize=3,
-            alpha=0.5, linestyle='dotted', label=stn2_id)
+            alpha=0.75, linestyle='dotted',
+            label=stn2_id)
     ax.set_xlim(min(xvals1.min(), xvals2.min()) - 0.1,
                 max(xvals1.max(), xvals2.max()) + 0.1)
-    ax.set_ylim(min(yvals1.min(), yvals2.min()), 1)
+    ax.set_yticks([0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 1])
+    ax.set_ylim(min(yvals1.min(), yvals2.min()) - 0.01, 1.0001)
 
     ax.xaxis.set_major_locator(majorLocator)
     ax.xaxis.set_major_formatter(FormatStrFormatter('%.0f'))
-    ax.yaxis.set_major_formatter(FormatStrFormatter('%.4f'))
+    ax.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
 
     ax.set_xlabel('Observed %s Rainfall in mm stations Id: %s and %s'
                   % (temp_freq, stn1_id, stn2_id))
     ax.set_ylabel('Observed %s CDF stations Id: %s and %s'
                   % (temp_freq, stn1_id, stn2_id))
     ax.legend(loc='lower right')
-    ax.set_title("CDF of extremes; Stn: %s vs Stn: %s;\n Distance: %0.1f m; \n"
-                 "Time Freq: %s; Ppt thr: %.1f" % (stn1_id, stn2_id,
-                                                   seperate_distance,
-                                                   temp_freq, ppt_thr))
+    ax.set_title("CDF of extremes; Stn: %s vs Stn: %s;"
+                 "\n Seperating Distance: %0.1f m; \n"
+                 "Available Data: %d \n Time Frequency: %s\n"
+                 "Rainfall Threshold: %.1f" % (stn1_id, stn2_id,
+                                               seperate_distance,
+                                               data_shape_df1,
+                                               temp_freq,
+                                               ppt_thr))
 
-    ax.grid(color='k', linestyle='--', linewidth=0.1, alpha=0.25)
+    ax.grid(color='k', linestyle='--', linewidth=0.5, alpha=0.5)
     plt.tight_layout()
     plt.savefig(os.path.join(out_dir, '%s_cdf_stn_%s_vs_stn_%s_.png'
                              % (temp_freq, stn1_id, stn2_id)))
@@ -720,9 +731,9 @@ def compare_two_dwd_stns(stns_ids):
                     try:
                         #====================================================
 
-                        plt_bar_plot_2_stns(iid, stn_near, distance_near,
-                                            df_common1, df_common2, tem_freq,
-                                            out_save_dir)
+                        # plt_bar_plot_2_stns(iid, stn_near, distance_near,
+                        #                    df_common1, df_common2, tem_freq,
+                        #                    out_save_dir)
 
                         plt_scatter_plot_2_stns(iid, stn_near, distance_near,
                                                 df_common1, df_common2, ppt_thr_min,
@@ -743,10 +754,10 @@ def compare_two_dwd_stns(stns_ids):
                         #                                   df_common2,
                         #                                   tem_freq,
                         #                                   out_save_dir)
-                        plot_sorted_stns_vals(iid, stn_near, distance_near,
-                                              df_common1, df_common2,
-                                              tem_freq,
-                                              out_save_dir)
+                        # plot_sorted_stns_vals(iid, stn_near, distance_near,
+                        #                      df_common1, df_common2,
+                        #                      tem_freq,
+                        #                      out_save_dir)
                     except Exception as msg:
                         print('error while plotting', msg, tem_freq)
                         continue
@@ -774,25 +785,25 @@ def compare_two_dwd_stns(stns_ids):
                             print(True, 'Plotting P0 and Contingency Tables')
 
                             # CHECK again with out dir
-                            plot_p0_as_a_sequence_two_stns(
-                                iid,
-                                stn_near,
-                                distance_near,
-                                ppt_thrs_list,
-                                idf1,
-                                idf2,
-                                aggregation_frequencies,
-                                out_save_dir)
-
-                            plot_contingency_tables_as_a_sequence_two_stns(
-                                iid,
-                                stn_near,
-                                distance_near,
-                                ppt_thrs_list,
-                                idf1,
-                                idf2,
-                                aggregation_frequencies,
-                                out_save_dir)
+#                             plot_p0_as_a_sequence_two_stns(
+#                                 iid,
+#                                 stn_near,
+#                                 distance_near,
+#                                 ppt_thrs_list,
+#                                 idf1,
+#                                 idf2,
+#                                 aggregation_frequencies,
+#                                 out_save_dir)
+#
+#                             plot_contingency_tables_as_a_sequence_two_stns(
+#                                 iid,
+#                                 stn_near,
+#                                 distance_near,
+#                                 ppt_thrs_list,
+#                                 idf1,
+#                                 idf2,
+#                                 aggregation_frequencies,
+#                                 out_save_dir)
 
                         else:
                             print('not enough data for P0 and Contingency Table')
@@ -804,8 +815,6 @@ def compare_two_dwd_stns(stns_ids):
 
         except Exception as msg:
             print(msg)
-
-        break
 
 
 if __name__ == '__main__':

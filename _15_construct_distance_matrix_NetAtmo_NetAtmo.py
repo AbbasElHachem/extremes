@@ -39,13 +39,13 @@ from _00_additional_functions import (convert_coords_fr_wgs84_to_utm32_)
 
 coords_netatmo_temp_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
                                r'\NetAtmo_BW\rain_bw_1hour'
-                               r'\netatmo_bw_1hour_coords_with_duplicates.csv')
+                               r'\netatmo_bw_1hour_coords.csv')
 
 assert os.path.exists(coords_netatmo_temp_df_file), 'wrong NETATMO coords file'
 
 coords_netatmo_ppt_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
                               r'\NetAtmo_BW\rain_bw_1hour'
-                              r'\netatmo_bw_1hour_coords_with_duplicates.csv')
+                              r'\netatmo_bw_1hour_coords.csv')
 
 assert os.path.exists(coords_netatmo_ppt_df_file), 'wrong NETATMO coords file'
 
@@ -55,10 +55,10 @@ out_save_dir = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW')
 if not os.path.exists(out_save_dir):
     os.mkdir(out_save_dir)
 
-lon_col_name = ' lon'
-lat_col_name = ' lat'
+lon_col_name = 'lon'
+lat_col_name = 'lat'
 
-df_sep = ','
+df_sep = ';'
 
 # def epsg wgs84 and utm32 for coordinates conversion
 wgs82 = "+init=EPSG:4326"

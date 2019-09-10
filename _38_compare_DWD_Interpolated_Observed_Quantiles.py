@@ -35,18 +35,66 @@ path_to_data = main_dir / r'oridinary_kriging_compare_DWD_Netatmo/needed_dfs'
 #     path_to_data /
 #     r'interpolated_daily_data_from_qunatiles_cold_season.csv')
 
-
-path_to_dwd_interpolated_warm_season_cdf_daily_data = (
+#==============================================================================
+# # WARM SEASON DATA INTERPOLATED RAINFALL
+#==============================================================================
+path_to_dwd_interpolated_using_dwd_netatmo_warm_season_cdf_daily_data = (
     path_to_data /
-    r'interpolated_dwd_daily_data_from_qunatiles_warm_season.csv')
+    r'interpolated_dwd_daily_data_from_qunatiles_warm_season_using_dwd_netamo.csv')
 
-path_to_dwd_netatmo_interpolated_warm_season_cdf_daily_data = (
+path_to_dwd_interpolated_using_dwd_only_warm_season_cdf_daily_data = (
     path_to_data /
-    r'interpolated_dwd_daily_data_from_qunatiles_warm_season2.csv')
+    r'interpolated_dwd_daily_data_from_qunatiles_warm_season_using_dwd_only.csv')
 
-path_to_dwd_netatmo_only_interpolated_warm_season_cdf_daily_data = (
+path_to_dwd_interpolated_using_netatmo_only_warm_season_cdf_daily_data = (
     path_to_data /
-    r'interpolated_dwd_daily_data_from_qunatiles_warm_season3.csv')
+    r'interpolated_dwd_daily_data_from_qunatiles_warm_season_using_netatmo_only.csv')
+
+#==============================================================================
+# # COLD SEASON DATA INTERPOLATED RAINFALL
+#==============================================================================
+path_to_dwd_interpolated_using_dwd_netatmo_cold_season_cdf_daily_data = (
+    path_to_data /
+    r'interpolated_dwd_daily_data_from_qunatiles_cold_season_using_dwd_netamo.csv')
+
+path_to_dwd_interpolated_using_dwd_only_cold_season_cdf_daily_data = (
+    path_to_data /
+    r'interpolated_dwd_daily_data_from_qunatiles_cold_season_using_dwd_only.csv')
+
+path_to_dwd_interpolated_using_netatmo_only_cold_season_cdf_daily_data = (
+    path_to_data /
+    r'interpolated_dwd_daily_data_from_qunatiles_cold_season_using_netatmo_only.csv')
+
+
+#==============================================================================
+# # COLD SEASON DATA INTERPOLATED QUANTILES
+#==============================================================================
+path_to_ppt_dwd_interpolated_using_dwd_netatmo_cold_season_cdf_daily_data = (
+    path_to_data /
+    r'interpolated_ppt_dwd_daily_data_basedon_quantiles_cold_season_using_dwd_netamo.csv')
+
+path_to_ppt_dwd_interpolated_using_dwd_only_cold_season_cdf_daily_data = (
+    path_to_data /
+    r'interpolated_ppt_dwd_daily_data_basedon_qunatiles_cold_season_using_dwd_only.csv')
+
+path_to_ppt_dwd_interpolated_using_netatmo_only_cold_season_cdf_daily_data = (
+    path_to_data /
+    r'interpolated_dwd_daily_data_basedon_qunatiles_cold_season_using_netatmo_only.csv')
+
+#==============================================================================
+# # WARM SEASON DATA INTERPOLATED QUANTILES
+#==============================================================================
+path_to_ppt_dwd_interpolated_using_dwd_netatmo_warm_season_cdf_daily_data = (
+    path_to_data /
+    r'interpolated_ppt_dwd_daily_data_basedon_quantiles_warm_season_using_dwd_netamo.csv')
+
+path_to_ppt_dwd_interpolated_using_dwd_only_warm_season_cdf_daily_data = (
+    path_to_data /
+    r'interpolated_ppt_dwd_daily_data_basedon_qunatiles_warm_season_using_dwd_only.csv')
+
+path_to_ppt_dwd_interpolated_using_netatmo_only_warm_season_cdf_daily_data = (
+    path_to_data /
+    r'interpolated_dwd_daily_data_basedon_qunatiles_warm_season_using_netatmo_only.csv')
 
 # Original Daily Data
 # path_to_netatmo_daily_data = path_to_data / r'all_netatmo_ppt_data_daily_.csv'
@@ -114,54 +162,125 @@ dwd_in_vals_df.dropna(how='all', axis=0, inplace=True)
 # READ DATA
 #==============================================================================
 
-# DWD stations interpolated using DWD stns
-df_dwd_interpolated_warm = pd.read_csv(
-    path_to_dwd_interpolated_warm_season_cdf_daily_data,
+# DWD stations interpolated using DWD and Netatmo stns
+df_dwd_interpolated_warm_using_dwd_netatmo = pd.read_csv(
+    path_to_dwd_interpolated_using_dwd_netatmo_warm_season_cdf_daily_data,
     sep=';', index_col=0)
 
-# DWD stations interpolated using DWD and Netatmo stns
-df_dwd_netatmo_interpolated_warm = pd.read_csv(
-    path_to_dwd_netatmo_interpolated_warm_season_cdf_daily_data,
+# DWD stations interpolated using DWD stns
+df_dwd_interpolated_warm_using_dwd_only = pd.read_csv(
+    path_to_dwd_interpolated_using_dwd_only_warm_season_cdf_daily_data,
     sep=';', index_col=0)
 
 # DWD stations interpolated using Netatmo stns
-df_dwd_netatmo_netatmo_interpolated_warm = pd.read_csv(
-    path_to_dwd_netatmo_only_interpolated_warm_season_cdf_daily_data,
+df_dwd_interpolated_warm_using_netatmo_only = pd.read_csv(
+    path_to_dwd_interpolated_using_netatmo_only_warm_season_cdf_daily_data,
     sep=';', index_col=0)
+#==============================================================================
+
+# DWD stations interpolated using DWD and Netatmo stns
+df_dwd_interpolated_cold_using_dwd_netatmo = pd.read_csv(
+    path_to_dwd_interpolated_using_dwd_netatmo_cold_season_cdf_daily_data,
+    sep=';', index_col=0)
+
+# DWD stations interpolated using DWD stns
+df_dwd_interpolated_cold_using_dwd_only = pd.read_csv(
+    path_to_dwd_interpolated_using_dwd_only_cold_season_cdf_daily_data,
+    sep=';', index_col=0)
+
+# DWD stations interpolated using Netatmo stns
+df_dwd_interpolated_cold_using_netatmo_only = pd.read_csv(
+    path_to_dwd_interpolated_using_netatmo_only_cold_season_cdf_daily_data,
+    sep=';', index_col=0)
+
+#==============================================================================
+# INTERPOLATION OF QUANTILES BASED ON RAINFALL
+#==============================================================================
+# COLD SEASON
+# DWD stations interpolated using DWD and Netatmo stns
+df_dwd_ppt_interpolated_cold_using_dwd_netatmo = pd.read_csv(
+    path_to_ppt_dwd_interpolated_using_dwd_netatmo_cold_season_cdf_daily_data,
+    sep=';', index_col=0)
+
+# DWD stations interpolated using DWD stns
+df_dwd_ppt_interpolated_cold_using_dwd_only = pd.read_csv(
+    path_to_ppt_dwd_interpolated_using_dwd_only_cold_season_cdf_daily_data,
+    sep=';', index_col=0)
+
+# DWD stations interpolated using Netatmo stns
+df_dwd_ppt_interpolated_cold_using_netatmo_only = pd.read_csv(
+    path_to_ppt_dwd_interpolated_using_netatmo_only_cold_season_cdf_daily_data,
+    sep=';', index_col=0)
+
+# WARM SEASOM
+
+# DWD stations interpolated using DWD and Netatmo stns
+df_dwd_ppt_interpolated_warm_using_dwd_netatmo = pd.read_csv(
+    path_to_ppt_dwd_interpolated_using_dwd_netatmo_warm_season_cdf_daily_data,
+    sep=';', index_col=0)
+
+# DWD stations interpolated using DWD stns
+df_dwd_ppt_interpolated_warm_using_dwd_only = pd.read_csv(
+    path_to_ppt_dwd_interpolated_using_dwd_only_warm_season_cdf_daily_data,
+    sep=';', index_col=0)
+
+# DWD stations interpolated using Netatmo stns
+df_dwd_ppt_interpolated_warm_using_netatmo_only = pd.read_csv(
+    path_to_ppt_dwd_interpolated_using_netatmo_only_warm_season_cdf_daily_data,
+    sep=';', index_col=0)
+
 #==============================================================================
 # COMPARE
 #==============================================================================
 if do_it_warm_season:
-    interpolated_df_dwd_season = df_dwd_interpolated_warm
-    interpolated_df_dwd_netamo_season = df_dwd_netatmo_interpolated_warm
-    interpolated_df_dwd_netamo_only_season = df_dwd_netatmo_netatmo_interpolated_warm
+    interpolated_df_dwd_season_using_dwd_netatmo = df_dwd_interpolated_warm_using_dwd_netatmo
+    interpolated_df_dwd_season_using_dwd_only = df_dwd_interpolated_warm_using_dwd_only
+    interpolated_df_dwd_season_using_netatmo_only = df_dwd_interpolated_warm_using_netatmo_only
+
+    interpolated_df_ppt_dwd_season_using_dwd_netatmo = df_dwd_ppt_interpolated_warm_using_dwd_netatmo
+    interpolated_df_ppt_dwd_season_using_dwd_only = df_dwd_ppt_interpolated_warm_using_dwd_only
+    interpolated_df_ppt_dwd_season_using_netatmo_only = df_dwd_ppt_interpolated_warm_using_netatmo_only
+
     title_add = 'Mai_till_September_Warm'
     df_dwd_distriubutions_season = select_season(
         dwd_in_vals_df, warm_season_month)
 
-# if do_it_cold_season:
-#     interpolated_df_season = df_interpolated_cold
-#
-#     interpolated_dwd_df_season = df_dwd_interpolated_cold
-#     netatmo_ppt_data_season = netatmo_ppt_data_cold_season
-#     title_add = 'October_till_April_Cold'
-#
-#     df_dwd_distriubutions_season = select_season(
-#         dwd_in_vals_df, cold_season_month)
+if do_it_cold_season:
+    interpolated_df_dwd_season_using_dwd_netatmo = df_dwd_interpolated_cold_using_dwd_netatmo
+    interpolated_df_dwd_season_using_dwd_only = df_dwd_interpolated_cold_using_dwd_only
+    interpolated_df_dwd_season_using_netatmo_only = df_dwd_interpolated_cold_using_netatmo_only
+
+    interpolated_df_ppt_dwd_season_using_dwd_netatmo = df_dwd_ppt_interpolated_cold_using_dwd_netatmo
+    interpolated_df_ppt_dwd_season_using_dwd_only = df_dwd_ppt_interpolated_cold_using_dwd_only
+    interpolated_df_ppt_dwd_season_using_netatmo_only = df_dwd_ppt_interpolated_cold_using_netatmo_only
+
+    title_add = 'October_till_April_Cold'
+    df_dwd_distriubutions_season = select_season(dwd_in_vals_df,
+                                                 cold_season_month)
 
 
-for _dwd_stn_ in interpolated_df_dwd_netamo_only_season.columns:
+for _dwd_stn_ in interpolated_df_ppt_dwd_season_using_dwd_netatmo.columns:
     print('station is ', _dwd_stn_)
 
     try:
-        int_vals_dwd = df_dwd_interpolated_warm.loc[:, _dwd_stn_]
-        int_vals_dwd_netatmo = interpolated_df_dwd_netamo_season.loc[:, _dwd_stn_]
-        int_vals_dwd_netatmo_netatmo = interpolated_df_dwd_netamo_only_season.loc[
+        # interpolated quantiles based on ppt
+        int_vals_dwd_netatmo_used = interpolated_df_dwd_season_using_dwd_netatmo.loc[
+            :, _dwd_stn_]
+        int_vals_dwd_used = interpolated_df_dwd_season_using_dwd_only.loc[:, _dwd_stn_]
+        int_vals_dwd_netatmo_only = interpolated_df_dwd_season_using_netatmo_only.loc[
             :, _dwd_stn_]
 
+        # interpolated ppt based on quantiles
+        int_ppt_vals_dwd_netatmo_used = interpolated_df_ppt_dwd_season_using_dwd_netatmo.loc[
+            :, _dwd_stn_]
+        int_ppt_vals_dwd_used = interpolated_df_ppt_dwd_season_using_dwd_only.loc[
+            :, _dwd_stn_]
+        int_ppt_vals_dwd_netatmo_only = interpolated_df_ppt_dwd_season_using_netatmo_only.loc[
+            :, _dwd_stn_]
+
+        # oroginal data
         ppt_vals_observed = df_dwd_distriubutions_season.loc[:, _dwd_stn_].dropna(
             how='all')
-
         ppt_vals_season, edf_vals_season = build_edf_fr_vals(
             ppt_vals_observed.values)
 
@@ -175,75 +294,98 @@ for _dwd_stn_ in interpolated_df_dwd_netamo_only_season.columns:
         ax.scatter(ppt_vals_season,
                    edf_vals_season,
                    alpha=.2,
-                   c='r',  # colors_arr,
+                   c='k',  # colors_arr,
                    s=10,
                    marker='d',
                    # cmap=plt.get_cmap('viridis'),
                    label='Obseved DWD values')
+        #======================================================================
+        # PLOT INTERPOLATED PPT BASED ON QUANTILES
+        #======================================================================
+#         ax.scatter(int_vals_dwd_used.values,
+#                    int_vals_dwd_used.index,
+#                    alpha=.75,
+#                    c='g',  # colors_arr,
+#                    s=15,
+#                    marker='o',
+#                    # cmap=plt.get_cmap('viridis'),
+#                    label='Interpolated DWD Ppt values with DWD stns')
+#
+#         ax.scatter(int_vals_dwd_netatmo_used.values,
+#                    int_vals_dwd_netatmo_used.index,
+#                    alpha=.75,
+#                    c='b',  # colors_arr,
+#                    s=15,
+#                    marker='+',
+#                    # cmap=plt.get_cmap('viridis'),
+#                    label='Interpolated DWD Ppt values with DWD & Netatmo stns')
+#
+#         ax.scatter(int_vals_dwd_netatmo_only.values,
+#                    int_vals_dwd_netatmo_only.index,
+#                    alpha=.75,
+#                    c='r',  # colors_arr,
+#                    s=15,
+#                    marker='X',
+#                    # cmap=plt.get_cmap('viridis'),
+#                    label='Interpolated DWD Ppt values with Netatmo stns')
 
-        ax.scatter(int_vals_dwd.values,
-                   int_vals_dwd.index,
-                   alpha=.85,
-                   c='b',  # colors_arr,
+        #======================================================================
+        # PLOT INTERPOLATED QUANTILES BASED ON PPT
+        #======================================================================,
+
+        ax.scatter(int_ppt_vals_dwd_used.index,
+                   int_ppt_vals_dwd_used.values,
+                   alpha=.75,
+                   c='m',  # colors_arr,
+                   s=15,
+                   marker='o',
+                   # cmap=plt.get_cmap('viridis'),
+                   label='Interpolated DWD Quantiles values with DWD stns')
+        ax.scatter(int_ppt_vals_dwd_netatmo_used.index,
+                   int_ppt_vals_dwd_netatmo_used.values,
+                   alpha=.75,
+                   c='c',  # colors_arr,
                    s=15,
                    marker='+',
                    # cmap=plt.get_cmap('viridis'),
-                   label='Interpolated DWD values with DWD stns')
+                   label='Interpolated DWD Quantiles values with DWD & Netatmo stns')
 
-        ax.scatter(int_vals_dwd_netatmo.values,
-                   int_vals_dwd_netatmo.index,
-                   alpha=.85,
-                   c='g',  # colors_arr,
-                   s=15,
-                   marker='*',
-                   # cmap=plt.get_cmap('viridis'),
-                   label='Interpolated DWD values with DWD & Netatmo stns')
-
-        ax.scatter(int_vals_dwd_netatmo_netatmo.values,
-                   int_vals_dwd_netatmo_netatmo.index,
-                   alpha=.85,
+        ax.scatter(int_ppt_vals_dwd_netatmo_only.index,
+                   int_ppt_vals_dwd_netatmo_only.values,
+                   alpha=.75,
                    c='gold',  # colors_arr,
                    s=15,
                    marker='X',
                    # cmap=plt.get_cmap('viridis'),
-                   label='Interpolated DWD values with Netatmo stns')
+                   label='Interpolated DWD Quantiles values with Netatmo stns')
 
-        for dwd_stn in df_dwd_distriubutions_season.columns:
-            # print('DWD STN is', dwd_stn)
-            dwd_df_stn = df_dwd_distriubutions_season.loc[:, dwd_stn].dropna()
-            ppt_dwd_season, edf_dwd_season = build_edf_fr_vals(
-                dwd_df_stn.values)
-
-            ax.scatter(ppt_dwd_season,
-                       edf_dwd_season,
-                       alpha=.0125,
-                       c='grey',  # colors_arr,
-                       s=4,
-                       marker='.')
-
-#         dwd_interpolated_vals = interpolated_dwd_df_season.loc[:, '00020']
-
-#         ax.scatter(dwd_interpolated_vals.values,
-#                    dwd_interpolated_vals.index,
-#                    alpha=.85,
-#                    c='g',  # colors_arr,
-#                    s=10,
-#                    marker='.',
-#                    label='interpolated DWD')
+#         for dwd_stn in df_dwd_distriubutions_season.columns:
+#             # print('DWD STN is', dwd_stn)
+#             dwd_df_stn = df_dwd_distriubutions_season.loc[:, dwd_stn].dropna()
+#             ppt_dwd_season, edf_dwd_season = build_edf_fr_vals(
+#                 dwd_df_stn.values)
+#
+#             ax.scatter(ppt_dwd_season,
+#                        edf_dwd_season,
+#                        alpha=.015,
+#                        c='k',  # colors_arr,
+#                        s=4,
+#                        marker='.')
 
         ax.set_title('%s season DWD station is %s'
                      % (title_add, _dwd_stn_))
         ax.grid(alpha=0.25)
         ax.set_ylim([0.5, 1.01])
-        ax.set_xlim([-0.5, max(int_vals_dwd.values.max(),
-                               ppt_vals_season.max(),
-                               int_vals_dwd_netatmo.values.max()) + 2])
+        ax.set_xlim([-0.5, max(int_vals_dwd_netatmo_used.values.max(),
+                               int_vals_dwd_used.max(),
+                               int_vals_dwd_netatmo_only.values.max(),
+                               ppt_vals_season.max()) + 2])
         ax.set_xlabel('Rainfall (mm/day)')
         ax.legend(loc='lower right')
         ax.set_ylabel('CDF')
 
         plt.savefig(out_plots_path / (
-            'oberserved_vs_interpolated_cdf_%s_season_%s_1.png'
+            'oberserved_vs_interpolated_cdf_%s_season_%s_2.png'
             % (title_add, _dwd_stn_)),
             frameon=True, papertype='a4',
             bbox_inches='tight', pad_inches=.2)
