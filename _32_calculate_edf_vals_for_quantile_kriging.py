@@ -29,19 +29,19 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-from _00_additional_functions import build_edf_fr_vals
+from _00_additional_functions import (calculate_probab_ppt_below_thr,
+                                      build_edf_fr_vals)
 
 plt.ioff()
 # =============================================================================
 
 # def values to replace edf of ppt=0
-# TODO: TALK TO PROF
-edf_ppt_0 = 0.44
+ppt_min_thr_0_vals = 0.1  # everything below it gets value of P0
 
-netatmo_data = True
+netatmo_data = False
 use_good_netatmo_stns = False
 
-dwd_data = False
+dwd_data = True
 
 # =============================================================================
 
@@ -56,7 +56,7 @@ if netatmo_data:
 if use_good_netatmo_stns:
     df_stns = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes"
                r"\plots_NetAtmo_ppt_DWD_ppt_correlation_"
-               r"\keep_stns_all_neighbor_92_per_60min_.csv")
+               r"\keep_stns_all_neighbor_90_per_60min_.csv")
 
 if dwd_data:
     df_file = (r"F:\download_DWD_data_recent"
@@ -110,8 +110,12 @@ for stn_ in df_stn0.columns:
     try:
         stn_df_no_nans = df_stn0.loc[:, stn_].dropna()
         if stn_df_no_nans.size > 2:
+            p0 = calculate_probab_ppt_below_thr(stn_df_no_nans.values,
+                                                ppt_min_thr_0_vals)
+            print('P0', p0, p0 / 2)
             x0, y0 = build_edf_fr_vals(stn_df_no_nans.values)
-            y0[np.where(x0 == 0)] = edf_ppt_0
+
+            y0[np.where(x0 <= 0.1)] = p0 / 2
 
             df_stn_ = pd.DataFrame(data=stn_df_no_nans.values,
                                    index=stn_df_no_nans.index,
@@ -130,7 +134,7 @@ for stn_ in df_stn0.columns:
 
 df_all.dropna(how='all', inplace=True)
 df_all.to_csv((r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
-               r"\edf_ppt_all_netatmo_hourly_.csv"),
+               r"\edf_ppt_all_dwd_hourly_.csv"),
               sep=';', float_format='%.3f')
 
 print('DONE WITH EVERYTHNG !')

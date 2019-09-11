@@ -360,7 +360,6 @@ def resampleDf(df, agg, closed='right', label='right',
         df = df.shift(-6, 'H')
 
     # To respect the nan values
-    # TODO: maybe look how to make it faster
     if leave_nan == True:
         # for max_nan == 0, the code runs faster if implemented as follows
         if max_nan == 0:

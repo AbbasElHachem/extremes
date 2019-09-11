@@ -35,5 +35,5 @@ encoding/_32_calculate_edf_vals_for_quantile_kriging.py=utf-8
 encoding/_32_read_interpolated_ppt_fields_and_calc_diff_map_corr_map.py=utf-8
 encoding/_33_read_interpolated_fields_cross_validate_DWD_stations.py=utf-8
 encoding/_35_find_maximum_events_Netatmo_and_DWD_data.py=utf-8
-encoding/_36_transform_DWD_data_to_edf_original_for_quantile_kriging_.py=utf-8
+encoding/_40_compare_DWD_historical_to_DWD_recent_data.py=utf-8
 encoding/_a0_download_dwd_historical_and_recent_data.py=utf-8
