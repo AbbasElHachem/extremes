@@ -45,6 +45,8 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 
 from _00_additional_functions import (func, fit_curve_get_vals_below_curve,
+                                      remove_all_low_corr_short_dist,
+                                      read_filter_df_corr_return_stns_x_y_vals,
                                       gen_path_df_file)
 
 plt.rcParams.update({'font.size': 14})
@@ -61,7 +63,7 @@ netatmo_path_acc = r'year_allyears_df_comparing_correlations_max_sep_dist_500000
 dwd_path_Acc = r'year_allyears_df_dwd_correlations'
 
 # def percentage threshold, time frequency and data source
-percent = '92'
+percent = '90'
 time_freq = '60min'
 
 data_source0 = 'Netatmo'  # reference station 'Netatmo'
@@ -99,39 +101,49 @@ if data_source0 == 'DWD':
 #==============================================================================
 
 
-in_df0 = pd.read_csv(df0, index_col=0, sep=';').dropna(how='all')
-in_df1 = pd.read_csv(df1, index_col=0, sep=';').dropna(how='all')
-in_df2 = pd.read_csv(df2, index_col=0, sep=';').dropna(how='all')
-in_df3 = pd.read_csv(df3, index_col=0, sep=';').dropna(how='all')
-in_df4 = pd.read_csv(df4, index_col=0, sep=';').dropna(how='all')
-
-# =============================================================================
+#==============================================================================
 
 
-s0 = in_df0.index
-s1 = in_df1.index
-s2 = in_df2.index
-s3 = in_df3.index
-s4 = in_df4.index
+s0, x0, y0, in_df0 = read_filter_df_corr_return_stns_x_y_vals(df0)
+s1, x1, y1, in_df1 = read_filter_df_corr_return_stns_x_y_vals(df1)
+s2, x2, y2, in_df2 = read_filter_df_corr_return_stns_x_y_vals(df2)
+s3, x3, y3, in_df3 = read_filter_df_corr_return_stns_x_y_vals(df3)
+s4, x4, y4, in_df4 = read_filter_df_corr_return_stns_x_y_vals(df4)
 
-x0 = in_df0.loc[:, 'Distance to neighbor'].values.ravel()
-x1 = in_df1.loc[:, 'Distance to neighbor'].values.ravel()
-x2 = in_df2.loc[:, 'Distance to neighbor'].values.ravel()
-x3 = in_df3.loc[:, 'Distance to neighbor'].values.ravel()
-x4 = in_df4.loc[:, 'Distance to neighbor'].values.ravel()
+#==============================================================================
 
-y0 = in_df0.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
-y1 = in_df1.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
-y2 = in_df2.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
-y3 = in_df3.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
-y4 = in_df4.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
+# x0, y0, s0 = remove_all_low_corr_short_dist(x0, y0, 5e3, 0.6, s0)
+x0_gd_corr, y0_gd_corr, s0_gd_corr, df0_gd_corr = remove_all_low_corr_short_dist(
+    x0, y0, 5e3, 0.5, s0, in_df0)
+
+x1_gd_corr, y1_gd_corr, s1_gd_corr, df1_gd_corr = remove_all_low_corr_short_dist(
+    x1, y1, 5e3, 0.5, s1, in_df1)
+
+x2_gd_corr, y2_gd_corr, s2_gd_corr, df2_gd_corr = remove_all_low_corr_short_dist(
+    x2, y2, 5e3, 0.5, s2, in_df2)
+
+x3_gd_corr, y3_gd_corr, s3_gd_corr, df3_gd_corr = remove_all_low_corr_short_dist(
+    x3, y3, 5e3, 0.5, s3, in_df3)
+
+x4_gd_corr, y4_gd_corr, s4_gd_corr, df4_gd_corr = remove_all_low_corr_short_dist(
+    x4, y4, 5e3, 0.5, s4, in_df4)
 
 # =============================================================================
 
 # combined all stns, distances and correlation data into arrays
-stns = np.concatenate((s0, s1, s2, s3, s4))
-xs = np.concatenate((x0, x1, x2, x3, x4))
-ys = np.concatenate((y0, y1, y2, y3, y4))
+stns = np.concatenate((s0_gd_corr, s1_gd_corr, s2_gd_corr,
+                       s3_gd_corr, s4_gd_corr))
+xs = np.concatenate((x0_gd_corr, x1_gd_corr, x2_gd_corr,
+                     x3_gd_corr, x4_gd_corr))
+ys = np.concatenate((y0_gd_corr, y1_gd_corr, y2_gd_corr,
+                     y3_gd_corr, y4_gd_corr))
+
+dfs = pd.DataFrame(index=stns)
+dfs['Distance to neighbor'] = xs
+dfs['Bool_Spearman_Correlation'] = ys
+
+# xs, ys, stns, dfs = remove_all_low_corr_short_dist(
+#     xs, ys, 5e3, 0.5, stns, dfs)
 
 # remove nans
 stns = stns[np.where(ys >= 0)]
@@ -142,7 +154,7 @@ ys = ys[ys >= 0]
 (yfs, xvals_below_curves, yvals_below_curves,
  xvals_above_curves, yvals_above_curves,
  stns_below_curves, stns_above_curves) = fit_curve_get_vals_below_curve(
-    xs, ys, func, stns)
+    xs, ys, func, stns, shift_per=0.1)
 
 # =============================================================================
 
@@ -150,62 +162,90 @@ stns_to_keep = np.unique(stns_above_curves)
 stns_to_remove = np.unique(stns_below_curves)
 
 # TODO: NEED FIXING ASK PROF
-stns_keep_all = np.intersect1d(
-    np.intersect1d(np.intersect1d(np.intersect1d(np.intersect1d(
-        stns_to_keep, s0),
-        s1), s2), s3), s4)
+# stns_keep_all = np.intersect1d(
+#     np.intersect1d(np.intersect1d(np.intersect1d(np.intersect1d(
+#         stns_to_keep, s0),
+#         s1), s2), s3), s4)
 
-# stns_keep_al_sr = pd.Series(stns_keep_all)
-# stns_keep_al_sr.to_csv(
-#     (main_dir /
-#         r'filter_Netamo_data_basedon_indicator_correlation' /
-#         r'keep_stns_all_neighbors_combined_%s_per_.csv' % percent),
-#     sep=';')
+# y0_gd_final = y0_gd_corr
+
+stns_keep_all = np.intersect1d(stns_to_keep, s0_gd_corr)
+
+# s0_gd_final = stns_keep_all[y0_gd_corr >= y0_gd_final]
+
+stns_keep_al_sr = pd.Series(stns_keep_all)
+stns_keep_al_sr.to_csv(
+    (main_dir /
+        r'plots_NetAtmo_ppt_DWD_ppt_correlation_' /
+        (r'keep_stns_good_any_neighbor_%s_per_.csv' % percent)),
+    sep=';')
 # =============================================================================
 
-x0_abv = in_df0.loc[stns_keep_all, 'Distance to neighbor'].dropna().values
-y0_abv = in_df0.loc[stns_keep_all, 'Bool_Spearman_Correlation'].dropna().values
+x0_abv = df0_gd_corr.loc[stns_keep_all, 'Distance to neighbor'].dropna().values
+y0_abv = df0_gd_corr.loc[stns_keep_all,
+                         'Bool_Spearman_Correlation'].dropna().values
 
-x1_abv = in_df1.loc[stns_keep_all, 'Distance to neighbor']  # .dropna().values
-y1_abv = in_df1.loc[stns_keep_all,
-                    'Bool_Spearman_Correlation']  # .dropna().values
+x1_abv = df1_gd_corr.loc[stns_keep_all,
+                         'Distance to neighbor']  # .dropna().values
+y1_abv = df1_gd_corr.loc[stns_keep_all,
+                         'Bool_Spearman_Correlation']  # .dropna().values
 
-x2_abv = in_df2.loc[stns_keep_all, 'Distance to neighbor'].dropna().values
-y2_abv = in_df2.loc[stns_keep_all, 'Bool_Spearman_Correlation'].dropna().values
+x2_abv = df2_gd_corr.loc[stns_keep_all, 'Distance to neighbor'].dropna().values
+y2_abv = df2_gd_corr.loc[stns_keep_all,
+                         'Bool_Spearman_Correlation'].dropna().values
 
-x3_abv = in_df3.loc[stns_keep_all, 'Distance to neighbor'].dropna().values
-y3_abv = in_df3.loc[stns_keep_all, 'Bool_Spearman_Correlation'].dropna().values
+x3_abv = df3_gd_corr.loc[stns_keep_all, 'Distance to neighbor'].dropna().values
+y3_abv = df3_gd_corr.loc[stns_keep_all,
+                         'Bool_Spearman_Correlation'].dropna().values
 
-x4_abv = in_df4.loc[stns_keep_all, 'Distance to neighbor'].dropna().values
-y4_abv = in_df4.loc[stns_keep_all, 'Bool_Spearman_Correlation'].dropna().values
+x4_abv = df4_gd_corr.loc[stns_keep_all, 'Distance to neighbor'].dropna().values
+y4_abv = df4_gd_corr.loc[stns_keep_all,
+                         'Bool_Spearman_Correlation'].dropna().values
 
 # TODO: Add Additional filter on stations
 # =============================================================================
 
 plt.ioff()
-plt.figure(figsize=(12, 8), dpi=100)
+plt.figure(figsize=(16, 12), dpi=300)
 
+marker_size_abv_curve = 34
+marker_size_below_curve = 28
+marker_size_curve = 15
+#
+plt.scatter(x0_abv, y0_abv, c='r', alpha=0.5,
+            marker='x', label=('First Neighbor Stn nbr %d / %d'
+                               % (y0_abv.shape[0], y0_gd_corr.shape[0])),
+            s=marker_size_abv_curve)
+plt.scatter(x1_abv, y1_abv, c='b', alpha=0.5,
+            marker='.', label=('Second Neighbor Stn nbr %d / %d'
+                               % (y1_abv.shape[0], y1_gd_corr.shape[0])),
+            s=marker_size_abv_curve)
+plt.scatter(x2_abv, y2_abv, c='g', alpha=0.5,
+            marker='d', label=('Third Neighbor Stn nbr %d / %d'
+                               % (y2_abv.shape[0], y2_gd_corr.shape[0])),
+            s=marker_size_abv_curve)
+plt.scatter(x3_abv, y3_abv, c='darkorange', alpha=0.5,
+            marker='1', label=('Fourth Neighbor Stn nbr %d / %d'
+                               % (y3_abv.shape[0], y3_gd_corr.shape[0])),
+            s=marker_size_abv_curve)
+plt.scatter(x4_abv, y4_abv, c='m', alpha=0.5,
+            marker='1', label=('Fifth Neighbor Stn nbr %d / %d'
+                               % (y4_abv.shape[0], y4_gd_corr.shape[0])),
+            s=marker_size_abv_curve)
 
-plt.scatter(x0, y0, c='r', alpha=0.5,
-            marker='x', label='First Neighbor', s=28)
-plt.scatter(x1, y1, c='orange', alpha=0.5,
-            marker='.', label='Second Neighbor', s=28)
-plt.scatter(x2, y2, c='g', alpha=0.5,
-            marker='d', label='Third Neighbor', s=28)
-plt.scatter(x3, y3, c='b', alpha=0.5,
-            marker='1', label='Fourth Neighbor', s=28)
-plt.scatter(x4, y4, c='b', alpha=0.5,
-            marker='1', label='Fourth Neighbor', s=28)
-
-plt.scatter(xs, yfs, label="Polynomial function",
-            alpha=.25, c='m', marker='*', s=20)
-plt.scatter(xvals_above_curves, yvals_above_curves, s=20,
-            label="Stns above Curve%d" % stns_to_keep.shape[0],
-            alpha=.25, c='grey', marker='d')
-
-plt.scatter(xvals_below_curves, yvals_below_curves, s=20,
-            label="Below Curve %d" % stns_to_remove.shape[0],
-            alpha=.25, c='k', marker='X')
+# plt.scatter(xvals_above_curves, yvals_above_curves, s=marker_size_abv_curve,
+#             label="Stns above Curve %d / %d" % (yvals_above_curves.shape[0],
+#                                                 stns.shape[0]),
+#             alpha=.25, c='b', marker='d')
+#
+# plt.scatter(xs, yfs, label="Polynomial function",
+#             alpha=.25, c='m', marker='*', s=marker_size_curve)
+#
+#
+# plt.scatter(xvals_below_curves, yvals_below_curves, s=marker_size_below_curve,
+#             label="Below Curve %d / %d" % (yvals_below_curves.shape[0],
+#                                            stns.shape[0]),
+#             alpha=.25, c='k', marker='X')
 
 #plt.scatter([],[], label='Number of stations %d' % dfs_all.shape[0], marker='.')
 plt.xlim([0, x4.max() + 1000])
@@ -216,11 +256,11 @@ plt.legend(loc=0)
 plt.grid(alpha=.25)
 plt.tight_layout()
 # plt.axis('equal')
-plt.title('Keeping %s %d stations: Indicator correlation with distance'
+plt.title('Keeping %s %d / %d stations: Indicator correlation with distance'
           ' for upper %s percent of data values'
-          % (data_source0, stns_to_keep.shape[0], percent))
+          % (data_source0, y0_abv.shape[0], s0.shape[0], percent))
 plt.savefig(save_dir /
-            (r'_%s_%s_%s_percent_indic_corr_freq_%s_all_neighbors.png'
+            (r'_%s_%s_%s_percent_indic_corr_freq_%s_all_neighbors_filtered.png'
              % (data_source0, data_source, percent, time_freq)),
             frameon=True, papertype='a4',
             bbox_inches='tight', pad_inches=.2)

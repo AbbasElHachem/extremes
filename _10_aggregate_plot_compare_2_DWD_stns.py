@@ -282,7 +282,8 @@ def plot_end_tail_cdf_2_stns(stn1_id, stn2_id, seperate_distance,
             label=stn2_id)
     ax.set_xlim(min(xvals1.min(), xvals2.min()) - 0.1,
                 max(xvals1.max(), xvals2.max()) + 0.1)
-    ax.set_yticks([0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 1])
+    ax.set_yticks([0.9, 0.91, 0.92, .93, 0.94,
+                   0.95, 0.96, 0.97, 0.98, 0.99, 1])
     ax.set_ylim(min(yvals1.min(), yvals2.min()) - 0.01, 1.0001)
 
     ax.xaxis.set_major_locator(majorLocator)

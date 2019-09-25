@@ -7,6 +7,7 @@ Created on Thu Aug 29 08:08:15 2019
 """
 
 #%%
+import os
 import pandas as pd
 import numpy as np
 
@@ -29,10 +30,10 @@ path_to_daily_netatmo_ppt = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW
 path_to_daily_dwd_ppt = r"F:\download_DWD_data_recent\all_dwd_daily_ppt_data_combined_2014_2019_.csv"
 
 
-path_to_hourly_netatmo_ppt = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new.csv"
+path_to_hourly_netatmo_ppt = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new_no_freezing.csv"
 path_to_hourly_dwd_ppt = r"F:\download_DWD_data_recent\all_dwd_hourly_ppt_data_combined_2014_2019_.csv"
 
-
+remove_bad_hours_ = True
 #==============================================================================
 # # hourly data
 #==============================================================================
@@ -50,14 +51,56 @@ df_dwd_hourly = pd.read_csv(
     engine='c').dropna(how='all')
 
 netatmo_maximum_hrs_dates = df_netatmo_hourly.max(axis=1).sort_values()[::-1]
-netatmo_max_100_hours = netatmo_maximum_hrs_dates[:100].sort_index()
+netatmo_max_100_hours = netatmo_maximum_hrs_dates[:200].sort_index()
+netatmo_max_100_hours = pd.DataFrame(data=netatmo_max_100_hours.values,
+                                     index=netatmo_max_100_hours.index)
+stns_netatmo = df_netatmo_hourly.loc[netatmo_max_100_hours.index, :].idxmax(
+    axis=1)
+bad_hours = stns_netatmo[stns_netatmo.duplicated()]
+good_hours = stns_netatmo[~stns_netatmo.duplicated()]
+
+netatmo_max_100_hours['Station Id'] = stns_netatmo.values
+
+for ix, stn in enumerate(netatmo_max_100_hours['Station Id'].values):
+    if stn in bad_hours.values:
+        netatmo_max_100_hours.iloc[ix, 1] = np.nan
+
+netatmo_max_100_hours.dropna(inplace=True)
+
+
+if remove_bad_hours_:
+    #     print(df_netatmo_hourly.isna().sum())
+    for idx, stn_id in zip(bad_hours.index, bad_hours.values):
+        df_netatmo_hourly.loc[idx, stn_id] = np.nan
+    print('Saving Dataframe')
+#     print(df_netatmo_hourly.isna().sum())
+    df_netatmo_hourly.dropna(how='all', inplace=True)
+    df_netatmo_hourly.to_csv(os.path.join(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW',
+                                          r'ppt_all_netatmo_hourly_stns_combined_new_no_freezing_2.csv'),
+                             sep=';', float_format='%.2f')  # temperature humidity ppt
+
+    df_netatmo_hourly.reset_index(inplace=True)
+    df_netatmo_hourly.rename(columns={'index': 'Time'}, inplace=True)
+    df_netatmo_hourly.to_feather(os.path.join(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW',
+                                              r'ppt_all_netatmo_hourly_stns_combined_new_no_freezing_2.fk'))
+
 
 dwd_maximum_hrs_dates = df_dwd_hourly.max(axis=1).sort_values()[::-1]
-dwd_max_100_hours = dwd_maximum_hrs_dates[:100].sort_index()
+dwd_max_100_hours = dwd_maximum_hrs_dates[:200].sort_index()
+dwd_max_100_hours = pd.DataFrame(data=dwd_max_100_hours.values,
+                                 index=dwd_max_100_hours.index)
+stns_dwd = df_dwd_hourly.loc[dwd_max_100_hours.index, :].idxmax(
+    axis=1)
+dwd_max_100_hours['Station Id'] = stns_dwd.values
+
 
 netatmo_max_100_hours.to_csv(
     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\netatmo_hourly_maximum_100_hours.csv",
     sep=';', header=False)
+
+# netatmo_max_100_hours.to_csv(
+#     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\netatmo_hourly_maximum_100_hours_stns.csv",
+#     sep=';', header=False)
 
 dwd_max_100_hours.to_csv(
     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\dwd_hourly_maximum_100_hours.csv",
@@ -87,12 +130,34 @@ dwd_maximum_dates = df_dwd_daily.max(axis=1).sort_values()[::-1]
 # netatmo_corr_dwd_max = df_netatmo_daily.loc[
 #     dwd_maximum_dates.index, :].max(axis=1).sort_values()[::-1].dropna(how='all')
 #
-netatmo_max_100_days = netatmo_maximum_dates[:100].sort_index()
+netatmo_max_100_days = netatmo_maximum_dates[:200].sort_index()
 # dwd_corr_netatmo_max_100_days = dwd_corr_netatmo_max[:100].sort_index()
 #
-dwd_max_100_days = dwd_maximum_dates[:100].sort_index()
-# net_corr_dwd_max_100_days = netatmo_corr_dwd_max[:100].sort_index()
 
+netatmo_max_100_days = pd.DataFrame(data=netatmo_max_100_days.values,
+                                    index=netatmo_max_100_days.index)
+stns_netatmo_daily = df_netatmo_daily.loc[netatmo_max_100_days.index, :].idxmax(
+    axis=1)
+netatmo_max_100_days['Station Id'] = stns_netatmo_daily.values
+bad_days = stns_netatmo_daily[stns_netatmo_daily.duplicated()]
+good_days = stns_netatmo_daily[~stns_netatmo_daily.duplicated()]
+
+netatmo_max_100_days['Station Id'] = stns_netatmo_daily.values
+
+for ix, stn in enumerate(netatmo_max_100_days['Station Id'].values):
+    if stn in bad_days.values:
+        netatmo_max_100_days.iloc[ix, 1] = np.nan
+
+netatmo_max_100_days.dropna(inplace=True)
+
+
+dwd_max_100_days = dwd_maximum_dates[:200].sort_index()
+# net_corr_dwd_max_100_days = netatmo_corr_dwd_max[:100].sort_index()
+dwd_max_100_days = pd.DataFrame(data=dwd_max_100_days.values,
+                                index=dwd_max_100_days.index)
+stns_dwd_daily = df_dwd_daily.loc[dwd_max_100_days.index, :].idxmax(
+    axis=1)
+dwd_max_100_days['Station Id'] = stns_dwd_daily.values
 
 netatmo_max_100_days.to_csv(
     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\netatmo_daily_maximum_100_days.csv",

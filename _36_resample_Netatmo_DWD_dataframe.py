@@ -10,7 +10,7 @@ import os
 import matplotlib.pyplot as plt
 
 #path_to_df = r"F:\download_DWD_data_recent\all_dwd_hourly_ppt_data_combined_1995_2019.csv"
-path_to_df = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new.csv"
+path_to_df = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new_no_freezing.csv"
 #path_to_df = r"F:\download_DWD_data_recent\all_dwd_10min_ppt_data_combined_2014_2019.csv"
 
 
@@ -114,21 +114,22 @@ def agg_data(df, agg, closed, label, shift=False, leave_nan=True,
 
 
 df_hourly = pd.read_csv(path_to_df, sep=';', index_col=0,
-                        infer_datetime_format=True, engine='c', parse_dates=True).dropna(how='all')
+                        infer_datetime_format=True, engine='c',
+                        parse_dates=True).dropna(how='all')
 
-
+df_hourly = df_hourly[0 <= df_hourly]
 # In[4]:
 
 
-df_daily = agg_data(df_hourly, '60min', closed='right',
+df_daily = agg_data(df_hourly, 'M', closed='right',
                     label='right', max_nan=0)
 
 
 # In[9]:
 
 
-df_daily = df_daily[0 <= df_daily]
-df_daily = df_daily[df_daily < 300]
+# df_daily = df_daily[0 <= df_daily]
+# df_daily = df_daily[df_daily < 300]
 df_daily.dropna(how='all', inplace=True)
 
 

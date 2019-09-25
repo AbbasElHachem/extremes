@@ -41,8 +41,8 @@ path_to_dwd_hourly_data = (path_to_data /
                            r'all_dwd_hourly_ppt_data_combined_2014_2019_.csv')
 
 # =============================================================================
-strt_date = '2014-01-01'
-end_date = '2019-08-01'
+strt_date = '2015-01-01'
+end_date = '2019-09-01'
 
 warm_season_month = [5, 6, 7, 8, 9]  # mai till sep
 cold_season_month = [10, 11, 12, 1, 2, 3, 4]  # oct till april
@@ -55,11 +55,11 @@ use_hourly_data = False  # True
 # =============================================================================
 if use_daily_data:
     path_to_dwd_ppt_data = path_to_dwd_daily_data
-
+    acc = 'daily'
 
 if use_hourly_data:
     path_to_dwd_ppt_data = path_to_dwd_hourly_data
-
+    acc = 'hourly'
 
 #==============================================================================
 # # DWD DATA
@@ -149,11 +149,11 @@ for stn_id in dwd_in_vals_df.columns:
         stn_id] = df_stn_warm.loc[stn_data_warm_season.index, 'edf']
 
 df_dwd_distriubutions_warm_season.to_csv(
-    out_plots_path / 'df_dwd_distributions_warm_season_hourly.csv',
+    out_plots_path / ('df_dwd_distributions_warm_season_%s.csv' % acc),
     sep=';', float_format='%.2f')
 
 df_dwd_distriubutions_cold_season.to_csv(
-    out_plots_path / 'df_dwd_distributions_cold_season_hourly.csv',
+    out_plots_path / ('df_dwd_distributions_cold_season_%s.csv' % acc),
     sep=';', float_format='%.2f')
 
 print('done with everything')

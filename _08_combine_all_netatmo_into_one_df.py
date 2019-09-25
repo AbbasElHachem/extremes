@@ -40,10 +40,11 @@ dfs_list_ppt = list(filter(lambda x: 'coords' not in x, dfs_list))
 
 stn_ids = split_df_file_to_get_alls_stn_ids(dfs_list_ppt)
 # 2014-04-01 00:00:00 for ppt
-date_range = pd.date_range('2014-01-01 00:00:00',
-                           '2019-09-03 00:00:00',
+date_range = pd.date_range('2015-01-01 00:00:00',
+                           '2019-09-23 00:00:00',
                            freq='H')  # 'H'
-max_ppt_thr = 200  # maximum ppt values per hour
+max_ppt_thr = 150  # maximum ppt values per hour
+initial_vals_to_remove = 4  # most likely calibration or test values
 
 data_mtx = np.zeros(shape=(date_range.shape[0], len(stn_ids))).astype('float')
 data_mtx[data_mtx == 0] = np.nan
@@ -62,8 +63,10 @@ for df_file in dfs_list_ppt:
                         parse_dates=True,
                         infer_datetime_format=True,
                         engine='c')
+    # in_df.dropna(inplace=True)
+    in_df = in_df[(0 <= in_df) & (in_df <= max_ppt_thr)]  # (0 <= in_df) &
     in_df.dropna(inplace=True)
-    in_df = in_df[(0 <= in_df) & (in_df <= max_ppt_thr)]
+    in_df = in_df.iloc[initial_vals_to_remove:]  # remove first values
     in_df = select_df_within_period(df=in_df, start=date_range[0],
                                     end=date_range[-1])
     print('Data has the following shape', in_df.values.shape)
@@ -78,10 +81,11 @@ for df_file in dfs_list_ppt:
 
     all_dfs_len -= 1
 
+print('Saving Dataframe')
 df_all.dropna(how='all', inplace=True)
 df_all.to_csv(os.path.join(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW',
                            r'ppt_all_netatmo_hourly_stns_combined_new.csv'),
-              sep=';', float_format='%.3f')  # temperature humidity ppt
+              sep=';', float_format='%.2f')  # temperature humidity ppt
 
 df_all.reset_index(inplace=True)
 df_all.rename(columns={'index': 'Time'}, inplace=True)

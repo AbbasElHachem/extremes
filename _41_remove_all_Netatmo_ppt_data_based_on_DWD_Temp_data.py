@@ -15,7 +15,7 @@ __copyright__ = 'Institut fuer Wasser- und Umweltsystemmodellierung - IWS'
 __email__ = "abbas.el-hachem@iws.uni-stuttgart.de"
 
 # ===========================================================================
-
+import os
 import timeit
 import time
 
@@ -81,7 +81,7 @@ print('Done getting all data\n')
 
 for netatmo_stn in in_df_netatmo_ppt_data.columns:
     print('Netatmo station is', netatmo_stn)
-    netatmo_stn_df = in_df_netatmo_ppt_data.loc[:, netatmo_stn].dropna()
+    netatmo_stn_df = in_df_netatmo_ppt_data.loc[:, netatmo_stn]  # .dropna()
 
     distance_to_dwd_stns = in_df_distance_netatmo_dwd_bw.loc[netatmo_stn, :]
     min_distance = distance_to_dwd_stns.sort_values()[0]
@@ -89,7 +89,8 @@ for netatmo_stn in in_df_netatmo_ppt_data.columns:
     print('Distance to DWD Temp station', np.round(min_distance, 2))
     dwd_ppt_data = in_df_dwd_temp_data.loc[:, dwd_stn_id].drop_duplicates()
 
-    dwd_ppt_data_freezing = dwd_ppt_data[dwd_ppt_data < freezing_temp].dropna()
+    # .dropna()
+    dwd_ppt_data_freezing = dwd_ppt_data[dwd_ppt_data < freezing_temp]
 
     dwd_freezing_days = dwd_ppt_data_freezing.index
     dwd_freezing_days_dayb4 = dwd_freezing_days - pd.Timedelta(days=1)
@@ -144,7 +145,11 @@ netatmo_stn_df_no_freezing_vals.to_csv(
     r'\ppt_all_netatmo_hourly_stns_combined_new_no_freezing.csv',
     sep=';', float_format='%0.2f')
 
-
+netatmo_stn_df_no_freezing_vals.reset_index(inplace=True)
+netatmo_stn_df_no_freezing_vals.rename(columns={'index': 'Time'}, inplace=True)
+netatmo_stn_df_no_freezing_vals.to_feather(
+    os.path.join(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW',
+                 r'ppt_all_netatmo_hourly_stns_combined_new_no_freezing.fk'))
 STOP = timeit.default_timer()  # Ending time
 print(('\n****Done with everything on %s.\nTotal run time was'
        ' about %0.4f seconds ***' % (time.asctime(), STOP - START)))

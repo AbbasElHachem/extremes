@@ -29,11 +29,11 @@ use_new_dwd_data = True
 
 if use_new_dwd_data:
     # for DWD Ppt stations
-    #     coords_dwd_df_file = (r'F:\download_DWD_data_recent'
-    #                           r'\station_coordinates_names_hourly_only_in_BW_utm32.csv')
+    coords_dwd_df_file = (r'F:\download_DWD_data_recent'
+                          r'\station_coordinates_names_hourly_only_in_BW_utm32.csv')
     # for DWD temperature stations
-    coords_dwd_df_file = (r'F:\DWD_download_Temperature_data'
-                          r'\Dwd_temperature_stations_coords_in_BW_utm32.csv')
+#     coords_dwd_df_file = (r'F:\DWD_download_Temperature_data'
+#                           r'\Dwd_temperature_stations_coords_in_BW_utm32.csv')
 
 else:
     coords_dwd_df_file = (r'F:\data_from_exchange\niederschlag_deutschland'
@@ -151,8 +151,8 @@ for stn_mac in in_df_netatmo_coords.index:
         print(msg, 'error for', stn_mac)
         continue
 
-df_distance.to_csv(os.path.join(out_save_dir,
-                                'distance_mtx_in_m_NetAtmo_ppt_DWD_temp.csv'),
+df_distance.to_csv(os.path.join(out_save_dir, 'distance_mtx_in_m_NetAtmo_DWD.csv'),
+                   #'distance_mtx_in_m_NetAtmo_ppt_DWD_temp.csv'),
                    sep=';', float_format='%.4f')
 
 print('Done with everything')

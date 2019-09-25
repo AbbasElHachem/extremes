@@ -73,11 +73,11 @@ dwd_path_Acc = r'year_allyears_df_dwd_correlations'
 path_to_netatmo_gd_stns_file = data_dir_Netamto_dfs / \
     r'keep_stns_all_neighbor_90_per_60min_.csv'
 
-assert path_to_netatmo_gd_stns_file.exists(), 'wrong netatmo good stns file'
+#assert path_to_netatmo_gd_stns_file.exists(), 'wrong netatmo good stns file'
 
 # def percentage threshold, time frequency and data source
 percent = '90'
-time_freq = '60min'
+time_freq = '720min'
 
 data_source0 = 'DWD'  # 'DWD'  # 'Netatmo'  #   # reference station 'Netatmo'
 data_source = 'dwd'  # 'dwd'  # 'netatmo'  #   # compare to station 'netatmo'
@@ -192,7 +192,9 @@ plt.legend(loc=0)
 plt.grid(alpha=.25)
 plt.tight_layout()
 
-plt.title('%s %s stations %s: Indicator correlation'
+if data_source == 'dwd':
+    data_source = 'DWD'
+plt.title('%s %s stations, Temporal Frequency %s\n Indicator correlation'
           ' with distance for upper %s percent of data values'
           % (data_source0, data_source, time_freq, percent))
 plt.savefig(save_dir /

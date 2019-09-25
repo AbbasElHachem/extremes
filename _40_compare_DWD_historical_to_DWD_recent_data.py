@@ -76,9 +76,8 @@ ppt_thrs_list = [0.5]  # , 1, 2]
 
 
 # till 1 day
-aggregation_frequencies = ['60min',
-                           '120min',
-                           '480min', '720min', '1440min']
+aggregation_frequencies = ['60min', '120min', '480min',
+                           '720min', '1440min']
 
 old_period_start = '1995-01-01 00:00:00'
 old_period_end = '2014-01-01 00:00:00'
@@ -97,8 +96,11 @@ def plot_end_tail_cdf_1_stn_old_recent(stn1_id, df1, df2, temp_freq,
     values_x = df1.values.ravel()
     values_y = df2.values.ravel()
 
-    data_shape_df1 = np.round(df1.values.ravel().shape[0], 0)
-    data_shape_df2 = np.round(df2.values.ravel().shape[0], 0)
+    start_df1, end_df1 = str(df1.index[0]), str(df1.index[-1])
+    start_df2, end_df2 = str(df2.index[0]), str(df2.index[-1])
+
+    # data_shape_df1 = np.round(df1.values.ravel().shape[0], 0)
+    # data_shape_df2 = np.round(df2.values.ravel().shape[0], 0)
 
     xvals1, yvals1 = build_edf_fr_vals(values_x)
     xvals2, yvals2 = build_edf_fr_vals(values_y)
@@ -106,10 +108,12 @@ def plot_end_tail_cdf_1_stn_old_recent(stn1_id, df1, df2, temp_freq,
     fig = plt.figure(figsize=(20, 12), dpi=150)
     ax = fig.add_subplot(111)
     ax.scatter(xvals1, yvals1, c='b', marker='+', s=10,
-               alpha=0.5, label='1995-2014')
+               alpha=0.5,
+               label='%s to %s' % (start_df1, end_df1))
 
     ax.scatter(xvals2, yvals2, c='r', marker='o', s=10,
-               alpha=0.5, label='2014-2019')
+               alpha=0.5,
+               label='%s to %s' % (start_df2, end_df2))
 
     ax.set_xlim(min(xvals1.min(), xvals2.min()) - 0.1,
                 max(xvals1.max(), xvals2.max()) + 1)
@@ -126,11 +130,12 @@ def plot_end_tail_cdf_1_stn_old_recent(stn1_id, df1, df2, temp_freq,
                   % (temp_freq, stn1_id))
     ax.legend(loc='lower right')
     ax.set_title("Comapring CDF old and recent periods for DWD Stn: %s"
-                 "\n Available Data St1: %d; \n"
-                 "Available Data St2: %d; \n Time Frequency: %s\n"
+                 #"\n Available Data St1: %d; \n"
+                 "\n Time Frequency: %s\n"
+                 #"Available Data St2: %d; \n Time Frequency: %s\n"
                  "Rainfall Threshold: %.1f" % (stn1_id,
-                                               data_shape_df1,
-                                               data_shape_df2,
+                                               # data_shape_df1,
+                                               # data_shape_df2,
                                                temp_freq,
                                                ppt_thr))
 
@@ -149,6 +154,8 @@ def plot_end_tail_cdf_1_stn_old_recent(stn1_id, df1, df2, temp_freq,
 #==============================================================================
 #
 #==============================================================================
+print('Reading Coordinate Dataframes')
+
 in_coords_df = pd.read_csv(path_to_dwd_coords_only_in_bw,
                            sep=',', index_col=0, encoding='latin')
 
@@ -158,13 +165,15 @@ stndwd_ix = ['0' * (5 - len(str(stn_id))) + str(stn_id)
 
 in_coords_df.index = stndwd_ix
 
+print('Reading Data Dataframes')
+
 df_dwd = pd.read_feather(path_to_ppt_dwd_data, use_threads=True)
 df_dwd.set_index('Time', inplace=True)
 
 df_dwd.index = pd.to_datetime(df_dwd.index, format='%Y-%m-%d %H:%M:%S')
 df_dwd.dropna(axis=0, inplace=True, how='all')
 
-
+print('Splitting Data Dataframes')
 df_dwd_old = select_df_within_period(df=df_dwd,
                                      start=old_period_start,
                                      end=old_period_end)
@@ -172,6 +181,7 @@ df_dwd_old = select_df_within_period(df=df_dwd,
 df_dwd_new = select_df_within_period(df=df_dwd,
                                      start=new_period_start,
                                      end=new_period_end)
+print('Start plotting')
 
 for dwd_stn_id in df_dwd_old.columns:
     if dwd_stn_id in stndwd_ix:
@@ -185,3 +195,5 @@ for dwd_stn_id in df_dwd_old.columns:
                                                temp_freq='60min',
                                                ppt_thr=0,
                                                out_dir=out_save_dir_orig)
+
+#            break

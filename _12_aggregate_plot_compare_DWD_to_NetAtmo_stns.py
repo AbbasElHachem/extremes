@@ -56,7 +56,7 @@ from b_get_data import HDF5
 
 path_to_ppt_hourly_netatmo_data = (
     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-    r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new.csv')
+    r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new_no_freezing.csv')
 assert os.path.exists(
     path_to_ppt_hourly_netatmo_data), 'wrong NETATMO Ppt file'
 
@@ -72,7 +72,7 @@ assert os.path.exists(
 # assert os.path.exists(path_to_ppt_hdf_data), 'wrong NETATMO Ppt file'
 
 path_to_ppt_dwd_data = (
-    r"F:\download_DWD_data_recent\all_dwd_hourly_ppt_data_combined_1995_2019.fk")
+    r"F:\download_DWD_data_recent\all_dwd_hourly_ppt_data_combined_2014_2019_.fk")
 assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
 
 distance_matrix_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
@@ -94,7 +94,7 @@ ppt_thr_min = .5
 
 ppt_thrs_list = [0.5]
 
-max_ppt_thr = 30.
+max_ppt_thr = 100.
 date_fmt = '%Y-%m-%d %H:%M:%S'
 # till 1 day '5min', '10min', '15min', '30min',
 aggregation_frequencies = ['60min',
@@ -131,7 +131,7 @@ def compare_cdf_two_stns(netatmo_ppt_df_file, path_to_ppt_hdf_data,
                 ascending=True)
 
             min_dist = sorted_distances.values[0]
-            if min_dist <= 10000:
+            if min_dist <= 15000:
 
                 #                 stn_2_id = sorted_distances.index[0]
                 #
@@ -180,13 +180,13 @@ def compare_cdf_two_stns(netatmo_ppt_df_file, path_to_ppt_hdf_data,
                                 columns=[stn_2_id])
                             try:
                                 pass
-#                                 plt_bar_plot_2_stns(stn_id,
-#                                                     stn_2_id,
-#                                                     min_dist,
-#                                                     df_common1,
-#                                                     df_common2,
-#                                                     tem_freq,
-#                                                     out_save_dir)
+                                plt_bar_plot_2_stns(stn_id,
+                                                    stn_2_id,
+                                                    min_dist,
+                                                    df_common1,
+                                                    df_common2,
+                                                    tem_freq,
+                                                    out_save_dir)
 
                                 plt_scatter_plot_2_stns(stn_id,
                                                         stn_2_id,

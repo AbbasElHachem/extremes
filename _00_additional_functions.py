@@ -1366,11 +1366,13 @@ def read_filter_df_corr_return_stns_x_y_vals(df_file, thr_low=0, thr_high=1,
     """ read df with correlation values, select all between 0 and 1 and 
         return station_ids, distance_values, correlation_values, and df"""
     in_df = pd.read_csv(df_file, index_col=0, sep=';').dropna(how='any')
-    in_df = in_df[(thr_low < in_df.loc[:, y_col_name]) &
+
+    in_df = in_df[(thr_low <= in_df.loc[:, y_col_name]) &
                   (in_df.loc[:, y_col_name] < thr_high)]
     stn_ids = in_df.index
     x_vals = in_df.loc[:, x_col_name].values.ravel()
     y_vals = in_df.loc[:, y_col_name].values.ravel()
+    print('Number of stations is', len(stn_ids))
     return stn_ids, x_vals, y_vals, in_df
 #==============================================================================
 #
@@ -1398,7 +1400,7 @@ def remove_all_low_corr_short_dist(x, y, xthr, ythr, stns, df,
     x_gd_corr = df_gd_corr.loc[s_gd_corr, x_col_name].values.ravel()
     y_gd_corr = df_gd_corr.loc[s_gd_corr, y_col_name].values.ravel()
 
-    assert np.isnan(x_gd_corr).sum() == 0, 'nans in data'
+    # assert np.isnan(x_gd_corr).sum() == 0, 'nans in data'
     return x_gd_corr, y_gd_corr, s_gd_corr, df_gd_corr
 #==============================================================================
 #

@@ -96,14 +96,14 @@ rcParams['axes.labelpad'] = 13
 # for getting station names
 path_to_ppt_netatmo_data_csv = (
     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-    r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new.csv')
+    r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new_no_freezing.csv')
 assert os.path.exists(path_to_ppt_netatmo_data_csv), 'wrong NETATMO Ppt file'
 
 # for reading ppt data station by station
 # HOURLY DATA
 path_to_ppt_netatmo_data_feather = (
     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-    r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new.fk')
+    r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new_no_freezing.fk')
 assert os.path.exists(
     path_to_ppt_netatmo_data_feather), 'wrong NETATMO Ppt file'
 
@@ -116,7 +116,7 @@ assert os.path.exists(
 
 # HOURLY DATA
 path_to_ppt_dwd_data = (
-    r"F:\download_DWD_data_recent\all_dwd_hourly_ppt_data_combined_1995_2019.fk")
+    r"F:\download_DWD_data_recent\all_dwd_hourly_ppt_data_combined_2014_2019_.fk")
 assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
 
 # 10Min DATA
@@ -139,8 +139,8 @@ assert os.path.exists(path_to_netatmo_coords_df_file), 'wrong DWD coords file'
 path_to_netatmo_gd_stns_file = (
     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes"
     r"\plots_NetAtmo_ppt_DWD_ppt_correlation_"
-    r"\keep_stns_1st_neighbor_95_per_60min_.csv")
-assert os.path.exists(path_to_netatmo_gd_stns_file), 'wrong netatmo stns file'
+    r"\keep_stns_all_neighbor_90_per_60min_.csv")
+#assert os.path.exists(path_to_netatmo_gd_stns_file), 'wrong netatmo stns file'
 
 path_to_shpfile = (r'F:\data_from_exchange\Netatmo'
                    r'\Landesgrenze_ETRS89\Landesgrenze_10000_ETRS89_lon_lat.shp')
@@ -169,11 +169,11 @@ min_dist_thr_ppt = 5000  # 500000  # m
 max_ppt_thr = 100.  # ppt above this value are not considered
 
 # only highest x% of the values are selected
-lower_percentile_val_lst = [90]  # ,95, 99]  # [80, 85, 90, 95, 99]
+lower_percentile_val_lst = [90, 92, 95, 97, 99]  # [80, 85, 90, 95, 99]
 
 
 # ['10min', '60min', '120min', '480min', '720min', '1440min']
-aggregation_frequencies = ['60min']
+aggregation_frequencies = ['60min', '120min', '480min', '720min', '1440min']
 # temporal aggregation of df
 
 # [0, 1, 2, 3, 4]  # refers to DWD neighbot (0=first)
@@ -182,11 +182,16 @@ neighbors_to_chose_lst = [0, 1, 2, 3, 4]
 min_req_ppt_vals = 30  # minimum values that should be available per station
 
 # this is used to keep only data where month is not in this list
-not_convective_season = [10, 11, 12, 1, 2, 3, 4]  # oct till april
+# not_convective_season = [10, 11, 12, 1, 2, 3, 4]  # oct till april
+not_convective_season = []  # oct till april
 
 plot_figures = True
 
 date_fmt = '%Y-%m-%d %H:%M:%S'
+
+# select data only within this period (same as netatmo)
+start_date = '2015-01-01 00:00:00'
+end_date = '2019-09-01 00:00:00'
 
 #==============================================================================
 #
@@ -239,10 +244,11 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
 
     # get all station names for netatmo
     stns_ppt_ids = [stn_id for stn_id in in_df_distance_netatmo_dwd.index]
+
     # read netatmo good stns df
-    in_df_stns = pd.read_csv(path_netatmo_gd_stns, index_col=0,
-                             sep=';')
-    good_stns = list(in_df_stns.values.ravel())
+#     in_df_stns = pd.read_csv(path_netatmo_gd_stns, index_col=0,
+#                              sep=';')
+#     good_stns = list(in_df_stns.values.ravel())
 
     print('\n######\n done reading all dfs \n#######\n')
     # create df to append results of comparing two stns
@@ -278,6 +284,10 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
             netatmo_ppt_stn1 = select_convective_season(
                 df=netatmo_ppt_stn1,
                 month_lst=not_convective_season)
+            # select df recent years
+            netatmo_ppt_stn1 = select_df_within_period(netatmo_ppt_stn1,
+                                                       start_date,
+                                                       end_date)
 
             # find distance to all dwd stations, sort them, select minimum
             distances_dwd_to_stn1 = in_df_distance_netatmo_dwd.loc[
@@ -314,6 +324,9 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                     df=df_dwd,
                     month_lst=not_convective_season)
 
+                df_dwd = select_df_within_period(df_dwd,
+                                                 start_date,
+                                                 end_date)
                 # intersect dwd and netatmo ppt data
 
                 if (netatmo_ppt_stn1.values.ravel().shape[0] > min_req_ppt_vals and

@@ -76,15 +76,14 @@ main_dir = Path(os.getcwd())
 os.chdir(main_dir)
 
 path_to_ppt_dwd_data = (
-    r"F:\download_DWD_data_recent\all_dwd_hourly_ppt_data_combined_1995_2019.fk")
+    r"F:\download_DWD_data_recent\all_dwd_hourly_ppt_data_combined_2014_2019_.fk")
 assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
 
-
-path_to_ppt_hdf_data = (
+path_to_ppt_csv_data = (
     r'F:\download_DWD_data_recent'
-    r'\DWD_60Min_ppt_stns_19950101000000_20190715000000_new.h5')
+    r'\all_dwd_hourly_ppt_data_combined_2014_2019_.csv')
 
-assert os.path.exists(path_to_ppt_hdf_data), 'wrong DWD Ppt file'
+assert os.path.exists(path_to_ppt_csv_data), 'wrong DWD Ppt file'
 
 coords_df_file = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
                   r"\station_coordinates_names_hourly_only_in_BW_utm32.csv")
@@ -114,29 +113,31 @@ x_col_name = 'X'
 y_col_name = 'Y'
 
 # only highest x% of the values are selected
-lower_percentile_val_lst = [99]  # 80, 85, 90,
+lower_percentile_val_lst = [90, 92, 95, 97, 99]  # 80, 85, 90,
 
 
 # temporal aggregation of df
 # , '120min', '480min', '720min', '1440min']
-aggregation_frequencies = ['60min']
+aggregation_frequencies = ['60min', '120min', '480min', '720min', '1440min']
 
 # month number, no need to change
-not_convective_season = [10, 11, 12, 1, 2, 3, 4]
+# not_convective_season = [10, 11, 12, 1, 2, 3, 4]
+
+not_convective_season = []
 
 # starts with one
 # , 2, 3, 4, 5]  # list of which neighbors to chose
-neighbors_to_chose_lst = [1]
+neighbors_to_chose_lst = [1, 2, 3, 4, 5]
 
 min_req_ppt_vals = 30  # stations minimum required ppt values
 
 # select data only within this period (same as netatmo)
-start_date = '2014-01-01 00:00:00'
-end_date = '2019-07-01 00:00:00'
+start_date = '2015-01-01 00:00:00'
+end_date = '2019-09-01 00:00:00'
 
 date_fmt = '%Y-%m-%d %H:%M:%S'
 
-plt_figures = True  # if true plot correlations seperatly and on map
+plt_figures = False  # if true plot correlations seperatly and on map
 #==============================================================================
 #
 #==============================================================================
@@ -178,7 +179,7 @@ def calc_indicator_correlatione_two_dwd_stns(
         #         if iid == '03362':
         #             raise Exception
 
-        print('\n********\n Total number of Netatmo stations is\n********\n',
+        print('\n********\n Total number of DWD stations is\n********\n',
               alls_stns_len)
         alls_stns_len -= 1
 
@@ -242,9 +243,13 @@ def calc_indicator_correlatione_two_dwd_stns(
 
             print('\n resampling data')
 
-            df_common1, df_common2 = resample_intersect_2_dfs(
-                idf1, idf2, tem_freq)
-
+            if (idf1.values.ravel().shape[0] > min_req_ppt_vals and
+                    idf2.values.ravel().shape[0] > min_req_ppt_vals):
+                try:
+                    df_common1, df_common2 = resample_intersect_2_dfs(
+                        idf1, idf2, tem_freq)
+                except Exception as msg:
+                    raise Exception
             print('\n done resampling data')
 
             if (df_common1.values.shape[0] > min_req_ppt_vals and
@@ -385,8 +390,10 @@ if __name__ == '__main__':
     print('**** Started on %s ****\n' % time.asctime())
     START = timeit.default_timer()  # to get the runtime of the program
 
-    HDF52 = HDF5(infile=path_to_ppt_hdf_data)
-    dwd_ids = HDF52.get_all_ids()
+    dwd_ids = pd.read_csv(
+        path_to_ppt_csv_data, nrows=0, sep=';', engine='c', index_col=0,
+        memory_map=True).columns.tolist()
+    print('Total number of DWD stations is', len(dwd_ids), '\n' * 2)
 
     for lower_percentile_val in lower_percentile_val_lst:
         print('\n***** lower_percentile_val: ', lower_percentile_val)

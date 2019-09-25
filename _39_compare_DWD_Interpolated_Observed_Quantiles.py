@@ -86,15 +86,15 @@ path_to_ppt_dwd_interpolated_using_netatmo_only_cold_season_cdf_daily_data = (
 #==============================================================================
 path_to_ppt_dwd_interpolated_using_dwd_netatmo_warm_season_cdf_daily_data = (
     path_to_data /
-    r'interpolated_ppt_dwd_daily_data_basedon_quantiles_warm_season_using_dwd_netamo.csv')
+    r'interpolated_quantiles_dwd_daily_data_basedon_quantiles_warm_season_using_dwd_netamo.csv')
 
 path_to_ppt_dwd_interpolated_using_dwd_only_warm_season_cdf_daily_data = (
     path_to_data /
-    r'interpolated_ppt_dwd_daily_data_basedon_qunatiles_warm_season_using_dwd_only.csv')
+    r'interpolated_quantiles_dwd_daily_data_basedon_qunatiles_warm_season_using_dwd_only.csv')
 
 path_to_ppt_dwd_interpolated_using_netatmo_only_warm_season_cdf_daily_data = (
     path_to_data /
-    r'interpolated_dwd_daily_data_basedon_qunatiles_warm_season_using_netatmo_only.csv')
+    r'interpolated_quantiles_daily_data_basedon_qunatiles_warm_season_using_netatmo_only.csv')
 
 # Original Daily Data
 # path_to_netatmo_daily_data = path_to_data / r'all_netatmo_ppt_data_daily_.csv'
@@ -294,7 +294,7 @@ for _dwd_stn_ in interpolated_df_ppt_dwd_season_using_dwd_netatmo.columns:
         ax.scatter(ppt_vals_season,
                    edf_vals_season,
                    alpha=.2,
-                   c='k',  # colors_arr,
+                   c='grey',  # colors_arr,
                    s=10,
                    marker='d',
                    # cmap=plt.get_cmap('viridis'),
@@ -333,31 +333,31 @@ for _dwd_stn_ in interpolated_df_ppt_dwd_season_using_dwd_netatmo.columns:
         # PLOT INTERPOLATED QUANTILES BASED ON PPT
         #======================================================================,
 
-        ax.scatter(int_ppt_vals_dwd_used.index,
-                   int_ppt_vals_dwd_used.values,
+        ax.scatter(int_ppt_vals_dwd_used.values,
+                   int_ppt_vals_dwd_used.index,
                    alpha=.75,
-                   c='m',  # colors_arr,
+                   c='r',  # colors_arr,
                    s=15,
                    marker='o',
                    # cmap=plt.get_cmap('viridis'),
                    label='Interpolated DWD Quantiles values with DWD stns')
-        ax.scatter(int_ppt_vals_dwd_netatmo_used.index,
-                   int_ppt_vals_dwd_netatmo_used.values,
+        ax.scatter(int_ppt_vals_dwd_netatmo_used.values,
+                   int_ppt_vals_dwd_netatmo_used.index,
                    alpha=.75,
-                   c='c',  # colors_arr,
+                   c='b',  # colors_arr,
                    s=15,
                    marker='+',
                    # cmap=plt.get_cmap('viridis'),
                    label='Interpolated DWD Quantiles values with DWD & Netatmo stns')
 
-        ax.scatter(int_ppt_vals_dwd_netatmo_only.index,
-                   int_ppt_vals_dwd_netatmo_only.values,
-                   alpha=.75,
-                   c='gold',  # colors_arr,
-                   s=15,
-                   marker='X',
-                   # cmap=plt.get_cmap('viridis'),
-                   label='Interpolated DWD Quantiles values with Netatmo stns')
+#         ax.scatter(int_ppt_vals_dwd_netatmo_only.values,
+#                    int_ppt_vals_dwd_netatmo_only.index,
+#                    alpha=.75,
+#                    c='g',  # colors_arr,
+#                    s=15,
+#                    marker='X',
+#                    # cmap=plt.get_cmap('viridis'),
+# label='Interpolated DWD Quantiles values with Netatmo stns')
 
 #         for dwd_stn in df_dwd_distriubutions_season.columns:
 #             # print('DWD STN is', dwd_stn)
