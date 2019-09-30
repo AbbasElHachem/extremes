@@ -39,7 +39,7 @@ plt.ioff()
 ppt_min_thr_0_vals = 0.1  # everything below it gets value of P0
 
 netatmo_data = True
-use_good_netatmo_stns = True
+use_good_netatmo_stns = False
 
 dwd_data = False
 
@@ -52,7 +52,7 @@ if netatmo_data:
     #                r"\all_netatmo_ppt_data_daily_.csv")
     df_file = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
                r"\all_netatmo_ppt_data_daily_.csv")
-    # r"\ppt_all_netatmo_hourly_stns_combined_new_no_freezing.csv")
+#                r"\ppt_all_netatmo_hourly_stns_combined_new_no_freezing_2.csv")
     save_acc = 'netatmo'
 # list of Netatmo stations with good indicator correlations
 if use_good_netatmo_stns:
@@ -62,8 +62,9 @@ if use_good_netatmo_stns:
     save_acc = 'netatmo_good_stns'
 if dwd_data:
     df_file = (
-        r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\all_dwd_ppt_data_daily_.csv")
-    # r"\all_dwd_hourly_ppt_data_combined_2014_2019_.csv")
+        # \all_dwd_ppt_data_daily_.csv")
+        r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
+        r"\all_dwd_hourly_ppt_data_combined_2014_2019_.csv")
     save_acc = 'dwd'
     # df_file = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
     #            r"\all_dwd_ppt_data_monthly_.csv")

@@ -48,8 +48,8 @@ warm_season_month = [5, 6, 7, 8, 9]  # mai till sep
 cold_season_month = [10, 11, 12, 1, 2, 3, 4]  # oct till april
 
 
-use_daily_data = True  # False
-use_hourly_data = False  # True
+use_daily_data = False  # False
+use_hourly_data = True  # True
 
 
 # =============================================================================

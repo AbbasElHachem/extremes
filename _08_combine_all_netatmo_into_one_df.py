@@ -43,7 +43,7 @@ stn_ids = split_df_file_to_get_alls_stn_ids(dfs_list_ppt)
 date_range = pd.date_range('2015-01-01 00:00:00',
                            '2019-09-23 00:00:00',
                            freq='H')  # 'H'
-max_ppt_thr = 150  # maximum ppt values per hour
+max_ppt_thr = 100  # maximum ppt values per hour
 initial_vals_to_remove = 4  # most likely calibration or test values
 
 data_mtx = np.zeros(shape=(date_range.shape[0], len(stn_ids))).astype('float')

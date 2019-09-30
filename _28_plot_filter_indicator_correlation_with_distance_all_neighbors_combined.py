@@ -59,7 +59,7 @@ main_dir = Path(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes')
 data_dir_Netamto_dfs = main_dir / r'plots_NetAtmo_ppt_DWD_ppt_correlation_'
 data_dir_DWD_dfs = main_dir / r'plots_DWD_ppt_DWD_ppt_correlation_'
 
-netatmo_path_acc = r'year_allyears_df_comparing_correlations_max_sep_dist_500000_'
+netatmo_path_acc = r'year_allyears_df_comparing_correlations_max_sep_dist_1000000_'
 dwd_path_Acc = r'year_allyears_df_dwd_correlations'
 
 # def percentage threshold, time frequency and data source
@@ -83,6 +83,12 @@ if data_source0 == 'Netatmo':
                            data_source, percent, 3)
     df4 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
                            data_source, percent, 4)
+    df5 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
+                           data_source, percent, 5)
+    df6 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
+                           data_source, percent, 6)
+    df7 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
+                           data_source, percent, 7)
     save_dir = data_dir_Netamto_dfs
 if data_source0 == 'DWD':
     # for DWD stations neighbors start from 1 not 0 !
@@ -96,6 +102,12 @@ if data_source0 == 'DWD':
                            data_source, percent, 4)
     df4 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
                            data_source, percent, 5)
+    df5 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+                           data_source, percent, 6)
+    df6 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+                           data_source, percent, 7)
+    df7 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+                           data_source, percent, 8)
     save_dir = data_dir_DWD_dfs
 
 #==============================================================================
@@ -109,7 +121,9 @@ s1, x1, y1, in_df1 = read_filter_df_corr_return_stns_x_y_vals(df1)
 s2, x2, y2, in_df2 = read_filter_df_corr_return_stns_x_y_vals(df2)
 s3, x3, y3, in_df3 = read_filter_df_corr_return_stns_x_y_vals(df3)
 s4, x4, y4, in_df4 = read_filter_df_corr_return_stns_x_y_vals(df4)
-
+s5, x5, y5, in_df5 = read_filter_df_corr_return_stns_x_y_vals(df5)
+s6, x6, y6, in_df6 = read_filter_df_corr_return_stns_x_y_vals(df6)
+s7, x7, y7, in_df7 = read_filter_df_corr_return_stns_x_y_vals(df7)
 #==============================================================================
 
 # x0, y0, s0 = remove_all_low_corr_short_dist(x0, y0, 5e3, 0.6, s0)
@@ -128,15 +142,25 @@ x3_gd_corr, y3_gd_corr, s3_gd_corr, df3_gd_corr = remove_all_low_corr_short_dist
 x4_gd_corr, y4_gd_corr, s4_gd_corr, df4_gd_corr = remove_all_low_corr_short_dist(
     x4, y4, 5e3, 0.5, s4, in_df4)
 
+x5_gd_corr, y5_gd_corr, s5_gd_corr, df5_gd_corr = remove_all_low_corr_short_dist(
+    x5, y5, 5e3, 0.5, s5, in_df5)
+x6_gd_corr, y6_gd_corr, s6_gd_corr, df6_gd_corr = remove_all_low_corr_short_dist(
+    x6, y6, 5e3, 0.5, s6, in_df6)
+x7_gd_corr, y7_gd_corr, s7_gd_corr, df7_gd_corr = remove_all_low_corr_short_dist(
+    x7, y7, 5e3, 0.5, s7, in_df7)
+
 # =============================================================================
 
 # combined all stns, distances and correlation data into arrays
 stns = np.concatenate((s0_gd_corr, s1_gd_corr, s2_gd_corr,
-                       s3_gd_corr, s4_gd_corr))
+                       s3_gd_corr, s4_gd_corr, s5_gd_corr,
+                       s6_gd_corr, s7_gd_corr))
 xs = np.concatenate((x0_gd_corr, x1_gd_corr, x2_gd_corr,
-                     x3_gd_corr, x4_gd_corr))
+                     x3_gd_corr, x4_gd_corr,
+                     x5_gd_corr, x6_gd_corr, x7_gd_corr))
 ys = np.concatenate((y0_gd_corr, y1_gd_corr, y2_gd_corr,
-                     y3_gd_corr, y4_gd_corr))
+                     y3_gd_corr, y4_gd_corr,
+                     y5_gd_corr, y6_gd_corr, y7_gd_corr))
 
 dfs = pd.DataFrame(index=stns)
 dfs['Distance to neighbor'] = xs
@@ -202,6 +226,17 @@ x4_abv = df4_gd_corr.loc[stns_keep_all, 'Distance to neighbor'].dropna().values
 y4_abv = df4_gd_corr.loc[stns_keep_all,
                          'Bool_Spearman_Correlation'].dropna().values
 
+x5_abv = df5_gd_corr.loc[stns_keep_all, 'Distance to neighbor'].dropna().values
+y5_abv = df5_gd_corr.loc[stns_keep_all,
+                         'Bool_Spearman_Correlation'].dropna().values
+
+x6_abv = df6_gd_corr.loc[stns_keep_all, 'Distance to neighbor'].dropna().values
+y6_abv = df6_gd_corr.loc[stns_keep_all,
+                         'Bool_Spearman_Correlation'].dropna().values
+
+x7_abv = df7_gd_corr.loc[stns_keep_all, 'Distance to neighbor'].dropna().values
+y7_abv = df7_gd_corr.loc[stns_keep_all,
+                         'Bool_Spearman_Correlation'].dropna().values
 # TODO: Add Additional filter on stations
 # =============================================================================
 
@@ -233,6 +268,21 @@ plt.scatter(x4_abv, y4_abv, c='m', alpha=0.5,
                                % (y4_abv.shape[0], y4_gd_corr.shape[0])),
             s=marker_size_abv_curve)
 
+plt.scatter(x5_abv, y5_abv, c='k', alpha=0.5,
+            marker='1', label=('Sixfth Neighbor Stn nbr %d / %d'
+                               % (y5_abv.shape[0], y5_gd_corr.shape[0])),
+            s=marker_size_abv_curve)
+
+plt.scatter(x6_abv, y6_abv, c='y', alpha=0.5,
+            marker='1', label=('Seventh Neighbor Stn nbr %d / %d'
+                               % (y6_abv.shape[0], y6_gd_corr.shape[0])),
+            s=marker_size_abv_curve)
+
+plt.scatter(x7_abv, y7_abv, c='c', alpha=0.5,
+            marker='1', label=('Eigth Neighbor Stn nbr %d / %d'
+                               % (y7_abv.shape[0], y7_gd_corr.shape[0])),
+            s=marker_size_abv_curve)
+
 # plt.scatter(xvals_above_curves, yvals_above_curves, s=marker_size_abv_curve,
 #             label="Stns above Curve %d / %d" % (yvals_above_curves.shape[0],
 #                                                 stns.shape[0]),
@@ -248,7 +298,8 @@ plt.scatter(x4_abv, y4_abv, c='m', alpha=0.5,
 #             alpha=.25, c='k', marker='X')
 
 #plt.scatter([],[], label='Number of stations %d' % dfs_all.shape[0], marker='.')
-plt.xlim([0, x4.max() + 1000])
+plt.xlim([0, x7.max() + 1000])
+plt.xticks(np.arange(0, x7.max() + 1000, 5000))
 plt.ylim([-0.1, 1.1])
 plt.xlabel('Distance (m)')
 plt.ylabel('Indicator Spearman Correlation')

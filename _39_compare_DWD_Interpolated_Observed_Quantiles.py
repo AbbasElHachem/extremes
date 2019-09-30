@@ -86,15 +86,15 @@ path_to_ppt_dwd_interpolated_using_netatmo_only_cold_season_cdf_daily_data = (
 #==============================================================================
 path_to_ppt_dwd_interpolated_using_dwd_netatmo_warm_season_cdf_daily_data = (
     path_to_data /
-    r'interpolated_quantiles_dwd_daily_data_basedon_quantiles_warm_season_using_dwd_netamo.csv')
+    r'interpolated_quantiles_dwd_daily_data_basedon_qunatiles_warm_season_using_dwd_netamo_grp_0.csv')
 
 path_to_ppt_dwd_interpolated_using_dwd_only_warm_season_cdf_daily_data = (
     path_to_data /
-    r'interpolated_quantiles_dwd_daily_data_basedon_qunatiles_warm_season_using_dwd_only.csv')
+    r'interpolated_quantiles_dwd_daily_data_basedon_qunatiles_warm_season_using_dwd_only_grp_0.csv')
 
 path_to_ppt_dwd_interpolated_using_netatmo_only_warm_season_cdf_daily_data = (
     path_to_data /
-    r'interpolated_quantiles_daily_data_basedon_qunatiles_warm_season_using_netatmo_only.csv')
+    r'interpolated_quantiles_daily_data_basedon_qunatiles_warm_season_using_netatmo_only_grp_0.csv')
 
 # Original Daily Data
 # path_to_netatmo_daily_data = path_to_data / r'all_netatmo_ppt_data_daily_.csv'
@@ -264,11 +264,11 @@ for _dwd_stn_ in interpolated_df_ppt_dwd_season_using_dwd_netatmo.columns:
 
     try:
         # interpolated quantiles based on ppt
-        int_vals_dwd_netatmo_used = interpolated_df_dwd_season_using_dwd_netatmo.loc[
-            :, _dwd_stn_]
-        int_vals_dwd_used = interpolated_df_dwd_season_using_dwd_only.loc[:, _dwd_stn_]
-        int_vals_dwd_netatmo_only = interpolated_df_dwd_season_using_netatmo_only.loc[
-            :, _dwd_stn_]
+        #         int_vals_dwd_netatmo_used = interpolated_df_dwd_season_using_dwd_netatmo.loc[
+        #             :, _dwd_stn_]
+        #         int_vals_dwd_used = interpolated_df_dwd_season_using_dwd_only.loc[:, _dwd_stn_]
+        #         int_vals_dwd_netatmo_only = interpolated_df_dwd_season_using_netatmo_only.loc[
+        #             :, _dwd_stn_]
 
         # interpolated ppt based on quantiles
         int_ppt_vals_dwd_netatmo_used = interpolated_df_ppt_dwd_season_using_dwd_netatmo.loc[
@@ -350,14 +350,14 @@ for _dwd_stn_ in interpolated_df_ppt_dwd_season_using_dwd_netatmo.columns:
                    # cmap=plt.get_cmap('viridis'),
                    label='Interpolated DWD Quantiles values with DWD & Netatmo stns')
 
-#         ax.scatter(int_ppt_vals_dwd_netatmo_only.values,
-#                    int_ppt_vals_dwd_netatmo_only.index,
-#                    alpha=.75,
-#                    c='g',  # colors_arr,
-#                    s=15,
-#                    marker='X',
-#                    # cmap=plt.get_cmap('viridis'),
-# label='Interpolated DWD Quantiles values with Netatmo stns')
+        ax.scatter(int_ppt_vals_dwd_netatmo_only.values,
+                   int_ppt_vals_dwd_netatmo_only.index,
+                   alpha=.75,
+                   c='g',  # colors_arr,
+                   s=15,
+                   marker='X',
+                   # cmap=plt.get_cmap('viridis'),
+                   label='Interpolated DWD Quantiles values with Netatmo stns')
 
 #         for dwd_stn in df_dwd_distriubutions_season.columns:
 #             # print('DWD STN is', dwd_stn)
@@ -376,16 +376,16 @@ for _dwd_stn_ in interpolated_df_ppt_dwd_season_using_dwd_netatmo.columns:
                      % (title_add, _dwd_stn_))
         ax.grid(alpha=0.25)
         ax.set_ylim([0.5, 1.01])
-        ax.set_xlim([-0.5, max(int_vals_dwd_netatmo_used.values.max(),
-                               int_vals_dwd_used.max(),
-                               int_vals_dwd_netatmo_only.values.max(),
-                               ppt_vals_season.max()) + 2])
+#         ax.set_xlim([-0.5, max(int_vals_dwd_netatmo_used.values.max(),
+#                                int_vals_dwd_used.max(),
+#                                int_vals_dwd_netatmo_only.values.max(),
+#                                ppt_vals_season.max()) + 2])
         ax.set_xlabel('Rainfall (mm/day)')
         ax.legend(loc='lower right')
         ax.set_ylabel('CDF')
 
         plt.savefig(out_plots_path / (
-            'oberserved_vs_interpolated_cdf_%s_season_%s_2.png'
+            'oberserved_vs_interpolated_cdf_%s_season_%s_0.png'
             % (title_add, _dwd_stn_)),
             frameon=True, papertype='a4',
             bbox_inches='tight', pad_inches=.2)

@@ -118,7 +118,8 @@ lower_percentile_val_lst = [90, 92, 95, 97, 99]  # 80, 85, 90,
 
 # temporal aggregation of df
 # , '120min', '480min', '720min', '1440min']
-aggregation_frequencies = ['60min', '120min', '480min', '720min', '1440min']
+# , '120min', '480min', '720min', '1440min']
+aggregation_frequencies = ['60min']
 
 # month number, no need to change
 # not_convective_season = [10, 11, 12, 1, 2, 3, 4]
@@ -127,8 +128,8 @@ not_convective_season = []
 
 # starts with one
 # , 2, 3, 4, 5]  # list of which neighbors to chose
-neighbors_to_chose_lst = [1, 2, 3, 4, 5]
-
+neighbors_to_chose_lst = [1, 2, 3, 4, 5, 6, 7, 8]
+max_dist_thr = 1e5  # 100km
 min_req_ppt_vals = 30  # stations minimum required ppt values
 
 # select data only within this period (same as netatmo)
@@ -239,134 +240,135 @@ def calc_indicator_correlatione_two_dwd_stns(
                 raise Exception
 
             print('Second Stn Id is', stn_near, 'distance is', distance_near)
-            all_distances.append(distance_near)
+            if distance_near < max_dist_thr:
+                all_distances.append(distance_near)
 
-            print('\n resampling data')
+                print('\n resampling data')
 
-            if (idf1.values.ravel().shape[0] > min_req_ppt_vals and
-                    idf2.values.ravel().shape[0] > min_req_ppt_vals):
-                try:
-                    df_common1, df_common2 = resample_intersect_2_dfs(
-                        idf1, idf2, tem_freq)
-                except Exception as msg:
-                    raise Exception
-            print('\n done resampling data')
+                if (idf1.values.ravel().shape[0] > min_req_ppt_vals and
+                        idf2.values.ravel().shape[0] > min_req_ppt_vals):
+                    try:
+                        df_common1, df_common2 = resample_intersect_2_dfs(
+                            idf1, idf2, tem_freq)
+                    except Exception as msg:
+                        raise Exception
+                print('\n done resampling data')
 
-            if (df_common1.values.shape[0] > min_req_ppt_vals and
-                    df_common2.values.shape[0] > min_req_ppt_vals):
-                df_common1 = pd.DataFrame(
-                    data=df_common1.values,
-                    index=df_common1.index,
-                    columns=[iid])
+                if (df_common1.values.shape[0] > min_req_ppt_vals and
+                        df_common2.values.shape[0] > min_req_ppt_vals):
+                    df_common1 = pd.DataFrame(
+                        data=df_common1.values,
+                        index=df_common1.index,
+                        columns=[iid])
 
-                df_common2 = pd.DataFrame(
-                    data=df_common2.values,
-                    index=df_common2.index,
-                    columns=[stn_near])
-#
-#                 plt.ioff()
-#                 fig = plt.figure(figsize=(16, 12), dpi=150)
-#                 plt.plot(df_common1.index, df_common1.values,
-#                          c='b', alpha=0.35)
-#                 plt.plot(df_common2.index, df_common2.values,
-#                          c='r', alpha=0.35)
-#
-#                 fig.savefig(os.path.join(out_save_dir_orig,
-#                                          r'dwd_%s_dwd_%s_time_%s.png'
-#                                          % (iid, stn_near, tem_freq)),
-#                             frameon=True, papertype='a4',
-#                             bbox_inches='tight', pad_inches=.2)
-#                 plt.close()
-                print('enough data are available for plotting')
+                    df_common2 = pd.DataFrame(
+                        data=df_common2.values,
+                        index=df_common2.index,
+                        columns=[stn_near])
+    #
+    #                 plt.ioff()
+    #                 fig = plt.figure(figsize=(16, 12), dpi=150)
+    #                 plt.plot(df_common1.index, df_common1.values,
+    #                          c='b', alpha=0.35)
+    #                 plt.plot(df_common2.index, df_common2.values,
+    #                          c='r', alpha=0.35)
+    #
+    #                 fig.savefig(os.path.join(out_save_dir_orig,
+    #                                          r'dwd_%s_dwd_%s_time_%s.png'
+    #                                          % (iid, stn_near, tem_freq)),
+    #                             frameon=True, papertype='a4',
+    #                             bbox_inches='tight', pad_inches=.2)
+    #                 plt.close()
+                    print('enough data are available for plotting')
 
-                # get coordinates of dwd station for plotting
-                x_stn_dwd = in_coords_df_bw.loc[
-                    iid, x_col_name]
-                y_stn_dwd = in_coords_df_bw.loc[
-                    iid, y_col_name]
-                # convert to lon, lat (for plotting in shapefile)
-                lon_dwd, lat_dwd = convert_coords_fr_wgs84_to_utm32_(
-                    utm32, wgs82, x_stn_dwd, y_stn_dwd)
+                    # get coordinates of dwd station for plotting
+                    x_stn_dwd = in_coords_df_bw.loc[
+                        iid, x_col_name]
+                    y_stn_dwd = in_coords_df_bw.loc[
+                        iid, y_col_name]
+                    # convert to lon, lat (for plotting in shapefile)
+                    lon_dwd, lat_dwd = convert_coords_fr_wgs84_to_utm32_(
+                        utm32, wgs82, x_stn_dwd, y_stn_dwd)
 
-                # calculate pearson and spearman between original values
-                orig_pears_corr = np.round(
-                    pears(df_common1.values,
-                          df_common2.values)[0], 2)
+                    # calculate pearson and spearman between original values
+                    orig_pears_corr = np.round(
+                        pears(df_common1.values,
+                              df_common2.values)[0], 2)
 
-                orig_spr_corr = np.round(
-                    spr(df_common1.values,
-                        df_common2.values)[0], 2)
+                    orig_spr_corr = np.round(
+                        spr(df_common1.values,
+                            df_common2.values)[0], 2)
 
-                #==========================================================
-                # select only upper tail of values of both dataframes
-                #==========================================================
-                val_thr_float = val_thr_percent / 100
+                    #==========================================================
+                    # select only upper tail of values of both dataframes
+                    #==========================================================
+                    val_thr_float = val_thr_percent / 100
 
-                dwd1_cdf_x, dwd1_cdf_y = get_cdf_part_abv_thr(
-                    df_common1.values, -0.1)
+                    dwd1_cdf_x, dwd1_cdf_y = get_cdf_part_abv_thr(
+                        df_common1.values, -0.1)
 
-                # get dwd1 ppt thr from cdf
-                dwd1_ppt_thr_per = dwd1_cdf_x[np.where(
-                    dwd1_cdf_y >= val_thr_float)][0]
+                    # get dwd1 ppt thr from cdf
+                    dwd1_ppt_thr_per = dwd1_cdf_x[np.where(
+                        dwd1_cdf_y >= val_thr_float)][0]
 
-                dwd2_cdf_x, dwd2_cdf_y = get_cdf_part_abv_thr(
-                    df_common2.values, -0.1)
+                    dwd2_cdf_x, dwd2_cdf_y = get_cdf_part_abv_thr(
+                        df_common2.values, -0.1)
 
-                # get dwd2 ppt thr from cdf
-                dwd2_ppt_thr_per = dwd2_cdf_x[np.where(
-                    dwd2_cdf_y >= val_thr_float)][0]
+                    # get dwd2 ppt thr from cdf
+                    dwd2_ppt_thr_per = dwd2_cdf_x[np.where(
+                        dwd2_cdf_y >= val_thr_float)][0]
 
-                print('\n****transform values to booleans*****\n')
+                    print('\n****transform values to booleans*****\n')
 
-                df_dwd1_cmn_Bool = (
-                    df_common1 > dwd1_ppt_thr_per).astype(int)
-                df_dwd2_cmn_Bool = (
-                    df_common2 > dwd2_ppt_thr_per).astype(int)
+                    df_dwd1_cmn_Bool = (
+                        df_common1 > dwd1_ppt_thr_per).astype(int)
+                    df_dwd2_cmn_Bool = (
+                        df_common2 > dwd2_ppt_thr_per).astype(int)
 
-                # calculate spearman correlations of booleans 1, 0
+                    # calculate spearman correlations of booleans 1, 0
 
-                bool_spr_corr = np.round(
-                    spr(df_dwd1_cmn_Bool.values.ravel(),
-                        df_dwd2_cmn_Bool.values.ravel())[0], 2)
+                    bool_spr_corr = np.round(
+                        spr(df_dwd1_cmn_Bool.values.ravel(),
+                            df_dwd2_cmn_Bool.values.ravel())[0], 2)
 
-                #==========================================================
-                # append the result to df_correlations, for each stn
-                #==========================================================
-                df_results_correlations_bw.loc[iid,
-                                               'lon'] = lon_dwd
-                df_results_correlations_bw.loc[iid,
-                                               'lat'] = lat_dwd
-                df_results_correlations_bw.loc[
-                    iid,
-                    'Distance to neighbor'] = distance_near
+                    #==========================================================
+                    # append the result to df_correlations, for each stn
+                    #==========================================================
+                    df_results_correlations_bw.loc[iid,
+                                                   'lon'] = lon_dwd
+                    df_results_correlations_bw.loc[iid,
+                                                   'lat'] = lat_dwd
+                    df_results_correlations_bw.loc[
+                        iid,
+                        'Distance to neighbor'] = distance_near
 
-                df_results_correlations_bw.loc[
-                    iid,
-                    'DWD neighbor ID'] = stn_near
-                df_results_correlations_bw.loc[
-                    iid,
-                    'DWD_orig_%s_Per_ppt_thr'
-                    % val_thr_percent] = dwd1_ppt_thr_per
+                    df_results_correlations_bw.loc[
+                        iid,
+                        'DWD neighbor ID'] = stn_near
+                    df_results_correlations_bw.loc[
+                        iid,
+                        'DWD_orig_%s_Per_ppt_thr'
+                        % val_thr_percent] = dwd1_ppt_thr_per
 
-                df_results_correlations_bw.loc[
-                    iid,
-                    'DWD_neighb_%s_Per_ppt_thr'
-                    % val_thr_percent] = dwd2_ppt_thr_per
+                    df_results_correlations_bw.loc[
+                        iid,
+                        'DWD_neighb_%s_Per_ppt_thr'
+                        % val_thr_percent] = dwd2_ppt_thr_per
 
-                df_results_correlations_bw.loc[
-                    iid,
-                    'Orig_Pearson_Correlation'] = orig_pears_corr
+                    df_results_correlations_bw.loc[
+                        iid,
+                        'Orig_Pearson_Correlation'] = orig_pears_corr
 
-                df_results_correlations_bw.loc[
-                    iid,
-                    'Orig_Spearman_Correlation'] = orig_spr_corr
+                    df_results_correlations_bw.loc[
+                        iid,
+                        'Orig_Spearman_Correlation'] = orig_spr_corr
 
-                df_results_correlations_bw.loc[
-                    iid,
-                    'Bool_Spearman_Correlation'] = bool_spr_corr
-            else:
-                print('not enough data')
-                continue
+                    df_results_correlations_bw.loc[
+                        iid,
+                        'Bool_Spearman_Correlation'] = bool_spr_corr
+                else:
+                    print('not enough data')
+                    continue
         except Exception as msg:
             print(msg)
             continue

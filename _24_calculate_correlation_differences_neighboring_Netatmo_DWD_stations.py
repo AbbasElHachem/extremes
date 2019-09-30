@@ -103,7 +103,7 @@ assert os.path.exists(path_to_ppt_netatmo_data_csv), 'wrong NETATMO Ppt file'
 # HOURLY DATA
 path_to_ppt_netatmo_data_feather = (
     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-    r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new_no_freezing.fk')
+    r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new_no_freezing_2.fk')
 assert os.path.exists(
     path_to_ppt_netatmo_data_feather), 'wrong NETATMO Ppt file'
 
@@ -163,21 +163,21 @@ x_col_name = 'lon'
 y_col_name = 'lat'
 
 # min distance threshold used for selecting neighbours
-min_dist_thr_ppt = 5000  # 500000  # m
+min_dist_thr_ppt = 1e5  # 5000  # m
 
 # threshold for max ppt value per hour
-max_ppt_thr = 100.  # ppt above this value are not considered
+max_ppt_thr = 90.  # ppt above this value are not considered
 
 # only highest x% of the values are selected
 lower_percentile_val_lst = [90, 92, 95, 97, 99]  # [80, 85, 90, 95, 99]
 
 
 # ['10min', '60min', '120min', '480min', '720min', '1440min']
-aggregation_frequencies = ['60min', '120min', '480min', '720min', '1440min']
+aggregation_frequencies = ['60min']
 # temporal aggregation of df
 
 # [0, 1, 2, 3, 4]  # refers to DWD neighbot (0=first)
-neighbors_to_chose_lst = [0, 1, 2, 3, 4]
+neighbors_to_chose_lst = [0, 1, 2, 3, 4, 5, 6, 7]
 
 min_req_ppt_vals = 30  # minimum values that should be available per station
 
@@ -185,7 +185,7 @@ min_req_ppt_vals = 30  # minimum values that should be available per station
 # not_convective_season = [10, 11, 12, 1, 2, 3, 4]  # oct till april
 not_convective_season = []  # oct till april
 
-plot_figures = True
+plot_figures = False
 
 date_fmt = '%Y-%m-%d %H:%M:%S'
 

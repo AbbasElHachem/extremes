@@ -74,7 +74,8 @@ utm32 = "+init=EPSG:32632"
 #==============================================================================
 #
 #==============================================================================
-in_df_netatmo_coords = pd.read_csv(coords_netatmo_df_file, index_col=0,
+in_df_netatmo_coords = pd.read_csv(coords_netatmo_df_file,
+                                   index_col=0,
                                    sep=';')
 # drop all duplicates in stations
 in_df_netatmo_coords.drop_duplicates(keep='first', inplace=True)
@@ -86,8 +87,8 @@ xnetatmo, ynetatmo = convert_coords_fr_wgs84_to_utm32_(
 
 if use_new_dwd_data:
 
-    in_df_dwd_coords = pd.read_csv(coords_dwd_df_file, index_col=0, sep=';',
-                                   encoding='latin-1')
+    in_df_dwd_coords = pd.read_csv(coords_dwd_df_file, index_col=0,
+                                   sep=';', encoding='latin-1')
     # get all station ids, make them a string for generating file_names
 #     stations_id_str_lst = []
 #     for stn_id in in_df_dwd_coords.index:
@@ -108,6 +109,7 @@ if use_new_dwd_data:
 #         wgs82, utm32, lon_dwd,  lat_dwd)
 
 else:
+
     in_df_dwd_coords = pd.read_csv(coords_dwd_df_file, index_col=3, sep=';')
 
     x_dwd, y_dwd = (in_df_dwd_coords.loc[:, x_col_name].values.ravel(),

@@ -56,34 +56,22 @@ netatmo_max_100_hours = pd.DataFrame(data=netatmo_max_100_hours.values,
                                      index=netatmo_max_100_hours.index)
 stns_netatmo = df_netatmo_hourly.loc[netatmo_max_100_hours.index, :].idxmax(
     axis=1)
-bad_hours = stns_netatmo[stns_netatmo.duplicated()]
-good_hours = stns_netatmo[~stns_netatmo.duplicated()]
 
 netatmo_max_100_hours['Station Id'] = stns_netatmo.values
 
-for ix, stn in enumerate(netatmo_max_100_hours['Station Id'].values):
-    if stn in bad_hours.values:
-        netatmo_max_100_hours.iloc[ix, 1] = np.nan
+df_count_event_per_stn = (netatmo_max_100_hours.fillna('')
+                          .groupby(netatmo_max_100_hours.columns.tolist()).apply(len)
+                          .rename('group_count')
+                          .reset_index()
+                          .replace('', np.nan)
+                          .sort_values(by=['group_count'], ascending=False))
 
-netatmo_max_100_hours.dropna(inplace=True)
+df_many_duplicates_per_stn = df_count_event_per_stn[
+    df_count_event_per_stn['group_count'] > 3]
+bad_stns = df_many_duplicates_per_stn['Station Id'].values
 
-
-if remove_bad_hours_:
-    #     print(df_netatmo_hourly.isna().sum())
-    for idx, stn_id in zip(bad_hours.index, bad_hours.values):
-        df_netatmo_hourly.loc[idx, stn_id] = np.nan
-    print('Saving Dataframe')
-#     print(df_netatmo_hourly.isna().sum())
-    df_netatmo_hourly.dropna(how='all', inplace=True)
-    df_netatmo_hourly.to_csv(os.path.join(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW',
-                                          r'ppt_all_netatmo_hourly_stns_combined_new_no_freezing_2.csv'),
-                             sep=';', float_format='%.2f')  # temperature humidity ppt
-
-    df_netatmo_hourly.reset_index(inplace=True)
-    df_netatmo_hourly.rename(columns={'index': 'Time'}, inplace=True)
-    df_netatmo_hourly.to_feather(os.path.join(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW',
-                                              r'ppt_all_netatmo_hourly_stns_combined_new_no_freezing_2.fk'))
-
+# bad_hours = stns_netatmo[stns_netatmo.duplicated()]
+# good_hours = stns_netatmo[~stns_netatmo.duplicated()]
 
 dwd_maximum_hrs_dates = df_dwd_hourly.max(axis=1).sort_values()[::-1]
 dwd_max_100_hours = dwd_maximum_hrs_dates[:200].sort_index()
@@ -139,16 +127,15 @@ netatmo_max_100_days = pd.DataFrame(data=netatmo_max_100_days.values,
 stns_netatmo_daily = df_netatmo_daily.loc[netatmo_max_100_days.index, :].idxmax(
     axis=1)
 netatmo_max_100_days['Station Id'] = stns_netatmo_daily.values
-bad_days = stns_netatmo_daily[stns_netatmo_daily.duplicated()]
-good_days = stns_netatmo_daily[~stns_netatmo_daily.duplicated()]
 
-netatmo_max_100_days['Station Id'] = stns_netatmo_daily.values
 
-for ix, stn in enumerate(netatmo_max_100_days['Station Id'].values):
-    if stn in bad_days.values:
-        netatmo_max_100_days.iloc[ix, 1] = np.nan
+df_bad_stn_days = netatmo_max_100_days[netatmo_max_100_days[0] > 280]
 
-netatmo_max_100_days.dropna(inplace=True)
+bad_stns_day_max = df_bad_stn_days[df_bad_stn_days['Station Id'].duplicated()]
+df_bad_stn_days = df_bad_stn_days.drop_duplicates(subset=['Station Id'])
+df_bad_stn_days = df_bad_stn_days[df_bad_stn_days[0] > 320]
+
+bad_stns_day = df_bad_stn_days['Station Id'].values
 
 
 dwd_max_100_days = dwd_maximum_dates[:200].sort_index()
@@ -168,34 +155,39 @@ dwd_max_100_days.to_csv(
 
 
 #==============================================================================
-# PLOTTING
+# FILTERING
 #==============================================================================
 
-# xticks = pd.date_range(start=netatmo_max_100_days.index[0],
-#                        end=netatmo_max_100_days.index[-1], freq='1D')
-# fig, ax = plt.subplots(figsize=(30, 16), dpi=150)
-# ax.plot(netatmo_max_100_days.index, netatmo_max_100_days.values,
-#         label='Netatmo', color='r', alpha=0.75)
-#
-# ax.plot(dwd_corr_netatmo_max_100_days.index, dwd_corr_netatmo_max_100_days.values,
-#         label='DWD', color='b', alpha=0.75)
-#
-#
-# # ax.set_xticks(xticks)
-#
-#
-# ax.set_xlim([netatmo_max_100_days.index[0], netatmo_max_100_days.index[-1]])
-#
-#
-# ax.tick_params(axis='x', rotation=45)
-# ax.xaxis.set_major_formatter(myFmt)
-# ax.xaxis.set_ticks(
-#     xticks[::int(np.round(xticks.shape[0] / 50))])
-#
-# plt.title('Highest 100 daily maximum rainfall values')
-# plt.ylabel('Rainfall mm/d')
-# plt.legend(loc=0)
-# plt.grid(alpha=0.5)
-# plt.savefig(r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\daily_maximums.png",
-#             frameon=True, papertype='a4',
-#             bbox_inches='tight', pad_inches=.2)
+if remove_bad_hours_:
+    print('removing stns hourly', bad_stns)
+    for idx, stn_id in zip(netatmo_max_100_hours.index,
+                           netatmo_max_100_hours['Station Id'].values):
+
+        if stn_id in bad_stns:
+            print(idx, stn_id)
+            df_netatmo_hourly.loc[idx, stn_id] = np.nan
+
+    for idxd, stn_idd in zip(netatmo_max_100_days.index,
+                             netatmo_max_100_days['Station Id'].values):
+
+        if stn_idd in bad_stns_day:
+            print(idxd, stn_idd)
+            end = idxd + pd.Timedelta(hours=24)
+            time_arr_idx = pd.date_range(start=idxd,
+                                         end=end, freq='H')
+            bad_hours_in_df = df_netatmo_hourly.index.intersection(
+                time_arr_idx)
+            df_netatmo_hourly.loc[bad_hours_in_df, stn_idd] = np.nan
+
+    print('Saving Dataframe')
+
+#     print(df_netatmo_hourly.isna().sum())
+    df_netatmo_hourly.dropna(how='all', inplace=True)
+    df_netatmo_hourly.to_csv(os.path.join(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW',
+                                          r'ppt_all_netatmo_hourly_stns_combined_new_no_freezing_2.csv'),
+                             sep=';', float_format='%.2f')  # temperature humidity ppt
+
+    df_netatmo_hourly.reset_index(inplace=True)
+    df_netatmo_hourly.rename(columns={'index': 'Time'}, inplace=True)
+    df_netatmo_hourly.to_feather(os.path.join(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW',
+                                              r'ppt_all_netatmo_hourly_stns_combined_new_no_freezing_2.fk'))
