@@ -59,11 +59,11 @@ main_dir = Path(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes')
 data_dir_Netamto_dfs = main_dir / r'plots_NetAtmo_ppt_DWD_ppt_correlation_'
 data_dir_DWD_dfs = main_dir / r'plots_DWD_ppt_DWD_ppt_correlation_'
 
-netatmo_path_acc = r'year_allyears_df_comparing_correlations_max_sep_dist_1000000_'
+netatmo_path_acc = r'year_allyears_df_comparing_correlations_max_sep_dist_100000_'
 dwd_path_Acc = r'year_allyears_df_dwd_correlations'
 
 # def percentage threshold, time frequency and data source
-percent = '90'
+percent = '95'
 time_freq = '60min'
 
 data_source0 = 'Netatmo'  # reference station 'Netatmo'
@@ -128,10 +128,10 @@ s7, x7, y7, in_df7 = read_filter_df_corr_return_stns_x_y_vals(df7)
 
 # x0, y0, s0 = remove_all_low_corr_short_dist(x0, y0, 5e3, 0.6, s0)
 x0_gd_corr, y0_gd_corr, s0_gd_corr, df0_gd_corr = remove_all_low_corr_short_dist(
-    x0, y0, 5e3, 0.5, s0, in_df0)
+    x0, y0, 5e3, 0.4, s0, in_df0)
 
 x1_gd_corr, y1_gd_corr, s1_gd_corr, df1_gd_corr = remove_all_low_corr_short_dist(
-    x1, y1, 5e3, 0.5, s1, in_df1)
+    x1, y1, 5e3, 0.4, s1, in_df1)
 
 x2_gd_corr, y2_gd_corr, s2_gd_corr, df2_gd_corr = remove_all_low_corr_short_dist(
     x2, y2, 5e3, 0.5, s2, in_df2)
@@ -260,26 +260,26 @@ plt.scatter(x2_abv, y2_abv, c='g', alpha=0.5,
                                % (y2_abv.shape[0], y2_gd_corr.shape[0])),
             s=marker_size_abv_curve)
 plt.scatter(x3_abv, y3_abv, c='darkorange', alpha=0.5,
-            marker='1', label=('Fourth Neighbor Stn nbr %d / %d'
+            marker='*', label=('Fourth Neighbor Stn nbr %d / %d'
                                % (y3_abv.shape[0], y3_gd_corr.shape[0])),
             s=marker_size_abv_curve)
 plt.scatter(x4_abv, y4_abv, c='m', alpha=0.5,
-            marker='1', label=('Fifth Neighbor Stn nbr %d / %d'
+            marker='+', label=('Fifth Neighbor Stn nbr %d / %d'
                                % (y4_abv.shape[0], y4_gd_corr.shape[0])),
             s=marker_size_abv_curve)
 
-plt.scatter(x5_abv, y5_abv, c='k', alpha=0.5,
+plt.scatter(x5_abv, y5_abv, c='darkgreen', alpha=0.5,
             marker='1', label=('Sixfth Neighbor Stn nbr %d / %d'
                                % (y5_abv.shape[0], y5_gd_corr.shape[0])),
             s=marker_size_abv_curve)
 
-plt.scatter(x6_abv, y6_abv, c='y', alpha=0.5,
-            marker='1', label=('Seventh Neighbor Stn nbr %d / %d'
+plt.scatter(x6_abv, y6_abv, c='darkblue', alpha=0.5,
+            marker='X', label=('Seventh Neighbor Stn nbr %d / %d'
                                % (y6_abv.shape[0], y6_gd_corr.shape[0])),
             s=marker_size_abv_curve)
 
 plt.scatter(x7_abv, y7_abv, c='c', alpha=0.5,
-            marker='1', label=('Eigth Neighbor Stn nbr %d / %d'
+            marker='8', label=('Eigth Neighbor Stn nbr %d / %d'
                                % (y7_abv.shape[0], y7_gd_corr.shape[0])),
             s=marker_size_abv_curve)
 

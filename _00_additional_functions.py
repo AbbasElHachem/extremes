@@ -1348,12 +1348,18 @@ def fit_curve_get_vals_below_curve(x, y, func, stns, shift_per=0.15):
 #
 #==============================================================================
 def gen_path_df_file(main_path, start_path_acc, time_freq,
-                     data_source, percent, neighbor):
+                     data_source, percent, neighbor, new_data=False):
     """ use this funtion to get the path to the dfs for different neighbors"""
 
-    return main_path / (
-        r'%sfreq_%s_%s_netatmo_upper_%s_percent_data_considered_neighbor_%d_.csv'
-        % (start_path_acc, time_freq, data_source, percent, neighbor))
+    if new_data is False:
+        return main_path / (
+            r'%sfreq_%s_%s_netatmo_upper_%s_percent_data_considered_neighbor_%d_.csv'
+            % (start_path_acc, time_freq, data_source, percent, neighbor))
+
+    else:
+        return main_path / (
+            r'%sfreq_%s_%s_netatmo_upper_%s_percent_data_considered_neighbor_%d_2.csv'
+            % (start_path_acc, time_freq, data_source, percent, neighbor))
 
 #==============================================================================
 #
@@ -1366,7 +1372,8 @@ def read_filter_df_corr_return_stns_x_y_vals(df_file, thr_low=0, thr_high=1,
     """ read df with correlation values, select all between 0 and 1 and 
         return station_ids, distance_values, correlation_values, and df"""
     in_df = pd.read_csv(df_file, index_col=0, sep=';').dropna(how='any')
-
+    ycol = in_df.columns.intersection([y_col_name])
+    xcol = in_df.columns.intersection([x_col_name])
     in_df = in_df[(thr_low <= in_df.loc[:, y_col_name]) &
                   (in_df.loc[:, y_col_name] < thr_high)]
     stn_ids = in_df.index

@@ -113,13 +113,13 @@ x_col_name = 'X'
 y_col_name = 'Y'
 
 # only highest x% of the values are selected
-lower_percentile_val_lst = [90, 92, 95, 97, 99]  # 80, 85, 90,
+lower_percentile_val_lst = [95, 98, 99]  # 80, 85, 90,
 
 
 # temporal aggregation of df
 # , '120min', '480min', '720min', '1440min']
 # , '120min', '480min', '720min', '1440min']
-aggregation_frequencies = ['60min']
+aggregation_frequencies = ['60min', '120min', '480min', '720min', '1440min']
 
 # month number, no need to change
 # not_convective_season = [10, 11, 12, 1, 2, 3, 4]
@@ -129,7 +129,7 @@ not_convective_season = []
 # starts with one
 # , 2, 3, 4, 5]  # list of which neighbors to chose
 neighbors_to_chose_lst = [1, 2, 3, 4, 5, 6, 7, 8]
-max_dist_thr = 1e5  # 100km
+max_dist_thr = 2 * 1e4  # 15km
 min_req_ppt_vals = 30  # stations minimum required ppt values
 
 # select data only within this period (same as netatmo)
@@ -177,7 +177,7 @@ def calc_indicator_correlatione_two_dwd_stns(
     all_distances = []
     for iid in stns_bw:
 
-        #         if iid == '03362':
+        #         if iid == '07135':
         #             raise Exception
 
         print('\n********\n Total number of DWD stations is\n********\n',
@@ -244,7 +244,7 @@ def calc_indicator_correlatione_two_dwd_stns(
                 all_distances.append(distance_near)
 
                 print('\n resampling data')
-
+                idf1.index.intersection(idf2.index)
                 if (idf1.values.ravel().shape[0] > min_req_ppt_vals and
                         idf2.values.ravel().shape[0] > min_req_ppt_vals):
                     try:
@@ -379,7 +379,7 @@ def calc_indicator_correlatione_two_dwd_stns(
         os.path.join(out_save_dir_orig,
                      'year_allyears_df_dwd_correlations'
                      'freq_%s_dwd_netatmo_upper_%d_percent_data_considered'
-                     '_neighbor_%d_.csv'
+                     '_neighbor_%d_2.csv'
                      % (tem_freq,
                         val_thr_percent, neighbor_to_chose)),
         sep=';')

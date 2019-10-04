@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# !/usr/bin/env python.
 # -*- coding: utf-8 -*-
 
 """
@@ -39,128 +39,141 @@ __copyright__ = 'Institut fuer Wasser- und Umweltsystemmodellierung - IWS'
 __email__ = "abbas.el-hachem@iws.uni-stuttgart.de"
 
 # =============================================================================
-#%%
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
+from scipy.optimize import leastsq
 from pathlib import Path
 
-from scipy.optimize import leastsq
+from _00_additional_functions import (func, fit_curve_get_vals_below_curve,
+                                      gen_path_df_file,
+                                      read_filter_df_corr_return_stns_x_y_vals,
+                                      remove_all_low_corr_short_dist)
 
-# from _00_additional_functions import (gen_path_df_file)
-
-#==============================================================================
-def gen_path_df_file(main_path, start_path_acc, time_freq,
-                     data_source, percent, neighbor):
-    """ use this funtion to get the path to the dfs for different neighbors"""
-
-    return main_path / (
-        r'%sfreq_%s_%s_netatmo_upper_%s_percent_data_considered_neighbor_%d_.csv'
-        % (start_path_acc, time_freq, data_source, percent, neighbor))
-
-plt.rcParams.update({'font.size': 14})
+plt.rcParams.update({'font.size': 12})
 plt.rcParams.update({'axes.labelsize': 12})
+
 #==============================================================================
 #
 #==============================================================================
-#%%
-#main_dir = Path(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes')
+main_dir = Path(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes')
 
-main_dir = Path(r'/run/media/abbas/EL HACHEM/')
+data_dir_Netamto_dfs = main_dir / r'plots_NetAtmo_ppt_DWD_ppt_correlation_'
+data_dir_DWD_dfs = main_dir / r'plots_DWD_ppt_DWD_ppt_correlation_'
 
-main_dir2 = Path(r'/home/abbas/Desktop/data/data/')
-
-data_dir_Netamto_dfs = main_dir2 # / \
-#    r'plots_NetAtmo_ppt_DWD_ppt_correlation_'
-data_dir_DWD_dfs = main_dir #/ r'plots_DWD_ppt_DWD_ppt_correlation_'
-
-netatmo_path_acc = r'year_allyears_df_comparing_correlations_max_sep_dist_500000_'
+netatmo_path_acc = r'year_allyears_df_comparing_correlations_max_sep_dist_30000_'
 dwd_path_Acc = r'year_allyears_df_dwd_correlations'
 
 # def percentage threshold, time frequency and data source
-percent = '95'
+percent = '98'
 time_freq = '60min'
 
-data_source0 = 'DWD'  # reference station 
-data_source1 = 'Netatmo'  # target data
+data_source0 = 'Netatmo'  # reference station 'Netatmo'
+data_source01 = 'DWD'  # reference station 'DWD'
 
 data_source = 'dwd'  # compare to station 'netatmo'
+
+remove_upper_limit = False
 #==============================================================================
 
 #==============================================================================
-#%%
-if data_source1 == 'Netatmo':
-    df00 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
+if data_source0 == 'Netatmo':
+    df0 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
                            data_source, percent, 0)
-    df01 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
+    df1 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
                            data_source, percent, 1)
-    df02 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
+    df2 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
                            data_source, percent, 2)
-    df03 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
-                           data_source, percent, 3)
-    df04 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
-                           data_source, percent, 4)
-    save_dir0 = data_dir_Netamto_dfs
-if data_source0 == 'DWD':
+#     df3 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
+#                            data_source, percent, 3)
+#     df4 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
+#                            data_source, percent, 4)
+#     df5 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
+#                            data_source, percent, 5)
+#     df6 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
+#                            data_source, percent, 6)
+#     df7 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
+#                            data_source, percent, 7)
+    save_dir = data_dir_Netamto_dfs
+if data_source01 == 'DWD':
     # for DWD stations neighbors start from 1 not 0 !
-    df0 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
-                           data_source, percent, 1)
-    df1 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
-                           data_source, percent, 2)
-    df2 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
-                           data_source, percent, 3)
-    df3 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
-                           data_source, percent, 4)
-    df4 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
-                           data_source, percent, 5)
+    df0_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+                               data_source, percent, 1)
+    df1_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+                               data_source, percent, 2)
+    df2_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+                               data_source, percent, 3)
+#     df3 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+#                            data_source, percent, 4)
+#     df4 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+#                            data_source, percent, 5)
+#     df5 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+#                            data_source, percent, 6)
+#     df6 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+#                            data_source, percent, 7)
+#     df7 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+#                            data_source, percent, 8)
     save_dir = data_dir_DWD_dfs
 
 #==============================================================================
-#%%
-def read_filter_df_corr_return_stns_x_y_vals(df_file, thr_low=0, thr_high=1,
-                                             x_col_name='Distance to neighbor',
-                                             y_col_name='Bool_Spearman_Correlation'):
-    """ read df with correlation values, select all between 0 and 1 and 
-        return station_ids, distance_values, correlation_values, and df"""
-    in_df = pd.read_csv(df_file, index_col=0, sep=';').dropna(how='any')
-    in_df = in_df[(thr_low < in_df.loc[:, y_col_name]) &
-                  (in_df.loc[:, y_col_name] < thr_high)]
-    stn_ids = in_df.index
-    x_vals = in_df.loc[:, x_col_name].values.ravel()
-    y_vals = in_df.loc[:, y_col_name].values.ravel()
-    return stn_ids, x_vals, y_vals, in_df
 
-#%%
 
-# DWD DATA
-stn0, xvals0, yvals0, in_df0 = read_filter_df_corr_return_stns_x_y_vals(df0) 
-stn1, xvals1, yvals1, in_df1 = read_filter_df_corr_return_stns_x_y_vals(df1) 
-stn2, xvals2, yvals2, in_df2 = read_filter_df_corr_return_stns_x_y_vals(df2) 
-stn3, xvals3, yvals3, in_df3 = read_filter_df_corr_return_stns_x_y_vals(df3) 
-stn3, xvals4, yvals4, in_df4 = read_filter_df_corr_return_stns_x_y_vals(df4) 
+s0, x0, y0, in_df0 = read_filter_df_corr_return_stns_x_y_vals(df0)
+s1, x1, y1, in_df1 = read_filter_df_corr_return_stns_x_y_vals(df1)
 
-# Netatmo DATA
-stn00, xvals00, yvals00, in_df00 = read_filter_df_corr_return_stns_x_y_vals(df00) 
-stn01, xvals01, yvals01, in_df01 = read_filter_df_corr_return_stns_x_y_vals(df01) 
-stn02, xvals02, yvals02, in_df02 = read_filter_df_corr_return_stns_x_y_vals(df02) 
-stn03, xvals03, yvals03, in_df03 = read_filter_df_corr_return_stns_x_y_vals(df03) 
-stn03, xvals04, yvals04, in_df04 = read_filter_df_corr_return_stns_x_y_vals(df04) 
+s0_dwd, x0_dwd, y0_dwd, in_df0_dwd = read_filter_df_corr_return_stns_x_y_vals(
+    df0_dwd)
+s1_dwd, x1_dwd, y1_dwd, in_df1_dwd = read_filter_df_corr_return_stns_x_y_vals(
+    df1_dwd)
+# s2, x2, y2, in_df2 = read_filter_df_corr_return_stns_x_y_vals(df2)
+# s3, x3, y3, in_df3 = read_filter_df_corr_return_stns_x_y_vals(df3)
+# s4, x4, y4, in_df4 = read_filter_df_corr_return_stns_x_y_vals(df4)
+# s5, x5, y5, in_df5 = read_filter_df_corr_return_stns_x_y_vals(df5)
+# s6, x6, y6, in_df6 = read_filter_df_corr_return_stns_x_y_vals(df6)
+# s7, x7, y7, in_df7 = read_filter_df_corr_return_stns_x_y_vals(df7)
+#==============================================================================
+
+# x0, y0, s0 = remove_all_low_corr_short_dist(x0, y0, 5e3, 0.6, s0)
+x0_gd_corr, y0_gd_corr, s0_gd_corr, df0_gd_corr = remove_all_low_corr_short_dist(
+    x0, y0, 5e3, 0.5, s0, in_df0)
+
+x1_gd_corr, y1_gd_corr, s1_gd_corr, df1_gd_corr = remove_all_low_corr_short_dist(
+    x1, y1, 5e3, 0.5, s1, in_df1)
+
+# x2_gd_corr, y2_gd_corr, s2_gd_corr, df2_gd_corr = remove_all_low_corr_short_dist(
+#     x2, y2, 5e3, 0.5, s2, in_df2)
+#
+# x3_gd_corr, y3_gd_corr, s3_gd_corr, df3_gd_corr = remove_all_low_corr_short_dist(
+#     x3, y3, 5e3, 0.5, s3, in_df3)
+#
+# x4_gd_corr, y4_gd_corr, s4_gd_corr, df4_gd_corr = remove_all_low_corr_short_dist(
+#     x4, y4, 5e3, 0.5, s4, in_df4)
+#
+# x5_gd_corr, y5_gd_corr, s5_gd_corr, df5_gd_corr = remove_all_low_corr_short_dist(
+#     x5, y5, 5e3, 0.5, s5, in_df5)
+# x6_gd_corr, y6_gd_corr, s6_gd_corr, df6_gd_corr = remove_all_low_corr_short_dist(
+#     x6, y6, 5e3, 0.5, s6, in_df6)
+# x7_gd_corr, y7_gd_corr, s7_gd_corr, df7_gd_corr = remove_all_low_corr_short_dist(
+#     x7, y7, 5e3, 0.5, s7, in_df7)
+
 # =============================================================================
-#%%
 
-
-#def model(x, a, b, c, d):
-#    """ 3degree polynomial function used for fitting and as filter"""
-#    return a * x**3 + b * x**2 + c * x + d
+# %% apply filter for every neighbor seperatly
 
 # true parameters and a function that takes them
-model = lambda x, a, b, c: (a / np.sqrt(x + b) + c)
+
+
+def model(x, a, b, c):
+    return (a / np.sqrt(x + b) + c)
 #%%
+
+
 def get_flipped(y_data, y_model):
     flipped = y_model - y_data
     flipped[flipped > 0] = 0
     return flipped
+
 
 def flipped_resid(pars, x, y):
     """
@@ -171,89 +184,540 @@ def flipped_resid(pars, x, y):
     y_model = model(x, *pars)
     flipped = get_flipped(y, y_model)
     resid = np.square(y + flipped - y_model)
-    #print pars, resid.sum() # uncomment to check the iteration parameters
+    # print pars, resid.sum() # uncomment to check the iteration parameters
     return np.nan_to_num(resid)
 
 
-
-#%%
-#def get_x_y_vals_df(df, xcol='Distance to neighbor')
-# DWD data
-xvals0 = in_df0.loc[:, 'Distance to neighbor'].values.ravel()
-yvals0 = in_df0.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
-
-xvals1 = in_df1.loc[:, 'Distance to neighbor'].values.ravel()
-yvals1 = in_df1.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
-
-xvals2 = in_df2.loc[:, 'Distance to neighbor'].values.ravel()
-yvals2 = in_df2.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
-
-xvals3 = in_df3.loc[:, 'Distance to neighbor'].values.ravel()
-yvals3 = in_df3.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
-
-xvals4 = in_df4.loc[:, 'Distance to neighbor'].values.ravel()
-yvals4 = in_df4.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
-
-#%%
-# Netatmo DATA
-
-#def get_x_y_vals_df(df, xcol='Distance to neighbor')
-xvals00 = in_df00.loc[:, 'Distance to neighbor'].values.ravel()
-yvals00 = in_df00.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
-
-xvals01 = in_df01.loc[:, 'Distance to neighbor'].values.ravel()
-yvals01 = in_df01.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
-
-xvals02 = in_df02.loc[:, 'Distance to neighbor'].values.ravel()
-yvals02 = in_df02.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
-
-xvals03 = in_df03.loc[:, 'Distance to neighbor'].values.ravel()
-yvals03 = in_df03.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
-
-xvals04 = in_df04.loc[:, 'Distance to neighbor'].values.ravel()
-yvals04 = in_df04.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
-
-#%%
-# DWD DATA
-xall = np.hstack([xvals0, xvals1, xvals2, xvals3, xvals4])
-yall = np.hstack([yvals0, yvals1, yvals2, yvals3, yvals4])
-
-# Netatmo DATA
-xall0 = np.hstack([xvals00, xvals01, xvals02, xvals03, xvals04])
-yall0 = np.hstack([yvals00, yvals01, yvals02, yvals03, yvals04])
-#%%
-
-#xall_ = np.insert(arr=xall, obj=0, values=0)
-#yall_ = np.insert(arr=yall, obj=0, values=1)
-#%%
-guesses =[100, 100, 0]
-
-fit_pars, flag = leastsq(func = flipped_resid, x0 = guesses,
-                         args = (xall, yall))
-
+# # DWD DATA
+xall = np.hstack([x0_dwd, x1_dwd])
+yall = np.hstack([y0_dwd, y1_dwd])
+#
+# # Netatmo DATA
+xall0 = np.hstack([x0_gd_corr, x1_gd_corr])
+yall0 = np.hstack([y0_gd_corr, y1_gd_corr])
+# #%%
+#
+# #xall_ = np.insert(arr=xall, obj=0, values=0)
+# #yall_ = np.insert(arr=yall, obj=0, values=1)
+# #%%
+guesses = [100, 100, 0]
+#
+fit_pars, flag = leastsq(func=flipped_resid, x0=guesses,
+                         args=(xall, yall))
+#
 y_fit = model(xall, *fit_pars)
-
-# shift curves 5percent downwards
-y_fit = y_fit - 0.025*y_fit.min()
+#
+# # shift curves 5percent downwards
+y_fit = y_fit - 0.025 * y_fit.min()
 #%%
 guesses = fit_pars
 
-fit_pars0, flag0 = leastsq(func = flipped_resid, x0 = guesses,
-                         args = (xall0, yall0))
+# fit_pars0, flag0 = leastsq(func=flipped_resid, x0=guesses,
+#                            args=(xall0, yall0))
 
-y_fit0 = model(xall0, *fit_pars)
+# y_fit0 = model(xall0, *fit_pars)
 
 # shift curves 5percent downwards
-y_fit0 = y_fit0 - 0.025*y_fit0.min()
+# y_fit = y_fit - 0.025 * y_fit.min()
 # %%
 plt.ioff()
-plt.plot(xall0,
-         yall0,
-         '.', alpha=0.8, label = 'Test data')
-plt.scatter(xall, y_fit, color='r', zorder = 0.9, label = 'Edge')
-plt.scatter(xall0, y_fit0, color='g', zorder = 0.9, label = 'Guess')
-plt.legend(loc = 'lower left')
+# plt.plot(xall0,
+#          yall0,
+#          '.', alpha=0.8, label='Test data')
+plt.scatter(xall, y_fit, color='r', zorder=0.9, label='Edge')
+plt.scatter(xall0, yall0, color='g', zorder=0.9, label='Guess')
+plt.legend(loc='lower left')
 plt.show()
-#%%
+#x, y, func, stns, df_data
 
-ybelow = yall0[yall0 < y_fit0]
+#
+# (y_fitted_shifted0, xvals_below_curve0,
+#  yvals_below_curve0, xvals_above_curve0,
+#  yvals_above_curve0, stnbelow0, stnabove0) = fit_curve_get_vals_below_curve(
+#     x=x0_gd_corr, y=y0_gd_corr, func=func, stns=s0_gd_corr, shift_per=0.1)
+#
+# (y_fitted_shifted1, xvals_below_curve1,
+#  yvals_below_curve1, xvals_above_curve1,
+#  yvals_above_curve1, stnbelow1, stnabove1) = fit_curve_get_vals_below_curve(
+#     x=x1_gd_corr, y=y1_gd_corr, func=func, stns=s1_gd_corr, shift_per=0.15)
+#
+# (y_fitted_shifted2, xvals_below_curve2,
+#  yvals_below_curve2, xvals_above_curve2,
+#  yvals_above_curve2, stnbelow2, stnabove2) = fit_curve_get_vals_below_curve(
+#     x=x2_gd_corr, y=y2_gd_corr, func=func, stns=s2_gd_corr, shift_per=0.25)
+
+# (y_fitted_shifted3, xvals_below_curve3,
+#  yvals_below_curve3, xvals_above_curve3,
+#  yvals_above_curve3, stnbelow3, stnabove3) = fit_curve_get_vals_below_curve(
+#     x=x3_gd_corr, y=y3_gd_corr, func=func, stns=s3_gd_corr, shift_per=0.25)
+#
+# (y_fitted_shifted4, xvals_below_curve4,
+#  yvals_below_curve4, xvals_above_curve4,
+#  yvals_above_curve4, stnbelow4, stnabove4) = fit_curve_get_vals_below_curve(
+#     x=x4_gd_corr, y=y4_gd_corr, func=func, stns=s4_gd_corr, shift_per=0.25)
+#
+# (y_fitted_shifted5, xvals_below_curve5,
+#  yvals_below_curve5, xvals_above_curve5,
+#  yvals_above_curve5, stnbelow5, stnabove5) = fit_curve_get_vals_below_curve(
+#     x=x5_gd_corr, y=y5_gd_corr, func=func, stns=s5_gd_corr, shift_per=0.25)
+#
+# (y_fitted_shifted6, xvals_below_curve6,
+#  yvals_below_curve6, xvals_above_curve6,
+#  yvals_above_curve6, stnbelow6, stnabove6) = fit_curve_get_vals_below_curve(
+#     x=x6_gd_corr, y=y6_gd_corr, func=func, stns=s6_gd_corr, shift_per=0.25)
+#
+# (y_fitted_shifted7, xvals_below_curve7,
+#  yvals_below_curve7, xvals_above_curve7,
+#  yvals_above_curve7, stnbelow7, stnabove7) = fit_curve_get_vals_below_curve(
+#     x=x7_gd_corr, y=y7_gd_corr, func=func, stns=s7_gd_corr, shift_per=0.25)
+# =============================================================================
+
+
+# stns_keep_all = stnabove0
+#
+# s0_keep_initial = in_df0.index.intersection(stns_keep_all)
+# s1_keep_initial = in_df1.index.intersection(stns_keep_all)
+# # s2_keep_initial = in_df2.index.intersection(stns_keep_all)
+# # s3_keep_initial = in_df3.index.intersection(stns_keep_all)
+# # s4_keep_initial = in_df4.index.intersection(stns_keep_all)
+# # s5_keep_initial = in_df5.index.intersection(stns_keep_all)
+# # s6_keep_initial = in_df6.index.intersection(stns_keep_all)
+# # s7_keep_initial = in_df7.index.intersection(stns_keep_all)
+#
+# # # %%
+# x0_abv = in_df0.loc[s0_keep_initial, 'Distance to neighbor'].dropna().values
+# y0_abv = in_df0.loc[s0_keep_initial,
+#                     'Bool_Spearman_Correlation'].dropna().values
+#
+# x1_abv = in_df1.loc[s1_keep_initial, 'Distance to neighbor'].dropna().values
+# y1_abv = in_df1.loc[s1_keep_initial,
+#                     'Bool_Spearman_Correlation'].dropna().values
+
+# x2_abv = in_df2.loc[s2_keep_initial, 'Distance to neighbor'].dropna().values
+# y2_abv = in_df2.loc[s2_keep_initial,
+#                     'Bool_Spearman_Correlation'].dropna().values
+
+# x3_abv = in_df3.loc[s3_keep_initial, 'Distance to neighbor'].dropna().values
+# y3_abv = in_df3.loc[s3_keep_initial,
+#                     'Bool_Spearman_Correlation'].dropna().values
+#
+# x4_abv = in_df4.loc[s4_keep_initial, 'Distance to neighbor'].dropna().values
+# y4_abv = in_df4.loc[s4_keep_initial,
+#                     'Bool_Spearman_Correlation'].dropna().values
+#
+# x5_abv = in_df5.loc[s5_keep_initial, 'Distance to neighbor'].dropna().values
+# y5_abv = in_df5.loc[s5_keep_initial,
+#                     'Bool_Spearman_Correlation'].dropna().values
+#
+# x6_abv = in_df6.loc[s6_keep_initial, 'Distance to neighbor'].dropna().values
+# y6_abv = in_df6.loc[s6_keep_initial,
+#                     'Bool_Spearman_Correlation'].dropna().values
+#
+# x7_abv = in_df7.loc[s7_keep_initial, 'Distance to neighbor'].dropna().values
+# y7_abv = in_df7.loc[s7_keep_initial,
+#                     'Bool_Spearman_Correlation'].dropna().values
+
+
+#     (y_fitted_shifted2_, xvals_below_curve2_,
+#      yvals_below_curve2_, x2_abv_22,
+#      y2_abv_22, stn2_below_22, stnabove2_) = fit_curve_get_vals_below_curve(
+#         x=x2_abv, y=y2_abv, func=func, stns=s2_keep_initial, shift_per=shit_curve_upp1)
+#
+#     print(stn2_below_22.shape, stnabove2_.shape)
+
+#     (y_fitted_shifted3_, xvals_below_curve3_,
+#      yvals_below_curve3_, x3_abv_22,
+#      y3_abv_22, stn3_below_22, stnabove3_) = fit_curve_get_vals_below_curve(
+#         x=x3_abv, y=y3_abv, func=func, stns=s3_keep_initial, shift_per=shit_curve_upp2)
+#     print(stn3_below_22.shape, stnabove3_.shape)
+#
+#     (y_fitted_shifted4_, xvals_below_curve4_,
+#      yvals_below_curve4_, x4_abv_22,
+#      y4_abv_22, stn4_below_22, stnabove4_) = fit_curve_get_vals_below_curve(
+#         x=x4_abv, y=y4_abv, func=func, stns=s4_keep_initial, shift_per=shit_curve_upp2)
+#     print(stn4_below_22.shape, stnabove4_.shape)
+#
+#     (y_fitted_shifted5_, xvals_below_curve5_,
+#      yvals_below_curve5_, x5_abv_22,
+#      y5_abv_22, stn5_below_22, stnabove5_) = fit_curve_get_vals_below_curve(
+#         x=x5_abv, y=y5_abv, func=func, stns=s5_keep_initial, shift_per=shit_curve_upp2)
+#     print(stn5_below_22.shape, stnabove5_.shape)
+#
+#     (y_fitted_shifted6_, xvals_below_curve6_,
+#      yvals_below_curve6_, x6_abv_22,
+#      y6_abv_22, stn6_below_22, stnabove6_) = fit_curve_get_vals_below_curve(
+#         x=x6_abv, y=y6_abv, func=func, stns=s6_keep_initial, shift_per=shit_curve_upp2)
+#     print(stn6_below_22.shape, stnabove6_.shape)
+#
+#     (y_fitted_shifted7_, xvals_below_curve7_,
+#      yvals_below_curve7_, x7_abv_22,
+#      y7_abv_22, stn7_below_22, stnabove7_) = fit_curve_get_vals_below_curve(
+#         x=x7_abv, y=y7_abv, func=func, stns=s7_keep_initial, shift_per=shit_curve_upp2)
+#     print(stn7_below_22.shape, stnabove7_.shape)
+
+
+# #==============================================================================
+
+#
+# y2_abv_2 = y2_abv[y2_abv >= lim1]
+# x2_abv_2 = x2_abv[np.where(y2_abv_2 >= lim1)]
+# stn2_abv_2 = s2_keep_initial[np.where(y2_abv_2 >= lim1)]
+
+# y3_abv_2 = yvals_below_curve3_[yvals_below_curve3_ >= lim1]
+# x3_abv_2 = xvals_below_curve3_[np.where(y3_abv_2 >= lim1)]
+# stn3_abv_2 = stn3_below_22[np.where(y3_abv_2 >= lim1)]
+#
+# y4_abv_2 = yvals_below_curve4_[yvals_below_curve4_ >= lim2]
+# x4_abv_2 = xvals_below_curve4_[np.where(y4_abv_2 >= lim2)]
+# stn4_abv_2 = stn4_below_22[np.where(y4_abv_2 >= lim2)]
+#
+# y5_abv_2 = yvals_below_curve5_[yvals_below_curve5_ >= lim2]
+# x5_abv_2 = xvals_below_curve5_[np.where(y5_abv_2 >= lim2)]
+# stn5_abv_2 = stn5_below_22[np.where(y5_abv_2 >= lim2)]
+#
+# y6_abv_2 = yvals_below_curve6_[yvals_below_curve6_ >= lim3]
+# x6_abv_2 = xvals_below_curve6_[np.where(y6_abv_2 >= lim3)]
+# stn6_abv_2 = stn6_below_22[np.where(y6_abv_2 >= lim3)]
+#
+# y7_abv_2 = yvals_below_curve7_[yvals_below_curve7_ >= lim3]
+# x7_abv_2 = xvals_below_curve7_[np.where(y7_abv_2 >= lim3)]
+# stn7_abv_2 = stn7_below_22[np.where(y7_abv_2 >= lim3)]
+
+#==============================================================================
+#
+#==============================================================================
+# stns_keep_all_final = np.intersect1d(stnabove0, stn1_abv_2)
+#                                      stn2_abv_2)
+#         ,
+#         stn2_abv_2), stn3_abv_2), stn4_abv_2),
+#     stn5_abv_2), stn6_abv_2), stn7_abv_2)
+
+# s01 = np.intersect1d(stn0_below_22, stn1_below_22)
+# print(s01.shape)
+# s012 =  np.intersect1d(s01, stn2_below_22)
+# print(s012.shape)
+#
+# s0123 =  np.intersect1d(s012, stn3_below_22)
+
+#==============================================================================
+# GET FINAL STATIONS
+#==============================================================================
+
+#
+# x0_abv_2 = in_df0.loc[stns_keep_all_final,
+#                       'Distance to neighbor'].dropna().values
+# y0_abv_2 = in_df0.loc[stns_keep_all_final,
+#                       'Bool_Spearman_Correlation'].dropna().values
+#
+# x1_abv_2 = in_df1.loc[stns_keep_all_final,
+#                       'Distance to neighbor'].dropna().values
+# y1_abv_2 = in_df1.loc[stns_keep_all_final,
+#                       'Bool_Spearman_Correlation'].dropna().values
+
+# x2_abv_2 = in_df2.loc[stns_keep_all_final,
+#                       'Distance to neighbor'].dropna().values
+# y2_abv_2 = in_df2.loc[stns_keep_all_final,
+#                       'Bool_Spearman_Correlation'].dropna().values
+#
+# x3_abv_2 = in_df3.loc[stns_keep_all_final,
+#                       'Distance to neighbor'].dropna().values
+# y3_abv_2 = in_df3.loc[stns_keep_all_final,
+#                       'Bool_Spearman_Correlation'].dropna().values
+#
+# x4_abv_2 = in_df4.loc[stns_keep_all_final,
+#                       'Distance to neighbor'].dropna().values
+# y4_abv_2 = in_df4.loc[stns_keep_all_final,
+#                       'Bool_Spearman_Correlation'].dropna().values
+#
+# x5_abv_2 = in_df5.loc[stns_keep_all_final,
+#                       'Distance to neighbor'].dropna().values
+# y5_abv_2 = in_df5.loc[stns_keep_all_final,
+#                       'Bool_Spearman_Correlation'].dropna().values
+#
+# x6_abv_2 = in_df6.loc[stns_keep_all_final,
+#                       'Distance to neighbor'].dropna().values
+# y6_abv_2 = in_df6.loc[stns_keep_all_final,
+#                       'Bool_Spearman_Correlation'].dropna().values
+#
+# x7_abv_2 = in_df7.loc[stns_keep_all_final,
+#                       'Distance to neighbor'].dropna().values
+# y7_abv_2 = in_df7.loc[stns_keep_all_final,
+#                       'Bool_Spearman_Correlation'].dropna().values
+
+#==============================================================================
+#
+#==============================================================================
+# print('refilter')
+# lim1 = 0.5
+# lim2 = 0.48
+# lim3 = 0.44
+#
+# x0_abv_2 = x0_abv_2
+# y0_abv_2 = y0_abv_2
+#
+# stns_keep_all_final0 = stns_keep_all_final[np.where(y0_abv_2 >= lim1)]
+# stns_keep_all_final1 = stns_keep_all_final[np.where(y1_abv_2 >= lim2)]
+# # stns_keep_all_final2 = stns_keep_all_final[np.where(y2_abv_2 >= lim1)]
+# stns_keep_all_final3 = stns_keep_all_final[np.where(y3_abv_2 >= lim1)]
+# stns_keep_all_final4 = stns_keep_all_final[np.where(y4_abv_2 >= lim2)]
+# # stns_keep_all_final5 = stns_keep_all_final[np.where(y5_abv_2 >= lim2)]
+# # stns_keep_all_final6 = stns_keep_all_final[np.where(y6_abv_2 >= lim3)]
+# # stns_keep_all_final7 = stns_keep_all_final[np.where(y7_abv_2 >= lim3)]
+#
+# stns_keep_all_final = np.intersect1d(
+#     stns_keep_all_final0, stns_keep_all_final1)
+# #     stns_keep_all_final2)
+# #         , stns_keep_all_final3), stns_keep_all_final4),
+# #     stns_keep_all_final5), stns_keep_all_final6), stns_keep_all_final7)
+#
+# print(stns_keep_all_final.shape)
+#
+# # stns_keep_all_final = stn0_below_22
+# stns_keep_al_sr = pd.DataFrame(data=stns_keep_all_final,
+#                                columns=['Stations'])
+#
+# stns_keep_al_sr.to_csv(
+#     (save_dir /
+#         (r'keep_stns_all_neighbor_%s_per_%s_s0.csv'
+#          % (percent, time_freq))),
+#     sep=';')
+# #==============================================================================
+# # reget all coordinates and corelations
+# #==============================================================================
+# print(stns_keep_all_final.shape)
+# x0_abv_2 = in_df0.loc[stns_keep_all_final,
+#                       'Distance to neighbor'].dropna().values
+# y0_abv_2 = in_df0.loc[stns_keep_all_final,
+#                       'Bool_Spearman_Correlation'].dropna().values
+#
+# x1_abv_2 = in_df1.loc[stns_keep_all_final,
+#                       'Distance to neighbor'].dropna().values
+# y1_abv_2 = in_df1.loc[stns_keep_all_final,
+#                       'Bool_Spearman_Correlation'].dropna().values
+#
+# # x2_abv_2 = in_df2.loc[stns_keep_all_final,
+# #                       'Distance to neighbor'].dropna().values
+# # y2_abv_2 = in_df2.loc[stns_keep_all_final,
+#                       'Bool_Spearman_Correlation'].dropna().values
+
+# x3_abv_2 = in_df3.loc[stns_keep_all_final,
+#                       'Distance to neighbor'].dropna().values
+# y3_abv_2 = in_df3.loc[stns_keep_all_final,
+#                       'Bool_Spearman_Correlation'].dropna().values
+#
+# x4_abv_2 = in_df4.loc[stns_keep_all_final,
+#                       'Distance to neighbor'].dropna().values
+# y4_abv_2 = in_df4.loc[stns_keep_all_final,
+#                       'Bool_Spearman_Correlation'].dropna().values
+#
+# x5_abv_2 = in_df5.loc[stns_keep_all_final,
+#                       'Distance to neighbor'].dropna().values
+# y5_abv_2 = in_df5.loc[stns_keep_all_final,
+#                       'Bool_Spearman_Correlation'].dropna().values
+#
+# x6_abv_2 = in_df6.loc[stns_keep_all_final,
+#                       'Distance to neighbor'].dropna().values
+# y6_abv_2 = in_df6.loc[stns_keep_all_final,
+#                       'Bool_Spearman_Correlation'].dropna().values
+#
+# x7_abv_2 = in_df7.loc[stns_keep_all_final,
+#                       'Distance to neighbor'].dropna().values
+# y7_abv_2 = in_df7.loc[stns_keep_all_final,
+#                       'Bool_Spearman_Correlation'].dropna().values
+
+#==============================================================================
+#
+#==============================================================================
+# plt.ioff()
+# plt.figure(figsize=(36, 18), dpi=300)
+#
+# marker_size_abv_curve = 100
+# marker_size_below_curve = 95
+# marker_size_curve = 55
+#
+# plt.figure(figsize=(16, 12), dpi=300)
+#
+# marker_size_abv_curve = 34
+# marker_size_below_curve = 28
+# marker_size_curve = 15
+#
+# plt.scatter(x0_abv_2, y0_abv_2, c='r', alpha=0.5,
+#             marker='x', label=('First Neighbor Stn nbr %d / %d'
+#                                % (y0_abv_2.shape[0], y0.shape[0])),
+#             s=marker_size_abv_curve)
+# plt.scatter(x1_abv_2, y1_abv_2, c='b', alpha=0.5,
+#             marker='.', label=('Second Neighbor Stn nbr %d / %d'
+#                                % (y1_abv_2.shape[0], y1.shape[0])),
+#             s=marker_size_abv_curve)
+# # plt.scatter(x2_abv_2, y2_abv_2, c='g', alpha=0.5,
+#             marker='d', label=('Third Neighbor Stn nbr %d / %d'
+#                                % (y2_abv_2.shape[0], y2.shape[0])),
+#             s=marker_size_abv_curve)
+# plt.scatter(x3_abv_2, y3_abv_2, c='darkorange', alpha=0.5,
+#             marker='*', label=('Fourth Neighbor Stn nbr %d / %d'
+#                                % (y3_abv_2.shape[0], y3.shape[0])),
+#             s=marker_size_abv_curve)
+# plt.scatter(x4_abv_2, y4_abv_2, c='m', alpha=0.5,
+#             marker='+', label=('Fifth Neighbor Stn nbr %d / %d'
+#                                % (y4_abv_2.shape[0], y4.shape[0])),
+#             s=marker_size_abv_curve)
+# plt.scatter(x5_abv_2, y5_abv_2, c='k', alpha=0.5,
+#             marker='1', label=('Sixth Neighbor Stn nbr %d / %d'
+#                                % (y5_abv_2.shape[0], y5.shape[0])),
+#             s=marker_size_abv_curve)
+#
+# plt.scatter(x6_abv_2, y6_abv_2, c='darkblue', alpha=0.5,
+#             marker='X', label=('Seventh Neighbor Stn nbr %d / %d'
+#                                % (y6_abv_2.shape[0], y6.shape[0])),
+#             s=marker_size_abv_curve)
+#
+# plt.scatter(x7_abv_2, y7_abv_2, c='c', alpha=0.5,
+#             marker='8', label=('Eigth Neighbor Stn nbr %d / %d'
+#                                % (y7_abv_2.shape[0], y7.shape[0])),
+#             s=marker_size_abv_curve)
+
+
+# plt.scatter(xvals_below_curve0, yvals_below_curve0, c='grey', alpha=0.65,
+#             marker='x', s=marker_size_below_curve,
+#             label='First Neighbor Stn nbr %d' % yvals_below_curve0.shape[0])
+# plt.scatter(xvals_below_curve1, yvals_below_curve1, c='grey', alpha=0.65,
+#             marker='.',  s=marker_size_below_curve,
+#             label='Second Neighbor Stn nbr %d' % yvals_below_curve1.shape[0])
+# plt.scatter(xvals_below_curve2, yvals_below_curve2, c='grey', alpha=0.65,
+#             marker='d',  s=marker_size_below_curve,
+#             label='Third Neighbor Stn nbr %d' % yvals_below_curve2.shape[0])
+# plt.scatter(xvals_below_curve3, yvals_below_curve3, c='grey', alpha=0.65,
+#             marker='*',  s=marker_size_below_curve,
+#             label='Fourth Neighbor Stn nbr %d' % yvals_below_curve3.shape[0])
+# plt.scatter(xvals_below_curve4, yvals_below_curve4, c='grey', alpha=0.65,
+#             marker='+', s=marker_size_below_curve,
+#             label='Fifth Neighbor Stn nbr %d' % yvals_below_curve4.shape[0])
+#
+# plt.scatter(x0_abv, y_fitted_shifted0_, c='darkred', alpha=0.25,
+#             marker='.',  s=marker_size_curve)  # label='Fitted curve 1',
+# plt.scatter(x1_abv, y_fitted_shifted1_, c='darkblue', alpha=0.25,
+#             marker='.', s=marker_size_curve)  # label='Fitted curve 2',
+# plt.scatter(x2_abv, y_fitted_shifted2_, c='darkgreen', alpha=0.25,
+#             marker='.', s=marker_size_curve)  # label='Fitted curve 3',
+# plt.scatter(x3_abv, y_fitted_shifted3_, c='darkorange', alpha=0.25,
+#             marker='.',  s=marker_size_curve)  # label='Fitted curve 4',
+# plt.scatter(x4_abv, y_fitted_shifted4_, c='m', alpha=0.25,
+#             marker='.', s=marker_size_curve)  # label='Fitted curve 5',
+#
+# plt.scatter(x5_abv, y_fitted_shifted5_, c='k', alpha=0.25,
+#             marker='.',  s=marker_size_curve)  # label='Fitted curve 1',
+# plt.scatter(x6_abv, y_fitted_shifted6_, c='darkblue', alpha=0.25,
+#             marker='.', s=marker_size_curve)  # label='Fitted curve 2',
+# plt.scatter(x7_abv, y_fitted_shifted7_, c='c', alpha=0.25,
+#             marker='.', s=marker_size_curve)  # label='Fitted curve 3',
+
+# plt.show()
+#
+# plt.xlim([0, max([x0_abv.max(), x1_gd_corr.max()]) + 1000])
+# plt.xticks(np.arange(0, x1_gd_corr.max() + 1000, 5000))
+# plt.ylim([-0.1, 1.1])
+# plt.xlabel('Distance (m)')
+# plt.ylabel('Indicator Spearman Correlation')
+# plt.legend(loc=0)
+# plt.grid(alpha=.25)
+#
+# plt.title('Keeping %s %d stations: Indicator correlation with distance'
+#           ' for upper %s percent for %s data values'
+#           % (data_source0, stns_keep_all_final.shape[0],
+#               percent, time_freq))
+# plt.savefig(save_dir /
+#             (r'_%s_%s_%s_percent_indic_corr_freq_%s_filtered_2_neighbors_data_.png'
+#              % (data_source0, data_source, percent, time_freq)),
+#             frameon=True, papertype='a4',
+#             bbox_inches='tight', pad_inches=.2)
+# plt.close()
+# #
+# #def model(x, a, b, c, d):
+# #    """ 3degree polynomial function used for fitting and as filter"""
+# #    return a * x**3 + b * x**2 + c * x + d
+#
+
+#
+#
+#
+# #%%
+# #def get_x_y_vals_df(df, xcol='Distance to neighbor')
+# # DWD data
+# xvals0 = in_df0.loc[:, 'Distance to neighbor'].values.ravel()
+# yvals0 = in_df0.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
+#
+# xvals1 = in_df1.loc[:, 'Distance to neighbor'].values.ravel()
+# yvals1 = in_df1.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
+#
+# xvals2 = in_df2.loc[:, 'Distance to neighbor'].values.ravel()
+# yvals2 = in_df2.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
+#
+# xvals3 = in_df3.loc[:, 'Distance to neighbor'].values.ravel()
+# yvals3 = in_df3.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
+#
+# xvals4 = in_df4.loc[:, 'Distance to neighbor'].values.ravel()
+# yvals4 = in_df4.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
+#
+# #%%
+# # Netatmo DATA
+#
+# #def get_x_y_vals_df(df, xcol='Distance to neighbor')
+# xvals00 = in_df00.loc[:, 'Distance to neighbor'].values.ravel()
+# yvals00 = in_df00.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
+#
+# xvals01 = in_df01.loc[:, 'Distance to neighbor'].values.ravel()
+# yvals01 = in_df01.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
+#
+# xvals02 = in_df02.loc[:, 'Distance to neighbor'].values.ravel()
+# yvals02 = in_df02.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
+#
+# xvals03 = in_df03.loc[:, 'Distance to neighbor'].values.ravel()
+# yvals03 = in_df03.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
+#
+# xvals04 = in_df04.loc[:, 'Distance to neighbor'].values.ravel()
+# yvals04 = in_df04.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
+#
+# #%%
+# # DWD DATA
+# xall = np.hstack([xvals0, xvals1, xvals2, xvals3, xvals4])
+# yall = np.hstack([yvals0, yvals1, yvals2, yvals3, yvals4])
+#
+# # Netatmo DATA
+# xall0 = np.hstack([xvals00, xvals01, xvals02, xvals03, xvals04])
+# yall0 = np.hstack([yvals00, yvals01, yvals02, yvals03, yvals04])
+# #%%
+#
+# #xall_ = np.insert(arr=xall, obj=0, values=0)
+# #yall_ = np.insert(arr=yall, obj=0, values=1)
+# #%%
+# guesses =[100, 100, 0]
+#
+# fit_pars, flag = leastsq(func = flipped_resid, x0 = guesses,
+#                          args = (xall, yall))
+#
+# y_fit = model(xall, *fit_pars)
+#
+# # shift curves 5percent downwards
+# y_fit = y_fit - 0.025*y_fit.min()
+# #%%
+# guesses = fit_pars
+#
+# fit_pars0, flag0 = leastsq(func = flipped_resid, x0 = guesses,
+#                          args = (xall0, yall0))
+#
+# y_fit0 = model(xall0, *fit_pars)
+#
+# # shift curves 5percent downwards
+# y_fit0 = y_fit0 - 0.025*y_fit0.min()
+# # %%
+# plt.ioff()
+# plt.plot(xall0,
+#          yall0,
+#          '.', alpha=0.8, label = 'Test data')
+# plt.scatter(xall, y_fit, color='r', zorder = 0.9, label = 'Edge')
+# plt.scatter(xall0, y_fit0, color='g', zorder = 0.9, label = 'Guess')
+# plt.legend(loc = 'lower left')
+# plt.show()
+# #%%
+
+# ybelow = yall0[yall0 < y_fit0]

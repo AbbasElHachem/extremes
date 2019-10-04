@@ -14,6 +14,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from pandas.plotting import register_matplotlib_converters
+
+from _00_additional_functions import select_df_within_period
 register_matplotlib_converters()
 
 
@@ -34,6 +36,11 @@ path_to_hourly_netatmo_ppt = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_B
 path_to_hourly_dwd_ppt = r"F:\download_DWD_data_recent\all_dwd_hourly_ppt_data_combined_2014_2019_.csv"
 
 remove_bad_hours_ = True
+
+# select data only within this period (same as netatmo)
+start_date = '2015-01-01 00:00:00'
+end_date = '2019-09-30 00:00:00'
+
 #==============================================================================
 # # hourly data
 #==============================================================================
@@ -50,8 +57,18 @@ df_dwd_hourly = pd.read_csv(
     infer_datetime_format=True,
     engine='c').dropna(how='all')
 
+df_netatmo_hourly = select_df_within_period(df_netatmo_hourly,
+                                            start_date,
+                                            end_date)
+
+df_dwd_hourly = select_df_within_period(df_dwd_hourly,
+                                        start_date,
+                                        end_date)
+#==============================================================================
+#
+#==============================================================================
 netatmo_maximum_hrs_dates = df_netatmo_hourly.max(axis=1).sort_values()[::-1]
-netatmo_max_100_hours = netatmo_maximum_hrs_dates[:200].sort_index()
+netatmo_max_100_hours = netatmo_maximum_hrs_dates[:100].sort_index()
 netatmo_max_100_hours = pd.DataFrame(data=netatmo_max_100_hours.values,
                                      index=netatmo_max_100_hours.index)
 stns_netatmo = df_netatmo_hourly.loc[netatmo_max_100_hours.index, :].idxmax(
@@ -74,7 +91,7 @@ bad_stns = df_many_duplicates_per_stn['Station Id'].values
 # good_hours = stns_netatmo[~stns_netatmo.duplicated()]
 
 dwd_maximum_hrs_dates = df_dwd_hourly.max(axis=1).sort_values()[::-1]
-dwd_max_100_hours = dwd_maximum_hrs_dates[:200].sort_index()
+dwd_max_100_hours = dwd_maximum_hrs_dates[:100].sort_index()
 dwd_max_100_hours = pd.DataFrame(data=dwd_max_100_hours.values,
                                  index=dwd_max_100_hours.index)
 stns_dwd = df_dwd_hourly.loc[dwd_max_100_hours.index, :].idxmax(
@@ -118,7 +135,7 @@ dwd_maximum_dates = df_dwd_daily.max(axis=1).sort_values()[::-1]
 # netatmo_corr_dwd_max = df_netatmo_daily.loc[
 #     dwd_maximum_dates.index, :].max(axis=1).sort_values()[::-1].dropna(how='all')
 #
-netatmo_max_100_days = netatmo_maximum_dates[:200].sort_index()
+netatmo_max_100_days = netatmo_maximum_dates[:100].sort_index()
 # dwd_corr_netatmo_max_100_days = dwd_corr_netatmo_max[:100].sort_index()
 #
 
@@ -138,7 +155,7 @@ df_bad_stn_days = df_bad_stn_days[df_bad_stn_days[0] > 320]
 bad_stns_day = df_bad_stn_days['Station Id'].values
 
 
-dwd_max_100_days = dwd_maximum_dates[:200].sort_index()
+dwd_max_100_days = dwd_maximum_dates[:100].sort_index()
 # net_corr_dwd_max_100_days = netatmo_corr_dwd_max[:100].sort_index()
 dwd_max_100_days = pd.DataFrame(data=dwd_max_100_days.values,
                                 index=dwd_max_100_days.index)

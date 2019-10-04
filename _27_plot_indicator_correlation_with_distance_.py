@@ -67,12 +67,12 @@ data_dir_Netamto_netatmo_dfs = main_dir / \
 assert data_dir_Netamto_netatmo_dfs.exists(), 'Wrong Netatmo Netatmo path'
 
 
-netatmo_path_acc = r'year_allyears_df_comparing_correlations_max_sep_dist_100000_'
+netatmo_path_acc = r'year_allyears_df_comparing_correlations_max_sep_dist_30000_'
 dwd_path_Acc = r'year_allyears_df_dwd_correlations'
 
 
 path_to_netatmo_gd_stns_file = data_dir_Netamto_dfs / \
-    r'keep_stns_all_neighbor_90_per_60min_s0.csv'
+    r'keep_stns_all_neighbor_95_per_60min_s0.csv'
 
 #assert path_to_netatmo_gd_stns_file.exists(), 'wrong netatmo good stns file'
 
@@ -84,6 +84,7 @@ data_source0 = 'Netatmo'  # 'DWD'  # 'Netatmo'  #   # reference station 'Netatmo
 data_source = 'dwd'  # 'dwd'  # 'netatmo'  #   # compare to station 'netatmo'
 
 use_good_netatmo_stns = False
+use_filtered_data = False
 
 save_acc = ''
 # =============================================================================
@@ -92,21 +93,21 @@ save_acc = ''
 if data_source0 == 'Netatmo' and data_source == 'dwd':
     # for Netatmo stations neighbors start from 0 !
     df0 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
-                           data_source, percent, 0)
+                           data_source, percent, 0, use_filtered_data)
     df1 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
-                           data_source, percent, 1)
-    df2 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
-                           data_source, percent, 2)
-    df3 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
-                           data_source, percent, 3)
-    df4 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
-                           data_source, percent, 4)
-    df5 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
-                           data_source, percent, 5)
-    df6 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
-                           data_source, percent, 6)
-    df7 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
-                           data_source, percent, 7)
+                           data_source, percent, 1, use_filtered_data)
+#     df2 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
+#                            data_source, percent, 2, use_filtered_data)
+#     df3 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
+#                            data_source, percent, 3, use_filtered_data)
+#     df4 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
+#                            data_source, percent, 4, use_filtered_data)
+#     df5 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
+#                            data_source, percent, 5, use_filtered_data)
+#     df6 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
+#                            data_source, percent, 6, use_filtered_data)
+#     df7 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
+#                            data_source, percent, 7, use_filtered_data)
     save_dir = data_dir_Netamto_dfs
 
 if data_source0 == 'DWD' and data_source == 'dwd':
@@ -115,18 +116,18 @@ if data_source0 == 'DWD' and data_source == 'dwd':
                            data_source, percent, 1)
     df1 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
                            data_source, percent, 2)
-    df2 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
-                           data_source, percent, 3)
-    df3 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
-                           data_source, percent, 4)
-    df4 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
-                           data_source, percent, 5)
-    df5 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
-                           data_source, percent, 6)
-    df6 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
-                           data_source, percent, 7)
-    df7 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
-                           data_source, percent, 8)
+#     df2 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+#                            data_source, percent, 3)
+#     df3 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+#                            data_source, percent, 4)
+#     df4 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+#                            data_source, percent, 5)
+#     df5 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+#                            data_source, percent, 6)
+#     df6 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+#                            data_source, percent, 7)
+#     df7 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+#                            data_source, percent, 8)
 
     save_dir = data_dir_DWD_dfs
 
@@ -138,26 +139,26 @@ if data_source0 == 'Netatmo' and data_source == 'netatmo':
     df1 = gen_path_df_file(data_dir_Netamto_netatmo_dfs,
                            netatmo_path_acc, time_freq,
                            data_source, percent, 1)
-    df2 = gen_path_df_file(data_dir_Netamto_netatmo_dfs,
-                           netatmo_path_acc, time_freq,
-                           data_source, percent, 2)
-    df3 = gen_path_df_file(data_dir_Netamto_netatmo_dfs,
-                           netatmo_path_acc, time_freq,
-                           data_source, percent, 3)
-    df4 = gen_path_df_file(data_dir_Netamto_netatmo_dfs,
-                           netatmo_path_acc, time_freq,
-                           data_source, percent, 4)
+#     df2 = gen_path_df_file(data_dir_Netamto_netatmo_dfs,
+#                            netatmo_path_acc, time_freq,
+#                            data_source, percent, 2)
+#     df3 = gen_path_df_file(data_dir_Netamto_netatmo_dfs,
+#                            netatmo_path_acc, time_freq,
+#                            data_source, percent, 3)
+#     df4 = gen_path_df_file(data_dir_Netamto_netatmo_dfs,
+#                            netatmo_path_acc, time_freq,
+#                            data_source, percent, 4)
     save_dir = data_dir_Netamto_netatmo_dfs
 # =============================================================================
 
 in_df0 = pd.read_csv(df0, index_col=0, sep=';').dropna(how='all')
 in_df1 = pd.read_csv(df1, index_col=0, sep=';').dropna(how='all')
-in_df2 = pd.read_csv(df2, index_col=0, sep=';').dropna(how='all')
-in_df3 = pd.read_csv(df3, index_col=0, sep=';').dropna(how='all')
-in_df4 = pd.read_csv(df4, index_col=0, sep=';').dropna(how='all')
-in_df5 = pd.read_csv(df5, index_col=0, sep=';').dropna(how='all')
-in_df6 = pd.read_csv(df6, index_col=0, sep=';').dropna(how='all')
-in_df7 = pd.read_csv(df7, index_col=0, sep=';').dropna(how='all')
+# in_df2 = pd.read_csv(df2, index_col=0, sep=';').dropna(how='all')
+# in_df3 = pd.read_csv(df3, index_col=0, sep=';').dropna(how='all')
+# in_df4 = pd.read_csv(df4, index_col=0, sep=';').dropna(how='all')
+# in_df5 = pd.read_csv(df5, index_col=0, sep=';').dropna(how='all')
+# in_df6 = pd.read_csv(df6, index_col=0, sep=';').dropna(how='all')
+# in_df7 = pd.read_csv(df7, index_col=0, sep=';').dropna(how='all')
 
 if use_good_netatmo_stns:
     df_good_stns = pd.read_csv(path_to_netatmo_gd_stns_file, sep=';',
@@ -165,32 +166,32 @@ if use_good_netatmo_stns:
     # assert np.all(df_good_stns.values.ravel()) in in_df0.index
     in_df0 = in_df0.loc[df_good_stns.values.ravel(), :].dropna(how='all')
     in_df1 = in_df1.loc[df_good_stns.values.ravel(), :].dropna(how='all')
-    in_df2 = in_df2.loc[df_good_stns.values.ravel(), :].dropna(how='all')
-    in_df3 = in_df3.loc[df_good_stns.values.ravel(), :].dropna(how='all')
-    in_df4 = in_df4.loc[df_good_stns.values.ravel(), :].dropna(how='all')
-    in_df5 = in_df2.loc[df_good_stns.values.ravel(), :].dropna(how='all')
-    in_df6 = in_df3.loc[df_good_stns.values.ravel(), :].dropna(how='all')
-    in_df7 = in_df4.loc[df_good_stns.values.ravel(), :].dropna(how='all')
+#     in_df2 = in_df2.loc[df_good_stns.values.ravel(), :].dropna(how='all')
+#     in_df3 = in_df3.loc[df_good_stns.values.ravel(), :].dropna(how='all')
+#     in_df4 = in_df4.loc[df_good_stns.values.ravel(), :].dropna(how='all')
+#     in_df5 = in_df2.loc[df_good_stns.values.ravel(), :].dropna(how='all')
+#     in_df6 = in_df3.loc[df_good_stns.values.ravel(), :].dropna(how='all')
+#     in_df7 = in_df4.loc[df_good_stns.values.ravel(), :].dropna(how='all')
     save_acc = 'filtered_using_stns_abv_curve_all_neighbor'
 # =============================================================================
 
 x0 = in_df0.loc[:, 'Distance to neighbor'].values.ravel()
 x1 = in_df1.loc[:, 'Distance to neighbor'].values.ravel()
-x2 = in_df2.loc[:, 'Distance to neighbor'].values.ravel()
-x3 = in_df3.loc[:, 'Distance to neighbor'].values.ravel()
-x4 = in_df4.loc[:, 'Distance to neighbor'].values.ravel()
-x5 = in_df5.loc[:, 'Distance to neighbor'].values.ravel()
-x6 = in_df6.loc[:, 'Distance to neighbor'].values.ravel()
-x7 = in_df7.loc[:, 'Distance to neighbor'].values.ravel()
+# x2 = in_df2.loc[:, 'Distance to neighbor'].values.ravel()
+# x3 = in_df3.loc[:, 'Distance to neighbor'].values.ravel()
+# x4 = in_df4.loc[:, 'Distance to neighbor'].values.ravel()
+# x5 = in_df5.loc[:, 'Distance to neighbor'].values.ravel()
+# x6 = in_df6.loc[:, 'Distance to neighbor'].values.ravel()
+# x7 = in_df7.loc[:, 'Distance to neighbor'].values.ravel()
 
 y0 = in_df0.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
 y1 = in_df1.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
-y2 = in_df2.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
-y3 = in_df3.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
-y4 = in_df4.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
-y5 = in_df5.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
-y6 = in_df6.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
-y7 = in_df7.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
+# y2 = in_df2.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
+# y3 = in_df3.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
+# y4 = in_df4.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
+# y5 = in_df5.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
+# y6 = in_df6.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
+# y7 = in_df7.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
 
 # s0, x0, y0, in_df0 = read_filter_df_corr_return_stns_x_y_vals(df0)
 # =============================================================================
@@ -202,20 +203,20 @@ plt.scatter(x0, y0, c='r', alpha=0.5, marker='x',
             label='First Neighbor Stn nbr %d' % y0.shape[0], s=34)
 plt.scatter(x1, y1, c='b', alpha=0.5, marker='.',
             label='Second Neighbor Stn nbr %d' % y1.shape[0], s=34)
-plt.scatter(x2, y2, c='g', alpha=0.5, marker='d',
-            label='Third Neighbor Stn nbr %d' % y2.shape[0], s=34)
-plt.scatter(x3, y3, c='darkorange', alpha=0.5, marker='*',
-            label='Fourth Neighbor Stn nbr %d' % y3.shape[0], s=34)
-plt.scatter(x4, y4, c='m', alpha=0.5, marker='+',
-            label='Fifth Neighbor Stn nbr %d' % y4.shape[0], s=34)
-plt.scatter(x5, y5, c='darkgreen', alpha=0.5, marker='1',
-            label='Sixth Neighbor Stn nbr %d' % y5.shape[0], s=34)
-plt.scatter(x6, y6, c='darkblue', alpha=0.5, marker='X',
-            label='Seventh Neighbor Stn nbr %d' % y6.shape[0], s=34)
-plt.scatter(x7, y7, c='c', alpha=0.5, marker='8',
-            label='Eighth Neighbor Stn nbr %d' % y7.shape[0], s=34)
-plt.xlim([0, max(x6.max(), x7.max()) + 1000])
-plt.xticks(np.arange(0, x7.max() + 1000, 5000))
+# plt.scatter(x2, y2, c='g', alpha=0.5, marker='d',
+#             label='Third Neighbor Stn nbr %d' % y2.shape[0], s=34)
+# plt.scatter(x3, y3, c='darkorange', alpha=0.5, marker='*',
+#             label='Fourth Neighbor Stn nbr %d' % y3.shape[0], s=34)
+# plt.scatter(x4, y4, c='m', alpha=0.5, marker='+',
+#             label='Fifth Neighbor Stn nbr %d' % y4.shape[0], s=34)
+# plt.scatter(x5, y5, c='darkgreen', alpha=0.5, marker='1',
+#             label='Sixth Neighbor Stn nbr %d' % y5.shape[0], s=34)
+# plt.scatter(x6, y6, c='darkblue', alpha=0.5, marker='X',
+#             label='Seventh Neighbor Stn nbr %d' % y6.shape[0], s=34)
+# plt.scatter(x7, y7, c='c', alpha=0.5, marker='8',
+#             label='Eighth Neighbor Stn nbr %d' % y7.shape[0], s=34)
+plt.xlim([0, max(x0.max(), x1.max()) + 1000])
+plt.xticks(np.arange(0, x1.max() + 1000, 5000))
 plt.ylim([-0.1, 1.1])
 plt.xlabel('Distance (m)')
 plt.ylabel('Indicator Spearman Correlation')
@@ -229,7 +230,7 @@ plt.title('%s %s stations, Temporal Frequency %s\n Indicator correlation'
           ' with distance for upper %s percent of data values'
           % (data_source0, data_source, time_freq, percent))
 plt.savefig(save_dir /
-            (r'_%s_%s_%s_percent_indic_corr_freq_%s_%s_orig.png'
+            (r'_%s_%s_%s_percent_indic_corr_freq_%s_%s_orig_2.png'
              % (data_source0, data_source, percent, time_freq, save_acc)),
             frameon=True, papertype='a4',
             bbox_inches='tight', pad_inches=.2)
