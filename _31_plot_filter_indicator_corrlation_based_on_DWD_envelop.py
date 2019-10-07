@@ -66,7 +66,7 @@ netatmo_path_acc = r'year_allyears_df_comparing_correlations_max_sep_dist_30000_
 dwd_path_Acc = r'year_allyears_df_dwd_correlations'
 
 # def percentage threshold, time frequency and data source
-percent = '98'
+percent = '95'
 time_freq = '60min'
 
 data_source0 = 'Netatmo'  # reference station 'Netatmo'
@@ -136,10 +136,10 @@ s1_dwd, x1_dwd, y1_dwd, in_df1_dwd = read_filter_df_corr_return_stns_x_y_vals(
 
 # x0, y0, s0 = remove_all_low_corr_short_dist(x0, y0, 5e3, 0.6, s0)
 x0_gd_corr, y0_gd_corr, s0_gd_corr, df0_gd_corr = remove_all_low_corr_short_dist(
-    x0, y0, 5e3, 0.5, s0, in_df0)
+    x0, y0, 5e3, 0.4, s0, in_df0)
 
 x1_gd_corr, y1_gd_corr, s1_gd_corr, df1_gd_corr = remove_all_low_corr_short_dist(
-    x1, y1, 5e3, 0.5, s1, in_df1)
+    x1, y1, 5e3, 0.4, s1, in_df1)
 
 # x2_gd_corr, y2_gd_corr, s2_gd_corr, df2_gd_corr = remove_all_low_corr_short_dist(
 #     x2, y2, 5e3, 0.5, s2, in_df2)
@@ -160,8 +160,6 @@ x1_gd_corr, y1_gd_corr, s1_gd_corr, df1_gd_corr = remove_all_low_corr_short_dist
 # =============================================================================
 
 # %% apply filter for every neighbor seperatly
-
-# true parameters and a function that takes them
 
 
 def model(x, a, b, c):
@@ -191,10 +189,12 @@ def flipped_resid(pars, x, y):
 # # DWD DATA
 xall = np.hstack([x0_dwd, x1_dwd])
 yall = np.hstack([y0_dwd, y1_dwd])
+
 #
 # # Netatmo DATA
 xall0 = np.hstack([x0_gd_corr, x1_gd_corr])
 yall0 = np.hstack([y0_gd_corr, y1_gd_corr])
+stnsall0 = np.hstack([s0_gd_corr, s1_gd_corr])
 # #%%
 #
 # #xall_ = np.insert(arr=xall, obj=0, values=0)
@@ -212,153 +212,32 @@ y_fit = y_fit - 0.025 * y_fit.min()
 #%%
 guesses = fit_pars
 
-# fit_pars0, flag0 = leastsq(func=flipped_resid, x0=guesses,
-#                            args=(xall0, yall0))
+# fit for Netatmo, not needed
+y_fit0 = model(xall0, *fit_pars)
 
-# y_fit0 = model(xall0, *fit_pars)
-
-# shift curves 5percent downwards
-# y_fit = y_fit - 0.025 * y_fit.min()
+y_netatmo_keep = yall0[yall0 >= y_fit.min()]
+x_netatmo_keep = xall0[yall0 >= y_fit.min()]
+stn_netatmo_keep = np.unique(stnsall0[yall0 >= y_fit.min()])
+print('keeping stations', stn_netatmo_keep.shape, ' from ', stnsall0.shape)
 # %%
 plt.ioff()
 # plt.plot(xall0,
 #          yall0,
 #          '.', alpha=0.8, label='Test data')
-plt.scatter(xall, y_fit, color='r', zorder=0.9, label='Edge')
-plt.scatter(xall0, yall0, color='g', zorder=0.9, label='Guess')
+plt.scatter(xall, y_fit, color='r', zorder=0.9, label='Edge', alpha=.5)
+plt.scatter(xall, yall, color='b', zorder=0.9, label='DWD Data', alpha=.5)
+
+plt.scatter(xall0, yall0, color='g', zorder=0.9,
+            label='Netamo Data', alpha=0.5)
+
+plt.scatter(x_netatmo_keep, y_netatmo_keep, color='m', zorder=0.9,
+            label='Netamo Data', alpha=0.5)
+
 plt.legend(loc='lower left')
 plt.show()
-#x, y, func, stns, df_data
 
-#
-# (y_fitted_shifted0, xvals_below_curve0,
-#  yvals_below_curve0, xvals_above_curve0,
-#  yvals_above_curve0, stnbelow0, stnabove0) = fit_curve_get_vals_below_curve(
-#     x=x0_gd_corr, y=y0_gd_corr, func=func, stns=s0_gd_corr, shift_per=0.1)
-#
-# (y_fitted_shifted1, xvals_below_curve1,
-#  yvals_below_curve1, xvals_above_curve1,
-#  yvals_above_curve1, stnbelow1, stnabove1) = fit_curve_get_vals_below_curve(
-#     x=x1_gd_corr, y=y1_gd_corr, func=func, stns=s1_gd_corr, shift_per=0.15)
-#
-# (y_fitted_shifted2, xvals_below_curve2,
-#  yvals_below_curve2, xvals_above_curve2,
-#  yvals_above_curve2, stnbelow2, stnabove2) = fit_curve_get_vals_below_curve(
-#     x=x2_gd_corr, y=y2_gd_corr, func=func, stns=s2_gd_corr, shift_per=0.25)
-
-# (y_fitted_shifted3, xvals_below_curve3,
-#  yvals_below_curve3, xvals_above_curve3,
-#  yvals_above_curve3, stnbelow3, stnabove3) = fit_curve_get_vals_below_curve(
-#     x=x3_gd_corr, y=y3_gd_corr, func=func, stns=s3_gd_corr, shift_per=0.25)
-#
-# (y_fitted_shifted4, xvals_below_curve4,
-#  yvals_below_curve4, xvals_above_curve4,
-#  yvals_above_curve4, stnbelow4, stnabove4) = fit_curve_get_vals_below_curve(
-#     x=x4_gd_corr, y=y4_gd_corr, func=func, stns=s4_gd_corr, shift_per=0.25)
-#
-# (y_fitted_shifted5, xvals_below_curve5,
-#  yvals_below_curve5, xvals_above_curve5,
-#  yvals_above_curve5, stnbelow5, stnabove5) = fit_curve_get_vals_below_curve(
-#     x=x5_gd_corr, y=y5_gd_corr, func=func, stns=s5_gd_corr, shift_per=0.25)
-#
-# (y_fitted_shifted6, xvals_below_curve6,
-#  yvals_below_curve6, xvals_above_curve6,
-#  yvals_above_curve6, stnbelow6, stnabove6) = fit_curve_get_vals_below_curve(
-#     x=x6_gd_corr, y=y6_gd_corr, func=func, stns=s6_gd_corr, shift_per=0.25)
-#
-# (y_fitted_shifted7, xvals_below_curve7,
-#  yvals_below_curve7, xvals_above_curve7,
-#  yvals_above_curve7, stnbelow7, stnabove7) = fit_curve_get_vals_below_curve(
-#     x=x7_gd_corr, y=y7_gd_corr, func=func, stns=s7_gd_corr, shift_per=0.25)
 # =============================================================================
 
-
-# stns_keep_all = stnabove0
-#
-# s0_keep_initial = in_df0.index.intersection(stns_keep_all)
-# s1_keep_initial = in_df1.index.intersection(stns_keep_all)
-# # s2_keep_initial = in_df2.index.intersection(stns_keep_all)
-# # s3_keep_initial = in_df3.index.intersection(stns_keep_all)
-# # s4_keep_initial = in_df4.index.intersection(stns_keep_all)
-# # s5_keep_initial = in_df5.index.intersection(stns_keep_all)
-# # s6_keep_initial = in_df6.index.intersection(stns_keep_all)
-# # s7_keep_initial = in_df7.index.intersection(stns_keep_all)
-#
-# # # %%
-# x0_abv = in_df0.loc[s0_keep_initial, 'Distance to neighbor'].dropna().values
-# y0_abv = in_df0.loc[s0_keep_initial,
-#                     'Bool_Spearman_Correlation'].dropna().values
-#
-# x1_abv = in_df1.loc[s1_keep_initial, 'Distance to neighbor'].dropna().values
-# y1_abv = in_df1.loc[s1_keep_initial,
-#                     'Bool_Spearman_Correlation'].dropna().values
-
-# x2_abv = in_df2.loc[s2_keep_initial, 'Distance to neighbor'].dropna().values
-# y2_abv = in_df2.loc[s2_keep_initial,
-#                     'Bool_Spearman_Correlation'].dropna().values
-
-# x3_abv = in_df3.loc[s3_keep_initial, 'Distance to neighbor'].dropna().values
-# y3_abv = in_df3.loc[s3_keep_initial,
-#                     'Bool_Spearman_Correlation'].dropna().values
-#
-# x4_abv = in_df4.loc[s4_keep_initial, 'Distance to neighbor'].dropna().values
-# y4_abv = in_df4.loc[s4_keep_initial,
-#                     'Bool_Spearman_Correlation'].dropna().values
-#
-# x5_abv = in_df5.loc[s5_keep_initial, 'Distance to neighbor'].dropna().values
-# y5_abv = in_df5.loc[s5_keep_initial,
-#                     'Bool_Spearman_Correlation'].dropna().values
-#
-# x6_abv = in_df6.loc[s6_keep_initial, 'Distance to neighbor'].dropna().values
-# y6_abv = in_df6.loc[s6_keep_initial,
-#                     'Bool_Spearman_Correlation'].dropna().values
-#
-# x7_abv = in_df7.loc[s7_keep_initial, 'Distance to neighbor'].dropna().values
-# y7_abv = in_df7.loc[s7_keep_initial,
-#                     'Bool_Spearman_Correlation'].dropna().values
-
-
-#     (y_fitted_shifted2_, xvals_below_curve2_,
-#      yvals_below_curve2_, x2_abv_22,
-#      y2_abv_22, stn2_below_22, stnabove2_) = fit_curve_get_vals_below_curve(
-#         x=x2_abv, y=y2_abv, func=func, stns=s2_keep_initial, shift_per=shit_curve_upp1)
-#
-#     print(stn2_below_22.shape, stnabove2_.shape)
-
-#     (y_fitted_shifted3_, xvals_below_curve3_,
-#      yvals_below_curve3_, x3_abv_22,
-#      y3_abv_22, stn3_below_22, stnabove3_) = fit_curve_get_vals_below_curve(
-#         x=x3_abv, y=y3_abv, func=func, stns=s3_keep_initial, shift_per=shit_curve_upp2)
-#     print(stn3_below_22.shape, stnabove3_.shape)
-#
-#     (y_fitted_shifted4_, xvals_below_curve4_,
-#      yvals_below_curve4_, x4_abv_22,
-#      y4_abv_22, stn4_below_22, stnabove4_) = fit_curve_get_vals_below_curve(
-#         x=x4_abv, y=y4_abv, func=func, stns=s4_keep_initial, shift_per=shit_curve_upp2)
-#     print(stn4_below_22.shape, stnabove4_.shape)
-#
-#     (y_fitted_shifted5_, xvals_below_curve5_,
-#      yvals_below_curve5_, x5_abv_22,
-#      y5_abv_22, stn5_below_22, stnabove5_) = fit_curve_get_vals_below_curve(
-#         x=x5_abv, y=y5_abv, func=func, stns=s5_keep_initial, shift_per=shit_curve_upp2)
-#     print(stn5_below_22.shape, stnabove5_.shape)
-#
-#     (y_fitted_shifted6_, xvals_below_curve6_,
-#      yvals_below_curve6_, x6_abv_22,
-#      y6_abv_22, stn6_below_22, stnabove6_) = fit_curve_get_vals_below_curve(
-#         x=x6_abv, y=y6_abv, func=func, stns=s6_keep_initial, shift_per=shit_curve_upp2)
-#     print(stn6_below_22.shape, stnabove6_.shape)
-#
-#     (y_fitted_shifted7_, xvals_below_curve7_,
-#      yvals_below_curve7_, x7_abv_22,
-#      y7_abv_22, stn7_below_22, stnabove7_) = fit_curve_get_vals_below_curve(
-#         x=x7_abv, y=y7_abv, func=func, stns=s7_keep_initial, shift_per=shit_curve_upp2)
-#     print(stn7_below_22.shape, stnabove7_.shape)
-
-
-# #==============================================================================
-
-#
 # y2_abv_2 = y2_abv[y2_abv >= lim1]
 # x2_abv_2 = x2_abv[np.where(y2_abv_2 >= lim1)]
 # stn2_abv_2 = s2_keep_initial[np.where(y2_abv_2 >= lim1)]

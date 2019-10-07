@@ -128,7 +128,7 @@ not_convective_season = []
 
 # starts with one
 # , 2, 3, 4, 5]  # list of which neighbors to chose
-neighbors_to_chose_lst = [1, 2, 3, 4, 5, 6, 7, 8]
+neighbors_to_chose_lst = [1, 2, 3, 4, 5, 6, 7, 8]  # 1
 max_dist_thr = 2 * 1e4  # 15km
 min_req_ppt_vals = 30  # stations minimum required ppt values
 
@@ -177,7 +177,7 @@ def calc_indicator_correlatione_two_dwd_stns(
     all_distances = []
     for iid in stns_bw:
 
-        #         if iid == '07135':
+        #         if iid == '02088' or iid == '07331':
         #             raise Exception
 
         print('\n********\n Total number of DWD stations is\n********\n',
@@ -244,10 +244,11 @@ def calc_indicator_correlatione_two_dwd_stns(
                 all_distances.append(distance_near)
 
                 print('\n resampling data')
-                idf1.index.intersection(idf2.index)
+
                 if (idf1.values.ravel().shape[0] > min_req_ppt_vals and
                         idf2.values.ravel().shape[0] > min_req_ppt_vals):
                     try:
+
                         df_common1, df_common2 = resample_intersect_2_dfs(
                             idf1, idf2, tem_freq)
                     except Exception as msg:
@@ -379,7 +380,7 @@ def calc_indicator_correlatione_two_dwd_stns(
         os.path.join(out_save_dir_orig,
                      'year_allyears_df_dwd_correlations'
                      'freq_%s_dwd_netatmo_upper_%d_percent_data_considered'
-                     '_neighbor_%d_2.csv'
+                     '_neighbor_%d_.csv'
                      % (tem_freq,
                         val_thr_percent, neighbor_to_chose)),
         sep=';')

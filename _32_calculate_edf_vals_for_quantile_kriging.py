@@ -38,10 +38,10 @@ plt.ioff()
 # def values to replace edf of ppt=0
 ppt_min_thr_0_vals = 0.1  # everything below it gets value of P0
 
-netatmo_data = True
+netatmo_data = False
 use_good_netatmo_stns = False
 
-dwd_data = False
+dwd_data = True
 
 # =============================================================================
 
@@ -139,7 +139,7 @@ for stn_ in df_stn0.columns:
 
 df_all.dropna(how='all', inplace=True)
 df_all.to_csv((r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
-               r"\edf_ppt_all_%s_daily_.csv" % save_acc),
+               r"\edf_ppt_all_%s_hourly_.csv" % save_acc),
               sep=';', float_format='%.3f')
 
 print('DONE WITH EVERYTHNG !')

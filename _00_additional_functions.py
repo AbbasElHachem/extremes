@@ -1348,18 +1348,20 @@ def fit_curve_get_vals_below_curve(x, y, func, stns, shift_per=0.15):
 #
 #==============================================================================
 def gen_path_df_file(main_path, start_path_acc, time_freq,
-                     data_source, percent, neighbor, new_data=False):
+                     data_source, percent, neighbor,
+                     use_filtered_data=False,
+                     filter_percent=None):
     """ use this funtion to get the path to the dfs for different neighbors"""
 
-    if new_data is False:
+    if use_filtered_data is False:
         return main_path / (
             r'%sfreq_%s_%s_netatmo_upper_%s_percent_data_considered_neighbor_%d_.csv'
             % (start_path_acc, time_freq, data_source, percent, neighbor))
 
     else:
         return main_path / (
-            r'%sfreq_%s_%s_netatmo_upper_%s_percent_data_considered_neighbor_%d_2.csv'
-            % (start_path_acc, time_freq, data_source, percent, neighbor))
+            r'%sfreq_%s_%s_netatmo_upper_%s_percent_data_considered_neighbor_%d_filtered_%s.csv'
+            % (start_path_acc, time_freq, data_source, percent, neighbor, filter_percent))
 
 #==============================================================================
 #
