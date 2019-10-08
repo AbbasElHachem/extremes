@@ -173,7 +173,10 @@ lower_percentile_val_lst = [95, 97, 98, 99]  # [80, 85, 90, 95, 99]
 
 
 # ['10min', '60min', '120min', '480min', '720min', '1440min']
-aggregation_frequencies = ['60min']
+aggregation_frequencies = ['60min', '120min',
+                           '180min', '360min',
+                           '480min', '720min',
+                           '1440min']
 # temporal aggregation of df
 
 # [0, 1, 2, 3, 4]  # refers to DWD neighbot (0=first)
@@ -250,8 +253,8 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
 
     in_df_stns = pd.read_csv(path_netatmo_gd_stns, index_col=0,
                              sep=';')
-    #good_stns = list(in_df_stns.values.ravel())
-    #stns_ppt_ids = good_stns
+    good_stns = list(in_df_stns.values.ravel())
+    stns_ppt_ids = good_stns
 
     print('\n######\n done reading all dfs \n#######\n')
     # create df to append results of comparing two stns
@@ -347,7 +350,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                     if (df_netatmo_cmn.values.ravel().shape[0] > 0 and
                             df_dwd.values.ravel().shape[0] > 0):
                         print('\n# Stations have more than 2month data #\n')
-                        raise Exception
+
                         # change everything to dataframes with stn Id as column
                         df_netatmo_cmn = pd.DataFrame(
                             data=df_netatmo_cmn.values,
@@ -465,7 +468,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
         os.path.join(out_save_dir_orig,
                      'year_allyears_df_comparing_correlations_max_sep_dist_%d_'
                      'freq_%s_dwd_netatmo_upper_%d_percent_data_considered'
-                     '_neighbor_%d_.csv'  # filtered_95
+                     '_neighbor_%d_filtered_95.csv'  # filtered_95
                      % (min_dist_thr_ppt, temp_freq_resample,
                         val_thr_percent, neighbor_to_chose)),
         sep=';')
@@ -498,7 +501,7 @@ if __name__ == '__main__':
                     out_save_dir_orig,
                     'year_allyears_df_comparing_correlations_max_sep_dist_%d_'
                     'freq_%s_dwd_netatmo_upper_%d_percent_data_considered'
-                    '_neighbor_%d_.csv'  # filtered_95
+                    '_neighbor_%d_filtered_95.csv'  # filtered_95
                     % (min_dist_thr_ppt, temp_freq,
                         lower_percentile_val, neighbor_to_chose))
 

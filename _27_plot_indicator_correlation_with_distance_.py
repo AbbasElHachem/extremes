@@ -77,14 +77,14 @@ path_to_netatmo_gd_stns_file = data_dir_Netamto_dfs / \
 #assert path_to_netatmo_gd_stns_file.exists(), 'wrong netatmo good stns file'
 
 # def percentage threshold, time frequency and data source
-percent = '95'
-time_freq = '1440min'
+percent = '99'
+time_freq = '60min'
 
 data_source0 = 'Netatmo'  # 'DWD'  # 'Netatmo'  #   # reference station 'Netatmo'
 data_source = 'dwd'  # 'dwd'  # 'netatmo'  #   # compare to station 'netatmo'
 
 use_good_netatmo_stns = False
-use_filtered_data = True
+use_filtered_data = False
 filtered_percent = '95'
 
 save_acc = ''
@@ -235,7 +235,7 @@ plt.title('%s %s stations, Temporal Frequency %s\n Indicator correlation'
           ' with distance for upper %s percent of data values '
           % (data_source0, data_source, time_freq, percent))
 plt.savefig(save_dir /
-            (r'_%s_%s_%s_percent_indic_corr_freq_%s_%s_filtered_95perc_.png'
+            (r'_%s_%s_%s_percent_indic_corr_freq_%s_%s_orig_.png'
              % (data_source0, data_source, percent, time_freq, save_acc)),
             frameon=True, papertype='a4',
             bbox_inches='tight', pad_inches=.2)

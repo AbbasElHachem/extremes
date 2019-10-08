@@ -65,7 +65,7 @@ netatmo_path_acc = r'year_allyears_df_comparing_correlations_max_sep_dist_30000_
 dwd_path_Acc = r'year_allyears_df_dwd_correlations'
 
 # def percentage threshold, time frequency and data source
-percent = '98'
+percent = '99'
 time_freq = '60min'
 
 data_source0 = 'Netatmo'  # reference station 'Netatmo'
@@ -307,6 +307,14 @@ if remove_upper_limit:
 lim1 = 0.5
 lim2 = 0.45
 lim3 = 0.45
+
+if percent == '98':
+    lim2 = 0.4
+    lim3 = 0.4
+
+if percent == '99':
+    lim2 = 0.35
+    lim3 = 0.35
 
 x0_abv_2 = x0_abv
 y0_abv_2 = y0_abv
