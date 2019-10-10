@@ -18,11 +18,17 @@ df_dwd_edf = pd.read_csv(path_dwd_edf_data, sep=';', index_col=0,
 for i in range(12):
     try:
         i = int(i)
-        path_interpolated_using_netatmo = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\oridinary_kriging_compare_DWD_Netatmo\interpolated_quantiles_daily_data_basedon_qunatiles_2019_08_08_00_00_00_season_using_netatmo_only_grp_%d.csv" % i
+        path_interpolated_using_netatmo = (
+            r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\oridinary_kriging_compare_DWD_Netatmo"
+            r"\interpolated_quantiles_daily_data_basedon_qunatiles_2019_08_08_season_using_netatmo_only_grp_%d_.csv" % i)
 
-        path_interpolated_using_dwd = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\oridinary_kriging_compare_DWD_Netatmo\interpolated_quantiles_dwd_daily_data_basedon_quantiles_2019_08_08_00_00_00_season_using_dwd_netamo_grp_%d.csv" % i
+        path_interpolated_using_dwd = (
+            r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\oridinary_kriging_compare_DWD_Netatmo"
+            r"\interpolated_quantiles_dwd_daily_data_basedon_qunatiles_2019_08_08_season_using_dwd_only_grp_%d_.csv" % i)
 
-        path_interpolated_using_netatmo_dwd = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\oridinary_kriging_compare_DWD_Netatmo\interpolated_quantiles_dwd_daily_data_basedon_qunatiles_2019_08_08_00_00_00_season_using_dwd_only_grp_%d.csv" % i
+        path_interpolated_using_netatmo_dwd = (
+            r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\oridinary_kriging_compare_DWD_Netatmo"
+            r"\interpolated_quantiles_dwd_daily_data_basedon_quantiles_2019_08_08_season_using_dwd_netamo_grp_%d_.csv" % i)
 
         df_netatmo = pd.read_csv(path_interpolated_using_netatmo,
                                  sep=';', index_col=0, parse_dates=True,
@@ -113,7 +119,7 @@ for i in range(12):
                        s=15,
                        marker='d',
                        # cmap=plt.get_cmap('viridis'),
-                       label='DWD Interpolated ')
+                       label='DWD Interpolated %d Events' % values_dwd.shape[0])
 
             ax.set_title('Observed and Interpolated Quantiles for Daily Extreme Events \n DWD Station %s \n'
                          'Pearson Cor=%0.3f; Spearman Cor=%0.3f'
@@ -151,7 +157,7 @@ for i in range(12):
                        s=15,
                        marker='d',
                        # cmap=plt.get_cmap('viridis'),
-                       label='Netatmo Interpolated ')
+                       label='Netatmo Interpolated %d Events' % values_netatmo.shape[0])
 
             ax.set_title('Observed and Interpolated Quantiles for Daily Extreme Events \n DWD Station %s \n'
                          'Pearson Cor=%0.3f; Spearman Cor=%0.3f'
@@ -187,7 +193,7 @@ for i in range(12):
                        s=15,
                        marker='d',
                        # cmap=plt.get_cmap('viridis'),
-                       label='DWD-Netatmo Interpolated  ')
+                       label='DWD-Netatmo Interpolated %d Events' % values_netatmo_dwd.shape[0])
 
             ax.set_title('Observed and Interpolated Quantiles for Daily Extreme Events \n DWD Station %s \n'
                          'Pearson Cor=%0.3f; Spearman Cor=%0.3f'
@@ -210,57 +216,58 @@ for i in range(12):
 
             ###################################################################
 
-            fig = plt.figure(figsize=(24, 12), dpi=150)
-
-            ax = fig.add_subplot(111)
-
-            # plot 45 deg line
-            _min = min(values_x.min(), values_dwd.min())
-            _max = max(values_x.max(), values_dwd.max())
-
-            ax.plot([_min, _max], [_min, _max],
-                    c='k', linestyle='--', alpha=0.4)
-
-            # set plot limit
-            ax.set_xlim(_min - 0.01, 1.01)
-            ax.set_ylim(_min - 0.01, 1.01)
-
-            ax.scatter(values_x,
-                       values_dwd,
-                       alpha=.6,
-                       c='r',  # colors_arr,
-                       s=15,
-                       marker='d',
-                       # cmap=plt.get_cmap('viridis'),
-                       label='DWD Interpolated ')
-            ax.scatter(values_x,
-                       values_netatmo,
-                       alpha=.6,
-                       c='b',  # colors_arr,
-                       s=15,
-                       marker='x',
-                       # cmap=plt.get_cmap('viridis'),
-                       label='Netatmo Interpolated ')
-            ax.scatter(values_x,
-                       values_netatmo_dwd,
-                       alpha=.6,
-                       c='g',  # colors_arr,
-                       s=15,
-                       marker='o',
-                       # cmap=plt.get_cmap('viridis'),
-                       label='DWD-Netatmo Interpolated  ')
-            ax.set_title('Observed and Interpolated Quantiles for Daily Extreme Events \n DWD Station %s \n'
-                         #'Pearson Cor=%0.3f; Spearman Cor=%0.3f'
-                         % (stn_))  # , corr_dwd, rho_dwd))
-            ax.grid(alpha=0.25)
-
-            ax.set_xlabel('Original Quantiles')
-            ax.legend(loc='lower right')
-            ax.set_ylabel('Interpolated Quantiles')
-
-            plt.savefig((r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\oridinary_kriging_compare_DWD_Netatmo'
-                         r'\oberserved_vs_interpolated_quantiles_extreme_daily_events_stn_%s_dwdnetatmo_.png' % (stn_)),
-                        frameon=True, papertype='a4', bbox_inches='tight', pad_inches=.2)
-            plt.close()
+#             fig = plt.figure(figsize=(24, 12), dpi=150)
+#
+#             ax = fig.add_subplot(111)
+#
+#             # plot 45 deg line
+#             _min = min(values_x.min(), values_dwd.min())
+#             _max = max(values_x.max(), values_dwd.max())
+#
+#             ax.plot([_min, _max], [_min, _max],
+#                     c='k', linestyle='--', alpha=0.4)
+#
+#             # set plot limit
+#             ax.set_xlim(_min - 0.01, 1.01)
+#             ax.set_ylim(_min - 0.01, 1.01)
+#
+#             ax.scatter(values_x,
+#                        values_dwd,
+#                        alpha=.6,
+#                        c='r',  # colors_arr,
+#                        s=15,
+#                        marker='d',
+#                        # cmap=plt.get_cmap('viridis'),
+#                        label='DWD Interpolated ')
+#             ax.scatter(values_x,
+#                        values_netatmo,
+#                        alpha=.6,
+#                        c='b',  # colors_arr,
+#                        s=15,
+#                        marker='x',
+#                        # cmap=plt.get_cmap('viridis'),
+#                        label='Netatmo Interpolated ')
+#             ax.scatter(values_x,
+#                        values_netatmo_dwd,
+#                        alpha=.6,
+#                        c='g',  # colors_arr,
+#                        s=15,
+#                        marker='o',
+#                        # cmap=plt.get_cmap('viridis'),
+#                        label='DWD-Netatmo Interpolated  ')
+#             ax.set_title('Observed and Interpolated Quantiles for Daily Extreme Events \n DWD Station %s \n'
+#                          #'Pearson Cor=%0.3f; Spearman Cor=%0.3f'
+#                          % (stn_))  # , corr_dwd, rho_dwd))
+#             ax.grid(alpha=0.25)
+#
+#             ax.set_xlabel('Original Quantiles')
+#             ax.legend(loc='lower right')
+#             ax.set_ylabel('Interpolated Quantiles')
+#
+#             plt.savefig((r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\oridinary_kriging_compare_DWD_Netatmo'
+#                          r'\oberserved_vs_interpolated_quantiles_extreme_daily_events_stn_%s_dwdnetatmo_.png' % (stn_)),
+#                         frameon=True, papertype='a4', bbox_inches='tight', pad_inches=.2)
+#             plt.close()
+#             break
     except Exception as msg:
         print(msg)

@@ -83,8 +83,8 @@ if data_source0 == 'Netatmo':
                            data_source, percent, 0)
     df1 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
                            data_source, percent, 1)
-    df2 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
-                           data_source, percent, 2)
+#     df2 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
+#                            data_source, percent, 2)
 #     df3 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
 #                            data_source, percent, 3)
 #     df4 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
@@ -102,8 +102,8 @@ if data_source01 == 'DWD':
                                data_source, percent, 1)
     df1_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
                                data_source, percent, 2)
-    df2_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
-                               data_source, percent, 3)
+#     df2_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+#                                data_source, percent, 3)
 #     df3 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
 #                            data_source, percent, 4)
 #     df4 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
@@ -229,23 +229,94 @@ y_fit0 = model(xall0, *fit_pars)
 y_netatmo_keep = yall0[yall0 >= yvals_above_curve6.min()]
 x_netatmo_keep = xall0[yall0 >= yvals_above_curve6.min()]
 stn_netatmo_keep = np.unique(stnsall0[yall0 >= yvals_above_curve6.min()])
+
+stn_netatmo_keep_df = pd.DataFrame(data=stn_netatmo_keep, columns=['Stations'])
+stn_netatmo_keep_df.to_csv(
+    (data_dir_Netamto_dfs /
+        (r'keep_stns_all_neighbor_%s_per_%s_s0_2.csv'
+         % (percent, time_freq))),
+    sep=';')
 print('keeping stations', stn_netatmo_keep.shape, ' from ', stnsall0.shape)
+
+x1 = in_df0.loc[stn_netatmo_keep, 'Distance to neighbor'].dropna().values
+
+y1 = in_df0.loc[stn_netatmo_keep,
+                'Bool_Spearman_Correlation'].dropna().values
+
+
+x2 = in_df1.loc[stn_netatmo_keep, 'Distance to neighbor'].dropna().values
+
+y2 = in_df1.loc[stn_netatmo_keep,
+                'Bool_Spearman_Correlation'].dropna().values
+
 # %%
-plt.ioff()
-# plt.plot(xall0,
-#          yall0,
-#          '.', alpha=0.8, label='Test data')
-plt.scatter(xall, y_fitted_shifted6, color='r',
-            zorder=0.9, label='Edge', alpha=.5)
-plt.scatter(xall, yall, color='b', zorder=0.9, label='DWD Data', alpha=.5)
-
-# plt.scatter(xall0, yall0, color='g', zorder=0.9,
+# plt.ioff()
+# plt.figure(figsize=(12, 8))
+# # plt.plot(xall0,
+# #          yall0,
+# #          '.', alpha=0.8, label='Test data')
+# # plt.scatter(xall, y_fitted_shifted6, color='r',
+# #             zorder=0.9, label='Edge', alpha=.5)
+# plt.scatter(xall, yall, color='b', zorder=0.9, label='DWD Data', alpha=.5)
+#
+# # plt.scatter(xall0, yall0, color='g', zorder=0.9,
+# #             label='Netamo Data', alpha=0.5)
+#
+# plt.scatter(x_netatmo_keep, y_netatmo_keep, color='m', zorder=0.9,
 #             label='Netamo Data', alpha=0.5)
+#
+# plt.legend(loc='lower left')
+# plt.show()
 
-plt.scatter(x_netatmo_keep, y_netatmo_keep, color='m', zorder=0.9,
-            label='Netamo Data', alpha=0.5)
 
-plt.legend(loc='lower left')
-plt.show()
+plt.ioff()
+# plt.figure(figsize=(36, 18), dpi=300)
+#
+# marker_size_abv_curve = 100
+# marker_size_below_curve = 95
+# marker_size_curve = 55
+
+plt.figure(figsize=(16, 12), dpi=300)
+
+marker_size_abv_curve = 34
+marker_size_below_curve = 28
+marker_size_curve = 15
+
+plt.scatter(xall, yall, c='r', alpha=0.85,
+            marker='x', label='DWD',
+            s=marker_size_abv_curve)
+
+plt.scatter(x1, y1, c='g', alpha=0.85,
+            marker='x', label='Netatmo 1st Neighbr %d' % y1.shape[0],
+            s=marker_size_abv_curve)
+
+plt.scatter(x2, y2, c='m', alpha=0.85,
+            marker='x', label='Netatmo 2st Neighbr %d' % y2.shape[0],
+            s=marker_size_abv_curve)
+
+plt.scatter(x_netatmo_keep, y_netatmo_keep, c='b', alpha=0.05,
+            marker='.', label='Netatmo all',
+            s=marker_size_abv_curve)
+
+# plt.show()
+
+plt.xlim([0, max([x_netatmo_keep.max(), xall.max()]) + 1000])
+plt.xticks(np.arange(0, x1_gd_corr.max() + 1000, 5000))
+plt.ylim([-0.1, 1.1])
+plt.xlabel('Distance (m)')
+plt.ylabel('Indicator Spearman Correlation')
+plt.legend(loc=0)
+plt.grid(alpha=.25)
+
+plt.title('Keeping %s %d / %d stations: Indicator correlation with distance'
+          ' for upper %s percent for %s data values'
+          % (data_source0, stn_netatmo_keep_df.shape[0], s0_gd_corr.shape[0],
+              percent, time_freq))
+plt.savefig(data_dir_Netamto_dfs /  # filtered_2_neighbors_data
+            (r'_%s_%s_%s_percent_indic_corr_freq_%s_giltered_.png'
+             % (data_source0, data_source, percent, time_freq)),
+            frameon=True, papertype='a4',
+            bbox_inches='tight', pad_inches=.2)
+plt.close()
 
 # =============================================================================

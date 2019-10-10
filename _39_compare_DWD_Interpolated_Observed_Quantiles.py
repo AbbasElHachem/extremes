@@ -25,7 +25,7 @@ os.chdir(main_dir)
 
 out_plots_path = main_dir / r'oridinary_kriging_compare_DWD_Netatmo'
 
-path_to_data = main_dir / r'oridinary_kriging_compare_DWD_Netatmo/needed_dfs'
+path_to_data = out_plots_path  # main_dir / r'NetAtmo_BW'
 
 # # DAILY DATA
 # path_to_netatmo_interpolated_warm_season_cdf_daily_data = (
@@ -86,11 +86,11 @@ path_to_ppt_dwd_interpolated_using_netatmo_only_cold_season_cdf_daily_data = (
 #==============================================================================
 path_to_ppt_dwd_interpolated_using_dwd_netatmo_warm_season_cdf_daily_data = (
     path_to_data /
-    r'interpolated_quantiles_dwd_daily_data_basedon_qunatiles_warm_season_using_dwd_netamo_grp_0.csv')
+    r'interpolated_quantiles_from_qnts_dwd_daily_data_basedon_quantiles_warm_season_using_dwd_netamo_grp_0')
 
 path_to_ppt_dwd_interpolated_using_dwd_only_warm_season_cdf_daily_data = (
     path_to_data /
-    r'interpolated_quantiles_dwd_daily_data_basedon_qunatiles_warm_season_using_dwd_only_grp_0.csv')
+    r'interpolated_quantiles_from_qnts_dwd_daily_data_basedon_qunatiles_warm_season_using_dwd_only_grp_0.csv')
 
 path_to_ppt_dwd_interpolated_using_netatmo_only_warm_season_cdf_daily_data = (
     path_to_data /

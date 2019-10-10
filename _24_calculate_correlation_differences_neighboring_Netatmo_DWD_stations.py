@@ -139,7 +139,7 @@ assert os.path.exists(path_to_netatmo_coords_df_file), 'wrong DWD coords file'
 path_to_netatmo_gd_stns_file = (
     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes"
     r"\plots_NetAtmo_ppt_DWD_ppt_correlation_"
-    r"\keep_stns_all_neighbor_95_per_60min_s0.csv")
+    r"\keep_stns_all_neighbor_99_per_60min_s0.csv")
 #assert os.path.exists(path_to_netatmo_gd_stns_file), 'wrong netatmo stns file'
 
 path_to_shpfile = (r'F:\data_from_exchange\Netatmo'
@@ -169,7 +169,7 @@ min_dist_thr_ppt = 3 * 1e4  # 5000  # m
 max_ppt_thr = 90.  # ppt above this value are not considered
 
 # only highest x% of the values are selected
-lower_percentile_val_lst = [95, 97, 98, 99]  # [80, 85, 90, 95, 99]
+lower_percentile_val_lst = [99.5]  # [80, 85, 90, 95, 99]
 
 
 # ['10min', '60min', '120min', '480min', '720min', '1440min']
@@ -468,7 +468,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
         os.path.join(out_save_dir_orig,
                      'year_allyears_df_comparing_correlations_max_sep_dist_%d_'
                      'freq_%s_dwd_netatmo_upper_%d_percent_data_considered'
-                     '_neighbor_%d_filtered_95.csv'  # filtered_95
+                     '_neighbor_%d_filtered_99_2.csv'  # filtered_95
                      % (min_dist_thr_ppt, temp_freq_resample,
                         val_thr_percent, neighbor_to_chose)),
         sep=';')
@@ -501,7 +501,7 @@ if __name__ == '__main__':
                     out_save_dir_orig,
                     'year_allyears_df_comparing_correlations_max_sep_dist_%d_'
                     'freq_%s_dwd_netatmo_upper_%d_percent_data_considered'
-                    '_neighbor_%d_filtered_95.csv'  # filtered_95
+                    '_neighbor_%d_filtered_99_2.csv'  # filtered_95
                     % (min_dist_thr_ppt, temp_freq,
                         lower_percentile_val, neighbor_to_chose))
 

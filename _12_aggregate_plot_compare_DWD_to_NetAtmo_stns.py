@@ -39,7 +39,8 @@ import shutil
 import pandas as pd
 
 
-from _00_additional_functions import (resample_intersect_2_dfs)
+from _00_additional_functions import (resample_intersect_2_dfs,
+                                      select_convective_season)
 
 from _10_aggregate_plot_compare_2_DWD_stns import (plt_bar_plot_2_stns,
                                                    plt_scatter_plot_2_stns,
@@ -56,7 +57,7 @@ from b_get_data import HDF5
 
 path_to_ppt_hourly_netatmo_data = (
     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-    r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new_no_freezing.csv')
+    r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new_no_freezing_2.csv')
 assert os.path.exists(
     path_to_ppt_hourly_netatmo_data), 'wrong NETATMO Ppt file'
 
@@ -79,12 +80,14 @@ distance_matrix_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
                            r'\NetAtmo_BW\distance_mtx_in_m_NetAtmo_DWD.csv')
 assert os.path.exists(distance_matrix_df_file), 'wrong Distance MTX  file'
 
-# out_save_dir_orig = (
-#     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\cdf_plots_DWD_NetAtmo_hourly')
+out_save_dir_orig = (
+    r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\cdf_plots_DWD_NetAtmo_hourly')
 
 out_save_dir_orig = (
-    r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\cdf_plots_DWD_NetAtmo_5min')
+    r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\cdf_plots_DWD_NetAtmo_hourly_shifted_backward')
 
+out_save_dir_orig = (
+    r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\cdf_plots_DWD_NetAtmo_hourly_shifted_forward')
 if not os.path.exists(out_save_dir_orig):
     os.mkdir(out_save_dir_orig)
 
@@ -96,9 +99,18 @@ ppt_thrs_list = [0.5]
 
 max_ppt_thr = 100.
 date_fmt = '%Y-%m-%d %H:%M:%S'
+
 # till 1 day '5min', '10min', '15min', '30min',
 aggregation_frequencies = ['60min',
-                           '120min', '480min', '720min', '1440min']
+                           '120min', '480min',
+                           '720min', '1440min']
+
+select_summer_month = True
+winter_month = [10, 11, 12, 1, 2, 3]
+
+
+shift_netatmo_data_backward = False  # if True shift by - one hour
+shift_netatmo_data_forward = True  # if True shift by + one hour
 #==============================================================================
 #
 #==============================================================================
@@ -159,7 +171,18 @@ def compare_cdf_two_stns(netatmo_ppt_df_file, path_to_ppt_hdf_data,
 
                     if not os.path.exists(out_save_dir):
                         os.mkdir(out_save_dir)
+                    if select_summer_month:
+                        idf1 = select_convective_season(idf1, winter_month)
+                        idf2 = select_convective_season(idf2, winter_month)
+                    if shift_netatmo_data_backward:
+                        print('Shifting Netatmo dataframe by -1hour')
 
+                        idf1 = idf1.shift(periods=-1, freq='60min')
+                        # idf2 = idf2.shift(periods=1, freq='60min')
+                    if shift_netatmo_data_forward:
+                        print('Shifting Netatmo dataframe by +1hour')
+
+                        idf1 = idf1.shift(periods=1, freq='60min')
                     for tem_freq in aggregation_frequencies:
                         print('Aggregation is: ', tem_freq)
 
@@ -234,22 +257,22 @@ def compare_cdf_two_stns(netatmo_ppt_df_file, path_to_ppt_hdf_data,
                             print('empty df, moving to another station')
                             shutil.rmtree(out_save_dir, ignore_errors=True)
                             break
-                    if os.path.exists(out_save_dir):
-                        if (idf1.values.shape[0] > 1000 and
-                                idf1.values.shape[0] > 1000):
-
-                            ppt_thr = ppt_thrs_list[0]
-                            print('Testing for Ppt Threshold of', ppt_thr)
-
-                            for temp_freq in aggregation_frequencies:
-                                print('Time freq is', temp_freq)
-                                df_common1, df_common2 = resample_intersect_2_dfs(idf1,
-                                                                                  idf2,
-                                                                                  temp_freq)
-                                if (df_common1.values.shape[0] > 10 and
-                                        df_common2.values.shape[0] > 10):
-                                    print(
-                                        True, 'Plotting P0 and Contingency Tables')
+#                     if os.path.exists(out_save_dir):
+#                         if (idf1.values.shape[0] > 30 and
+#                                 idf1.values.shape[0] > 30):
+#
+#                             ppt_thr = ppt_thrs_list[0]
+#                             print('Testing for Ppt Threshold of', ppt_thr)
+#
+#                             for temp_freq in aggregation_frequencies:
+#                                 print('Time freq is', temp_freq)
+#                                 df_common1, df_common2 = resample_intersect_2_dfs(idf1,
+#                                                                                   idf2,
+#                                                                                   temp_freq)
+#                                 if (df_common1.values.shape[0] > 10 and
+#                                         df_common2.values.shape[0] > 10):
+#                                     print(
+# True, 'Plotting P0 and Contingency Tables')
 
 #                                     plot_p0_as_a_sequence_two_stns(
 #                                         stn_id,
