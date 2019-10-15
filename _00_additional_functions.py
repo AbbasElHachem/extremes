@@ -486,6 +486,35 @@ def select_df_within_period(df,  # original dataframe
 #==============================================================================
 
 
+def select_df_within_period_year_basis(df,  # original dataframe
+                                       start_day_of_year=91,  # start day april
+                                       end_day_of_year=288  # end day 15oktober
+                                       ):
+    """ 
+    Purpose: a function to select DF between two days, considering all years
+    --------
+
+    Keyword arguments:
+    ------------------
+        df: original dataframe
+        start: start day of wanted period (should be same format as df index)
+        end: end day of wanted period (should be same format as df index)
+    Return:
+    ------
+        DF between giver start and end date (could return also empty Dataframe)
+    """
+    df = df.copy()
+
+    mask = (df.index.dayofyear > start_day_of_year) & (
+        df.index.dayofyear <= end_day_of_year)
+    df_period = df.loc[mask]
+
+    return df_period
+#==============================================================================
+#
+#==============================================================================
+
+
 def resample_intersect_2_dfs(df1,  # first dataframe to resample
                              df2,  # second dataframe to resample
                              temp_freq  # temporal frequency for resampling

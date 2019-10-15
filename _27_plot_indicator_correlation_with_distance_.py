@@ -72,12 +72,12 @@ dwd_path_Acc = r'year_allyears_df_dwd_correlations'
 
 
 path_to_netatmo_gd_stns_file = data_dir_Netamto_dfs / \
-    r'keep_stns_all_neighbor_95_per_60min_s0.csv'
+    r'keep_stns_all_neighbor_99_0_per_60min_s0.csv'
 
 #assert path_to_netatmo_gd_stns_file.exists(), 'wrong netatmo good stns file'
 
 # def percentage threshold, time frequency and data source
-percent = '99'
+percent = '98_0'
 time_freq = '1440min'  # '720min', 1440min, '480min', '360min', '180min', '120min'
 # '60min'
 data_source0 = 'Netatmo'  # 'DWD'  # 'Netatmo'  #   # reference station 'Netatmo'
@@ -140,10 +140,14 @@ if data_source0 == 'Netatmo' and data_source == 'netatmo':
     # for Netatmo stations neighbors start from 0 !
     df0 = gen_path_df_file(data_dir_Netamto_netatmo_dfs,
                            netatmo_path_acc, time_freq,
-                           data_source, percent, 0)
+                           data_source, percent, 0,
+                           use_filtered_data=use_filtered_data,
+                           filter_percent=filtered_percent)
     df1 = gen_path_df_file(data_dir_Netamto_netatmo_dfs,
                            netatmo_path_acc, time_freq,
-                           data_source, percent, 1)
+                           data_source, percent, 1,
+                           use_filtered_data=use_filtered_data,
+                           filter_percent=filtered_percent)
 #     df2 = gen_path_df_file(data_dir_Netamto_netatmo_dfs,
 #                            netatmo_path_acc, time_freq,
 #                            data_source, percent, 2)
@@ -231,13 +235,15 @@ plt.tight_layout()
 
 if data_source == 'dwd':
     data_source = 'DWD'
+if use_filtered_data:
+    save_acc = save_acc + 'filtered_' + str(filtered_percent)
+
 plt.title('%s %s stations, Temporal Frequency %s\n Indicator correlation'
           ' with distance for upper %s percent of data values '
           % (data_source0, data_source, time_freq, percent))
 plt.savefig(save_dir /
-            (r'_%s_%s_%s_percent_indic_corr_freq_%s_%s_filtered_%s.png'
-             % (data_source0, data_source, percent, time_freq, save_acc,
-                 filtered_percent)),
+            (r'_%s_%s_%s_percent_indic_corr_freq_%s_%s_.png'
+             % (data_source0, data_source, percent, time_freq, save_acc)),
             frameon=True, papertype='a4',
             bbox_inches='tight', pad_inches=.2)
 plt.close()

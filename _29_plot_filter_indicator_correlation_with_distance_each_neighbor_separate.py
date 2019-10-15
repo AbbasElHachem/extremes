@@ -65,7 +65,7 @@ netatmo_path_acc = r'year_allyears_df_comparing_correlations_max_sep_dist_30000_
 dwd_path_Acc = r'year_allyears_df_dwd_correlations'
 
 # def percentage threshold, time frequency and data source
-percent = '95'
+percent = '98_0'
 time_freq = '60min'
 
 data_source0 = 'Netatmo'  # reference station 'Netatmo'
@@ -73,6 +73,8 @@ data_source0 = 'Netatmo'  # reference station 'Netatmo'
 data_source = 'dwd'  # compare to station 'netatmo'
 
 remove_upper_limit = False
+
+plot_dwd_on_top = True
 #==============================================================================
 
 #==============================================================================
@@ -95,13 +97,14 @@ if data_source0 == 'Netatmo':
 #                            data_source, percent, 7)
     save_dir = data_dir_Netamto_dfs
 if data_source0 == 'DWD':
+    percent_dwd = percent.replace('_0', '')
     # for DWD stations neighbors start from 1 not 0 !
     df0 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
-                           data_source, percent, 1)
+                           data_source, percent_dwd, 1)
     df1 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
-                           data_source, percent, 2)
+                           data_source, percent_dwd, 2)
     df2 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
-                           data_source, percent, 3)
+                           data_source, percent_dwd, 3)
 #     df3 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
 #                            data_source, percent, 4)
 #     df4 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
@@ -114,6 +117,26 @@ if data_source0 == 'DWD':
 #                            data_source, percent, 8)
     save_dir = data_dir_DWD_dfs
 
+if plot_dwd_on_top:
+    percent_dwd = percent.replace('_0', '')
+    # for DWD stations neighbors start from 1 not 0 !
+    df0_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+                               data_source, percent_dwd, 1)
+    df1_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+                               data_source, percent_dwd, 2)
+    df2_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+                               data_source, percent_dwd, 3)
+#     df3 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+#                            data_source, percent, 4)
+#     df4 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+#                            data_source, percent, 5)
+#     df5 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+#                            data_source, percent, 6)
+#     df6 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+#                            data_source, percent, 7)
+#     df7 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+#                            data_source, percent, 8)
+
 #==============================================================================
 
 
@@ -121,42 +144,49 @@ s0, x0, y0, in_df0 = read_filter_df_corr_return_stns_x_y_vals(df0)
 s1, x1, y1, in_df1 = read_filter_df_corr_return_stns_x_y_vals(df1)
 
 # remove above 20km
-# x1 = x1[x1 <= 20000]
-# s1 = s1[x1]
-# y1 = y1[x1 <= 20000]
-# in_df1 = in_df1[x1 < 20000]
+x1 = x1[np.where(0 < x1) and np.where(x1 <= 20000)]
+s1 = s1[np.where(0 < x1) and np.where(x1 <= 20000)]
+y1 = y1[np.where(0 < x1) and np.where(x1 <= 20000)]
+in_df1 = in_df1.loc[in_df1.index.intersection(s1), :]
+
 # s2, x2, y2, in_df2 = read_filter_df_corr_return_stns_x_y_vals(df2)
 # s3, x3, y3, in_df3 = read_filter_df_corr_return_stns_x_y_vals(df3)
 # s4, x4, y4, in_df4 = read_filter_df_corr_return_stns_x_y_vals(df4)
 # s5, x5, y5, in_df5 = read_filter_df_corr_return_stns_x_y_vals(df5)
 # s6, x6, y6, in_df6 = read_filter_df_corr_return_stns_x_y_vals(df6)
 # s7, x7, y7, in_df7 = read_filter_df_corr_return_stns_x_y_vals(df7)
+
+if plot_dwd_on_top:
+    s0_dwd, x0_dwd, y0_dwd, in_df0_dwd = read_filter_df_corr_return_stns_x_y_vals(
+        df0_dwd)
+    s1_dwd, x1_dwd, y1_dwd, in_df1_dwd = read_filter_df_corr_return_stns_x_y_vals(
+        df1_dwd)
 #==============================================================================
 
 # x0, y0, s0 = remove_all_low_corr_short_dist(x0, y0, 5e3, 0.6, s0)
 
-if percent == '95':
+if percent == '95_0':
     x0_gd_corr, y0_gd_corr, s0_gd_corr, df0_gd_corr = remove_all_low_corr_short_dist(
         x0, y0, 5e3, 0.5, s0, in_df0)
 
     x1_gd_corr, y1_gd_corr, s1_gd_corr, df1_gd_corr = remove_all_low_corr_short_dist(
         x1, y1, 5e3, 0.5, s1, in_df1)
 
-if percent == '97':
+if percent == '97_0':
     x0_gd_corr, y0_gd_corr, s0_gd_corr, df0_gd_corr = remove_all_low_corr_short_dist(
         x0, y0, 5e3, 0.5, s0, in_df0)
 
     x1_gd_corr, y1_gd_corr, s1_gd_corr, df1_gd_corr = remove_all_low_corr_short_dist(
         x1, y1, 5e3, 0.5, s1, in_df1)
 
-if percent == '98':
+if percent == '98_0':
     x0_gd_corr, y0_gd_corr, s0_gd_corr, df0_gd_corr = remove_all_low_corr_short_dist(
         x0, y0, 5e3, 0.4, s0, in_df0)
 
     x1_gd_corr, y1_gd_corr, s1_gd_corr, df1_gd_corr = remove_all_low_corr_short_dist(
         x1, y1, 5e3, 0.4, s1, in_df1)
 
-if percent == '99':
+if percent == '99_0':
     x0_gd_corr, y0_gd_corr, s0_gd_corr, df0_gd_corr = remove_all_low_corr_short_dist(
         x0, y0, 5e3, 0.25, s0, in_df0)
 
@@ -186,34 +216,34 @@ if percent == '99':
 (y_fitted_shifted0, xvals_below_curve0,
  yvals_below_curve0, xvals_above_curve0,
  yvals_above_curve0, stnbelow0, stnabove0) = fit_curve_get_vals_below_curve(
-    x=x0_gd_corr, y=y0_gd_corr, func=func, stns=s0_gd_corr, shift_per=0.0)
+    x=x0_gd_corr, y=y0_gd_corr, func=func, stns=s0_gd_corr, shift_per=0.2)
 
 (y_fitted_shifted1, xvals_below_curve1,
  yvals_below_curve1, xvals_above_curve1,
  yvals_above_curve1, stnbelow1, stnabove1) = fit_curve_get_vals_below_curve(
     x=x1_gd_corr, y=y1_gd_corr, func=func, stns=s1_gd_corr, shift_per=0.001)
 
-if percent == '98':
+if percent == '98_0':
     (y_fitted_shifted0, xvals_below_curve0,
      yvals_below_curve0, xvals_above_curve0,
      yvals_above_curve0, stnbelow0, stnabove0) = fit_curve_get_vals_below_curve(
-        x=x0_gd_corr, y=y0_gd_corr, func=func, stns=s0_gd_corr, shift_per=0.1)
+        x=x0_gd_corr, y=y0_gd_corr, func=func, stns=s0_gd_corr, shift_per=0.15)
 
     (y_fitted_shifted1, xvals_below_curve1,
      yvals_below_curve1, xvals_above_curve1,
      yvals_above_curve1, stnbelow1, stnabove1) = fit_curve_get_vals_below_curve(
-        x=x1_gd_corr, y=y1_gd_corr, func=func, stns=s1_gd_corr, shift_per=0.025)
+        x=x1_gd_corr, y=y1_gd_corr, func=func, stns=s1_gd_corr, shift_per=0.05)
 
-if percent == '99':
+if percent == '99_0':
     (y_fitted_shifted0, xvals_below_curve0,
      yvals_below_curve0, xvals_above_curve0,
      yvals_above_curve0, stnbelow0, stnabove0) = fit_curve_get_vals_below_curve(
-        x=x0_gd_corr, y=y0_gd_corr, func=func, stns=s0_gd_corr, shift_per=0.1)
+        x=x0_gd_corr, y=y0_gd_corr, func=func, stns=s0_gd_corr, shift_per=0.2)
 
     (y_fitted_shifted1, xvals_below_curve1,
      yvals_below_curve1, xvals_above_curve1,
      yvals_above_curve1, stnbelow1, stnabove1) = fit_curve_get_vals_below_curve(
-        x=x1_gd_corr, y=y1_gd_corr, func=func, stns=s1_gd_corr, shift_per=0.01)
+        x=x1_gd_corr, y=y1_gd_corr, func=func, stns=s1_gd_corr, shift_per=0.05)
 # (y_fitted_shifted2, xvals_below_curve2,
 #  yvals_below_curve2, xvals_above_curve2,
 #  yvals_above_curve2, stnbelow2, stnabove2) = fit_curve_get_vals_below_curve(
@@ -354,19 +384,19 @@ if remove_upper_limit:
 # # Lower Limit
 # #==============================================================================
 
-if percent == '95':
+if percent == '95_0':
     lim1 = 0.5
     lim2 = 0.5
 
-if percent == '97':
+if percent == '97_0':
     lim1 = 0.45
     lim2 = 0.42
 
-if percent == '98':
-    lim1 = 0.4
+if percent == '98_0':
+    lim1 = 0.42
     lim2 = 0.4
 
-if percent == '99':
+if percent == '99_0':
     lim1 = 0.3
     lim2 = 0.3
 
@@ -509,26 +539,36 @@ x1_abv_2 = in_df1.loc[stns_keep_all_final,
 y1_abv_2 = in_df1.loc[stns_keep_all_final,
                       'Bool_Spearman_Correlation'].dropna().values
 
+# x1 = x1_abv_2[np.where(0 < x1_abv_2) and np.where(x1_abv_2 <= 20000)]
+# s1 = s1[np.where(0 < x1_abv_2) and np.where(x1_abv_2 <= 20000)]
+# y1 = y1[np.where(0 < x1_abv_2) and np.where(x1_abv_2 <= 20000)]
+# in_df1 = in_df1.loc[in_df1.index.intersection(s1), :]
+
+# stns_keep_all_final = np.intersect1d(
+#     stns_keep_all_final, s1)
+
 # idx_remove0 = []
 # for ix0, yv0 in enumerate(y0_abv_2):
 #
-#     if yv0 <= lim1:
+#     if yv0 <= y0_dwd.min():
 #         # print(ix0)
 #         idx_remove0.append(ix0)
-# #         try:
-#
+#         try:
+
 # x0_abv_2_new = np.delete(x0_abv_2, idx_remove0)
 # y0_abv_2_new = np.delete(y0_abv_2, idx_remove0)
 # stns_keep_all_final_new = np.delete(stns_keep_all_final, idx_remove0)
-#
-# #         except Exception as msg:
-# #             print(msg)
-# #             continue
-#
+# #
+# # #         except Exception as msg:
+# x1_abv_2 = in_df1.loc[stns_keep_all_final_new,
+#                       'Distance to neighbor'].dropna().values
+# y1_abv_2 = in_df1.loc[stns_keep_all_final_new,
+#                       'Bool_Spearman_Correlation'].dropna().values
+# #
 # idx_remove1 = []
 # for ix, yv1 in enumerate(y1_abv_2):
 #
-#     if yv1 <= lim2:
+#     if yv1 <= y1_dwd.min():
 #         # print(ix)
 #         idx_remove1.append(ix)
 # #         try:
@@ -538,17 +578,22 @@ y1_abv_2 = in_df1.loc[stns_keep_all_final,
 # #         except Exception as msg:
 #             print(msg)
 #             continue
-print(stns_keep_all_final.shape)
+# print(stns_keep_all_final_new.shape)
+#
+# x0_abv_2 = in_df0.loc[stns_keep_all_final_new,
+#                       'Distance to neighbor'].dropna().values
+# y0_abv_2 = in_df0.loc[stns_keep_all_final_new,
+#                       'Bool_Spearman_Correlation'].dropna().values
 
 # stns_keep_all_final = stn0_below_22
 stns_keep_al_sr = pd.DataFrame(data=stns_keep_all_final,
                                columns=['Stations'])
 
-# stns_keep_al_sr.to_csv(
-#     (save_dir /
-#         (r'keep_stns_all_neighbor_%s_per_%s_s0.csv'
-#          % (percent, time_freq))),
-#     sep=';')
+stns_keep_al_sr.to_csv(
+    (save_dir /
+        (r'keep_stns_all_neighbor_%s_per_%s_s0_.csv'
+         % (percent, time_freq))),
+    sep=';')
 
 # x0_abv_2_new = in_df0.loc[
 #     in_df0.index.intersection(stns_keep_all_final_new),
@@ -681,6 +726,17 @@ plt.scatter(x1_abv_2, y1_abv_2, c='b', alpha=0.5,
 
 # plt.show()
 
+if plot_dwd_on_top:
+    plt.scatter(x0_dwd, y0_dwd, c='k', alpha=0.65,
+                marker='D', label=('DWD First Neighbor Stn nbr %d'
+                                   % (y0_dwd.shape[0])),
+                s=marker_size_abv_curve)
+    plt.scatter(x1_dwd, y1_dwd, c='k', alpha=0.65,
+                marker='X', label=('DWD Second Neighbor Stn nbr %d '
+                                   % (y1_dwd.shape[0])),
+                s=marker_size_abv_curve)
+
+
 plt.xlim([0, max([x0_abv.max(), x1_gd_corr.max()]) + 1000])
 plt.xticks(np.arange(0, x1_gd_corr.max() + 1000, 5000))
 plt.ylim([-0.1, 1.1])
@@ -694,7 +750,7 @@ plt.title('Keeping %s %d stations: Indicator correlation with distance'
           % (data_source0, stns_keep_all_final.shape[0],
               percent, time_freq))
 plt.savefig(save_dir /  # filtered_2_neighbors_data
-            (r'_%s_%s_%s_percent_indic_corr_freq_%s_giltered_.png'
+            (r'_%s_%s_%s_percent_indic_corr_freq_%s_filtered_0.png'
              % (data_source0, data_source, percent, time_freq)),
             frameon=True, papertype='a4',
             bbox_inches='tight', pad_inches=.2)

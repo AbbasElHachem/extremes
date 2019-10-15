@@ -139,7 +139,7 @@ assert os.path.exists(path_to_netatmo_coords_df_file), 'wrong DWD coords file'
 path_to_netatmo_gd_stns_file = (
     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes"
     r"\plots_NetAtmo_ppt_DWD_ppt_correlation_"
-    r"\keep_stns_all_neighbor_99_per_60min_s0.csv")
+    r"\keep_stns_all_neighbor_99_0_per_60min_s0.csv")
 #assert os.path.exists(path_to_netatmo_gd_stns_file), 'wrong netatmo stns file'
 
 path_to_shpfile = (r'F:\data_from_exchange\Netatmo'
@@ -169,14 +169,13 @@ min_dist_thr_ppt = 3 * 1e4  # 5000  # m
 max_ppt_thr = 90.  # ppt above this value are not considered
 
 # only highest x% of the values are selected
-lower_percentile_val_lst = [99.5]  # [80, 85, 90, 95, 99]
+lower_percentile_val_lst = [97., 98., 99., 99.5]  # [80, 85, 90, 95, 99]
 
 
 # ['10min', '60min', '120min', '480min', '720min', '1440min']
-aggregation_frequencies = ['60min', '120min',
-                           '180min', '360min',
-                           '480min', '720min',
-                           '1440min']
+aggregation_frequencies = ['60min', '120min', '180min', '360min',
+                           '720min', '1440min']
+
 # temporal aggregation of df
 
 # [0, 1, 2, 3, 4]  # refers to DWD neighbot (0=first)
@@ -467,10 +466,11 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
     df_results_correlations.to_csv(
         os.path.join(out_save_dir_orig,
                      'year_allyears_df_comparing_correlations_max_sep_dist_%d_'
-                     'freq_%s_dwd_netatmo_upper_%d_percent_data_considered'
-                     '_neighbor_%d_filtered_99_2.csv'  # filtered_95
+                     'freq_%s_dwd_netatmo_upper_%s_percent_data_considered'
+                     '_neighbor_%d_filtered_99.csv'  # filtered_95
                      % (min_dist_thr_ppt, temp_freq_resample,
-                        val_thr_percent, neighbor_to_chose)),
+                        str(val_thr_percent).replace('.', '_'),
+                         neighbor_to_chose)),
         sep=';')
 
     return df_results_correlations
@@ -500,10 +500,11 @@ if __name__ == '__main__':
                 path_to_df_correlations = os.path.join(
                     out_save_dir_orig,
                     'year_allyears_df_comparing_correlations_max_sep_dist_%d_'
-                    'freq_%s_dwd_netatmo_upper_%d_percent_data_considered'
-                    '_neighbor_%d_filtered_99_2.csv'  # filtered_95
+                    'freq_%s_dwd_netatmo_upper_%s_percent_data_considered'
+                    '_neighbor_%d_filtered_99.csv'  # filtered_95
                     % (min_dist_thr_ppt, temp_freq,
-                        lower_percentile_val, neighbor_to_chose))
+                        str(lower_percentile_val).replace('.', '_'),
+                       neighbor_to_chose))
 
                 if (not os.path.exists(path_to_df_correlations)):
 

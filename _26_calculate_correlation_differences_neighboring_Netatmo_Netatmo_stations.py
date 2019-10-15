@@ -95,13 +95,13 @@ rcParams['axes.labelpad'] = 13
 # for getting station names
 path_to_ppt_netatmo_data_csv = (
     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-    r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_.csv')
+    r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new_no_freezing_2.csv')
 assert os.path.exists(path_to_ppt_netatmo_data_csv), 'wrong NETATMO Ppt file'
 
 # for reading ppt data station by station
 path_to_ppt_netatmo_data_feather = (
     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-    r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_.fk')
+    r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new_no_freezing_2.fk')
 assert os.path.exists(
     path_to_ppt_netatmo_data_feather), 'wrong NETATMO Ppt file'
 
@@ -126,7 +126,7 @@ assert os.path.exists(path_to_netatmo_coords_df_file), 'wrong DWD coords file'
 path_to_netatmo_gd_stns_file = (
     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes"
     r"\plots_NetAtmo_ppt_DWD_ppt_correlation_"
-    r"\keep_stns_1st_neighbor_95_per_60min_.csv")
+    r"\keep_stns_all_neighbor_99_0_per_60min_s0.csv")
 assert os.path.exists(path_to_netatmo_gd_stns_file), 'wrong netatmo stns file'
 
 path_to_shpfile = (r'F:\data_from_exchange\Netatmo'
@@ -150,13 +150,13 @@ x_col_name = 'lon'
 y_col_name = 'lat'
 
 # min distance threshold used for selecting neighbours
-min_dist_thr_ppt = 500000  # 5000  # m
+min_dist_thr_ppt = 30000  # 5000  # m
 
 # threshold for max ppt value per hour
 max_ppt_thr = 100.  # ppt above this value are not considered
 
 
-lower_percentile_val_lst = [90]  # ,95, 85, 99]  # 80, 85, 90,, 99
+lower_percentile_val_lst = [95, 97]  # ,95, 85, 99]  # 80, 85, 90,, 99
 # only highest x% of the values are selected
 
 # aggregation_frequencies = ['60min', '720min', '1440min']
@@ -164,14 +164,14 @@ lower_percentile_val_lst = [90]  # ,95, 85, 99]  # 80, 85, 90,, 99
 # ,'60min', '120min', '480min', '720min', '1440min']
 aggregation_frequencies = ['60min']
 
-neighbors_to_chose_lst = [0]  # , 1, 2, 3, 4 refers to neighbor (0=first)
+neighbors_to_chose_lst = [0, 1, 2]  # , 1, 2, 3, 4 refers to neighbor (0=first)
 
 # this is used to keep only data where month is not in this list
-not_convective_season = [10, 11, 12, 1, 2, 3, 4]  # oct till april
+not_convective_season = []  # oct till april
 
-min_req_ppt_vals = 30  # minimum required ppt values for a station
+min_req_ppt_vals = 30 * 2 * 24  # minimum required ppt values for a station
 
-plot_figures = True
+plot_figures = False
 
 date_fmt = '%Y-%m-%d %H:%M:%S'
 
@@ -221,7 +221,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
         distance_matrix_netatmo_ppt_netatmo_ppt, sep=';', index_col=0)
 
     # read netatmo ppt coords df (for plotting)
-    in_netatmo_df_coords = pd.read_csv(netatmo_ppt_coords_df, sep=',',
+    in_netatmo_df_coords = pd.read_csv(netatmo_ppt_coords_df, sep=';',
                                        index_col=0, engine='c')
 
     # read netatmo good stns df
@@ -229,6 +229,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                              sep=';', header=None)
     good_stns = list(in_df_stns.values.ravel())
 
+    #stns_ppt_ids = good_stns
     print('\n######\n done reading all dfs \n#######\n')
     # create df to append results of comparing two stns
     df_results_correlations = pd.DataFrame(index=stns_ppt_ids)
@@ -300,7 +301,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                     month_lst=not_convective_season)
 
                 df_netatmo2.dropna(axis=0, inplace=True)
-                print('\n********\n Second DWD Stn Id is', stn_2_netatmo,
+                print('\n********\n Second Netatmo Stn Id is', stn_2_netatmo,
                       'distance is ', min_dist_ppt_netatmo)
 
                 # intersect dwd and netatmo ppt data
@@ -447,7 +448,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
         os.path.join(out_save_dir_orig,
                      'year_allyears_df_comparing_correlations_max_sep_dist_%d_'
                      'freq_%s_netatmo_netatmo_upper_%d_percent_data_considered'
-                     '_neighbor_%d_.csv'
+                     '_neighbor_%d_filtered_99.csv'  # filtered_99_
                      % (min_dist_thr_ppt, temp_freq_resample,
                         val_thr_percent, neighbor_to_chose)),
         sep=';')
@@ -560,7 +561,7 @@ if __name__ == '__main__':
                     out_save_dir_orig,
                     'year_allyears_df_comparing_correlations_max_sep_dist_%d_'
                     'freq_%s_netatmo_netatmo_upper_%d_percent_data_considered'
-                    '_neighbor_%d_.csv'
+                    '_neighbor_%d_filtered_99.csv'  # filtered_99_
                     % (min_dist_thr_ppt, temp_freq, lower_percentile_val,
                        neighbor_to_chose))
 

@@ -55,7 +55,7 @@ for i in range(12):
 
                 original_quantile = df_dwd_edf.loc[event_date, stn_]
 
-                if original_quantile >= 0.6:
+                if original_quantile >= 0.9:
                     df_compare.loc[event_date,
                                    'original_quantile'] = original_quantile
                     df_compare.loc[event_date,
@@ -102,8 +102,11 @@ for i in range(12):
             ax = fig.add_subplot(111)
 
             # plot 45 deg line
-            _min = min(values_x.min(), values_dwd.min())
-            _max = max(values_x.max(), values_dwd.max())
+            #_min = min(values_x.min(), values_dwd.min())
+            #_max = max(values_x.max(), values_dwd.max())
+
+            _min = 0.88
+            _max = 1
 
             ax.plot([_min, _max], [_min, _max],
                     c='k', linestyle='--', alpha=0.4)
@@ -111,7 +114,8 @@ for i in range(12):
             # set plot limit
             ax.set_xlim(_min - 0.01, 1.01)
             ax.set_ylim(_min - 0.01, 1.01)
-
+            ax.set_xticks([0.9, 0.92, 0.95, 0.97, 1])
+            ax.set_yticks([0.9, 0.92, 0.95, 0.97, 1])
             ax.scatter(values_x,
                        values_dwd,
                        alpha=.8,
@@ -136,44 +140,44 @@ for i in range(12):
             plt.close()
 
             ###################################################################
-
-            fig = plt.figure(figsize=(24, 12), dpi=150)
-
-            ax = fig.add_subplot(111)
-
-            _min = min(values_x.min(), values_netatmo.min())
-            _max = max(values_x.max(), values_netatmo.max())
-            ax.plot([_min, _max], [_min, _max],
-                    c='k', linestyle='--', alpha=0.4)
-
-            # set plot limit
-            ax.set_xlim(_min - 0.01, 1.01)
-            ax.set_ylim(_min - 0.01, 1.01)
-
-            ax.scatter(values_x,
-                       values_netatmo,
-                       alpha=.8,
-                       c='b',  # colors_arr,
-                       s=15,
-                       marker='d',
-                       # cmap=plt.get_cmap('viridis'),
-                       label='Netatmo Interpolated %d Events' % values_netatmo.shape[0])
-
-            ax.set_title('Observed and Interpolated Quantiles for Daily Extreme Events \n DWD Station %s \n'
-                         'Pearson Cor=%0.3f; Spearman Cor=%0.3f'
-                         % (stn_, corr_netatmo, rho_netatmo))
-            ax.grid(alpha=0.25)
-
-            # ax.set_xlim([-0.1, max(interpolated_vals.values.max(),
-            #                       ppt_vals_season.max()) + 2])
-            ax.set_xlabel('Original Quantiles')
-            ax.legend(loc='lower right')
-            ax.set_ylabel('Interpolated Quantiles')
-
-            plt.savefig((r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\oridinary_kriging_compare_DWD_Netatmo'
-                         r'\oberserved_vs_interpolated_quantiles_extreme_daily_events_stn_%s_netatmo.png' % (stn_)),
-                        frameon=True, papertype='a4', bbox_inches='tight', pad_inches=.2)
-            plt.close()
+#
+#             fig = plt.figure(figsize=(24, 12), dpi=150)
+#
+#             ax = fig.add_subplot(111)
+#
+#             _min = min(values_x.min(), values_netatmo.min())
+#             _max = max(values_x.max(), values_netatmo.max())
+#             ax.plot([_min, _max], [_min, _max],
+#                     c='k', linestyle='--', alpha=0.4)
+#
+#             # set plot limit
+#             ax.set_xlim(_min - 0.01, 1.01)
+#             ax.set_ylim(_min - 0.01, 1.01)
+#
+#             ax.scatter(values_x,
+#                        values_netatmo,
+#                        alpha=.8,
+#                        c='b',  # colors_arr,
+#                        s=15,
+#                        marker='d',
+#                        # cmap=plt.get_cmap('viridis'),
+#                        label='Netatmo Interpolated %d Events' % values_netatmo.shape[0])
+#
+#             ax.set_title('Observed and Interpolated Quantiles for Daily Extreme Events \n DWD Station %s \n'
+#                          'Pearson Cor=%0.3f; Spearman Cor=%0.3f'
+#                          % (stn_, corr_netatmo, rho_netatmo))
+#             ax.grid(alpha=0.25)
+#
+#             # ax.set_xlim([-0.1, max(interpolated_vals.values.max(),
+#             #                       ppt_vals_season.max()) + 2])
+#             ax.set_xlabel('Original Quantiles')
+#             ax.legend(loc='lower right')
+#             ax.set_ylabel('Interpolated Quantiles')
+#
+#             plt.savefig((r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\oridinary_kriging_compare_DWD_Netatmo'
+#                          r'\oberserved_vs_interpolated_quantiles_extreme_daily_events_stn_%s_netatmo.png' % (stn_)),
+#                         frameon=True, papertype='a4', bbox_inches='tight', pad_inches=.2)
+#             plt.close()
 
             ###################################################################
 
@@ -181,10 +185,17 @@ for i in range(12):
 
             ax = fig.add_subplot(111)
 
-            _min = min(values_x.min(), values_netatmo_dwd.min())
-            _max = max(values_x.max(), values_netatmo_dwd.max())
+            _min = 0.88
+            _max = 1
+
             ax.plot([_min, _max], [_min, _max],
                     c='k', linestyle='--', alpha=0.4)
+
+            # set plot limit
+            ax.set_xlim(_min - 0.01, 1.01)
+            ax.set_ylim(_min - 0.01, 1.01)
+            ax.set_xticks([0.9, 0.92, 0.95, 0.97, 1])
+            ax.set_yticks([0.9, 0.92, 0.95, 0.97, 1])
 
             ax.scatter(values_x,
                        values_netatmo_dwd,
