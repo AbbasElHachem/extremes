@@ -156,13 +156,13 @@ min_dist_thr_ppt = 30000  # 5000  # m
 max_ppt_thr = 100.  # ppt above this value are not considered
 
 
-lower_percentile_val_lst = [95, 97]  # ,95, 85, 99]  # 80, 85, 90,, 99
+lower_percentile_val_lst = [97, 98, 99]  # ,95, 85, 99]  # 80, 85, 90,, 99
 # only highest x% of the values are selected
 
 # aggregation_frequencies = ['60min', '720min', '1440min']
 # ['60min', '120min', '480min', '720min', '1440min']
 # ,'60min', '120min', '480min', '720min', '1440min']
-aggregation_frequencies = ['60min']
+aggregation_frequencies = ['60min', '120min', '360min', '720min', '1440min']
 
 neighbors_to_chose_lst = [0, 1, 2]  # , 1, 2, 3, 4 refers to neighbor (0=first)
 
@@ -229,7 +229,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                              sep=';', header=None)
     good_stns = list(in_df_stns.values.ravel())
 
-    #stns_ppt_ids = good_stns
+#     stns_ppt_ids = good_stns
     print('\n######\n done reading all dfs \n#######\n')
     # create df to append results of comparing two stns
     df_results_correlations = pd.DataFrame(index=stns_ppt_ids)

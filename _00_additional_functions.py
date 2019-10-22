@@ -604,20 +604,20 @@ def calculate_probab_ppt_below_thr(ppt_data, ppt_thr):
 #==============================================================================
 
 # both correct
-def build_edf_fr_vals(ppt_data):
-    # Construct EDF, need to check if it works
-    """ construct empirical distribution function given data values """
-    data_sorted = np.sort(ppt_data, axis=0)[::-1]
-    x0 = np.squeeze(data_sorted)[::-1]
-    y0 = (np.arange(data_sorted.size) / len(data_sorted))
-    return x0, y0
-
-
-# def build_edf_fr_vals(data):
+# def build_edf_fr_vals(ppt_data):
+#     # Construct EDF, need to check if it works
 #     """ construct empirical distribution function given data values """
-#     from statsmodels.distributions.empirical_distribution import ECDF
-#     cdf = ECDF(data)
-#     return cdf.x, cdf.y
+#     data_sorted = np.sort(ppt_data, axis=0)[::-1]
+#     x0 = np.squeeze(data_sorted)[::-1]
+#     y0 = (np.arange(data_sorted.size) / len(data_sorted))
+#     return x0, y0
+
+#
+def build_edf_fr_vals(data):
+    """ construct empirical distribution function given data values """
+    from statsmodels.distributions.empirical_distribution import ECDF
+    cdf = ECDF(data)
+    return cdf.x, cdf.y
 #==============================================================================
 #
 #==============================================================================
@@ -626,13 +626,13 @@ def build_edf_fr_vals(ppt_data):
 def get_cdf_part_abv_thr(ppt_data, ppt_thr):
     """ select part of the CDF that is abv ppt thr """
 
-    p0 = calculate_probab_ppt_below_thr(ppt_data, ppt_thr)
+    #p0 = calculate_probab_ppt_below_thr(ppt_data, ppt_thr)
 
     x0, y0 = build_edf_fr_vals(ppt_data)
     x_abv_thr = x0[x0 > ppt_thr]
     y_abv_thr = y0[np.where(x0 > ppt_thr)]
 
-    assert y_abv_thr[0] == p0, 'something is wrong with probability cal'
+    #assert y_abv_thr[0] == p0, 'something is wrong with probability cal'
 
     return x_abv_thr, y_abv_thr
 #==============================================================================
@@ -1440,6 +1440,26 @@ def remove_all_low_corr_short_dist(x, y, xthr, ythr, stns, df,
 
     # assert np.isnan(x_gd_corr).sum() == 0, 'nans in data'
     return x_gd_corr, y_gd_corr, s_gd_corr, df_gd_corr
+#==============================================================================
+#
+#==============================================================================
+
+
+def chunks(l, n):
+    """Yield successive n-sized chunks from l."""
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
+
+#==============================================================================
+#
+#==============================================================================
+
+
+def find_nearest(array, value):
+    ''' given a value, find nearest one to it in original data array'''
+    array = np.asarray(array)
+    idx = (np.abs(array - value)).argmin()
+    return array[idx]
 #==============================================================================
 #
 #==============================================================================

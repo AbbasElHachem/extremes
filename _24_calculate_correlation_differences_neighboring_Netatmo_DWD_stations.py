@@ -116,7 +116,8 @@ assert os.path.exists(
 
 # HOURLY DATA
 path_to_ppt_dwd_data = (
-    r"F:\download_DWD_data_recent\all_dwd_hourly_ppt_data_combined_2014_2019_.fk")
+    r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
+    r"\NetAtmo_BW\all_dwd_hourly_ppt_data_combined_2014_2019_.fk")
 assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
 
 # 10Min DATA
@@ -145,7 +146,7 @@ path_to_netatmo_gd_stns_file = (
 path_to_shpfile = (r'F:\data_from_exchange\Netatmo'
                    r'\Landesgrenze_ETRS89\Landesgrenze_10000_ETRS89_lon_lat.shp')
 
-assert os.path.exists(path_to_shpfile), 'wrong shapefile path'
+# assert os.path.exists(path_to_shpfile), 'wrong shapefile path'
 
 out_save_dir_orig = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
                      r'\plots_NetAtmo_ppt_DWD_ppt_correlation_')
@@ -252,8 +253,8 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
 
     in_df_stns = pd.read_csv(path_netatmo_gd_stns, index_col=0,
                              sep=';')
-    good_stns = list(in_df_stns.values.ravel())
-    stns_ppt_ids = good_stns
+    # good_stns = list(in_df_stns.values.ravel())
+    # stns_ppt_ids = good_stns
 
     print('\n######\n done reading all dfs \n#######\n')
     # create df to append results of comparing two stns
@@ -402,15 +403,19 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                         print('\n****transform values to booleans*****\n')
 
                         df_netatmo_cmn_Bool = (
-                            df_netatmo_cmn > netatmo_ppt_thr_per).astype(int)
+                            df_netatmo_cmn >= netatmo_ppt_thr_per).astype(int)
                         df_dwd_cmn_Bool = (
-                            df_dwd_cmn > dwd_ppt_thr_per).astype(int)
+                            df_dwd_cmn >= dwd_ppt_thr_per).astype(int)
 
                         # calculate spearman correlations of booleans 1, 0
 
-                        bool_spr_corr = np.round(
-                            spr(df_dwd_cmn_Bool.values.ravel(),
-                                df_netatmo_cmn_Bool.values.ravel())[0], 2)
+                        bool_pears_corr = np.round(
+                            pears(df_dwd_cmn_Bool.values.ravel(),
+                                  df_netatmo_cmn_Bool.values.ravel())[0], 2)
+
+#                         bool_spr_corr = np.round(
+#                             spr(df_dwd_cmn_Bool.values.ravel(),
+#                                 df_netatmo_cmn_Bool.values.ravel())[0], 2)
 
                         #======================================================
                         # append the result to df_correlations, for each stn
@@ -447,7 +452,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
 
                         df_results_correlations.loc[
                             ppt_stn_id,
-                            'Bool_Spearman_Correlation'] = bool_spr_corr
+                            'Bool_Spearman_Correlation'] = bool_pears_corr
 
                         print('\n********\n ADDED DATA TO DF RESULTS')
                     else:
@@ -465,9 +470,9 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
     df_results_correlations.dropna(how='all', inplace=True)
     df_results_correlations.to_csv(
         os.path.join(out_save_dir_orig,
-                     'year_allyears_df_comparing_correlations_max_sep_dist_%d_'
+                     'pearson_year_allyears_df_comparing_correlations_max_sep_dist_%d_'
                      'freq_%s_dwd_netatmo_upper_%s_percent_data_considered'
-                     '_neighbor_%d_filtered_99.csv'  # filtered_95
+                     '_neighbor_%d_.csv'  # filtered_95
                      % (min_dist_thr_ppt, temp_freq_resample,
                         str(val_thr_percent).replace('.', '_'),
                          neighbor_to_chose)),
@@ -499,7 +504,7 @@ if __name__ == '__main__':
 
                 path_to_df_correlations = os.path.join(
                     out_save_dir_orig,
-                    'year_allyears_df_comparing_correlations_max_sep_dist_%d_'
+                    'pearson_year_allyears_df_comparing_correlations_max_sep_dist_%d_'
                     'freq_%s_dwd_netatmo_upper_%s_percent_data_considered'
                     '_neighbor_%d_filtered_99.csv'  # filtered_95
                     % (min_dist_thr_ppt, temp_freq,

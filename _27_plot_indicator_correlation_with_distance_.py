@@ -66,8 +66,9 @@ data_dir_Netamto_netatmo_dfs = main_dir / \
 
 assert data_dir_Netamto_netatmo_dfs.exists(), 'Wrong Netatmo Netatmo path'
 
-# allyears
-netatmo_path_acc = r'year_allyears_df_comparing_correlations_max_sep_dist_30000_'
+
+# allyears pearson_
+netatmo_path_acc = r'pearson_year_allyears_df_comparing_correlations_max_sep_dist_30000_'
 dwd_path_Acc = r'year_allyears_df_dwd_correlations'
 
 
@@ -77,14 +78,14 @@ path_to_netatmo_gd_stns_file = data_dir_Netamto_dfs / \
 #assert path_to_netatmo_gd_stns_file.exists(), 'wrong netatmo good stns file'
 
 # def percentage threshold, time frequency and data source
-percent = '98_0'
-time_freq = '1440min'  # '720min', 1440min, '480min', '360min', '180min', '120min'
+percent = '99_5'
+time_freq = '60min'  # '720min', 1440min, '480min', '360min', '180min', '120min'
 # '60min'
 data_source0 = 'Netatmo'  # 'DWD'  # 'Netatmo'  #   # reference station 'Netatmo'
 data_source = 'dwd'  # 'dwd'  # 'netatmo'  #   # compare to station 'netatmo'
 
 use_good_netatmo_stns = False
-use_filtered_data = True
+use_filtered_data = False
 filtered_percent = '99'
 
 save_acc = ''
@@ -242,7 +243,7 @@ plt.title('%s %s stations, Temporal Frequency %s\n Indicator correlation'
           ' with distance for upper %s percent of data values '
           % (data_source0, data_source, time_freq, percent))
 plt.savefig(save_dir /
-            (r'_%s_%s_%s_percent_indic_corr_freq_%s_%s_.png'
+            (r'pearson__%s_%s_%s_percent_indic_corr_freq_%s_%s_.png'
              % (data_source0, data_source, percent, time_freq, save_acc)),
             frameon=True, papertype='a4',
             bbox_inches='tight', pad_inches=.2)
