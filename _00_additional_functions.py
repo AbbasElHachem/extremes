@@ -363,6 +363,7 @@ def resampleDf(df, agg, closed='right', label='right',
     if leave_nan == True:
         # for max_nan == 0, the code runs faster if implemented as follows
         if max_nan == 0:
+            print('Resampling')
             # Fill the nan values with values very great negative values and later
             # get the out again, if the sum is still negative
             df = df.fillna(-100000000000.)
@@ -530,7 +531,7 @@ def resample_intersect_2_dfs(df1,  # first dataframe to resample
     """
     df_resample1 = resampleDf(df=df1, agg=temp_freq)
     df_resample2 = resampleDf(df=df2, agg=temp_freq)
-
+    print('\n+++ Done resampling each df, finding intersection+++')
     idx_common = df_resample1.index.intersection(df_resample2.index)
 
     if idx_common.shape[0] > 0:
@@ -616,8 +617,11 @@ def calculate_probab_ppt_below_thr(ppt_data, ppt_thr):
 def build_edf_fr_vals(data):
     """ construct empirical distribution function given data values """
     from statsmodels.distributions.empirical_distribution import ECDF
+    data = data.ravel()
     cdf = ECDF(data)
-    return cdf.x, cdf.y
+    x0 = cdf.x[1:]
+    y0 = cdf.y[1:]
+    return x0, y0
 #==============================================================================
 #
 #==============================================================================

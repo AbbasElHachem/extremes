@@ -408,10 +408,48 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                             df_dwd_cmn >= dwd_ppt_thr_per).astype(int)
 
                         # calculate spearman correlations of booleans 1, 0
-
                         bool_pears_corr = np.round(
                             pears(df_dwd_cmn_Bool.values.ravel(),
-                                  df_netatmo_cmn_Bool.values.ravel())[0], 2)
+                                  df_netatmo_cmn_Bool.values.ravel())[0], 3)
+
+                        # make ones back to orig ranks
+                        df_netatmo_cmn_Bool_ones = df_netatmo_cmn_Bool[
+                            df_netatmo_cmn_Bool == 1].dropna()
+
+                        # NETATMO Sensored RANK
+                        rank_netatmo_cmn = df_netatmo_cmn.rank(
+                            method='max', pct=True)
+                        rank_netatmo_cmn_high_ppt = rank_netatmo_cmn.loc[
+                            df_netatmo_cmn_Bool_ones.index]
+
+                        rank_netatmo_cmn_high_ppt.dropna(inplace=True)
+
+                        df_netatmo_cmn_Bool_sens = df_netatmo_cmn_Bool.copy()
+                        df_netatmo_cmn_Bool_sens.loc[
+                            rank_netatmo_cmn_high_ppt.index] = rank_netatmo_cmn_high_ppt.values
+                        # common events
+
+                        # DWD Sensored Rank
+
+                        df_dwd_cmn_Bool_ones = df_dwd_cmn_Bool[
+                            df_dwd_cmn_Bool == 1].dropna()
+
+                        rank_dwd_cmn = df_dwd_cmn.rank(
+                            method='max', pct=True)
+
+                        rank_dwd_cmn_high_ppt = rank_dwd_cmn.loc[
+                            df_dwd_cmn_Bool_ones.index]
+
+                        rank_dwd_cmn_high_ppt.dropna(inplace=True)
+
+                        df_dwd_cmn_Bool_sens = df_dwd_cmn_Bool.copy()
+                        df_dwd_cmn_Bool_sens.loc[
+                            rank_dwd_cmn_high_ppt.index] = rank_dwd_cmn_high_ppt.values
+                        # common events
+
+                        bool_sensored_pears_corr = np.round(
+                            pears(df_netatmo_cmn_Bool_sens.values.ravel(),
+                                  df_dwd_cmn_Bool_sens.values.ravel())[0], 3)
 
 #                         bool_spr_corr = np.round(
 #                             spr(df_dwd_cmn_Bool.values.ravel(),
@@ -442,17 +480,21 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                             'DWD_%s_Per_ppt_thr'
                             % val_thr_percent] = dwd_ppt_thr_per
 
-                        df_results_correlations.loc[
-                            ppt_stn_id,
-                            'Orig_Pearson_Correlation'] = orig_pears_corr
+#                         df_results_correlations.loc[
+#                             ppt_stn_id,
+#                             'Orig_Pearson_Correlation'] = orig_pears_corr
+#
+#                         df_results_correlations.loc[
+#                             ppt_stn_id,
+#                             'Orig_Spearman_Correlation'] = orig_spr_corr
 
                         df_results_correlations.loc[
                             ppt_stn_id,
-                            'Orig_Spearman_Correlation'] = orig_spr_corr
+                            'Bool_Pearson_Correlation'] = bool_pears_corr
 
                         df_results_correlations.loc[
                             ppt_stn_id,
-                            'Bool_Spearman_Correlation'] = bool_pears_corr
+                            'Bool_Sensored_Pearson_Correlation'] = bool_sensored_pears_corr
 
                         print('\n********\n ADDED DATA TO DF RESULTS')
                     else:
@@ -470,7 +512,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
     df_results_correlations.dropna(how='all', inplace=True)
     df_results_correlations.to_csv(
         os.path.join(out_save_dir_orig,
-                     'pearson_year_allyears_df_comparing_correlations_max_sep_dist_%d_'
+                     'sensored_corr_pearson_year_allyears_df_comparing_correlations_max_sep_dist_%d_'
                      'freq_%s_dwd_netatmo_upper_%s_percent_data_considered'
                      '_neighbor_%d_.csv'  # filtered_95
                      % (min_dist_thr_ppt, temp_freq_resample,
@@ -504,9 +546,9 @@ if __name__ == '__main__':
 
                 path_to_df_correlations = os.path.join(
                     out_save_dir_orig,
-                    'pearson_year_allyears_df_comparing_correlations_max_sep_dist_%d_'
+                    'sensored_coor_pearson_year_allyears_df_comparing_correlations_max_sep_dist_%d_'
                     'freq_%s_dwd_netatmo_upper_%s_percent_data_considered'
-                    '_neighbor_%d_filtered_99.csv'  # filtered_95
+                    '_neighbor_%d_.csv'  # filtered_95
                     % (min_dist_thr_ppt, temp_freq,
                         str(lower_percentile_val).replace('.', '_'),
                        neighbor_to_chose))
@@ -532,43 +574,6 @@ if __name__ == '__main__':
                     print('\n Data frames exist, not creating them\n')
                     df_results_correlations = pd.read_csv(path_to_df_correlations,
                                                           sep=';', index_col=0)
-
-                if plot_figures:
-                    print('\n********\n Plotting Correlation with distance')
-                    plt_correlation_with_distance(
-                        df_correlations=df_results_correlations,
-                        dist_col_to_plot='Distance to neighbor',
-                        corr_col_to_plot='Bool_Spearman_Correlation',
-                        temp_freq=temp_freq,
-                        out_dir=out_save_dir_orig,
-                        year_vals='all_years',
-                        val_thr_percent=lower_percentile_val,
-                        neighbor_nbr=neighbor_to_chose)
-
-                    plt_correlation_with_distance(
-                        df_correlations=df_results_correlations,
-                        dist_col_to_plot='Distance to neighbor',
-                        corr_col_to_plot='Orig_Spearman_Correlation',
-                        temp_freq=temp_freq,
-                        out_dir=out_save_dir_orig,
-                        year_vals='all_years',
-                        val_thr_percent=lower_percentile_val,
-                        neighbor_nbr=neighbor_to_chose)
-
-                    print('\n********\n Plotting Correlation maps')
-                    for col_label in df_results_correlations.columns:
-                        if ('Correlation' in col_label):
-                                # and 'Bool_Spearman' in col_label):
-                            # plot the results of df_results_correlations
-                            plt_on_map_agreements(
-                                df_correlations=df_results_correlations,
-                                col_to_plot=col_label,
-                                shp_de_file=path_to_shpfile,
-                                temp_freq=temp_freq,
-                                out_dir=out_save_dir_orig,
-                                year_vals=('all_years_%d_m_distance_neighbor_%d_'
-                                           % (min_dist_thr_ppt, neighbor_to_chose)),
-                                val_thr_percent=lower_percentile_val)
 
     STOP = timeit.default_timer()  # Ending time
     print(('\n****Done with everything on %s.\nTotal run time was'

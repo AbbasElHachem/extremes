@@ -67,8 +67,8 @@ data_dir_Netamto_netatmo_dfs = main_dir / \
 assert data_dir_Netamto_netatmo_dfs.exists(), 'Wrong Netatmo Netatmo path'
 
 
-# allyears pearson_
-netatmo_path_acc = r'pearson_year_allyears_df_comparing_correlations_max_sep_dist_30000_'
+# allyears pearson_  new_method
+netatmo_path_acc = r'sensored_corr_pearson_year_allyears_df_comparing_correlations_max_sep_dist_30000_'
 dwd_path_Acc = r'year_allyears_df_dwd_correlations'
 
 
@@ -78,7 +78,7 @@ path_to_netatmo_gd_stns_file = data_dir_Netamto_dfs / \
 #assert path_to_netatmo_gd_stns_file.exists(), 'wrong netatmo good stns file'
 
 # def percentage threshold, time frequency and data source
-percent = '99_5'
+percent = '97_0'
 time_freq = '60min'  # '720min', 1440min, '480min', '360min', '180min', '120min'
 # '60min'
 data_source0 = 'Netatmo'  # 'DWD'  # 'Netatmo'  #   # reference station 'Netatmo'
@@ -185,8 +185,20 @@ if use_good_netatmo_stns:
     save_acc = 'filtered_using_stns_abv_curve_all_neighbor'
 # =============================================================================
 
-x0 = in_df0.loc[:, 'Distance to neighbor'].values.ravel()
-x1 = in_df1.loc[:, 'Distance to neighbor'].values.ravel()
+
+# in_df0 = in_df0[in_df0['Bool_Pearson_Correlation_Netatmo_DWD'] > 0.2]
+# in_df1 = in_df1[in_df1['Bool_Pearson_Correlation_Netatmo_DWD'] > 0.2]
+
+# in_df0 = in_df0[in_df0['Bool_Pearson_Correlation'] > 0.2]
+# in_df1 = in_df1[in_df1['Bool_Pearson_Correlation'] > 0.2]
+
+stns_keep_all_final_new = in_df0.index.intersection(in_df1.index)
+
+stns_keep_all_final_new = in_df0.index
+
+#cmn_stns = in_df0.index.intersection(in_df1.index)
+x0 = in_df0.loc[stns_keep_all_final_new, 'Distance to neighbor'].values.ravel()
+x1 = in_df1.loc[stns_keep_all_final_new, 'Distance to neighbor'].values.ravel()
 # x2 = in_df2.loc[:, 'Distance to neighbor'].values.ravel()
 # x3 = in_df3.loc[:, 'Distance to neighbor'].values.ravel()
 # x4 = in_df4.loc[:, 'Distance to neighbor'].values.ravel()
@@ -194,14 +206,43 @@ x1 = in_df1.loc[:, 'Distance to neighbor'].values.ravel()
 # x6 = in_df6.loc[:, 'Distance to neighbor'].values.ravel()
 # x7 = in_df7.loc[:, 'Distance to neighbor'].values.ravel()
 
-y0 = in_df0.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
-y1 = in_df1.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
+# y0 = in_df0.loc[stns_keep_all_final_new,
+#                 'Bool_Pearson_Correlation_Netatmo_DWD'].values.ravel()
+# y1 = in_df1.loc[stns_keep_all_final_new,
+#                 'Bool_Pearson_Correlation_Netatmo_DWD'].values.ravel()
+#
+# y0_dwd = in_df0.loc[:,
+#                     'Bool_Pearson_Correlation_DWD_DWD'].values.ravel()
+# y1_dwd = in_df1.loc[:,
+#                     'Bool_Pearson_Correlation_DWD_DWD'].values.ravel()
+
+y0 = in_df0.loc[stns_keep_all_final_new,
+                'Bool_Pearson_Correlation'].values.ravel()
+y1 = in_df1.loc[stns_keep_all_final_new,
+                'Bool_Pearson_Correlation'].values.ravel()
+#
+y0_sens = in_df0.loc[stns_keep_all_final_new,
+                     'Bool_Sensored_Pearson_Correlation'].values.ravel()
+y1_sens = in_df1.loc[stns_keep_all_final_new,
+                     'Bool_Sensored_Pearson_Correlation'].values.ravel()
+
 # y2 = in_df2.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
 # y3 = in_df3.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
 # y4 = in_df4.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
 # y5 = in_df5.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
 # y6 = in_df6.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
 # y7 = in_df7.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
+
+
+# stns_keep_al_sr = pd.DataFrame(data=stns_keep_all_final_new,
+#                                columns=['Stations'])
+#
+# stns_keep_al_sr.to_csv(
+#     (save_dir /
+#         (r'keep_stns_all_neighbor_%s_per_%s_s0_1st.csv'
+#          % (percent, time_freq))),
+#     sep=';')
+
 
 # s0, x0, y0, in_df0 = read_filter_df_corr_return_stns_x_y_vals(df0)
 # =============================================================================
@@ -211,8 +252,19 @@ plt.figure(figsize=(16, 12), dpi=300)
 
 plt.scatter(x0, y0, c='r', alpha=0.5, marker='x',
             label='First Neighbor Stn nbr %d' % y0.shape[0], s=34)
-plt.scatter(x1, y1, c='b', alpha=0.5, marker='.',
+plt.scatter(x1, y1, c='y', alpha=0.5, marker=',',
             label='Second Neighbor Stn nbr %d' % y1.shape[0], s=34)
+
+plt.scatter(x0, y0_sens, c='b', alpha=0.5, marker='.',
+            label='First Neighbor Stn nbr %d' % y0_sens.shape[0], s=34)
+plt.scatter(x1, y1_sens, c='c', alpha=0.5, marker='.',
+            label='Second Neighbor Stn nbr %d' % y1_sens.shape[0], s=34)
+
+# plt.scatter(x0, y0_dwd, c='gold', alpha=0.5, marker='o',
+#            label='DWD station 1', s=34)
+# plt.scatter(x1, y1_dwd, c='m', alpha=0.5, marker='*',
+#            label=' DWD Second Neighbor', s=34)
+
 # plt.scatter(x2, y2, c='g', alpha=0.5, marker='d',
 #             label='Third Neighbor Stn nbr %d' % y2.shape[0], s=34)
 # plt.scatter(x3, y3, c='darkorange', alpha=0.5, marker='*',
@@ -226,10 +278,10 @@ plt.scatter(x1, y1, c='b', alpha=0.5, marker='.',
 # plt.scatter(x7, y7, c='c', alpha=0.5, marker='8',
 #             label='Eighth Neighbor Stn nbr %d' % y7.shape[0], s=34)
 plt.xlim([0, max(x0.max(), x1.max()) + 1000])
-plt.xticks(np.arange(0, x1.max() + 1000, 5000))
+plt.xticks(np.arange(0, 20000 + 1000, 5000))
 plt.ylim([-0.1, 1.1])
 plt.xlabel('Distance (m)')
-plt.ylabel('Indicator Spearman Correlation')
+plt.ylabel('Indicator Pearson Correlation')
 plt.legend(loc=0)
 plt.grid(alpha=.25)
 plt.tight_layout()
@@ -243,7 +295,7 @@ plt.title('%s %s stations, Temporal Frequency %s\n Indicator correlation'
           ' with distance for upper %s percent of data values '
           % (data_source0, data_source, time_freq, percent))
 plt.savefig(save_dir /
-            (r'pearson__%s_%s_%s_percent_indic_corr_freq_%s_%s_.png'
+            (r'new_pearson__%s_%s_%s_percent_indic_corr_freq_%s_%s_sensored.png'
              % (data_source0, data_source, percent, time_freq, save_acc)),
             frameon=True, papertype='a4',
             bbox_inches='tight', pad_inches=.2)

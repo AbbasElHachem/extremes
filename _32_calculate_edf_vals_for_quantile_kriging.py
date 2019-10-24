@@ -39,10 +39,10 @@ plt.ioff()
 # def values to replace edf of ppt=0
 ppt_min_thr_0_vals = 0.1  # everything below it gets value of P0
 
-netatmo_data = True
+netatmo_data = False
 use_good_netatmo_stns = False
 
-dwd_data = False
+dwd_data = True
 resample_data = True
 
 # select data only within this period (same as netatmo / dwd)
@@ -73,6 +73,12 @@ if dwd_data:
         # \all_dwd_ppt_data_daily_.csv")
         r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
         r"\all_dwd_hourly_ppt_data_combined_2014_2019_.csv")
+
+    df_file = (
+        # \all_dwd_ppt_data_daily_.csv")
+        r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
+        r"\ppt_all_dwd_old_60min_.csv")
+
     save_acc = 'dwd'
     # df_file = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
     #            r"\all_dwd_ppt_data_monthly_.csv")
@@ -88,7 +94,7 @@ in_df = pd.read_csv(df_file, index_col=0, sep=';',
 in_df.index = pd.to_datetime(in_df.index,
                              format='%Y-%m-%d %H:%M:%S')
 
-in_df = select_df_within_period(in_df, start=start_date, end=end_date)
+# in_df = select_df_within_period(in_df, start=start_date, end=end_date)
 
 in_df.dropna(how='all', inplace=True)
 
@@ -167,7 +173,7 @@ if resample_data:
 
         df_all.dropna(how='all', inplace=True)
         df_all.to_csv((r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
-                       r"\edf_ppt_all_%s_%s_.csv" % (save_acc, agg_freq)),
+                       r"\edf_ppt_all_%s_old_%s_.csv" % (save_acc, agg_freq)),
                       sep=';', float_format='%.3f')
 
     print('DONE WITH EVERYTHNG !')

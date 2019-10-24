@@ -67,7 +67,7 @@ netatmo_path_acc = r'pearson_year_allyears_df_comparing_correlations_max_sep_dis
 dwd_path_Acc = r'year_allyears_df_dwd_correlations'
 
 # def percentage threshold, time frequency and data source
-percent = '99_0'
+percent = '97_0'
 time_freq = '60min'
 
 data_source0 = 'Netatmo'  # reference station 'Netatmo'
@@ -78,8 +78,8 @@ remove_upper_limit = False
 
 plot_dwd_on_top = True
 
-method1 = True
-method2 = False
+method1 = False
+method2 = True
 #==============================================================================
 
 #==============================================================================
@@ -446,7 +446,7 @@ plt.title('Keeping %s %d stations: Indicator correlation with distance'
           % (data_source0,  len(corr_keep0),
               percent, time_freq))
 plt.savefig(save_dir /  # filtered_2_neighbors_data
-            (r'_%s_%s_%s_percent_indic_corr_freq_%s_filtered_pearson1.png'
+            (r'_%s_%s_%s_percent_indic_corr_freq_%s_filtered_pearson2.png'
              % (data_source0, data_source, percent, time_freq)),
             frameon=True, papertype='a4',
             bbox_inches='tight', pad_inches=.2)

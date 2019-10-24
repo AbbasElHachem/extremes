@@ -54,7 +54,7 @@ list_years = ['2015', '2016', '2017', '2018', '2019']
 #==============================================================================
 max_ppt_thr = 100  # maximum ppt values per hour
 initial_vals_to_remove = 4  # most likely calibration or test values
-minimal_number_of_vals = 30 * 24  # 1 month of hourly data
+minimal_number_of_vals = 2 * 30 * 24  # 1 month of hourly data
 
 data_mtx = np.zeros(
     shape=(date_range.shape[0], len(stn_ids))).astype('float')
@@ -140,7 +140,7 @@ if do_it_yearly_basis:
 
         max_ppt_thr = 100  # maximum ppt values per hour
         initial_vals_to_remove = 4  # most likely calibration or test values
-        minimal_number_of_vals = 30 * 24  # 1 month of hourly data
+        minimal_number_of_vals = 2 * 30 * 24  # 1 month of hourly data
 
         data_mtx = np.zeros(
             shape=(date_range.shape[0], len(stn_ids))).astype('float')

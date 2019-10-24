@@ -113,14 +113,14 @@ x_col_name = 'X'
 y_col_name = 'Y'
 
 # only highest x% of the values are selected
-lower_percentile_val_lst = [97]  # 80, 85, 90,
+lower_percentile_val_lst = [97, 98, 99, 99.5]  # 80, 85, 90,
 
 
 # temporal aggregation of df
 # , '120min', '480min', '720min', '1440min']
 # , '120min', '480min', '720min', '1440min']
 # , '120min', '480min', '720min', '1440min']
-aggregation_frequencies = ['60min']
+aggregation_frequencies = ['60min', '120min', '480min', '720min', '1440min']
 
 # month number, no need to change
 # not_convective_season = [10, 11, 12, 1, 2, 3, 4]
@@ -130,7 +130,7 @@ not_convective_season = []
 # starts with one
 # , 2, 3, 4, 5]  # list of which neighbors to chose
 neighbors_to_chose_lst = [1, 2, 3]  # 4, 5, 6, 7, 8]  # 1
-max_dist_thr = 2 * 1e4  # 15km
+max_dist_thr = 3 * 1e4  # 20km
 min_req_ppt_vals = 30  # stations minimum required ppt values
 
 # select data only within this period (same as netatmo)
@@ -256,8 +256,8 @@ def calc_indicator_correlatione_two_dwd_stns(
                         raise Exception
                 print('\n done resampling data')
 
-                if (df_common1.values.shape[0] > min_req_ppt_vals and
-                        df_common2.values.shape[0] > min_req_ppt_vals):
+                if (df_common1.values.size > min_req_ppt_vals and
+                        df_common2.values.size > min_req_ppt_vals):
                     df_common1 = pd.DataFrame(
                         data=df_common1.values,
                         index=df_common1.index,
@@ -329,10 +329,12 @@ def calc_indicator_correlatione_two_dwd_stns(
 
                     # calculate spearman correlations of booleans 1, 0
 
+#                     bool_spr_corr = np.round(
+#                         spr(df_dwd1_cmn_Bool.values.ravel(),
+#                             df_dwd2_cmn_Bool.values.ravel())[0], 2)
                     bool_spr_corr = np.round(
-                        spr(df_dwd1_cmn_Bool.values.ravel(),
-                            df_dwd2_cmn_Bool.values.ravel())[0], 2)
-
+                        pears(df_dwd1_cmn_Bool.values.ravel(),
+                              df_dwd2_cmn_Bool.values.ravel())[0], 2)
                     #==========================================================
                     # append the result to df_correlations, for each stn
                     #==========================================================
@@ -376,14 +378,16 @@ def calc_indicator_correlatione_two_dwd_stns(
             continue
     print('SAVING DF')
     # assert len(all_distances) == len(stns_bw), 'smtg went wrong'
+
     df_results_correlations_bw.dropna(how='all', inplace=True)
     df_results_correlations_bw.to_csv(
         os.path.join(out_save_dir_orig,
-                     'year_allyears_df_dwd_correlations'
-                     'freq_%s_dwd_netatmo_upper_%d_percent_data_considered'
+                     'pearson_year_allyears_df_dwd_correlations'
+                     'freq_%s_dwd_netatmo_upper_%s_percent_data_considered'
                      '_neighbor_%d_.csv'
                      % (tem_freq,
-                        val_thr_percent, neighbor_to_chose)),
+                        str(val_thr_percent).replace('.', '_'),
+                         neighbor_to_chose)),
         sep=';')
 
     return df_results_correlations_bw

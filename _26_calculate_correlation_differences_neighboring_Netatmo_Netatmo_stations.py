@@ -156,7 +156,8 @@ min_dist_thr_ppt = 30000  # 5000  # m
 max_ppt_thr = 100.  # ppt above this value are not considered
 
 
-lower_percentile_val_lst = [97, 98, 99]  # ,95, 85, 99]  # 80, 85, 90,, 99
+# ,95, 85, 99]  # 80, 85, 90,, 99
+lower_percentile_val_lst = [97, 98, 99, 99.5]
 # only highest x% of the values are selected
 
 # aggregation_frequencies = ['60min', '720min', '1440min']
@@ -249,7 +250,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
             # read first netatmo station
             netatmo_ppt_stn1 = pd.read_feather(path_netatmo_ppt_df_feather,
                                                columns=['Time', ppt_stn_id],
-                                               use_threads=True)
+                                               use_threads=False)
             netatmo_ppt_stn1.set_index('Time', inplace=True)
             netatmo_ppt_stn1.index = pd.to_datetime(
                 netatmo_ppt_stn1.index, format=date_fmt)
@@ -284,7 +285,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
 
                 df_netatmo2 = pd.read_feather(path_netatmo_ppt_df_feather,
                                               columns=['Time', stn_2_netatmo],
-                                              use_threads=True)
+                                              use_threads=False)
                 df_netatmo2.set_index('Time', inplace=True)
 
                 df_netatmo2.index = pd.to_datetime(
@@ -301,139 +302,134 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                     month_lst=not_convective_season)
 
                 df_netatmo2.dropna(axis=0, inplace=True)
-                print('\n********\n Second Netatmo Stn Id is', stn_2_netatmo,
-                      'distance is ', min_dist_ppt_netatmo)
 
-                # intersect dwd and netatmo ppt data
-                if temp_freq_resample != '5min':
-                    df_netatmo_cmn, df_netatmo2_cmn = resample_intersect_2_dfs(
-                        netatmo_ppt_stn1, df_netatmo2, temp_freq_resample)
-                else:
-                    if (netatmo_ppt_stn1.values.shape[1] != 0 and
-                            df_netatmo2.values.shape[1] != 0):
+                if (netatmo_ppt_stn1.values.size > 0) and (
+                        df_netatmo2.values.size > 0):
 
-                        netatmo_ppt_stn1.dropna(how='any', inplace=True)
-                        df_netatmo2.dropna(how='any', inplace=True)
-                        idx_common = netatmo_ppt_stn1.index.intersection(
-                            df_netatmo2.index)
+                    print('\n********\n Second Netatmo Stn Id is', stn_2_netatmo,
+                          'distance is ', min_dist_ppt_netatmo)
 
-                        if idx_common.shape[0] > 0:
-                            print(
-                                '\n********\n common index is found, interescting dataframes')
-                            try:
-                                df_netatmo_cmn = netatmo_ppt_stn1.loc[idx_common, :]
-                                df_netatmo2_cmn = df_netatmo2.loc[idx_common, :]
-                            except Exception:
-                                df_netatmo_cmn = netatmo_ppt_stn1.loc[idx_common]
-                                df_netatmo2_cmn = df_netatmo2.loc[idx_common]
+    #                 # intersect dwd and netatmo ppt data
+    #                 if temp_freq_resample != '5min':
+                    print('\nResampling DFs\n')
+#                     if stn_2_netatmo == '70_ee_50_1b_1a_3a':
+#                         print(stn_2_netatmo)
+#                         raise Exception
+
+                    print('---Done Resampling---')
+                    if (netatmo_ppt_stn1.values.size > min_req_ppt_vals and
+                            df_netatmo2.values.size > min_req_ppt_vals):
+
+                        df_netatmo_cmn, df_netatmo2_cmn = resample_intersect_2_dfs(
+                            netatmo_ppt_stn1, df_netatmo2, temp_freq_resample)
+
+                        # change everything to dataframes with stn Id as column
+                        df_netatmo_cmn = pd.DataFrame(
+                            data=df_netatmo_cmn.values,
+                            index=df_netatmo_cmn.index,
+                            columns=[ppt_stn_id])
+
+                        df_netatmo2_cmn = pd.DataFrame(
+                            data=df_netatmo2_cmn.values,
+                            index=df_netatmo2_cmn.index,
+                            columns=[stn_2_netatmo])
+
+                        # get coordinates of netatmo station for plotting
+                        lon_stn_netatmo = in_netatmo_df_coords.loc[
+                            ppt_stn_id_name_orig, x_col_name]
+                        lat_stn_netatmo = in_netatmo_df_coords.loc[
+                            ppt_stn_id_name_orig, y_col_name]
+
+                        #======================================================
+                        # look for agreements, correlation between all values
+                        #======================================================
+
+                        # calculate pearson and spearman between original
+                        # values
+                        orig_pears_corr = np.round(
+                            pears(df_netatmo2_cmn.values,
+                                  df_netatmo_cmn.values)[0], 2)
+
+                        orig_spr_corr = np.round(
+                            spr(df_netatmo2_cmn.values,
+                                df_netatmo_cmn.values)[0], 2)
+
+                        #======================================================
+                        # select only upper tail of values of both dataframes
+                        #======================================================
+                        val_thr_float = val_thr_percent / 100
+
+                        netatmo_cdf_x, netatmo_cdf_y = get_cdf_part_abv_thr(
+                            df_netatmo_cmn.values.ravel(), -0.1)
+                        # get netatmo ppt thr from cdf
+                        netatmo_ppt_thr_per = netatmo_cdf_x[np.where(
+                            netatmo_cdf_y >= val_thr_float)][0]
+
+                        netatmo2_cdf_x, netatmo2_cdf_y = get_cdf_part_abv_thr(
+                            df_netatmo2_cmn.values.ravel(), -0.1)
+
+                        # get dwd ppt thr from cdf
+                        netatmo2_ppt_thr_per = netatmo2_cdf_x[np.where(
+                            netatmo2_cdf_y >= val_thr_float)][0]
+
+                        print('\n****transform values to booleans*****\n')
+
+                        df_netatmo_cmn_Bool = (
+                            df_netatmo_cmn > netatmo_ppt_thr_per).astype(int)
+                        df_netatmo2_cmn_Bool = (
+                            df_netatmo2_cmn > netatmo2_ppt_thr_per).astype(int)
+
+                        # calculate spearman correlations of booleans 1, 0
+
+    #                     bool_spr_corr = np.round(
+    #                         spr(df_netatmo2_cmn_Bool.values.ravel(),
+    #                             df_netatmo_cmn_Bool.values.ravel())[0], 2)
+                        bool_spr_corr = np.round(
+                            pears(df_netatmo2_cmn_Bool.values.ravel(),
+                                  df_netatmo_cmn_Bool.values.ravel())[0], 2)
+                        #======================================================
+                        # append the result to df_correlations, for each stn
+                        #======================================================
+                        df_results_correlations.loc[ppt_stn_id,
+                                                    'lon'] = lon_stn_netatmo
+                        df_results_correlations.loc[ppt_stn_id,
+                                                    'lat'] = lat_stn_netatmo
+                        df_results_correlations.loc[
+                            ppt_stn_id,
+                            'Distance to neighbor'] = min_dist_ppt_netatmo
+
+                        df_results_correlations.loc[
+                            ppt_stn_id,
+                            'Netatmo neighbor ID'] = stn_2_netatmo
+
+                        df_results_correlations.loc[
+                            ppt_stn_id,
+                            'Netatmo_orig_%s_Per_ppt_thr'
+                            % val_thr_percent] = netatmo_ppt_thr_per
+
+                        df_results_correlations.loc[
+                            ppt_stn_id,
+                            'Netatmo_neigh_%s_Per_ppt_thr'
+                            % val_thr_percent] = netatmo2_ppt_thr_per
+
+                        df_results_correlations.loc[
+                            ppt_stn_id,
+                            'Orig_Pearson_Correlation'] = orig_pears_corr
+
+                        df_results_correlations.loc[
+                            ppt_stn_id,
+                            'Orig_Spearman_Correlation'] = orig_spr_corr
+
+                        df_results_correlations.loc[
+                            ppt_stn_id,
+                            'Bool_Spearman_Correlation'] = bool_spr_corr
+
+                        print('\n********\n ADDED DATA TO DF RESULTS')
+
                     else:
-                        print('not enough data for intersecting 5min data')
-                        continue
-                if (df_netatmo_cmn.values.shape[0] > min_req_ppt_vals and
-                        df_netatmo2_cmn.values.shape[0] > min_req_ppt_vals):
-                    pass
-                    # change everything to dataframes with stn Id as column
-                    df_netatmo_cmn = pd.DataFrame(
-                        data=df_netatmo_cmn.values,
-                        index=df_netatmo_cmn.index,
-                        columns=[ppt_stn_id])
-
-                    df_netatmo2_cmn = pd.DataFrame(
-                        data=df_netatmo2_cmn.values,
-                        index=df_netatmo2_cmn.index,
-                        columns=[stn_2_netatmo])
-
-                    # get coordinates of netatmo station for plotting
-                    lon_stn_netatmo = in_netatmo_df_coords.loc[
-                        ppt_stn_id_name_orig, x_col_name]
-                    lat_stn_netatmo = in_netatmo_df_coords.loc[
-                        ppt_stn_id_name_orig, y_col_name]
-
-                    #==========================================================
-                    # look for agreements, correlation between all values
-                    #==========================================================
-
-                    # calculate pearson and spearman between original values
-                    orig_pears_corr = np.round(
-                        pears(df_netatmo2_cmn.values,
-                              df_netatmo_cmn.values)[0], 2)
-
-                    orig_spr_corr = np.round(
-                        spr(df_netatmo2_cmn.values,
-                            df_netatmo_cmn.values)[0], 2)
-
-                    #==========================================================
-                    # select only upper tail of values of both dataframes
-                    #==========================================================
-                    val_thr_float = val_thr_percent / 100
-
-                    netatmo_cdf_x, netatmo_cdf_y = get_cdf_part_abv_thr(
-                        df_netatmo_cmn.values.ravel(), -0.1)
-                    # get netatmo ppt thr from cdf
-                    netatmo_ppt_thr_per = netatmo_cdf_x[np.where(
-                        netatmo_cdf_y >= val_thr_float)][0]
-
-                    netatmo2_cdf_x, netatmo2_cdf_y = get_cdf_part_abv_thr(
-                        df_netatmo2_cmn.values.ravel(), -0.1)
-
-                    # get dwd ppt thr from cdf
-                    netatmo2_ppt_thr_per = netatmo2_cdf_x[np.where(
-                        netatmo2_cdf_y >= val_thr_float)][0]
-
-                    print('\n****transform values to booleans*****\n')
-
-                    df_netatmo_cmn_Bool = (
-                        df_netatmo_cmn > netatmo_ppt_thr_per).astype(int)
-                    df_netatmo2_cmn_Bool = (
-                        df_netatmo2_cmn > netatmo2_ppt_thr_per).astype(int)
-
-                    # calculate spearman correlations of booleans 1, 0
-
-                    bool_spr_corr = np.round(
-                        spr(df_netatmo2_cmn_Bool.values.ravel(),
-                            df_netatmo_cmn_Bool.values.ravel())[0], 2)
-
-                    #==========================================================
-                    # append the result to df_correlations, for each stn
-                    #==========================================================
-                    df_results_correlations.loc[ppt_stn_id,
-                                                'lon'] = lon_stn_netatmo
-                    df_results_correlations.loc[ppt_stn_id,
-                                                'lat'] = lat_stn_netatmo
-                    df_results_correlations.loc[
-                        ppt_stn_id,
-                        'Distance to neighbor'] = min_dist_ppt_netatmo
-
-                    df_results_correlations.loc[
-                        ppt_stn_id,
-                        'Netatmo neighbor ID'] = stn_2_netatmo
-
-                    df_results_correlations.loc[
-                        ppt_stn_id,
-                        'Netatmo_orig_%s_Per_ppt_thr'
-                        % val_thr_percent] = netatmo_ppt_thr_per
-
-                    df_results_correlations.loc[
-                        ppt_stn_id,
-                        'Netatmo_neigh_%s_Per_ppt_thr'
-                        % val_thr_percent] = netatmo2_ppt_thr_per
-
-                    df_results_correlations.loc[
-                        ppt_stn_id,
-                        'Orig_Pearson_Correlation'] = orig_pears_corr
-
-                    df_results_correlations.loc[
-                        ppt_stn_id,
-                        'Orig_Spearman_Correlation'] = orig_spr_corr
-
-                    df_results_correlations.loc[
-                        ppt_stn_id,
-                        'Bool_Spearman_Correlation'] = bool_spr_corr
-
-                    print('\n********\n ADDED DATA TO DF RESULTS')
-
+                        print('Netatmo Station is near but not enough data')
                 else:
-                    print('Netatmo Station is near but not enough data')
+                    ('One of the stations doesnt have any data')
             else:
                 print('\n********\n Netatmo station is not near')
 
@@ -446,11 +442,12 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
     df_results_correlations.dropna(how='all', inplace=True)
     df_results_correlations.to_csv(
         os.path.join(out_save_dir_orig,
-                     'year_allyears_df_comparing_correlations_max_sep_dist_%d_'
-                     'freq_%s_netatmo_netatmo_upper_%d_percent_data_considered'
-                     '_neighbor_%d_filtered_99.csv'  # filtered_99_
+                     'pearson_year_allyears_df_comparing_correlations_max_sep_dist_%d_'
+                     'freq_%s_netatmo_netatmo_upper_%s_percent_data_considered'
+                     '_neighbor_%d_.csv'  # filtered_99_
                      % (min_dist_thr_ppt, temp_freq_resample,
-                        val_thr_percent, neighbor_to_chose)),
+                        str(val_thr_percent).replace('.', '_'),
+                         neighbor_to_chose)),
         sep=';')
 
     return df_results_correlations
@@ -559,9 +556,9 @@ if __name__ == '__main__':
                 # df_correlations comparing correaltions, agreements
                 path_to_df_correlations = os.path.join(
                     out_save_dir_orig,
-                    'year_allyears_df_comparing_correlations_max_sep_dist_%d_'
+                    'pearson_year_allyears_df_comparing_correlations_max_sep_dist_%d_'
                     'freq_%s_netatmo_netatmo_upper_%d_percent_data_considered'
-                    '_neighbor_%d_filtered_99.csv'  # filtered_99_
+                    '_neighbor_%d_.csv'  # filtered_99_
                     % (min_dist_thr_ppt, temp_freq, lower_percentile_val,
                        neighbor_to_chose))
 
