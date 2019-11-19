@@ -86,7 +86,7 @@ markers_time_dict = {i: m for i, m in zip(np.arange(-60, 61, 5), markers)}
 
 
 def calculate_distance_between_two_positions(x0, y0, x1, y1):
-    ''' calculate angle between two successive positions in Km'''
+    ''' calculate distance between two successive positions in Km'''
     distance = np.round(
         np.sqrt(np.square(x1 - x0) + np.square(y1 - y0)) / 1000, 2)
     return distance

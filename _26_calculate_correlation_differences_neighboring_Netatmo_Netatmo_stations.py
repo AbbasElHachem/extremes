@@ -126,13 +126,13 @@ assert os.path.exists(path_to_netatmo_coords_df_file), 'wrong DWD coords file'
 path_to_netatmo_gd_stns_file = (
     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes"
     r"\plots_NetAtmo_ppt_DWD_ppt_correlation_"
-    r"\keep_stns_all_neighbor_99_0_per_60min_s0.csv")
+    r"\keep_stns_all_neighbor_99_per_60min_s0_1st.csv")
 assert os.path.exists(path_to_netatmo_gd_stns_file), 'wrong netatmo stns file'
 
 path_to_shpfile = (r'F:\data_from_exchange\Netatmo'
                    r'\Landesgrenze_ETRS89\Landesgrenze_10000_ETRS89_lon_lat.shp')
 
-assert os.path.exists(path_to_shpfile), 'wrong shapefile path'
+#assert os.path.exists(path_to_shpfile), 'wrong shapefile path'
 
 out_save_dir_orig = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
                      r'\plots_Netatmo_ppt_Netatmo_ppt_correlation_')
@@ -157,15 +157,16 @@ max_ppt_thr = 100.  # ppt above this value are not considered
 
 
 # ,95, 85, 99]  # 80, 85, 90,, 99
-lower_percentile_val_lst = [97, 98, 99, 99.5]
+lower_percentile_val_lst = [98, 99]
 # only highest x% of the values are selected
 
 # aggregation_frequencies = ['60min', '720min', '1440min']
 # ['60min', '120min', '480min', '720min', '1440min']
 # ,'60min', '120min', '480min', '720min', '1440min']
-aggregation_frequencies = ['60min', '120min', '360min', '720min', '1440min']
+aggregation_frequencies = ['60min']
+#, '120min', '360min', '720min', '1440min']
 
-neighbors_to_chose_lst = [0, 1, 2]  # , 1, 2, 3, 4 refers to neighbor (0=first)
+neighbors_to_chose_lst = [0, 1]  # , 1, 2, 3, 4 refers to neighbor (0=first)
 
 # this is used to keep only data where month is not in this list
 not_convective_season = []  # oct till april

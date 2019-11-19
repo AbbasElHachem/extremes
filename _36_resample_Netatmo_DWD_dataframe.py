@@ -10,9 +10,11 @@ import os
 import matplotlib.pyplot as plt
 
 #path_to_df = r"F:\download_DWD_data_recent\all_dwd_hourly_ppt_data_combined_1995_2019.csv"
-path_to_df = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new_no_freezing.csv"
+path_to_df = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new_no_freezing_2.csv"
 #path_to_df = r"F:\download_DWD_data_recent\all_dwd_10min_ppt_data_combined_2014_2019.csv"
 
+resample_frequencies = ['60min', '120min', '180min',
+                        '360min', '720min', '1440min']
 
 # In[2]:
 

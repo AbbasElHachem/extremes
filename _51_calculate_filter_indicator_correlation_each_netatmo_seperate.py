@@ -362,8 +362,10 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
 
                 if (netatmo_ppt_stn1.values.size > min_req_ppt_vals and
                         df_dwd.values.size > min_req_ppt_vals):
+
                     print('\n********\n Second DWD Stn Id is', stn_2_dwd,
                           'distance is ', min_dist_ppt_dwd)
+
                     # select only data within same range
                     df_dwd = select_df_within_period(df_dwd,
                                                      netatmo_ppt_stn1.index[0],

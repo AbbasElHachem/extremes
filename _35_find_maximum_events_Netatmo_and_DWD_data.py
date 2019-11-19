@@ -31,10 +31,10 @@ myFmt = mdates.DateFormatter('%Y-%m-%d')
 # Read data
 #==============================================================================
 path_to_daily_netatmo_ppt = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\all_netatmo_ppt_data_daily_.csv"
-path_to_daily_dwd_ppt = r"F:\download_DWD_data_recent\all_dwd_daily_ppt_data_combined_2014_2019_.csv"
+path_to_daily_dwd_ppt = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\all_dwd_daily_ppt_data_combined_2014_2019_.csv"
 
 
-path_to_hourly_netatmo_ppt = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new_no_freezing_2.csv"
+path_to_hourly_netatmo_ppt = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new_no_freezing.csv"
 path_to_hourly_dwd_ppt = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\all_dwd_hourly_ppt_data_combined_2014_2019_.csv"
 
 # if True, stations how measure high value consecutively
@@ -71,40 +71,40 @@ df_netatmo_hourly = select_df_within_period(df_netatmo_hourly,
 df_dwd_hourly = select_df_within_period(df_dwd_hourly,
                                         start_date,
                                         end_date)
-if resample_data:
-    for agg_freq in resample_frequencies:
-        print('DWD stations resampling for', agg_freq)
-        df_dwd_resampled = resampleDf(df=df_dwd_hourly,
-                                      agg=agg_freq)
-        # bad_hours = stns_netatmo[stns_netatmo.duplicated()]
-        # good_hours = stns_netatmo[~stns_netatmo.duplicated()]
-
-        dwd_maximum_hrs_dates = df_dwd_resampled.max(
-            axis=1).sort_values()[::-1]
-        dwd_max_100_event = dwd_maximum_hrs_dates[:200].sort_index()
-        dwd_max_100_event = pd.DataFrame(data=np.round(dwd_max_100_event.values, 2),
-                                         index=dwd_max_100_event.index)
-        stns_dwd = df_dwd_resampled.loc[dwd_max_100_event.index, :].idxmax(
-            axis=1)
-        dwd_max_100_event['Station Id'] = stns_dwd.values
-
-    #     netatmo_max_100_event.to_csv(
-    #         r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\netatmo_%s_maximum_100_event.csv" % (
-    #             agg_freq),
-    #         sep=';', header=False)
-    #
-    #     # netatmo_max_100_hours.to_csv(
-    #     #     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\netatmo_hourly_maximum_100_hours_stns.csv",
-    #     #     sep=';', header=False)
-    #
-        dwd_max_100_event.to_csv(
-            r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\dwd_%s_maximum_100_event.csv" % (
-                agg_freq),
-            sep=';', header=False)
-
-        pass
-
-    raise Exception
+# if resample_data:
+#     for agg_freq in resample_frequencies:
+#         print('DWD stations resampling for', agg_freq)
+#         df_dwd_resampled = resampleDf(df=df_dwd_hourly,
+#                                       agg=agg_freq)
+#         # bad_hours = stns_netatmo[stns_netatmo.duplicated()]
+#         # good_hours = stns_netatmo[~stns_netatmo.duplicated()]
+#
+#         dwd_maximum_hrs_dates = df_dwd_resampled.max(
+#             axis=1).sort_values()[::-1]
+#         dwd_max_100_event = dwd_maximum_hrs_dates[:200].sort_index()
+#         dwd_max_100_event = pd.DataFrame(data=np.round(dwd_max_100_event.values, 2),
+#                                          index=dwd_max_100_event.index)
+#         stns_dwd = df_dwd_resampled.loc[dwd_max_100_event.index, :].idxmax(
+#             axis=1)
+#         dwd_max_100_event['Station Id'] = stns_dwd.values
+#
+#     #     netatmo_max_100_event.to_csv(
+#     #         r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\netatmo_%s_maximum_100_event.csv" % (
+#     #             agg_freq),
+#     #         sep=';', header=False)
+#     #
+#     #     # netatmo_max_100_hours.to_csv(
+#     #     #     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\netatmo_hourly_maximum_100_hours_stns.csv",
+#     #     #     sep=';', header=False)
+#     #
+#         dwd_max_100_event.to_csv(
+#             r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\dwd_%s_maximum_100_event.csv" % (
+#                 agg_freq),
+#             sep=';', header=False)
+#
+#         pass
+#
+#     raise Exception
 #==============================================================================
 #
 #==============================================================================
