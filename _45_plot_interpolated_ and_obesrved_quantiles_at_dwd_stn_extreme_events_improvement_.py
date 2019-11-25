@@ -29,6 +29,7 @@ plt.rcParams.update({'axes.labelsize': 12})
 main_dir = Path(
     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\oridinary_kriging_compare_DWD_Netatmo')
 
+#main_dir = Path(r'/home/IWS/hachem/Extremes')
 
 min_orig_qnt_thr = 0.
 _acc_ = ''
@@ -346,29 +347,24 @@ if plot_filtered:
         print(temp_freq)
 
         path_to_Qt_ok_un_first_flt__temp_flt_1st_ = main_dir / (
-            r'Qt_ok_ok_un__first_flt__temp_flt__1st_%s' % temp_freq)
+            r'Qt_ok_ok_un_2_first_flt__temp_flt__1st_%s' % temp_freq)
         Qt_ok_un_first_flt__temp_flt_1st_ = list_all_full_path(
             '.csv', path_to_Qt_ok_un_first_flt__temp_flt_1st_)
 
         path_to_Qt_ok_un_first_flt__temp_flt_comb_ = main_dir / (
-            r'Qt_ok_ok_un__first_flt__temp_flt__comb_%s' % temp_freq)
+            r'Qt_ok_ok_un_2_first_flt__temp_flt__comb_%s' % temp_freq)
         Qt_ok_un_first_flt__temp_flt_comb_ = list_all_full_path(
             '.csv', path_to_Qt_ok_un_first_flt__temp_flt_comb_)
 
         path_to_Qt_ok_un_first_flt_1st_ = main_dir / (
-            r'Qt_ok_ok_un__first_flt__1st_%s' % temp_freq)
+            r'Qt_ok_ok_un_2_first_flt__1st_%s' % temp_freq)
         Qt_ok_un_first_flt_1st_ = list_all_full_path(
             '.csv', path_to_Qt_ok_un_first_flt_1st_)
 
         path_to_Qt_ok_un_first_flt_comb_ = main_dir / (
-            r'Qt_ok_ok_un__first_flt__comb_%s' % temp_freq)
+            r'Qt_ok_ok_un_2_first_flt__comb_%s' % temp_freq)
         Qt_ok_un_first_flt_comb_ = list_all_full_path(
             '.csv', path_to_Qt_ok_un_first_flt_comb_)
-
-        path_to_Quantiles_netatmo_no_flt___ = main_dir / (
-            r'Qt_ok_ok_un_netatmo_no_flt___%s' % temp_freq)
-        Quantiles_netatmo_no_flt___ = list_all_full_path(
-            '.csv', path_to_Quantiles_netatmo_no_flt___)
 
         #########################################################
         path_dwd_edf_data = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\edf_ppt_all_dwd_%s_.csv" % temp_freq
@@ -391,8 +387,8 @@ if plot_filtered:
         path_interpolated_using_netatmo_dwd_list = []
         path_interpolated_using_netatmo_dwd_list_un = []
 
-        path_to_use = path_to_Qt_ok_un_first_flt_comb_
-        data_to_use = Qt_ok_un_first_flt_comb_
+        path_to_use = path_to_Qt_ok_un_first_flt__temp_flt_1st_
+        data_to_use = Qt_ok_un_first_flt__temp_flt_1st_
 
         _interp_acc_ = str(r'%s' % (str(path_to_use).split('\\')[-1]))
         # for i in range(12):

@@ -67,7 +67,7 @@ main_dir
 # In[26]:
 
 
-for temp_freq in ['60min', '720min', '1440min']:
+for temp_freq in ['60min', '360min', '720min', '1440min']:
     print(temp_freq)
 
     path_to_Qt_ok_un_first_flt__temp_flt_1st_ = main_dir / (
@@ -92,7 +92,7 @@ for temp_freq in ['60min', '720min', '1440min']:
 
     path_to_Quantiles_netatmo_no_flt___ = Path(
         r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-        r'\oridinary_kriging_compare_DWD_Netatmo\Ppt_ok_ok_un__netatmo_no_flt___%s'
+        r'\oridinary_kriging_compare_DWD_Netatmo\Ppt_ok_ok_un_netatmo_no_flt__%s'
         % temp_freq)
 
     Quantiles_netatmo_no_flt___ = list_all_full_path(
@@ -117,8 +117,8 @@ for temp_freq in ['60min', '720min', '1440min']:
 
     #########################################################
 
-    path_to_use = path_to_Qt_ok_un_first_flt_1st_
-    data_to_use = Qt_ok_un_first_flt_1st_
+    path_to_use = path_to_Quantiles_netatmo_no_flt___
+    data_to_use = Quantiles_netatmo_no_flt___
 
     _interp_acc_ = str(r'%s' % (str(path_to_use).split('\\')[-1]))
     # for i in range(12):
@@ -159,9 +159,9 @@ for temp_freq in ['60min', '720min', '1440min']:
 
     print(df_netatmo_dwd.isna().sum().max())
 
-    df_netatmo_dwd_unc = pd.read_csv(path_interpolated_using_netatmo_dwd_unc,
-                                     sep=';', index_col=0,
-                                     parse_dates=True, infer_datetime_format=True)
+#     df_netatmo_dwd_unc = pd.read_csv(path_interpolated_using_netatmo_dwd_unc,
+#                                      sep=';', index_col=0,
+#                                      parse_dates=True, infer_datetime_format=True)
     # df_netatmo_dwd_unc.dropna(inplace=True)
 
     #########################################################
@@ -186,12 +186,13 @@ for temp_freq in ['60min', '720min', '1440min']:
                 edf_stn_orig = df_dwd_edf.loc[event_date, stn_]
                 edf_stn_interp_dwd = df_dwd.loc[event_date, stn_]
                 edf_stn_interp_netatmo_dwd = df_netatmo_dwd.loc[event_date, stn_]
-                edf_stn_interp_netatmo_dwd_unc = df_netatmo_dwd_unc.loc[event_date, stn_]
+#                 edf_stn_interp_netatmo_dwd_unc = df_netatmo_dwd_unc.loc[event_date, stn_]
 
                 if ((edf_stn_orig >= 0) and
                     (edf_stn_interp_dwd >= 0) and
-                    (edf_stn_interp_netatmo_dwd >= 0) and
-                        (edf_stn_interp_netatmo_dwd_unc >= 0)):
+                        (edf_stn_interp_netatmo_dwd >= 0)):
+                    #                     and
+                    #                         (edf_stn_interp_netatmo_dwd_unc >= 0)):
                     #                     orig_edf_vals.append(edf_stn_orig)
                     #                     dwd_interp_vals.append(edf_stn_interp_dwd)
                     #                     netatmo_dwd_interp_vals.append(edf_stn_interp_netatmo_dwd)
@@ -209,9 +210,9 @@ for temp_freq in ['60min', '720min', '1440min']:
                     df_compare.loc[
                         event_date,
                         'interpolated_quantile_netatmo_dwd'] = edf_stn_interp_netatmo_dwd
-                    df_compare.loc[
-                        event_date,
-                        'interpolated_quantile_netatmo_dwd_unc'] = edf_stn_interp_netatmo_dwd_unc
+#                     df_compare.loc[
+#                         event_date,
+#                         'interpolated_quantile_netatmo_dwd_unc'] = edf_stn_interp_netatmo_dwd_unc
 
                 else:
                     df_compare.loc[event_date,
@@ -222,8 +223,8 @@ for temp_freq in ['60min', '720min', '1440min']:
                     #               'interpolated_quantile_netatmo'] = np.nan
                     df_compare.loc[event_date,
                                    'interpolated_quantile_netatmo_dwd'] = np.nan
-                    df_compare.loc[event_date,
-                                   'interpolated_quantile_netatmo_dwd_unc'] = np.nan
+#                     df_compare.loc[event_date,
+#                                    'interpolated_quantile_netatmo_dwd_unc'] = np.nan
 
             df_compare = df_compare[df_compare > 0]
             df_compare.dropna(how='any', inplace=True)
@@ -233,7 +234,7 @@ for temp_freq in ['60min', '720min', '1440min']:
 
             # values_netatmo =df_compare['interpolated_quantile_netatmo'].values
             values_netatmo_dwd = df_compare['interpolated_quantile_netatmo_dwd'].values
-            values_netatmo_dwd_unc = df_compare['interpolated_quantile_netatmo_dwd_unc'].values
+#             values_netatmo_dwd_unc = df_compare['interpolated_quantile_netatmo_dwd_unc'].values
 
             # plot the stations in shapefile, look at the results of
             # agreements
@@ -246,8 +247,8 @@ for temp_freq in ['60min', '720min', '1440min']:
             corr_netatmo_dwd = pears(values_x, values_netatmo_dwd)[0]
             rho_netatmo_dwd = spr(values_x, values_netatmo_dwd)[0]
             # netatmo dwd unc
-            corr_netatmo_dwd_unc = pears(values_x, values_netatmo_dwd_unc)[0]
-            rho_netatmo_dwd_unc = spr(values_x, values_netatmo_dwd_unc)[0]
+#             corr_netatmo_dwd_unc = pears(values_x, values_netatmo_dwd_unc)[0]
+#             rho_netatmo_dwd_unc = spr(values_x, values_netatmo_dwd_unc)[0]
 
             df_improvements.loc[stn_, 'pearson_corr_dwd_'] = corr_dwd
             df_improvements.loc[stn_, 'spearman_corr_dwd_'] = rho_dwd
@@ -256,10 +257,10 @@ for temp_freq in ['60min', '720min', '1440min']:
             df_improvements.loc[stn_,
                                 'spearman_corr_dwd_netatmo'] = rho_netatmo_dwd
 
-            df_improvements.loc[stn_,
-                                'pearson_corr_dwd_netatmo_unc'] = corr_netatmo_dwd_unc
-            df_improvements.loc[stn_,
-                                'spearman_corr_dwd_netatmo_unc'] = rho_netatmo_dwd_unc
+#             df_improvements.loc[stn_,
+#                                 'pearson_corr_dwd_netatmo_unc'] = corr_netatmo_dwd_unc
+#             df_improvements.loc[stn_,
+#                                 'spearman_corr_dwd_netatmo_unc'] = rho_netatmo_dwd_unc
 
         df_improvements.dropna(how='all', inplace=True)
 
@@ -282,27 +283,27 @@ for temp_freq in ['60min', '720min', '1440min']:
                                    df_improvements.pearson_corr_dwd_netatmo.shape[0])
 
     # OK with Unc
-    stations_with_improvements_unc = sum(i >= j for (i, j) in zip(
-        df_improvements.pearson_corr_dwd_netatmo_unc.values,
-        df_improvements.pearson_corr_dwd_.values))
+#     stations_with_improvements_unc = sum(i >= j for (i, j) in zip(
+#         df_improvements.pearson_corr_dwd_netatmo_unc.values,
+#         df_improvements.pearson_corr_dwd_.values))
 
-    stations_without_improvements_unc = sum(i < j for (i, j) in zip(
-        df_improvements.pearson_corr_dwd_netatmo_unc.values,
-        df_improvements.pearson_corr_dwd_.values))
+#     stations_without_improvements_unc = sum(i < j for (i, j) in zip(
+#         df_improvements.pearson_corr_dwd_netatmo_unc.values,
+#         df_improvements.pearson_corr_dwd_.values))
 
-    percent_of_improvment_unc = 100 * (
-        stations_with_improvements_unc /
-        df_improvements.pearson_corr_dwd_netatmo_unc.shape[0])
+#     percent_of_improvment_unc = 100 * (
+#         stations_with_improvements_unc /
+#         df_improvements.pearson_corr_dwd_netatmo_unc.shape[0])
 
     ####
     mean_pearson_correlation_dwd_only = df_improvements.pearson_corr_dwd_.mean()
     mean_pearson_correlation_dwd_netatmo = df_improvements.pearson_corr_dwd_netatmo.mean()
-    mean_pearson_correlation_dwd_netatmo_unc = df_improvements.pearson_corr_dwd_netatmo_unc.mean()
+#     mean_pearson_correlation_dwd_netatmo_unc = df_improvements.pearson_corr_dwd_netatmo_unc.mean()
 
     #########################################################
     mean_spr_correlation_dwd_only = df_improvements.spearman_corr_dwd_.mean()
     mean_spr_correlation_dwd_netatmo = df_improvements.spearman_corr_dwd_netatmo.mean()
-    mean_spr_correlation_dwd_netatmo_unc = df_improvements.spearman_corr_dwd_netatmo_unc.mean()
+#     mean_spr_correlation_dwd_netatmo_unc = df_improvements.spearman_corr_dwd_netatmo_unc.mean()
     #########################################################
     plt.ioff()
     fig = plt.figure(figsize=(24, 12), dpi=150)
@@ -324,25 +325,25 @@ for temp_freq in ['60min', '720min', '1440min']:
             label='DWD-Netatmo Interpolation %0.2f'
             % mean_pearson_correlation_dwd_netatmo)
 
-    ax.plot(df_improvements.index,
-            df_improvements.pearson_corr_dwd_netatmo_unc,
-            alpha=.8,
-            c='g',  # colors_arr,
-            marker='+',
-            label='DWD-Netatmo Interpolation Unc %0.2f'
-            % mean_pearson_correlation_dwd_netatmo_unc)
+#     ax.plot(df_improvements.index,
+#             df_improvements.pearson_corr_dwd_netatmo_unc,
+#             alpha=.8,
+#             c='g',  # colors_arr,
+#             marker='+',
+#             label='DWD-Netatmo Interpolation Unc %0.2f'
+#             % mean_pearson_correlation_dwd_netatmo_unc)
 
     ax.set_title('Pearson Correlation Interpolated Quantiles from DWD or DWD-Netatmo\n '
                  'Precipitation of %s Extreme Events %s\n Events with Improvemnts %d / %d, Percentage %0.0f\n'
-                 'Events with Improvemnts with OK Unc %d / %d, Percentage %0.0f'
+                 #                  'Events with Improvemnts with OK Unc %d / %d, Percentage %0.0f'
                  % (temp_freq, _interp_acc_,
                     stations_with_improvements,
                      df_improvements.pearson_corr_dwd_netatmo.shape[0],
-                    percent_of_improvment,
-                    stations_with_improvements_unc,
-                     df_improvements.pearson_corr_dwd_netatmo_unc.shape[
-                         0],
-                    percent_of_improvment_unc))
+                    percent_of_improvment))
+#                     stations_with_improvements_unc,
+#                      df_improvements.pearson_corr_dwd_netatmo_unc.shape[
+#                          0],
+#                     percent_of_improvment_unc))
     ax.grid(alpha=0.25)
     plt.setp(ax.get_xticklabels(), rotation=45)
     ax.grid(alpha=0.25)
@@ -370,16 +371,16 @@ for temp_freq in ['60min', '720min', '1440min']:
                                    df_improvements.spearman_corr_dwd_netatmo.shape[0])
 
     # ok with Un
-    stations_with_improvements_unc = sum(i >= j for (i, j) in zip(
-        df_improvements.spearman_corr_dwd_netatmo_unc.values,
-        df_improvements.spearman_corr_dwd_.values))
+#     stations_with_improvements_unc = sum(i >= j for (i, j) in zip(
+#         df_improvements.spearman_corr_dwd_netatmo_unc.values,
+#         df_improvements.spearman_corr_dwd_.values))
 
-    stations_without_improvements_unc = sum(i < j for (i, j) in zip(
-        df_improvements.spearman_corr_dwd_netatmo_unc.values,
-        df_improvements.spearman_corr_dwd_.values))
+#     stations_without_improvements_unc = sum(i < j for (i, j) in zip(
+#         df_improvements.spearman_corr_dwd_netatmo_unc.values,
+#         df_improvements.spearman_corr_dwd_.values))
 
-    percent_of_improvment_unc = 100 * (stations_with_improvements_unc /
-                                       df_improvements.spearman_corr_dwd_netatmo_unc.shape[0])
+#     percent_of_improvment_unc = 100 * (stations_with_improvements_unc /
+#                                        df_improvements.spearman_corr_dwd_netatmo_unc.shape[0])
     #########################################################
     plt.ioff()
     fig = plt.figure(figsize=(24, 12), dpi=150)
@@ -400,25 +401,25 @@ for temp_freq in ['60min', '720min', '1440min']:
             marker='*',
             label='DWD-Netatmo Interpolation %0.2f'
             % mean_spr_correlation_dwd_netatmo)
-    ax.plot(df_improvements.index,
-            df_improvements.spearman_corr_dwd_netatmo_unc,
-            alpha=.8,
-            c='g',  # colors_arr,
-            marker='+',
-            label='DWD-Netatmo Interpolation Unc %0.2f'
-            % mean_spr_correlation_dwd_netatmo_unc)
+#     ax.plot(df_improvements.index,
+#             df_improvements.spearman_corr_dwd_netatmo_unc,
+#             alpha=.8,
+#             c='g',  # colors_arr,
+#             marker='+',
+#             label='DWD-Netatmo Interpolation Unc %0.2f'
+#             % mean_spr_correlation_dwd_netatmo_unc)
 
     ax.set_title('Spearman Correlation Interpolated Quantiles from DWD or DWD-Netatmo \n '
                  'Rainfall of %s Extreme Events %s \n Events with Improvemnts %d / %d, Percentage %0.0f'
-                 '\n Events with Improvemnts OK with Unc %d / %d, Percentage %0.0f'
+                 #                  '\n Events with Improvemnts OK with Unc %d / %d, Percentage %0.0f'
                  % (temp_freq, _interp_acc_,
                     stations_with_improvements,
                      df_improvements.spearman_corr_dwd_netatmo.shape[0],
-                    percent_of_improvment,
-                    stations_with_improvements_unc,
-                     df_improvements.spearman_corr_dwd_netatmo_unc.shape[
-                         0],
-                    percent_of_improvment_unc))
+                    percent_of_improvment))
+#                     stations_with_improvements_unc,
+#                      df_improvements.spearman_corr_dwd_netatmo_unc.shape[
+#                          0],
+#                     percent_of_improvment_unc))
     ax.grid(alpha=0.25)
     plt.setp(ax.get_xticklabels(), rotation=45)
     ax.grid(alpha=0.25)
