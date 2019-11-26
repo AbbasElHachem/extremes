@@ -103,8 +103,8 @@ for temp_freq in ['60min', '360min', '720min', '1440min']:
     path_interpolated_using_netatmo_dwd_list = []
     path_interpolated_using_netatmo_dwd_list_un = []
 
-    path_to_use = path_to_Qt_ok_un_first_flt__temp_flt_1st_
-    data_to_use = Qt_ok_un_first_flt__temp_flt_1st_
+    path_to_use = path_to_Qt_ok_un_first_flt__temp_flt_comb_
+    data_to_use = Qt_ok_un_first_flt__temp_flt_comb_
 
     _interp_acc_ = str(r'%s' % (str(path_to_use).split('\\')[-1]))
     # for i in range(12):

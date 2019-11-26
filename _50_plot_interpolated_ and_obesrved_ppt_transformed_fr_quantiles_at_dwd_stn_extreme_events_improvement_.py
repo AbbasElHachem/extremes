@@ -35,8 +35,8 @@ main_dir = Path(
 min_orig_qnt_thr = 0.
 _acc_ = ''
 
-plot_not_filtered = True
-plot_filtered = False
+plot_not_filtered = False
+plot_filtered = True
 #==============================================================================
 #
 #==============================================================================
@@ -52,7 +52,7 @@ if plot_filtered:
             '.csv', path_to_Qt_ok_un_first_flt__temp_flt_1st_)
 
         path_to_Qt_ok_un_first_flt__temp_flt_comb_ = main_dir / (
-            r'Qt_ok_ok_un__first_flt__temp_flt__comb_%s' % temp_freq)
+            r'Qt_ok_ok_un_2_first_flt__temp_flt__comb_%s' % temp_freq)
         Qt_ok_un_first_flt__temp_flt_comb_ = list_all_full_path(
             '.csv', path_to_Qt_ok_un_first_flt__temp_flt_comb_)
 
@@ -62,7 +62,7 @@ if plot_filtered:
             '.csv', path_to_Qt_ok_un_first_flt_1st_)
 
         path_to_Qt_ok_un_first_flt_comb_ = main_dir / (
-            r'Qt_ok_ok_un__first_flt__comb_%s' % temp_freq)
+            r'Qt_ok_ok_un_2_first_flt__comb_%s' % temp_freq)
         Qt_ok_un_first_flt_comb_ = list_all_full_path(
             '.csv', path_to_Qt_ok_un_first_flt_comb_)
 
@@ -92,8 +92,8 @@ if plot_filtered:
         path_interpolated_using_netatmo_dwd_list = []
         path_interpolated_using_netatmo_dwd_list_un = []
 
-        path_to_use = path_to_Qt_ok_un_first_flt_comb_
-        data_to_use = Qt_ok_un_first_flt_comb_
+        path_to_use = path_to_Qt_ok_un_first_flt__temp_flt_comb_
+        data_to_use = Qt_ok_un_first_flt__temp_flt_comb_
 
         _interp_acc_ = str(r'%s' % (str(path_to_use).split('\\')[-1]))
         # for i in range(12):
