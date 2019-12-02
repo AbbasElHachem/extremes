@@ -52,7 +52,7 @@ if plot_filtered:
             '.csv', path_to_Qt_ok_un_first_flt__temp_flt_1st_)
 
         path_to_Qt_ok_un_first_flt__temp_flt_comb_ = main_dir / (
-            r'Qt_ok_ok_un_2_first_flt__temp_flt__comb_%s' % temp_freq)
+            r'Qt_ok_ok_un__first_flt__temp_flt__comb_%s' % temp_freq)
         Qt_ok_un_first_flt__temp_flt_comb_ = list_all_full_path(
             '.csv', path_to_Qt_ok_un_first_flt__temp_flt_comb_)
 
@@ -62,7 +62,7 @@ if plot_filtered:
             '.csv', path_to_Qt_ok_un_first_flt_1st_)
 
         path_to_Qt_ok_un_first_flt_comb_ = main_dir / (
-            r'Qt_ok_ok_un_2_first_flt__comb_%s' % temp_freq)
+            r'Qt_ok_ok_un__first_flt__comb_%s' % temp_freq)
         Qt_ok_un_first_flt_comb_ = list_all_full_path(
             '.csv', path_to_Qt_ok_un_first_flt_comb_)
 
@@ -92,8 +92,8 @@ if plot_filtered:
         path_interpolated_using_netatmo_dwd_list = []
         path_interpolated_using_netatmo_dwd_list_un = []
 
-        path_to_use = path_to_Qt_ok_un_first_flt__temp_flt_comb_
-        data_to_use = Qt_ok_un_first_flt__temp_flt_comb_
+        path_to_use = path_to_Qt_ok_un_first_flt_comb_
+        data_to_use = Qt_ok_un_first_flt_comb_
 
         _interp_acc_ = str(r'%s' % (str(path_to_use).split('\\')[-1]))
         # for i in range(12):
@@ -172,15 +172,15 @@ if plot_filtered:
                             original_ppt_stn, 0)
 
                         if np.isclose(interpolated_quantile_dwd,
-                                      p0_stn / 2, atol=0.1):
+                                      p0_stn, atol=0.1):
                             ppt_interp_fr_dwd = 0
 
                         if np.isclose(interpolated_quantile_netatmo_dwd,
-                                      p0_stn / 2, atol=0.1):
+                                      p0_stn, atol=0.1):
                             ppt_interp_fr_dwd_netatmo = 0
 
                         if np.isclose(original_quantile,
-                                      p0_stn / 2, atol=0.1):
+                                      p0_stn, atol=0.1):
                             ppt_orig_fr_edf = 0
 
                         else:
@@ -402,7 +402,7 @@ if plot_filtered:
         ax.set_ylabel('RMSE')
 
         plt.savefig((path_to_use / (
-            r'rmse_%s_events_dwd_%s_.png' % (temp_freq, _interp_acc_))),
+            r'rmse_%s_events_dwd_%s_p0.png' % (temp_freq, _interp_acc_))),
             frameon=True, papertype='a4', bbox_inches='tight', pad_inches=.2)
         plt.close()
 
@@ -500,7 +500,7 @@ if plot_filtered:
         ax.set_ylabel('Pearson Correlation')
 
         plt.savefig((path_to_use / (
-            r'rmse_pears_corr_%s_events_dwd_%s_.png' % (temp_freq, _interp_acc_))),
+            r'rmse_pears_corr_%s_events_dwd_%s_p0.png' % (temp_freq, _interp_acc_))),
             frameon=True, papertype='a4', bbox_inches='tight', pad_inches=.2)
         plt.close()
 
@@ -565,7 +565,7 @@ if plot_filtered:
         ax.set_ylabel('Spearman Correlation')
 
         plt.savefig((path_to_use / (
-            r'rmse_spr_corr_%s_events_dwd_%s_.png' % (temp_freq, _interp_acc_))),
+            r'rmse_spr_corr_%s_events_dwd_%s_p0.png' % (temp_freq, _interp_acc_))),
             frameon=True, papertype='a4', bbox_inches='tight', pad_inches=.2)
         plt.close()
 
@@ -869,7 +869,7 @@ if plot_not_filtered:
             ax.set_ylabel('RMSE')
 
             plt.savefig((path_to_use / (
-                r'rmse_%s_events_dwd_%s_.png' % (temp_freq, _interp_acc_))),
+                r'rmse_%s_events_dwd_%s_p02.png' % (temp_freq, _interp_acc_))),
                 frameon=True, papertype='a4', bbox_inches='tight', pad_inches=.2)
             plt.close()
 
@@ -938,7 +938,7 @@ if plot_not_filtered:
             ax.set_ylabel('Pearson Correlation')
 
             plt.savefig((path_to_use / (
-                r'rmse_pears_corr_%s_events_dwd_%s_.png' % (temp_freq, _interp_acc_))),
+                r'rmse_pears_corr_%s_events_dwd_%s_p02.png' % (temp_freq, _interp_acc_))),
                 frameon=True, papertype='a4', bbox_inches='tight', pad_inches=.2)
             plt.close()
 
@@ -987,6 +987,6 @@ if plot_not_filtered:
             ax.set_ylabel('Spearman Correlation')
 
             plt.savefig((path_to_use / (
-                r'rmse_spr_corr_%s_events_dwd_%s_.png' % (temp_freq, _interp_acc_))),
+                r'rmse_spr_corr_%s_events_dwd_%s_p02.png' % (temp_freq, _interp_acc_))),
                 frameon=True, papertype='a4', bbox_inches='tight', pad_inches=.2)
             plt.close()

@@ -71,29 +71,27 @@ for temp_freq in ['60min', '360min', '720min', '1440min']:
     print(temp_freq)
 
     path_to_Qt_ok_un_first_flt__temp_flt_1st_ = main_dir / (
-        r'Ppt_ok_ok_un__first_flt__temp_flt__1st_%s' % temp_freq)
+        r'Ppt_ok_ok_un_new_first_flt__temp_flt__1st_%s' % temp_freq)
     Qt_ok_un_first_flt__temp_flt_1st_ = list_all_full_path(
         '.csv', path_to_Qt_ok_un_first_flt__temp_flt_1st_)
 
     path_to_Qt_ok_un_first_flt__temp_flt_comb_ = main_dir / (
-        r'Ppt_ok_ok_un__first_flt__temp_flt__comb_%s' % temp_freq)
+        r'Ppt_ok_ok_un_new_first_flt__temp_flt__comb_%s' % temp_freq)
     Qt_ok_un_first_flt__temp_flt_comb_ = list_all_full_path(
         '.csv', path_to_Qt_ok_un_first_flt__temp_flt_comb_)
 
     path_to_Qt_ok_un_first_flt_1st_ = main_dir / (
-        r'Ppt_ok_ok_un__first_flt__1st_%s' % temp_freq)
+        r'Ppt_ok_ok_un_new_first_flt__1st_%s' % temp_freq)
     Qt_ok_un_first_flt_1st_ = list_all_full_path(
         '.csv', path_to_Qt_ok_un_first_flt_1st_)
 
     path_to_Qt_ok_un_first_flt_comb_ = main_dir / (
-        r'Ppt_ok_ok_un__first_flt__comb_%s' % temp_freq)
+        r'Ppt_ok_ok_un_new_first_flt__comb_%s' % temp_freq)
     Qt_ok_un_first_flt_comb_ = list_all_full_path(
         '.csv', path_to_Qt_ok_un_first_flt_comb_)
 
-    path_to_Quantiles_netatmo_no_flt___ = Path(
-        r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-        r'\oridinary_kriging_compare_DWD_Netatmo\Ppt_ok_ok_un_netatmo_no_flt__%s'
-        % temp_freq)
+    path_to_Quantiles_netatmo_no_flt___ = main_dir / (
+        r'Ppt_ok_ok_un_new_netatmo_no_flt___%s' % temp_freq)
 
     Quantiles_netatmo_no_flt___ = list_all_full_path(
         '.csv', path_to_Quantiles_netatmo_no_flt___)
@@ -117,8 +115,8 @@ for temp_freq in ['60min', '360min', '720min', '1440min']:
 
     #########################################################
 
-    path_to_use = path_to_Qt_ok_un_first_flt__temp_flt_comb_
-    data_to_use = Qt_ok_un_first_flt__temp_flt_comb_
+    path_to_use = path_to_Qt_ok_un_first_flt_comb_
+    data_to_use = Qt_ok_un_first_flt_comb_
 
     _interp_acc_ = str(r'%s' % (str(path_to_use).split('\\')[-1]))
     # for i in range(12):
@@ -147,38 +145,25 @@ for temp_freq in ['60min', '360min', '720min', '1440min']:
                          sep=';', index_col=0, parse_dates=True,
                          infer_datetime_format=True)
 
-    # f_dwd.dropna(inplace=True)
-
     print(df_dwd.isna().sum().max())
 
     df_netatmo_dwd = pd.read_csv(path_interpolated_using_netatmo_dwd,
                                  sep=';', index_col=0,
                                  parse_dates=True,
                                  infer_datetime_format=True)
-    # df_netatmo_dwd.dropna(inplace=True)
 
     print(df_netatmo_dwd.isna().sum().max())
 
     df_netatmo_dwd_unc = pd.read_csv(path_interpolated_using_netatmo_dwd_unc,
                                      sep=';', index_col=0,
                                      parse_dates=True, infer_datetime_format=True)
-    # df_netatmo_dwd_unc.dropna(inplace=True)
 
     #########################################################
 
     df_compare = pd.DataFrame(index=df_dwd.index)
 
-#     df_dwd_edf = df_dwd_edf.loc[df_dwd_edf.index.intersection(
-#         df_netatmo_dwd.index), :]
-#
-#     df_dwd_edf = df_dwd_edf[df_dwd_edf > 0]
-    # df_dwd_edf.dropna(how='all')
-
     try:
 
-        #         (orig_edf_vals, dwd_interp_vals,
-        # netatmo_dwd_interp_vals, netatmo_dwd_interp_vals_unc) = [], [], [],
-        # []
         for stn_ in df_dwd_edf.columns:
 
             for event_date in df_dwd.index.intersection(df_dwd_edf.index):
@@ -192,12 +177,6 @@ for temp_freq in ['60min', '360min', '720min', '1440min']:
                     (edf_stn_interp_dwd >= 0) and
                         (edf_stn_interp_netatmo_dwd >= 0)
                         and (edf_stn_interp_netatmo_dwd_unc >= 0)):
-                    #                     orig_edf_vals.append(edf_stn_orig)
-                    #                     dwd_interp_vals.append(edf_stn_interp_dwd)
-                    #                     netatmo_dwd_interp_vals.append(edf_stn_interp_netatmo_dwd)
-                    #
-                    #                     netatmo_dwd_interp_vals_unc.append(
-                    #                         edf_stn_interp_netatmo_dwd_unc)
 
                     df_compare.loc[
                         event_date,
@@ -230,7 +209,6 @@ for temp_freq in ['60min', '360min', '720min', '1440min']:
             values_x = df_compare['original_quantile'].values
             values_dwd = df_compare['interpolated_quantile_dwd'].values
 
-            # values_netatmo =df_compare['interpolated_quantile_netatmo'].values
             values_netatmo_dwd = df_compare['interpolated_quantile_netatmo_dwd'].values
             values_netatmo_dwd_unc = df_compare['interpolated_quantile_netatmo_dwd_unc'].values
 
@@ -280,7 +258,7 @@ for temp_freq in ['60min', '360min', '720min', '1440min']:
     percent_of_improvment = 100 * (stations_with_improvements /
                                    df_improvements.pearson_corr_dwd_netatmo.shape[0])
 
-    # OK with Unc
+#     # OK with Unc
     stations_with_improvements_unc = sum(i >= j for (i, j) in zip(
         df_improvements.pearson_corr_dwd_netatmo_unc.values,
         df_improvements.pearson_corr_dwd_.values))
@@ -348,7 +326,7 @@ for temp_freq in ['60min', '360min', '720min', '1440min']:
     ax.set_yticks(np.arange(0, 1.05, .10))
     ax.set_xlabel('DWD Stations')
     ax.legend(loc='lower right')
-    ax.set_ylabel('Spearman Correlation')
+    ax.set_ylabel('Pearson Correlation')
 
     plt.savefig(os.path.join(path_to_use,
                              r'ppt_temporal_pears_corr_%s_events_dwd.png' % temp_freq,
