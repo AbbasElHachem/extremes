@@ -59,7 +59,7 @@ def list_all_full_path(ext, file_dir):
 # In[13]:
 
 
-for temp_freq in ['60min', '360min', '720min', '1440min']:
+for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
     print(temp_freq)
 
     path_to_Qt_ok_un_first_flt__temp_flt_1st_ = main_dir / (
@@ -103,6 +103,10 @@ for temp_freq in ['60min', '360min', '720min', '1440min']:
     path_interpolated_using_netatmo_dwd_list = []
     path_interpolated_using_netatmo_dwd_list_un = []
 
+    path_interpolated_using_dwd_list_std_dev = []
+    path_interpolated_using_netatmo_dwd_list_std_dev = []
+    path_interpolated_using_netatmo_dwd_list_un_std_dev = []
+
     path_to_use = path_to_Qt_ok_un_first_flt__temp_flt_comb_
     data_to_use = Qt_ok_un_first_flt__temp_flt_comb_
 
@@ -124,6 +128,23 @@ for temp_freq in ['60min', '360min', '720min', '1440min']:
                 print(df_file)
                 path_interpolated_using_netatmo_dwd_list_un.append(df_file)
 
+            if (('using_dwd_only_grp_') in df_file) and (
+                    ('std_dev') in df_file):
+                print(df_file)
+                path_interpolated_using_dwd_list_std_dev.append(df_file)
+            if (('using_dwd_netamo_grp_') in df_file) and (
+                    ('std_dev') in df_file):
+
+                print(df_file)
+                path_interpolated_using_netatmo_dwd_list_std_dev.append(
+                    df_file)
+
+            if (('interpolated_quantiles_un_dwd_') in df_file) and (
+                    ('std_dev') in df_file):
+                print(df_file)
+                path_interpolated_using_netatmo_dwd_list_un_std_dev.append(
+                    df_file)
+
     except Exception as msg:
         print(msg)
         continue
@@ -134,13 +155,24 @@ for temp_freq in ['60min', '360min', '720min', '1440min']:
     df_combined_interp_dwd = pd.DataFrame(columns=stns_dwd)
     df_combined_interp_dwd_netatmo = pd.DataFrame(columns=stns_dwd)
     df_combined_interp_dwd_netatmo_unc = pd.DataFrame(columns=stns_dwd)
+    # STD DEV
+    df_combined_interp_dwd_std_dev = pd.DataFrame(columns=stns_dwd)
+    df_combined_interp_dwd_netatmo_std_dev = pd.DataFrame(columns=stns_dwd)
+    df_combined_interp_dwd_netatmo_unc_std_dev = pd.DataFrame(columns=stns_dwd)
+
     for (path_interpolated_using_dwd,
          path_interpolated_using_netatmo_dwd,
-         path_interpolated_using_netatmo_dwd_unc
+         path_interpolated_using_netatmo_dwd_unc,
+         path_interpolated_using_dwd_std_dev,
+         path_interpolated_using_netatmo_dwd_std_dev,
+         path_interpolated_using_netatmo_dwd_unc_std_dev
          ) in zip(
             path_interpolated_using_dwd_list,
             path_interpolated_using_netatmo_dwd_list,
-            path_interpolated_using_netatmo_dwd_list_un):
+            path_interpolated_using_netatmo_dwd_list_un,
+            path_interpolated_using_dwd_list_std_dev,
+            path_interpolated_using_netatmo_dwd_list_std_dev,
+            path_interpolated_using_netatmo_dwd_list_un_std_dev):
 
         df_dwd = pd.read_csv(path_interpolated_using_dwd,
                              sep=';', index_col=0,
@@ -156,6 +188,24 @@ for temp_freq in ['60min', '360min', '720min', '1440min']:
                                          sep=';', index_col=0,
                                          parse_dates=True,
                                          infer_datetime_format=True)
+        # STD DEV
+        df_dwd_std_dev = pd.read_csv(
+            path_interpolated_using_dwd_std_dev,
+            sep=';', index_col=0,
+            parse_dates=True,
+            infer_datetime_format=True)
+
+        df_netatmo_dwd_std_dev = pd.read_csv(
+            path_interpolated_using_netatmo_dwd_std_dev,
+            sep=';', index_col=0,
+            parse_dates=True,
+            infer_datetime_format=True)
+
+        df_netatmo_dwd_unc_std_dev = pd.read_csv(
+            path_interpolated_using_netatmo_dwd_unc_std_dev,
+            sep=';', index_col=0,
+            parse_dates=True,
+            infer_datetime_format=True)
         for stn_ in df_dwd.columns:
             # print(stn_)
             for event_date in df_dwd.index[1:]:
@@ -179,6 +229,38 @@ for temp_freq in ['60min', '360min', '720min', '1440min']:
                 interpolated_quantile_netatmo_dwd_unc = df_netatmo_dwd_unc.loc[event_date, stn_]
                 df_combined_interp_dwd_netatmo_unc.loc[event_date,
                                                        stn_] = interpolated_quantile_netatmo_dwd_unc
+
+        # STD DEV
+        #############
+        for stn_ in df_dwd_std_dev.columns:
+            # print(stn_)
+            for event_date in df_dwd_std_dev.index[1:]:
+                # interpolated_quantile_netatmo = df_netatmo.loc[event_date, stn_]
+
+                interpolated_quantile_dwd_std_dev = df_dwd_std_dev.loc[event_date, stn_]
+
+                df_combined_interp_dwd_std_dev.loc[
+                    event_date,
+                    stn_] = interpolated_quantile_dwd_std_dev
+
+        for stn_ in df_netatmo_dwd_std_dev.columns:
+            print(stn_)
+            for event_date in df_netatmo_dwd_std_dev.index[1:]:
+                interpolated_quantile_netatmo_dwd_std_dev = df_netatmo_dwd_std_dev.loc[
+                    event_date, stn_]
+                df_combined_interp_dwd_netatmo_std_dev.loc[
+                    event_date,
+                    stn_] = interpolated_quantile_netatmo_dwd_std_dev
+
+        for stn_ in df_netatmo_dwd_unc_std_dev.columns:
+            print(stn_)
+            for event_date in df_netatmo_dwd_unc_std_dev.index[1:]:
+                interpolated_quantile_netatmo_dwd_unc_std_dev = df_netatmo_dwd_unc_std_dev.loc[
+                    event_date, stn_]
+                df_combined_interp_dwd_netatmo_unc_std_dev.loc[
+                    event_date,
+                    stn_] = interpolated_quantile_netatmo_dwd_unc_std_dev
+
     df_combined_interp_dwd.to_csv(path_to_use / (
         r'df_combined_interp_dwd_%s_events_at_dwd_%s.csv' % (temp_freq, _interp_acc_)),
         sep=';')
@@ -189,7 +271,15 @@ for temp_freq in ['60min', '360min', '720min', '1440min']:
         r'df_combined_interp_dwd_netatmo_unc_%s_events_at_dwd_%s.csv' % (temp_freq, _interp_acc_)),
         sep=';')
 
-
+    df_combined_interp_dwd_std_dev.to_csv(path_to_use / (
+        r'std_dev_df_combined_interp_dwd_%s_events_at_dwd_%s.csv' % (temp_freq, _interp_acc_)),
+        sep=';')
+    df_combined_interp_dwd_netatmo_std_dev.to_csv(path_to_use / (
+        r'std_dev_df_combined_interp_dwd_netatmo_%s_events_at_dwd_%s.csv' % (temp_freq, _interp_acc_)),
+        sep=';')
+    df_combined_interp_dwd_netatmo_unc_std_dev.to_csv(path_to_use / (
+        r'std_dev_df_combined_interp_dwd_netatmo_unc_%s_events_at_dwd_%s.csv' % (temp_freq, _interp_acc_)),
+        sep=';')
 # In[12]:
 
 

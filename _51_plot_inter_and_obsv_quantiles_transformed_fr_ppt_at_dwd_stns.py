@@ -35,14 +35,14 @@ main_dir = Path(
 min_orig_qnt_thr = 0.
 _acc_ = ''
 
-plot_not_filtered = True  # False
-plot_filtered = False  # True
+plot_not_filtered = False  # False
+plot_filtered = True  # True
 #==============================================================================
 #
 #==============================================================================
 
 if plot_filtered:
-    for temp_freq in ['60min', '360min', '720min', '1440min']:
+    for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
         # '60min', '360min',  '1440min'
         print(temp_freq)
 
@@ -92,8 +92,8 @@ if plot_filtered:
         path_interpolated_using_netatmo_dwd_list = []
         path_interpolated_using_netatmo_dwd_list_un = []
 
-        path_to_use = path_to_Qt_ok_un_first_flt_1st_
-        data_to_use = Qt_ok_un_first_flt_1st_
+        path_to_use = path_to_Qt_ok_un_first_flt_comb_
+        data_to_use = Qt_ok_un_first_flt_comb_
 
         _interp_acc_ = str(r'%s' % (str(path_to_use).split('\\')[-1]))
         # for i in range(12):
@@ -145,7 +145,7 @@ if plot_filtered:
             print('Total number of events is',
                   cmn_interpolated_events.shape[0])
             for stn_ in df_dwd.columns:
-                print(stn_)
+                #                 print(stn_)
                 #stn_ = df_dwd.columns[0]
                 for event_date in cmn_interpolated_events:
                     # print(event_date)

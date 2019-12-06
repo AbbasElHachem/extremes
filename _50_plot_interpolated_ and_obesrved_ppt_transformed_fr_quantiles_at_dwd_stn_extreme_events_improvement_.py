@@ -40,9 +40,14 @@ plot_filtered = True
 #==============================================================================
 #
 #==============================================================================
-
+# def backtransform_qt_to_ppt(qt, std_dev):
+#     qz_mod = ((qt-std_dev) )
+#     pass
+#==============================================================================
+#
+#==============================================================================
 if plot_filtered:
-    for temp_freq in ['60min', '360min', '720min', '1440min']:
+    for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
         # '60min', '360min',  '1440min'
         print(temp_freq)
 
@@ -52,7 +57,7 @@ if plot_filtered:
             '.csv', path_to_Qt_ok_un_first_flt__temp_flt_1st_)
 
         path_to_Qt_ok_un_first_flt__temp_flt_comb_ = main_dir / (
-            r'Qt_ok_ok_un__first_flt__temp_flt__comb_%s' % temp_freq)
+            r'Qt_ok_ok_un_2_first_flt__temp_flt__comb_%s' % temp_freq)
         Qt_ok_un_first_flt__temp_flt_comb_ = list_all_full_path(
             '.csv', path_to_Qt_ok_un_first_flt__temp_flt_comb_)
 
@@ -62,7 +67,7 @@ if plot_filtered:
             '.csv', path_to_Qt_ok_un_first_flt_1st_)
 
         path_to_Qt_ok_un_first_flt_comb_ = main_dir / (
-            r'Qt_ok_ok_un__first_flt__comb_%s' % temp_freq)
+            r'Qt_ok_ok_un_2_first_flt__comb_%s' % temp_freq)
         Qt_ok_un_first_flt_comb_ = list_all_full_path(
             '.csv', path_to_Qt_ok_un_first_flt_comb_)
 
@@ -92,6 +97,10 @@ if plot_filtered:
         path_interpolated_using_netatmo_dwd_list = []
         path_interpolated_using_netatmo_dwd_list_un = []
 
+        path_interpolated_using_dwd_list_std_dev = []
+        path_interpolated_using_netatmo_dwd_list_std_dev = []
+        path_interpolated_using_netatmo_dwd_list_un_std_dev = []
+
         path_to_use = path_to_Qt_ok_un_first_flt_comb_
         data_to_use = Qt_ok_un_first_flt_comb_
 
@@ -101,17 +110,37 @@ if plot_filtered:
         try:
             for df_file in data_to_use:
 
-                if ('using_dwd_only_grp_') in df_file:
+                if ('using_dwd_only_grp_') in df_file and (
+                        ('std_dev') not in df_file):
                     print(df_file)
                     path_interpolated_using_dwd_list.append(df_file)
-                if ('using_dwd_netamo_grp_') in df_file:
+                if ('using_dwd_netamo_grp_') in df_file and (
+                        ('std_dev') not in df_file):
 
                     print(df_file)
                     path_interpolated_using_netatmo_dwd_list.append(df_file)
 
-                if ('interpolated_quantiles_un_dwd_') in df_file:
+                if ('interpolated_quantiles_un_dwd_') in df_file and (
+                        ('std_dev') not in df_file):
                     print(df_file)
                     path_interpolated_using_netatmo_dwd_list_un.append(df_file)
+
+                if (('using_dwd_only_grp_') in df_file) and (
+                        ('std_dev') in df_file):
+                    print(df_file)
+                    path_interpolated_using_dwd_list_std_dev.append(df_file)
+                if (('using_dwd_netamo_grp_') in df_file) and (
+                        ('std_dev') in df_file):
+
+                    print(df_file)
+                    path_interpolated_using_netatmo_dwd_list_std_dev.append(
+                        df_file)
+
+                if (('interpolated_quantiles_un_dwd_') in df_file) and (
+                        ('std_dev') in df_file):
+                    print(df_file)
+                    path_interpolated_using_netatmo_dwd_list_un_std_dev.append(
+                        df_file)
 
         except Exception as msg:
             print(msg)
@@ -120,23 +149,51 @@ if plot_filtered:
 
         for (path_interpolated_using_dwd,
              path_interpolated_using_netatmo_dwd,
-             path_interpolated_using_netatmo_dwd_unc) in zip(
+             path_interpolated_using_netatmo_dwd_unc,
+             path_interpolated_using_dwd_std_dev,
+             path_interpolated_using_netatmo_dwd_std_dev,
+             path_interpolated_using_netatmo_dwd_unc_std_dev
+             ) in zip(
                 path_interpolated_using_dwd_list,
                 path_interpolated_using_netatmo_dwd_list,
-                path_interpolated_using_netatmo_dwd_list_un):
+                path_interpolated_using_netatmo_dwd_list_un,
+                path_interpolated_using_dwd_list_std_dev,
+                path_interpolated_using_netatmo_dwd_list_std_dev,
+                path_interpolated_using_netatmo_dwd_list_un_std_dev):
 
-            df_dwd = pd.read_csv(path_interpolated_using_dwd, skiprows=[1],
-                                 sep=';', index_col=0,
-                                 parse_dates=True, infer_datetime_format=True)
+            df_dwd = pd.read_csv(
+                path_interpolated_using_dwd, skiprows=[1],
+                sep=';', index_col=0,
+                parse_dates=True, infer_datetime_format=True)
 
-            df_netatmo_dwd = pd.read_csv(path_interpolated_using_netatmo_dwd, skiprows=[1],
-                                         sep=';', index_col=0,
-                                         parse_dates=True, infer_datetime_format=True)
+            df_netatmo_dwd = pd.read_csv(
+                path_interpolated_using_netatmo_dwd, skiprows=[1],
+                sep=';', index_col=0,
+                parse_dates=True, infer_datetime_format=True)
 
-            df_netatmo_dwd_unc = pd.read_csv(path_interpolated_using_netatmo_dwd_unc, skiprows=[1],
-                                             sep=';', index_col=0,
-                                             parse_dates=True, infer_datetime_format=True)
+            df_netatmo_dwd_unc = pd.read_csv(
+                path_interpolated_using_netatmo_dwd_unc, skiprows=[1],
+                sep=';', index_col=0,
+                parse_dates=True, infer_datetime_format=True)
 
+            # STD DEV
+            df_dwd_std_dev = pd.read_csv(
+                path_interpolated_using_dwd_std_dev,
+                sep=';', index_col=0,
+                parse_dates=True,
+                infer_datetime_format=True)
+
+            df_netatmo_dwd_std_dev = pd.read_csv(
+                path_interpolated_using_netatmo_dwd_std_dev,
+                sep=';', index_col=0,
+                parse_dates=True,
+                infer_datetime_format=True)
+
+            df_netatmo_dwd_unc_std_dev = pd.read_csv(
+                path_interpolated_using_netatmo_dwd_unc_std_dev,
+                sep=';', index_col=0,
+                parse_dates=True,
+                infer_datetime_format=True)
             df_compare = pd.DataFrame(index=df_dwd.index)
 
             cmn_interpolated_events = df_netatmo_dwd.index.intersection(
@@ -158,6 +215,15 @@ if plot_filtered:
                     interpolated_quantile_netatmo_dwd = df_netatmo_dwd.loc[event_date, stn_]
 
                     interpolated_quantile_netatmo_dwd_unc = df_netatmo_dwd_unc.loc[event_date, stn_]
+                    # std dev
+                    interpolated_quantile_dwd_std_dev = df_dwd_std_dev.loc[event_date, stn_]
+
+                    interpolated_quantile_netatmo_dwd_std_dev = df_netatmo_dwd_std_dev.loc[
+                        event_date, stn_]
+
+                    interpolated_quantile_netatmo_dwd_unc_std_dev = df_netatmo_dwd_unc_std_dev.loc[
+                        event_date, stn_]
+
                     # original quantile when transforming ppt to edf
                     original_quantile = df_dwd_edf.loc[event_date, stn_]
 
@@ -172,15 +238,15 @@ if plot_filtered:
                             original_ppt_stn, 0)
 
                         if np.isclose(interpolated_quantile_dwd,
-                                      p0_stn, atol=0.1):
+                                      p0_stn / 2, atol=0.1):
                             ppt_interp_fr_dwd = 0
 
                         if np.isclose(interpolated_quantile_netatmo_dwd,
-                                      p0_stn, atol=0.1):
+                                      p0_stn / 2, atol=0.1):
                             ppt_interp_fr_dwd_netatmo = 0
 
                         if np.isclose(original_quantile,
-                                      p0_stn, atol=0.1):
+                                      p0_stn / 2, atol=0.1):
                             ppt_orig_fr_edf = 0
 
                         else:
@@ -194,23 +260,78 @@ if plot_filtered:
                             # plt.plot(ppt_stn, edf_stn_dist)
                             ppt_orig_ = df_dwd_ppt.loc[event_date, stn_]
 
+                            # backtransform quantiles to ppt, new method
                             # interpolated from DWD
                             ppt_interp_fr_dwd = ppt_stn_dist[
                                 np.where(edf_stn_dist == find_nearest(
                                     edf_stn_dist,
-                                    interpolated_quantile_dwd))][0]
+                                    interpolated_quantile_dwd
+                                )
+                                )][0]
 
-                            # interpolated from DWD-Netatmo
                             ppt_interp_fr_dwd_netatmo = ppt_stn_dist[
                                 np.where(edf_stn_dist == find_nearest(
                                     edf_stn_dist,
-                                    interpolated_quantile_netatmo_dwd))][0]
-
-                            # interpolated from DWD-Netatmo Unc
+                                    interpolated_quantile_netatmo_dwd
+                                )
+                                )][0]
                             ppt_interp_fr_dwd_netatmo_unc = ppt_stn_dist[
                                 np.where(edf_stn_dist == find_nearest(
                                     edf_stn_dist,
-                                    interpolated_quantile_netatmo_dwd_unc))][0]
+                                    interpolated_quantile_netatmo_dwd_unc)
+                                )][0]
+#                             ppt_interp_fr_dwd_min_std_dev = ppt_stn_dist[
+#                                 np.where(edf_stn_dist == find_nearest(
+#                                     edf_stn_dist,
+#                                     interpolated_quantile_dwd -
+#                                     interpolated_quantile_dwd_std_dev)
+#                                 )][0]
+#
+#                             ppt_interp_fr_dwd_plus_std_dev = ppt_stn_dist[
+#                                 np.where(edf_stn_dist == find_nearest(
+#                                     edf_stn_dist,
+#                                     interpolated_quantile_dwd +
+#                                     interpolated_quantile_dwd_std_dev)
+#                                 )][0]
+#
+#                             ppt_interp_fr_dwd = (
+#                                 (ppt_interp_fr_dwd_min_std_dev +
+#                                  ppt_interp_fr_dwd_plus_std_dev)) / 2
+#                             # interpolated from DWD-Netatmo
+#                             ppt_interp_fr_dwd_netatmo_min_std_dev = ppt_stn_dist[
+#                                 np.where(edf_stn_dist == find_nearest(
+#                                     edf_stn_dist,
+#                                     interpolated_quantile_netatmo_dwd -
+#                                     interpolated_quantile_netatmo_dwd_std_dev)
+#                                 )][0]
+#
+#                             ppt_interp_fr_dwd_netatmo_plus_std_dev = ppt_stn_dist[
+#                                 np.where(edf_stn_dist == find_nearest(
+#                                     edf_stn_dist,
+#                                     interpolated_quantile_netatmo_dwd +
+#                                     interpolated_quantile_netatmo_dwd_std_dev)
+#                                 )][0]
+#
+#                             ppt_interp_fr_dwd_netatmo = (
+#                                 (ppt_interp_fr_dwd_netatmo_min_std_dev +
+#                                  ppt_interp_fr_dwd_netatmo_plus_std_dev)) / 2
+#
+#                             # interpolated from DWD-Netatmo Unc
+#                             ppt_interp_fr_dwd_netatmo_unc_min_std_dev = ppt_stn_dist[
+#                                 np.where(edf_stn_dist == find_nearest(
+#                                     edf_stn_dist,
+#                                     interpolated_quantile_netatmo_dwd_unc -
+#                                     interpolated_quantile_netatmo_dwd_std_dev)
+#                                 )][0]
+#                             ppt_interp_fr_dwd_netatmo_unc_plus_std_dev = ppt_stn_dist[
+#                                 np.where(edf_stn_dist == find_nearest(
+#                                     edf_stn_dist,
+#                                     interpolated_quantile_netatmo_dwd_unc +
+#                                     interpolated_quantile_netatmo_dwd_std_dev)
+#                                 )][0]
+#                             ppt_interp_fr_dwd_netatmo_unc = (
+#                                 (ppt_interp_fr_dwd_netatmo_unc_min_std_dev +
+# ppt_interp_fr_dwd_netatmo_unc_plus_std_dev)) / 2
 
                             if ppt_orig_ >= 0.2:
                                 # print(original_quantile)
@@ -402,7 +523,7 @@ if plot_filtered:
         ax.set_ylabel('RMSE')
 
         plt.savefig((path_to_use / (
-            r'rmse_%s_events_dwd_%s_p0.png' % (temp_freq, _interp_acc_))),
+            r'rmse_%s_events_dwd_%s_p02.png' % (temp_freq, _interp_acc_))),
             frameon=True, papertype='a4', bbox_inches='tight', pad_inches=.2)
         plt.close()
 
@@ -500,7 +621,7 @@ if plot_filtered:
         ax.set_ylabel('Pearson Correlation')
 
         plt.savefig((path_to_use / (
-            r'rmse_pears_corr_%s_events_dwd_%s_p0.png' % (temp_freq, _interp_acc_))),
+            r'rmse_pears_corr_%s_events_dwd_%s_p02.png' % (temp_freq, _interp_acc_))),
             frameon=True, papertype='a4', bbox_inches='tight', pad_inches=.2)
         plt.close()
 
@@ -565,7 +686,7 @@ if plot_filtered:
         ax.set_ylabel('Spearman Correlation')
 
         plt.savefig((path_to_use / (
-            r'rmse_spr_corr_%s_events_dwd_%s_p0.png' % (temp_freq, _interp_acc_))),
+            r'rmse_spr_corr_%s_events_dwd_%s_p02.png' % (temp_freq, _interp_acc_))),
             frameon=True, papertype='a4', bbox_inches='tight', pad_inches=.2)
         plt.close()
 

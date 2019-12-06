@@ -13,12 +13,9 @@ import pandas as pd
 import numpy as np
 
 import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
+
 import fnmatch
 from pathlib import Path
-
-from scipy.stats import spearmanr as spr
-from scipy.stats import pearsonr as pears
 
 from pandas.plotting import register_matplotlib_converters
 register_matplotlib_converters()
@@ -72,27 +69,28 @@ for temp_freq in ['60min', '360min', '720min', '1440min']:
     print(temp_freq)
 
     path_to_Qt_ok_un_first_flt__temp_flt_1st_ = main_dir / (
-        r'Ppt_ok_ok_un__first_flt__temp_flt__1st_%s' % temp_freq)
+        r'Ppt_ok_ok_un_new_first_flt__temp_flt__1st_%s' % temp_freq)
     Qt_ok_un_first_flt__temp_flt_1st_ = list_all_full_path(
         '.csv', path_to_Qt_ok_un_first_flt__temp_flt_1st_)
 
     path_to_Qt_ok_un_first_flt__temp_flt_comb_ = main_dir / (
-        r'Ppt_ok_ok_un__first_flt__temp_flt__comb_%s' % temp_freq)
+        r'Ppt_ok_ok_un_new_first_flt__temp_flt__comb_%s' % temp_freq)
     Qt_ok_un_first_flt__temp_flt_comb_ = list_all_full_path(
         '.csv', path_to_Qt_ok_un_first_flt__temp_flt_comb_)
 
     path_to_Qt_ok_un_first_flt_1st_ = main_dir / (
-        r'Ppt_ok_ok_un__first_flt__1st_%s' % temp_freq)
+        r'Ppt_ok_ok_un_new_first_flt__1st_%s' % temp_freq)
     Qt_ok_un_first_flt_1st_ = list_all_full_path(
         '.csv', path_to_Qt_ok_un_first_flt_1st_)
 
     path_to_Qt_ok_un_first_flt_comb_ = main_dir / (
-        r'Ppt_ok_ok_un__first_flt__comb_%s' % temp_freq)
+        r'Ppt_ok_ok_un_new_first_flt__comb_%s' % temp_freq)
     Qt_ok_un_first_flt_comb_ = list_all_full_path(
         '.csv', path_to_Qt_ok_un_first_flt_comb_)
 
     path_to_Quantiles_netatmo_no_flt___ = main_dir / (
-        r'Ppt_ok_ok_un_netatmo_no_flt__%s' % temp_freq)
+        r'Ppt_ok_ok_un_new_netatmo_no_flt___%s' % temp_freq)
+
     Quantiles_netatmo_no_flt___ = list_all_full_path(
         '.csv', path_to_Quantiles_netatmo_no_flt___)
 
@@ -109,8 +107,8 @@ for temp_freq in ['60min', '360min', '720min', '1440min']:
 
     #########################################################
 
-    path_to_use = path_to_Qt_ok_un_first_flt__temp_flt_1st_
-    data_to_use = Qt_ok_un_first_flt__temp_flt_1st_
+    path_to_use = path_to_Quantiles_netatmo_no_flt___
+    data_to_use = Quantiles_netatmo_no_flt___
 
     _interp_acc_ = str(r'%s' % (str(path_to_use).split('\\')[-1]))
     # for i in range(12):
@@ -142,10 +140,10 @@ for temp_freq in ['60min', '360min', '720min', '1440min']:
                                  parse_dates=True,
                                  infer_datetime_format=True)
 
-    df_netatmo_dwd_unc = pd.read_csv(path_interpolated_using_netatmo_dwd_unc,
-                                     sep=';', index_col=0,
-                                     parse_dates=True,
-                                     infer_datetime_format=True)
+#     df_netatmo_dwd_unc = pd.read_csv(path_interpolated_using_netatmo_dwd_unc,
+#                                      sep=';', index_col=0,
+#                                      parse_dates=True,
+#                                      infer_datetime_format=True)
 
     nbr_stns = 111
 
@@ -268,49 +266,49 @@ for temp_freq in ['60min', '360min', '720min', '1440min']:
 
     B1_dwd = calculate_overall_bias(df_dwd_ppt, df_dwd)
     B1_dwd_netatmo = calculate_overall_bias(df_dwd_ppt, df_netatmo_dwd)
-    B1_dwd_netatmo_unc = calculate_overall_bias(df_dwd_edf, df_netatmo_dwd_unc)
+#     B1_dwd_netatmo_unc = calculate_overall_bias(df_dwd_edf, df_netatmo_dwd_unc)
     print('*\n+-B1 DWD Interp:', B1_dwd)
     print('*\n+-B1 DWD Netatmo Interp:', B1_dwd_netatmo)
-    print('*\n+-B1 DWD Netatmo Unc Interp:', B1_dwd_netatmo_unc)
+#     print('*\n+-B1 DWD Netatmo Unc Interp:', B1_dwd_netatmo_unc)
 
     B2_dwd = calculate_temporal_bias(df_dwd_ppt, df_dwd)
     B2_dwd_netatmo = calculate_temporal_bias(df_dwd_ppt, df_netatmo_dwd)
-    B2_dwd_netatmo_unc = calculate_temporal_bias(
-        df_dwd_edf, df_netatmo_dwd_unc)
+#     B2_dwd_netatmo_unc = calculate_temporal_bias(
+#         df_dwd_edf, df_netatmo_dwd_unc)
     print('*\n+-B2 DWD Interp:', B2_dwd)
     print('*\n+-B2 DWD Netatmo Interp:', B2_dwd_netatmo)
-    print('*\n+-B2 DWD Netatmo Unc Interp:', B2_dwd_netatmo_unc)
+#     print('*\n+-B2 DWD Netatmo Unc Interp:', B2_dwd_netatmo_unc)
 
     B3_dwd = calculate_spatial_bias(df_dwd_ppt, df_dwd)
     B3_dwd_netatmo = calculate_spatial_bias(df_dwd_ppt, df_netatmo_dwd)
-    B3_dwd_netatmo_unc = calculate_spatial_bias(df_dwd_edf, df_netatmo_dwd_unc)
+#     B3_dwd_netatmo_unc = calculate_spatial_bias(df_dwd_edf, df_netatmo_dwd_unc)
     print('*\n+-B3 DWD Interp:', B3_dwd)
     print('*\n+-B3 DWD Netatmo Interp:', B3_dwd_netatmo)
-    print('*\n+-B3 DWD Netatmo Unc Interp:', B3_dwd_netatmo_unc)
+#     print('*\n+-B3 DWD Netatmo Unc Interp:', B3_dwd_netatmo_unc)
 
     B4_dwd = calculate_squared_error(df_dwd_ppt, df_dwd)
     B4_dwd_netatmo = calculate_squared_error(df_dwd_ppt, df_netatmo_dwd)
-    B4_dwd_netatmo_unc = calculate_squared_error(
-        df_dwd_edf, df_netatmo_dwd_unc)
+#     B4_dwd_netatmo_unc = calculate_squared_error(
+#         df_dwd_edf, df_netatmo_dwd_unc)
     print('*\n+-B4 DWD Interp:', B4_dwd)
     print('*\n+-B4 DWD Netatmo Interp:', B4_dwd_netatmo)
-    print('*\n+-B4 DWD Netatmo Unc Interp:', B4_dwd_netatmo_unc)
+#     print('*\n+-B4 DWD Netatmo Unc Interp:', B4_dwd_netatmo_unc)
 
     df_overall_bias.loc[temp_freq, 'B1_dwd'] = B1_dwd
     df_overall_bias.loc[temp_freq, 'B1_dwd_netatmo'] = B1_dwd_netatmo
-    df_overall_bias.loc[temp_freq, 'B1_dwd_netatmo_unc'] = B1_dwd_netatmo_unc
+#     df_overall_bias.loc[temp_freq, 'B1_dwd_netatmo_unc'] = B1_dwd_netatmo_unc
 
     df_overall_bias.loc[temp_freq, 'B2_dwd'] = B2_dwd
     df_overall_bias.loc[temp_freq, 'B2_dwd_netatmo'] = B2_dwd_netatmo
-    df_overall_bias.loc[temp_freq, 'B2_dwd_netatmo_unc'] = B2_dwd_netatmo_unc
+#     df_overall_bias.loc[temp_freq, 'B2_dwd_netatmo_unc'] = B2_dwd_netatmo_unc
 
     df_overall_bias.loc[temp_freq, 'B3_dwd'] = B3_dwd
     df_overall_bias.loc[temp_freq, 'B3_dwd_netatmo'] = B3_dwd_netatmo
-    df_overall_bias.loc[temp_freq, 'B3_dwd_netatmo_unc'] = B3_dwd_netatmo_unc
+#     df_overall_bias.loc[temp_freq, 'B3_dwd_netatmo_unc'] = B3_dwd_netatmo_unc
 
     df_overall_bias.loc[temp_freq, 'B4_dwd'] = B4_dwd
     df_overall_bias.loc[temp_freq, 'B4_dwd_netatmo'] = B4_dwd_netatmo
-    df_overall_bias.loc[temp_freq, 'B4_dwd_netatmo_unc'] = B4_dwd_netatmo_unc
+#     df_overall_bias.loc[temp_freq, 'B4_dwd_netatmo_unc'] = B4_dwd_netatmo_unc
 
 #==============================================================================
 #

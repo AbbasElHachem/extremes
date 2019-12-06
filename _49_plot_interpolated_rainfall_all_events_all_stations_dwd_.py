@@ -67,7 +67,7 @@ main_dir
 # In[26]:
 
 
-for temp_freq in ['60min', '360min', '720min', '1440min']:
+for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
     print(temp_freq)
 
     path_to_Qt_ok_un_first_flt__temp_flt_1st_ = main_dir / (
@@ -115,8 +115,8 @@ for temp_freq in ['60min', '360min', '720min', '1440min']:
 
     #########################################################
 
-    path_to_use = path_to_Qt_ok_un_first_flt_comb_
-    data_to_use = Qt_ok_un_first_flt_comb_
+    path_to_use = path_to_Qt_ok_un_first_flt__temp_flt_comb_
+    data_to_use = Qt_ok_un_first_flt__temp_flt_comb_
 
     _interp_acc_ = str(r'%s' % (str(path_to_use).split('\\')[-1]))
     # for i in range(12):

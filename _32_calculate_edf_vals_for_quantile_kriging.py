@@ -29,6 +29,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 from _00_additional_functions import (select_df_within_period,
                                       calculate_probab_ppt_below_thr,
                                       build_edf_fr_vals, resampleDf)
@@ -125,6 +126,7 @@ if use_good_netatmo_stns:
     df_all = pd.DataFrame(index=in_df.index, columns=good_stns, data=data_mtx)
     df_stn0 = in_df.loc[:, good_stns].dropna(how='all')
 #==============================================================================
+
 
 if resample_data:
 
