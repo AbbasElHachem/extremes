@@ -62,10 +62,11 @@ def list_all_full_path(ext, file_dir):
 # In[26]:
 
 
-df_overall_bias = pd.DataFrame(index=['60min', '360min',
-                                      '720min', '1440min'])
-
-for temp_freq in ['60min', '360min', '720min', '1440min']:
+df_overall_bias = pd.DataFrame(index=['60min', '180min',
+                                      '360min', '720min', '1440min'])
+# '60min', '180min', '360min', '720min', '1440min']:
+for temp_freq in ['60min']:
+    # '60min', '360min',  '1440min'
     print(temp_freq)
 
     path_to_Qt_ok_un_first_flt__temp_flt_1st_ = main_dir / (
@@ -93,12 +94,11 @@ for temp_freq in ['60min', '360min', '720min', '1440min']:
 
     Quantiles_netatmo_no_flt___ = list_all_full_path(
         '.csv', path_to_Quantiles_netatmo_no_flt___)
-
     #########################################################
-    path_dwd_edf_data = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\edf_ppt_all_dwd_%s_.csv" % temp_freq
+#     path_dwd_edf_data = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\edf_ppt_all_dwd_%s_.csv" % temp_freq
 
-    df_dwd_edf = pd.read_csv(path_dwd_edf_data, sep=';', index_col=0,
-                             parse_dates=True, infer_datetime_format=True)
+#     df_dwd_edf = pd.read_csv(path_dwd_edf_data, sep=';', index_col=0,
+#                              parse_dates=True, infer_datetime_format=True)
 
     path_dwd_ppt_data = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\ppt_all_dwd_%s_.csv" % temp_freq
 
@@ -107,8 +107,13 @@ for temp_freq in ['60min', '360min', '720min', '1440min']:
 
     #########################################################
 
-    path_to_use = path_to_Quantiles_netatmo_no_flt___
-    data_to_use = Quantiles_netatmo_no_flt___
+    #########################################################
+    path_interpolated_using_dwd_list = []
+    path_interpolated_using_netatmo_dwd_list = []
+    path_interpolated_using_netatmo_dwd_list_un = []
+
+    path_to_use = path_to_Qt_ok_un_first_flt__temp_flt_1st_
+    data_to_use = Qt_ok_un_first_flt__temp_flt_1st_
 
     _interp_acc_ = str(r'%s' % (str(path_to_use).split('\\')[-1]))
     # for i in range(12):
@@ -116,201 +121,150 @@ for temp_freq in ['60min', '360min', '720min', '1440min']:
     try:
         for df_file in data_to_use:
 
-            if ('dwd_only') in df_file:
-                path_interpolated_using_dwd = df_file
+            if ('using_dwd_only_grp_') in df_file:
+                print(df_file)
+                path_interpolated_using_dwd_list.append(df_file)
+            if ('using_dwd_netamo_grp_') in df_file and 'unc' not in df_file:
 
-            if ('dwd_netamo') in df_file and 'unc' not in df_file:
-                path_interpolated_using_netatmo_dwd = df_file
+                print(df_file)
+                path_interpolated_using_netatmo_dwd_list.append(df_file)
 
-            if ('dwd_netamo') in df_file:
-                path_interpolated_using_netatmo_dwd_unc = df_file
+            if ('using_dwd_netamo_grp_') in df_file and 'unc' in df_file:
+                print(df_file)
+                path_interpolated_using_netatmo_dwd_list_un.append(df_file)
 
     except Exception as msg:
         print(msg)
-        raise Exception
+        continue
+        #########################################################
 
-    #########################################################
+    for (path_interpolated_using_dwd,
+         path_interpolated_using_netatmo_dwd,
+         path_interpolated_using_netatmo_dwd_unc) in zip(
+            path_interpolated_using_dwd_list,
+            path_interpolated_using_netatmo_dwd_list,
+            path_interpolated_using_netatmo_dwd_list_un):
 
-    df_dwd = pd.read_csv(path_interpolated_using_dwd,
-                         sep=';', index_col=0, parse_dates=True,
-                         infer_datetime_format=True)
+        df_dwd = pd.read_csv(path_interpolated_using_dwd, skiprows=[1],
+                             sep=';', index_col=0,
+                             parse_dates=True, infer_datetime_format=True)
 
-    df_netatmo_dwd = pd.read_csv(path_interpolated_using_netatmo_dwd,
-                                 sep=';', index_col=0,
-                                 parse_dates=True,
-                                 infer_datetime_format=True)
+        df_netatmo_dwd = pd.read_csv(path_interpolated_using_netatmo_dwd, skiprows=[1],
+                                     sep=';', index_col=0,
+                                     parse_dates=True, infer_datetime_format=True)
 
-#     df_netatmo_dwd_unc = pd.read_csv(path_interpolated_using_netatmo_dwd_unc,
-#                                      sep=';', index_col=0,
-#                                      parse_dates=True,
-#                                      infer_datetime_format=True)
+        df_netatmo_dwd_unc = pd.read_csv(path_interpolated_using_netatmo_dwd_unc, skiprows=[1],
+                                         sep=';', index_col=0,
+                                         parse_dates=True, infer_datetime_format=True)
 
-    nbr_stns = 111
+        cmn_interpolated_events = df_netatmo_dwd.index.intersection(
+            df_dwd.index).intersection(df_dwd_ppt.index)
 
-    #==========================================================================
-    #
-    #==========================================================================
+        df_improvements = pd.DataFrame(
+            index=df_dwd_ppt.columns)
 
-    def calculate_overall_bias(df_obsv, df_interp):
-        nbr_events = []
-        sum_over_stns = []
-        for stn in df_interp.columns:
+#         df_improvements_b3 = pd.DataFrame(
+#             index=df_dwd.index)
 
-            if df_interp.loc[:, stn].dropna(how='all').values.size > 0:
-                sum_over_events = []
+#         df_dwd_ppt = df_dwd_ppt.loc[df_dwd_ppt.index.intersection(
+#             cmn_interpolated_events), :].dropna(how='all')
 
-                for event_date in df_interp.index:
+        print('Total number of events is',
+              cmn_interpolated_events.shape[0])
 
-                    obsv = df_obsv.loc[event_date, stn]
-                    interp = df_interp.loc[event_date, stn]
+        for stn_ in df_dwd_ppt.columns:
+            #                 print(stn_)
+            print(stn_)
+            df_dwd_ppt_stn = df_dwd_ppt.loc[df_dwd_ppt.index.intersection(
+                cmn_interpolated_events), stn_].dropna(how='all')
+            print(df_dwd_ppt_stn.size)
+            if df_dwd_ppt_stn.size > 0:
+                df_compare = pd.DataFrame(index=df_dwd_ppt_stn.index)
+                #stn_ = df_dwd.columns[0]
+                for event_date in df_dwd_ppt_stn.index:
+                    print(event_date)
+                    # original ppt
+                    original_ppt = df_dwd_ppt_stn.loc[event_date]
 
-                    if ((obsv >= 0) and (interp >= 0)):
-                        sum_over_events.append(obsv - interp)
+                    #event_date = cmn_interpolated_events[0]
+                    interpolated_ppt_dwd = df_dwd.loc[event_date, stn_]
+                    #print(stn_, interpolated_ppt_dwd, original_ppt)
 
-            if len(sum_over_events) > 0:
-                nbr_events.append(len(sum_over_events))
-                sum_over_stns.append(np.sum(sum_over_events))
+                    interpolated_ppt_netatmo_dwd = df_netatmo_dwd.loc[event_date, stn_]
 
-        mean_nbr_events = np.mean(nbr_events)
-        # print('mean_nbr_events: ', mean_nbr_events)
-        B1 = np.round((1 / (nbr_stns * mean_nbr_events)) *
-                      np.square(np.sum(sum_over_stns)), 6)
-        return B1
+                    interpolated_ppt_netatmo_dwd_unc = df_netatmo_dwd_unc.loc[event_date, stn_]
 
-    #==========================================================================
-    #
-    #==========================================================================
-    def calculate_temporal_bias(df_obsv, df_interp):
-        nbr_events = []
-        sum_over_stns = []
-        for stn in df_interp.columns:
-            if df_interp.loc[:, stn].dropna(how='all').values.size > 0:
-                sum_over_events = []
+                    if (interpolated_ppt_dwd >= 0) and (
+                            interpolated_ppt_netatmo_dwd >= 0) and (
+                            original_ppt >= 0):
 
-                for event_date in df_interp.index:
-                    obsv = df_obsv.loc[event_date, stn]
-                    interp = df_interp.loc[event_date, stn]
+                        df_compare.loc[event_date,
+                                       'diff_dwd_dwd'] = (
+                                           original_ppt - interpolated_ppt_dwd)
+                        print(df_compare.loc[event_date,
+                                             'diff_dwd_dwd'])
+#                         df_compare.loc[event_date, 'diff_dwd_netatmo'] = (
+#                             original_ppt -
+#                             interpolated_ppt_netatmo_dwd)
+#                         df_compare.loc[event_date, 'diff_dwd_netatmo_unc'] = (
+#                             original_ppt -
+#                             interpolated_ppt_netatmo_dwd_unc)
+#
+                df_compare.dropna(how='all', inplace=True)
+                if df_compare.size > 0:
+                    #             values_x_ppt = df_compare['original_ppt'].values
+                    #             values_dwd_ppt = df_compare['interpolated_ppt_dwd'].values
 
-                    if ((obsv >= 0) and (interp >= 0)):
-                        sum_over_events.append(obsv - interp)
+                    #             values_netatmo_dwd_ppt = df_compare['interpolated_ppt_netatmo_dwd'].values
+                    #             values_netatmo_dwd_unc_ppt = df_compare['interpolated_ppt_netatmo_dwd_unc'].values
 
-            if len(sum_over_events) > 0:
-                nbr_events.append(len(sum_over_events))
-                sum_over_stns.append(
-                    np.square(np.sum(sum_over_events) / np.mean(nbr_events)))
-        # print('mean_nbr_events: ', np.mean(nbr_events))
-        B2 = np.round((1 / (nbr_stns)) * (np.sum(sum_over_stns)), 6)
-        return B2
-    #==========================================================================
-    #
-    #==========================================================================
+                    diff_dwd_obs_interp = df_compare.loc[
+                        :, 'diff_dwd_dwd'].values.sum()
+#                     diff_dwd_obs_dwd_netatmo_interp = df_compare.loc[
+#                         :, 'diff_dwd_netatmo'].values.sum()
+#                     diff_dwd_obs_dwd_netatmo_interp_unc = df_compare.loc[
+#                         :, 'diff_dwd_netatmo_unc'].values.sum()
 
-    def calculate_spatial_bias(df_obsv, df_interp):
-        nbr_events = 0
-        sum_over_events = []
-        for event_date in df_interp.index:
-            sum_over_stns = []
-            for stn in df_interp.columns:
-                if df_interp.loc[:, stn].dropna(how='all').values.size > 0:
+                    # calculate sum per stn
 
-                    obsv = df_obsv.loc[event_date, stn]
-                    interp = df_interp.loc[event_date, stn]
-
-                    if ((obsv >= 0) and (interp >= 0)):
-                        sum_over_stns.append(obsv - interp)
-
-            if len(sum_over_stns) > 0:
-
-                sum_over_events.append(
-                    np.square(np.sum(sum_over_stns) / nbr_stns))
-
-                nbr_events += 1
-        # print('mean_nbr_events: ', nbr_events)
-        B3 = np.round((1 / (nbr_events)) * (np.sum(sum_over_events)), 6)
-        return B3
+                    df_improvements.loc[stn_,
+                                        'dwd_interp_ppt_B1'] = diff_dwd_obs_interp
+#                     df_improvements.loc[stn_,
+#                                         'dwd_netatmo_interp_ppt_B1'] = diff_dwd_obs_dwd_netatmo_interp
+#                     df_improvements.loc[stn_,
+#                                         'dwd_netatmo_interp_unc_ppt_B1'] = diff_dwd_obs_dwd_netatmo_interp_unc
 
     #==========================================================================
-    #
+    # CALCULATE TERMS
     #==========================================================================
+        break
+        df_improvements.dropna(how='any', inplace=True)
 
-    def calculate_squared_error(df_obsv, df_interp):
-        nbr_events = []
-        sum_over_stns = []
-        for stn in df_interp.columns:
+        B1_dwd = (
+            np.square(
+                df_improvements.loc[:,
+                                    'dwd_interp_ppt_B1'].values.sum()) /
+            (cmn_interpolated_events.shape[0] * 111))
 
-            if df_interp.loc[:, stn].dropna(how='all').values.size > 0:
-                sum_over_events = []
+#     B1_netatmo = (
+#         np.square(
+#             df_improvements.loc[:,
+#                                 'dwd_netatmo_interp_ppt_B1'].values.sum()) /
+#         (cmn_interpolated_events.shape[0] * 111))
+#
+#     B1_netatmo_unc = (
+#         np.square(
+#             df_improvements.loc[:, 'dwd_netatmo_interp_unc_ppt_B1'].values.sum()) /
+#         (cmn_interpolated_events.shape[0] * 111))
 
-                for event_date in df_interp.index:
+        df_overall_bias.loc[temp_freq, 'B1_dwd'] = B1_dwd
 
-                    obsv = df_obsv.loc[event_date, stn]
-                    interp = df_interp.loc[event_date, stn]
+        print(temp_freq, ' B1_dwd ', B1_dwd)
+#     df_overall_bias.loc[temp_freq, 'B1_dwd_netatmo'] = B1_netatmo
+#     df_overall_bias.loc[temp_freq, 'B1_dwd_netatmo_unc'] = B1_netatmo_unc
 
-                    if ((obsv >= 0) and (interp >= 0)):
-                        sum_over_events.append(
-                            np.square(obsv - interp))
 
-            if len(sum_over_events) > 0:
-                nbr_events.append(len(sum_over_events))
-                sum_over_stns.append(np.sum(sum_over_events))
-
-        mean_nbr_events = np.mean(nbr_events)
-        # print('mean_nbr_events: ', mean_nbr_events)
-        B4 = np.round((1 / (nbr_stns * mean_nbr_events)) *
-                      np.sum(sum_over_stns), 6)
-        return B4
-
-    #==========================================================================
-    #
-    #==========================================================================
-
-    B1_dwd = calculate_overall_bias(df_dwd_ppt, df_dwd)
-    B1_dwd_netatmo = calculate_overall_bias(df_dwd_ppt, df_netatmo_dwd)
-#     B1_dwd_netatmo_unc = calculate_overall_bias(df_dwd_edf, df_netatmo_dwd_unc)
-    print('*\n+-B1 DWD Interp:', B1_dwd)
-    print('*\n+-B1 DWD Netatmo Interp:', B1_dwd_netatmo)
-#     print('*\n+-B1 DWD Netatmo Unc Interp:', B1_dwd_netatmo_unc)
-
-    B2_dwd = calculate_temporal_bias(df_dwd_ppt, df_dwd)
-    B2_dwd_netatmo = calculate_temporal_bias(df_dwd_ppt, df_netatmo_dwd)
-#     B2_dwd_netatmo_unc = calculate_temporal_bias(
-#         df_dwd_edf, df_netatmo_dwd_unc)
-    print('*\n+-B2 DWD Interp:', B2_dwd)
-    print('*\n+-B2 DWD Netatmo Interp:', B2_dwd_netatmo)
-#     print('*\n+-B2 DWD Netatmo Unc Interp:', B2_dwd_netatmo_unc)
-
-    B3_dwd = calculate_spatial_bias(df_dwd_ppt, df_dwd)
-    B3_dwd_netatmo = calculate_spatial_bias(df_dwd_ppt, df_netatmo_dwd)
-#     B3_dwd_netatmo_unc = calculate_spatial_bias(df_dwd_edf, df_netatmo_dwd_unc)
-    print('*\n+-B3 DWD Interp:', B3_dwd)
-    print('*\n+-B3 DWD Netatmo Interp:', B3_dwd_netatmo)
-#     print('*\n+-B3 DWD Netatmo Unc Interp:', B3_dwd_netatmo_unc)
-
-    B4_dwd = calculate_squared_error(df_dwd_ppt, df_dwd)
-    B4_dwd_netatmo = calculate_squared_error(df_dwd_ppt, df_netatmo_dwd)
-#     B4_dwd_netatmo_unc = calculate_squared_error(
-#         df_dwd_edf, df_netatmo_dwd_unc)
-    print('*\n+-B4 DWD Interp:', B4_dwd)
-    print('*\n+-B4 DWD Netatmo Interp:', B4_dwd_netatmo)
-#     print('*\n+-B4 DWD Netatmo Unc Interp:', B4_dwd_netatmo_unc)
-
-    df_overall_bias.loc[temp_freq, 'B1_dwd'] = B1_dwd
-    df_overall_bias.loc[temp_freq, 'B1_dwd_netatmo'] = B1_dwd_netatmo
-#     df_overall_bias.loc[temp_freq, 'B1_dwd_netatmo_unc'] = B1_dwd_netatmo_unc
-
-    df_overall_bias.loc[temp_freq, 'B2_dwd'] = B2_dwd
-    df_overall_bias.loc[temp_freq, 'B2_dwd_netatmo'] = B2_dwd_netatmo
-#     df_overall_bias.loc[temp_freq, 'B2_dwd_netatmo_unc'] = B2_dwd_netatmo_unc
-
-    df_overall_bias.loc[temp_freq, 'B3_dwd'] = B3_dwd
-    df_overall_bias.loc[temp_freq, 'B3_dwd_netatmo'] = B3_dwd_netatmo
-#     df_overall_bias.loc[temp_freq, 'B3_dwd_netatmo_unc'] = B3_dwd_netatmo_unc
-
-    df_overall_bias.loc[temp_freq, 'B4_dwd'] = B4_dwd
-    df_overall_bias.loc[temp_freq, 'B4_dwd_netatmo'] = B4_dwd_netatmo
-#     df_overall_bias.loc[temp_freq, 'B4_dwd_netatmo_unc'] = B4_dwd_netatmo_unc
-
-#==============================================================================
+# #==============================================================================
 #
 #==============================================================================
 print('Done')

@@ -67,7 +67,8 @@ main_dir
 # In[26]:
 
 
-for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
+for temp_freq in ['60min', '180min',
+                  '360min', '720min', '1440min']:  # , '180min', '360min', '720min', '1440min']:
     print(temp_freq)
 
     path_to_Qt_ok_un_first_flt__temp_flt_1st_ = main_dir / (
@@ -115,8 +116,8 @@ for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
 
     #########################################################
 
-    path_to_use = path_to_Qt_ok_un_first_flt__temp_flt_comb_
-    data_to_use = Qt_ok_un_first_flt__temp_flt_comb_
+    path_to_use = path_to_Quantiles_netatmo_no_flt___
+    data_to_use = Quantiles_netatmo_no_flt___
 
     _interp_acc_ = str(r'%s' % (str(path_to_use).split('\\')[-1]))
     # for i in range(12):
@@ -160,7 +161,7 @@ for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
     df_netatmo_dwd_unc = pd.read_csv(path_interpolated_using_netatmo_dwd_unc,
                                      sep=';', index_col=0,
                                      parse_dates=True, infer_datetime_format=True)
-    # df_netatmo_dwd_unc.dropna(inplace=True)
+#     df_netatmo_dwd_unc.dropna(inplace=True)
 
     #########################################################
 
@@ -190,8 +191,8 @@ for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
                     stn_]
                 if ((edf_stn_orig >= 0) and
                     (edf_stn_interp_dwd >= 0) and
-                        (edf_stn_interp_netatmo_dwd >= 0)
-                    and
+                        (edf_stn_interp_netatmo_dwd >= 0) and
+
                         (edf_stn_interp_netatmo_dwd_unc >= 0)):
                     orig_edf_vals.append(edf_stn_orig)
                     dwd_interp_vals.append(edf_stn_interp_dwd)
