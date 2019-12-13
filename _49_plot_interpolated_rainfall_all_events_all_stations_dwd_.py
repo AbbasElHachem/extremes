@@ -67,8 +67,8 @@ main_dir
 # In[26]:
 
 
-for temp_freq in ['60min', '180min',
-                  '360min', '720min', '1440min']:  # , '180min', '360min', '720min', '1440min']:
+# , '180min', '360min', '720min', '1440min']:
+for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
     print(temp_freq)
 
     path_to_Qt_ok_un_first_flt__temp_flt_1st_ = main_dir / (
@@ -77,7 +77,8 @@ for temp_freq in ['60min', '180min',
         '.csv', path_to_Qt_ok_un_first_flt__temp_flt_1st_)
 
     path_to_Qt_ok_un_first_flt__temp_flt_comb_ = main_dir / (
-        r'Ppt_ok_ok_un_new_first_flt__temp_flt__comb_%s' % temp_freq)
+        # r'Ppt_ok_ok_un_new_first_flt__temp_flt__comb_%s' % temp_freq)
+        r'Qt_ok_ok_un_3_test_first_flt__temp_flt__comb_%s' % temp_freq)
     Qt_ok_un_first_flt__temp_flt_comb_ = list_all_full_path(
         '.csv', path_to_Qt_ok_un_first_flt__temp_flt_comb_)
 
@@ -87,7 +88,7 @@ for temp_freq in ['60min', '180min',
         '.csv', path_to_Qt_ok_un_first_flt_1st_)
 
     path_to_Qt_ok_un_first_flt_comb_ = main_dir / (
-        r'Ppt_ok_ok_un_new_first_flt__comb_%s' % temp_freq)
+        r'Qt_ok_ok_un_3_test_first_flt__comb_%s' % temp_freq)
     Qt_ok_un_first_flt_comb_ = list_all_full_path(
         '.csv', path_to_Qt_ok_un_first_flt_comb_)
 
@@ -116,8 +117,8 @@ for temp_freq in ['60min', '180min',
 
     #########################################################
 
-    path_to_use = path_to_Quantiles_netatmo_no_flt___
-    data_to_use = Quantiles_netatmo_no_flt___
+    path_to_use = path_to_Qt_ok_un_first_flt_comb_
+    data_to_use = Qt_ok_un_first_flt_comb_
 
     _interp_acc_ = str(r'%s' % (str(path_to_use).split('\\')[-1]))
     # for i in range(12):
@@ -125,18 +126,30 @@ for temp_freq in ['60min', '180min',
     try:
         for df_file in data_to_use:
 
-            if ('dwd_only') in df_file:
+            #             if ('dwd_only') in df_file:
+            #                 print(df_file)
+            #                 path_interpolated_using_dwd = df_file
+            #
+            #             if ('dwd_netamo') in df_file and 'unc' not in df_file:
+            #                 print(df_file)
+            #                 path_interpolated_using_netatmo_dwd = df_file
+            #
+            #             if ('dwd_netamo') in df_file:
+            #                 print(df_file)
+            #                 path_interpolated_using_netatmo_dwd_unc = df_file
+
+            if ('combined_interp_dwd_%s' % temp_freq) in df_file:
                 print(df_file)
                 path_interpolated_using_dwd = df_file
 
-            if ('dwd_netamo') in df_file and 'unc' not in df_file:
+            if 'combined_interp_dwd_netatmo' in df_file and 'unc' not in df_file:
+
                 print(df_file)
                 path_interpolated_using_netatmo_dwd = df_file
 
-            if ('dwd_netamo') in df_file:
+            if 'combined_interp_dwd_netatmo_unc' in df_file:
                 print(df_file)
                 path_interpolated_using_netatmo_dwd_unc = df_file
-
     except Exception as msg:
         print(msg)
         continue

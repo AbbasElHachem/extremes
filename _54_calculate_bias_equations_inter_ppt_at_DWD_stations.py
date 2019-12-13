@@ -109,8 +109,8 @@ for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
 
     #########################################################
 
-    path_to_use = path_to_Qt_ok_un_first_flt_comb_
-    data_to_use = Qt_ok_un_first_flt_comb_
+    path_to_use = path_to_Quantiles_netatmo_no_flt___
+    data_to_use = Quantiles_netatmo_no_flt___
 
     _interp_acc_ = str(r'%s' % (str(path_to_use).split('\\')[-1]))
     # for i in range(12):
@@ -185,9 +185,9 @@ for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
 
     ax2 = fig2.add_subplot(111)
 
-    fig3 = plt.figure(figsize=(24, 12), dpi=200)
-
-    ax3 = fig3.add_subplot(111)
+#     fig3 = plt.figure(figsize=(24, 12), dpi=200)
+#
+#     ax3 = fig3.add_subplot(111)
 
     for stn_ in df_dwd_ppt.columns:
 
@@ -269,34 +269,34 @@ for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
             df_sum_events.dropna(how='all', inplace=True)
 
             if df_sum_events.size > 0:
-                ax.plot(df_sum_events.loc[:, 'diff_dwd_dwd'].index,
-                        df_sum_events.loc[:, 'diff_dwd_dwd'].values,
-                        # marker='+',
-                        color='b', alpha=0.1)
-                ax.plot(df_sum_events.loc[:, 'diff_dwd_netatmo'].index,
-                        df_sum_events.loc[:, 'diff_dwd_netatmo'].values,
-                        # marker='d',
-                        color='r', alpha=0.1)
+                #                 ax.plot(df_sum_events.loc[:, 'diff_dwd_dwd'].index,
+                #                         df_sum_events.loc[:, 'diff_dwd_dwd'].values,
+                #                         # marker='+',
+                #                         color='b', alpha=0.1)
+                #                 ax.plot(df_sum_events.loc[:, 'diff_dwd_netatmo'].index,
+                #                         df_sum_events.loc[:, 'diff_dwd_netatmo'].values,
+                #                         # marker='d',
+                #                         color='r', alpha=0.1)
 
-                df_sums_sorted = df_sum_events.sort_values(
-                    by=['diff_dwd_netatmo'])
+                #                 df_sums_sorted = df_sum_events.sort_values(
+                #                     by=['diff_dwd_netatmo'])
+                #
+                #                 idx_int = np.arange(0,
+                #                                     df_sums_sorted.loc[:,
+                #                                                        'diff_dwd_netatmo'].index.size, 1)
+                #                 ax3.plot(idx_int,
+                #                          df_sums_sorted.loc[:, 'diff_dwd_dwd'].values,
+                #                          # marker='+',
+                #                          color='b', alpha=0.25)
+                #                 ax3.plot(idx_int,
+                #                          df_sums_sorted.loc[:, 'diff_dwd_netatmo'].values,
+                #                          # marker='d',
+                #                          color='r', alpha=0.25)
 
-                idx_int = np.arange(0,
-                                    df_sums_sorted.loc[:,
-                                                       'diff_dwd_netatmo'].index.size, 1)
-                ax3.plot(idx_int,
-                         df_sums_sorted.loc[:, 'diff_dwd_dwd'].values,
-                         # marker='+',
-                         color='b', alpha=0.25)
-                ax3.plot(idx_int,
-                         df_sums_sorted.loc[:, 'diff_dwd_netatmo'].values,
-                         # marker='d',
-                         color='r', alpha=0.25)
-
-#                 ax.plot(df_sum_events.loc[:, 'diff_dwd_netatmo_unc'].index,
-#                         df_sum_events.loc[:, 'diff_dwd_netatmo_unc'].values,
-#                         marker='o',
-#                         color='r', alpha=0.1)
+                #                 ax.plot(df_sum_events.loc[:, 'diff_dwd_netatmo_unc'].index,
+                #                         df_sum_events.loc[:, 'diff_dwd_netatmo_unc'].values,
+                #                         marker='o',
+                #                         color='r', alpha=0.1)
 
                 # difference obs-inter square stn for B1
                 diff_dwd_obs_interp = df_sum_events.loc[
@@ -407,74 +407,74 @@ for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
         r'diff_obs_int_%s_events_dwd_%s_.png' % (temp_freq, _interp_acc_))),
         frameon=True, papertype='a4', bbox_inches='tight', pad_inches=.2)
 
-    ax3.grid(alpha=0.25)
-    ax3.set_ylim([-200, 200])
-    ax3.set_title(
-        'Sorted Difference Obsv-Interp for every station;'
-        '\n%s'
-        '\nDWD:blue, DWD-Netatmo:red' % _interp_acc_)
-    ax3.set_xlabel('Event number')
-    #ax.legend(loc='upper right')
-    ax3.set_ylabel('(Z-Z*) mm/%s' % temp_freq)
-
-    fig3.savefig((out_dir_bias_dfs / (
-        r'sorted_diff_obs_int_%s_events_dwd_%s_.png' % (temp_freq, _interp_acc_))),
-        frameon=True, papertype='a4', bbox_inches='tight', pad_inches=.2)
+#     ax3.grid(alpha=0.25)
+#     ax3.set_ylim([-200, 200])
+#     ax3.set_title(
+#         'Sorted Difference Obsv-Interp for every station;'
+#         '\n%s'
+#         '\nDWD:blue, DWD-Netatmo:red' % _interp_acc_)
+#     ax3.set_xlabel('Event number')
+#     #ax.legend(loc='upper right')
+#     ax3.set_ylabel('(Z-Z*) mm/%s' % temp_freq)
+#
+#     fig3.savefig((out_dir_bias_dfs / (
+#         r'sorted_diff_obs_int_%s_events_dwd_%s_.png' % (temp_freq, _interp_acc_))),
+#         frameon=True, papertype='a4', bbox_inches='tight', pad_inches=.2)
 
     df_sum_per_stn.dropna(how='all', inplace=True)
 
-    ax2.plot(df_sum_per_stn.index,
-             df_sum_per_stn.loc[:, 'dwd_interp_ppt_B1'].values,
-             color='b', marker='+', alpha=0.75,
-             label='DWD %0.1f' % df_sum_per_stn.loc[
-                 :,
-                 'dwd_interp_ppt_B1'].values.sum())
-    mean_dwd_val = df_sum_per_stn.loc[:, 'dwd_interp_ppt_B1'].mean()
-    mean_dwd_vals = [mean_dwd_val for i in range(len(df_sum_per_stn.index))]
-
-    ax2.plot(df_sum_per_stn.index,
-             mean_dwd_vals, marker='_',
-             color='darkblue', alpha=0.75)
-
-    ax2.plot(df_sum_per_stn.index,
-             df_sum_per_stn.loc[:, 'dwd_netatmo_interp_ppt_B1'].values,
-             color='g', marker='o', alpha=0.75,
-             label='DWD-Netatmo %0.1f' % df_sum_per_stn.loc[
-                 :,
-                 'dwd_netatmo_interp_ppt_B1'].values.sum())
-
-    mean_netatmo_val = df_sum_per_stn.loc[:,
-                                          'dwd_netatmo_interp_ppt_B1'].mean()
-    mean_netatmo_vals = [
-        mean_netatmo_val for i in range(len(df_sum_per_stn.index))]
-
-    ax2.plot(df_sum_per_stn.index,
-             mean_netatmo_vals, marker='_',
-             color='darkgreen', alpha=0.75)
-
-    ax2.plot(df_sum_per_stn.index,
-             df_sum_per_stn.loc[:, 'dwd_netatmo_unc_interp_ppt_B1'].values,
-             color='r', marker='d', alpha=0.75,
-             label='DWD-Netatmo Unc %0.1f' % df_sum_per_stn.loc[
-                 :,
-                 'dwd_netatmo_unc_interp_ppt_B1'].values.sum())
-
-    ax2.legend(loc='upper right')
-    ax2.grid(alpha=0.25)
-    #ax2.set_ylim([-400, 200])
-    ax2.set_title(
-        'Sum Difference Obsv-Interp for every station;'
-        '%s'
-        ' \nDWD:blue, DWD-Netatmo:green, DWD-NEtatmo Und:red' % _interp_acc_)
-    ax2.set_xlabel('Extreme Events')
-    ax2.set_xticklabels(labels=df_sum_per_stn.index, rotation=45)
-    #ax.legend(loc='upper right')
-    ax2.set_ylabel('sum(Z-Z*) mm/%s' % temp_freq)
-
-    fig2.savefig((out_dir_bias_dfs / (
-        r'sum_diff_obs_int_%s_events_dwd_%s_.png' % (temp_freq, _interp_acc_))),
-        frameon=True, papertype='a4', bbox_inches='tight', pad_inches=.2)
-    plt.close()
+#     ax2.plot(df_sum_per_stn.index,
+#              df_sum_per_stn.loc[:, 'dwd_interp_ppt_B1'].values,
+#              color='b', marker='+', alpha=0.75,
+#              label='DWD %0.1f' % df_sum_per_stn.loc[
+#                  :,
+#                  'dwd_interp_ppt_B1'].values.sum())
+#     mean_dwd_val = df_sum_per_stn.loc[:, 'dwd_interp_ppt_B1'].mean()
+#     mean_dwd_vals = [mean_dwd_val for i in range(len(df_sum_per_stn.index))]
+#
+#     ax2.plot(df_sum_per_stn.index,
+#              mean_dwd_vals, marker='_',
+#              color='darkblue', alpha=0.75)
+#
+#     ax2.plot(df_sum_per_stn.index,
+#              df_sum_per_stn.loc[:, 'dwd_netatmo_interp_ppt_B1'].values,
+#              color='g', marker='o', alpha=0.75,
+#              label='DWD-Netatmo %0.1f' % df_sum_per_stn.loc[
+#                  :,
+#                  'dwd_netatmo_interp_ppt_B1'].values.sum())
+#
+#     mean_netatmo_val = df_sum_per_stn.loc[:,
+#                                           'dwd_netatmo_interp_ppt_B1'].mean()
+#     mean_netatmo_vals = [
+#         mean_netatmo_val for i in range(len(df_sum_per_stn.index))]
+#
+#     ax2.plot(df_sum_per_stn.index,
+#              mean_netatmo_vals, marker='_',
+#              color='darkgreen', alpha=0.75)
+#
+#     ax2.plot(df_sum_per_stn.index,
+#              df_sum_per_stn.loc[:, 'dwd_netatmo_unc_interp_ppt_B1'].values,
+#              color='r', marker='d', alpha=0.75,
+#              label='DWD-Netatmo Unc %0.1f' % df_sum_per_stn.loc[
+#                  :,
+#                  'dwd_netatmo_unc_interp_ppt_B1'].values.sum())
+#
+#     ax2.legend(loc='upper right')
+#     ax2.grid(alpha=0.25)
+#     #ax2.set_ylim([-400, 200])
+#     ax2.set_title(
+#         'Sum Difference Obsv-Interp for every station;'
+#         '%s'
+#         ' \nDWD:blue, DWD-Netatmo:green, DWD-NEtatmo Und:red' % _interp_acc_)
+#     ax2.set_xlabel('Extreme Events')
+#     ax2.set_xticklabels(labels=df_sum_per_stn.index, rotation=45)
+#     #ax.legend(loc='upper right')
+#     ax2.set_ylabel('sum(Z-Z*) mm/%s' % temp_freq)
+#
+#     fig2.savefig((out_dir_bias_dfs / (
+#         r'sum_diff_obs_int_%s_events_dwd_%s_.png' % (temp_freq, _interp_acc_))),
+#         frameon=True, papertype='a4', bbox_inches='tight', pad_inches=.2)
+#     plt.close()
 
     #======================================================================
     # calculte B3
@@ -543,14 +543,14 @@ for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
     # calculate TERMS
     #==========================================================================
 
-    B1_dwd = (df_sum_per_stn.loc[:, 'dwd_interp_ppt_B1'].values.sum()**2 /
+    B1_dwd = (np.abs(df_sum_per_stn.loc[:, 'dwd_interp_ppt_B1'].values.sum()) /
               (df_dwd_ppt.index.shape[0] * 111))
 
-    B1_netatmo = (df_sum_per_stn.loc[:, 'dwd_netatmo_interp_ppt_B1'].values.sum()**2 /
-                  (df_dwd_ppt.index.shape[0] * 111))
+    B1_netatmo = np.abs((df_sum_per_stn.loc[:, 'dwd_netatmo_interp_ppt_B1'].values.sum()) /
+                        (df_dwd_ppt.index.shape[0] * 111))
 
-    B1_netatmo_unc = (df_sum_per_stn.loc[:, 'dwd_netatmo_unc_interp_ppt_B1'].values.sum()**2 /
-                      (df_dwd_ppt.index.shape[0] * 111))
+    B1_netatmo_unc = np.abs((df_sum_per_stn.loc[:, 'dwd_netatmo_unc_interp_ppt_B1'].values.sum()) /
+                            (df_dwd_ppt.index.shape[0] * 111))
 
     # B!_abs
     B1_dwd_abs = (df_sum_per_stn.loc[:, 'dwd_interp_ppt_B1_abs'].values.sum()**2 /
@@ -644,4 +644,4 @@ for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
 
 print('Done')
 df_overall_bias.to_csv(
-    Path(out_dir_bias_dfs / ('%s.csv' % _interp_acc_)), sep=';')
+    Path(out_dir_bias_dfs / ('abs%s.csv' % _interp_acc_)), sep=';')

@@ -68,7 +68,7 @@ for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
         '.csv', path_to_Qt_ok_un_first_flt__temp_flt_1st_)
 
     path_to_Qt_ok_un_first_flt__temp_flt_comb_ = main_dir / (
-        r'Qt_ok_ok_un_3_first_flt__temp_flt__comb_%s' % temp_freq)
+        r'Qt_ok_ok_un_3_test_first_flt__temp_flt__comb_%s' % temp_freq)
     Qt_ok_un_first_flt__temp_flt_comb_ = list_all_full_path(
         '.csv', path_to_Qt_ok_un_first_flt__temp_flt_comb_)
 
@@ -78,7 +78,7 @@ for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
         '.csv', path_to_Qt_ok_un_first_flt_1st_)
 
     path_to_Qt_ok_un_first_flt_comb_ = main_dir / (
-        r'Qt_ok_ok_un_3_first_flt__comb_%s' % temp_freq)
+        r'Qt_ok_ok_un_3_test_first_flt__comb_%s' % temp_freq)
     Qt_ok_un_first_flt_comb_ = list_all_full_path(
         '.csv', path_to_Qt_ok_un_first_flt_comb_)
 
@@ -107,8 +107,8 @@ for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
     path_interpolated_using_netatmo_dwd_list_std_dev = []
     path_interpolated_using_netatmo_dwd_list_un_std_dev = []
 
-    path_to_use = path_to_Qt_ok_un_first_flt__temp_flt_comb_
-    data_to_use = Qt_ok_un_first_flt__temp_flt_comb_
+    path_to_use = path_to_Qt_ok_un_first_flt_comb_
+    data_to_use = Qt_ok_un_first_flt_comb_
 
     _interp_acc_ = str(r'%s' % (str(path_to_use).split('\\')[-1]))
     # for i in range(12):
