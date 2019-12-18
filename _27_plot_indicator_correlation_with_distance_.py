@@ -79,7 +79,7 @@ path_to_netatmo_gd_stns_file = data_dir_Netamto_dfs / \
 
 # def percentage threshold, time frequency and data source
 percent = '50'
-time_freq = '360min'  # '720min', 1440min, '480min', '360min', '180min', '120min'
+time_freq = '1440min'  # '720min', 1440min, '480min', '360min', '180min', '120min'
 # '60min'
 data_source0 = 'Netatmo'  # 'DWD'  # 'Netatmo'  #   # reference station 'Netatmo'
 data_source = 'dwd'  # 'dwd'  # 'netatmo'  #   # compare to station 'netatmo'
@@ -118,7 +118,7 @@ if data_source0 == 'Netatmo' and data_source == 'dwd':
 #                            data_source, percent, 7, use_filtered_data)
     save_dir = data_dir_Netamto_dfs
 
-# data_source0 = 'DWD'
+data_source0 = 'DWD'
 # percent = '99'
 if data_source0 == 'DWD' and data_source == 'dwd':
     # for DWD stations neighbors start from 1 not 0  (1 is first)!
@@ -126,8 +126,8 @@ if data_source0 == 'DWD' and data_source == 'dwd':
                                data_source, percent, 1)
     df1_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
                                data_source, percent, 2)
-#     df2 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
-#                            data_source, percent, 3)
+    df2_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+                               data_source, percent, 3)
 #     df3 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
 #                            data_source, percent, 4)
 #     df4 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
@@ -168,9 +168,9 @@ if data_source0 == 'Netatmo' and data_source == 'netatmo':
 # for DWD stations neighbors start from 1 not 0  (1 is first)!
 
 
-# in_df0_dwd = pd.read_csv(df0_dwd, index_col=0, sep=';').dropna(how='all')
-# in_df1_dwd = pd.read_csv(df1_dwd, index_col=0, sep=';').dropna(how='all')
-
+in_df0_dwd = pd.read_csv(df0_dwd, index_col=0, sep=';').dropna(how='all')
+in_df1_dwd = pd.read_csv(df1_dwd, index_col=0, sep=';').dropna(how='all')
+in_df2_dwd = pd.read_csv(df2_dwd, index_col=0, sep=';').dropna(how='all')
 # Netatmo
 
 in_df0 = pd.read_csv(df0, index_col=0, sep=';').dropna(how='all')
@@ -198,11 +198,13 @@ if use_good_netatmo_stns:
 # =============================================================================
 
 
-# x0_dwd0 = in_df0_dwd.loc[:, 'Distance to neighbor'].values.ravel()
-# x1_dwd0 = in_df1_dwd.loc[:, 'Distance to neighbor'].values.ravel()
+x0_dwd0 = in_df0_dwd.loc[:, 'Distance to neighbor'].values.ravel()
+x1_dwd0 = in_df1_dwd.loc[:, 'Distance to neighbor'].values.ravel()
+x2_dwd0 = in_df2_dwd.loc[:, 'Distance to neighbor'].values.ravel()
 
-# y0_dwd0 = in_df0_dwd.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
-# y1_dwd0 = in_df1_dwd.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
+y0_dwd0 = in_df0_dwd.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
+y1_dwd0 = in_df1_dwd.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
+y2_dwd0 = in_df2_dwd.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
 
 
 # in_df0 = in_df0[in_df0['Bool_Pearson_Correlation_Netatmo_DWD'] > 0.2]
@@ -273,27 +275,31 @@ y2 = in_df2.loc[:,
 plt.ioff()
 plt.figure(figsize=(12, 8), dpi=300)
 
-plt.scatter(x0, y0, c='r', alpha=0.5, marker='x',
+plt.scatter(x0, y0, c='r', alpha=0.35, marker='x',
             label='First Neighbor %d Pairs' % y0.shape[0], s=34)
 
 # plt.scatter(x0, y0_dwd, c='orange', alpha=0.5, marker='o',
 #             label='DWD First Neighbor', s=34)
 
-plt.scatter(x1, y1, c='blue', alpha=0.5, marker='.',
+plt.scatter(x1, y1, c='blue', alpha=0.35, marker='.',
             label='Second Neighbor %d Pairs' % y1.shape[0], s=34)
-#
+
+plt.scatter(x2, y2, c='green', alpha=0.35, marker='d',
+            label='Third Neighbor Stn nbr %d' % y2.shape[0], s=34)
+
 # plt.scatter(x1, y1_dwd, c='g', alpha=0.5, marker='*',
 #             label=' DWD Second Neighbor', s=34)
 
-# plt.scatter(x0_dwd0, y0_dwd0, c='k', alpha=0.5, marker='*',
-#             label=' DWD First Neighbor', s=34)
+plt.scatter(x0_dwd0, y0_dwd0, c='k', alpha=0.95, marker='x',
+            label=' DWD First Neighbor', s=34)
 #
-# plt.scatter(x1_dwd0, y1_dwd0, c='k', alpha=0.5, marker='+',
-#             label=' DWD Second Neighbor', s=34)
+plt.scatter(x1_dwd0, y1_dwd0, c='k', alpha=0.95, marker='.',
+            label=' DWD Second Neighbor', s=34)
+
+plt.scatter(x2_dwd0, y2_dwd0, c='k', alpha=0.95, marker='d',
+            label=' DWD Third Neighbor', s=34)
 
 
-plt.scatter(x2, y2, c='darkorange', alpha=0.5, marker='d',
-            label='Third Neighbor Stn nbr %d' % y2.shape[0], s=34)
 # plt.scatter(x3, y3, c='darkorange', alpha=0.5, marker='*',
 #             label='Fourth Neighbor Stn nbr %d' % y3.shape[0], s=34)
 # plt.scatter(x4, y4, c='m', alpha=0.5, marker='+',
@@ -309,7 +315,7 @@ plt.xticks(np.arange(0, 30000 + 100, 5000))  # x1.max()
 plt.ylim([-0.1, 1.1])
 plt.xlabel('Distance (m)')
 plt.ylabel('Indicator Correlation')
-plt.legend(loc=0)
+# plt.legend(loc=0)
 plt.grid(alpha=.25)
 plt.tight_layout()
 

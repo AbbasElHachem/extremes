@@ -174,7 +174,7 @@ lower_percentile_val_lst = [50]  # [80, 85, 90, 95, 99]
 
 
 # ['10min', '60min', '120min', '480min', '720min', '1440min']
-aggregation_frequencies = ['720min']
+aggregation_frequencies = ['1440min']
 
 # temporal aggregation of df
 

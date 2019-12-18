@@ -40,10 +40,10 @@ plt.ioff()
 # def values to replace edf of ppt=0
 ppt_min_thr_0_vals = 0.1  # everything below it gets value of P0
 
-netatmo_data = False
+netatmo_data = True
 use_good_netatmo_stns = False
 
-dwd_data = True
+dwd_data = False
 resample_data = True
 
 # select data only within this period (same as netatmo / dwd)
@@ -55,10 +55,7 @@ resample_frequencies = ['60min', '120min', '180min',
 # =============================================================================
 
 if netatmo_data:
-    #     df_file = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
-    #                r"\all_netatmo_ppt_data_monthly_.csv")
-    #     df_file = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
-    #                r"\all_netatmo_ppt_data_daily_.csv")
+
     df_file = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
                # r"\all_netatmo_ppt_data_daily_.csv")
                r"\ppt_all_netatmo_hourly_stns_combined_new_no_freezing_2.csv")
@@ -175,8 +172,8 @@ if resample_data:
 
         df_all.dropna(how='all', inplace=True)
         df_all.to_csv((r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
-                       r"\edf_ppt_all_%s_old_%s_.csv" % (save_acc, agg_freq)),
-                      sep=';', float_format='%.3f')
+                       r"\edf_ppt_all_%s_%s_.csv" % (save_acc, agg_freq)),  # old_
+                      sep=';', float_format='%.10f')
 
     print('DONE WITH EVERYTHNG !')
 
@@ -215,6 +212,6 @@ for stn_ in df_stn0.columns:
 df_all.dropna(how='all', inplace=True)
 df_all.to_csv((r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
                r"\edf_ppt_all_%s_hourly_.csv" % save_acc),
-              sep=';', float_format='%.3f')
+              sep=';', float_format='%.10f')
 
 print('DONE WITH EVERYTHNG !')

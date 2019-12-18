@@ -1,7 +1,10 @@
 eclipse.preferences.version=1
 encoding/_00_additional_functions.py=utf-8
 encoding/_24_calculate_correlation_differences_neighboring_Netatmo_DWD_stations.py=utf-8
+encoding/_25_calculate_correlation_differences_neighboring_DWD_DWD_stations.py=utf-8
 encoding/_27_plot_indicator_correlation_with_distance_.py=utf-8
+encoding/_32_calculate_edf_vals_for_quantile_kriging.py=utf-8
+encoding/_37_transform_DWD_data_to_edf_original_for_quantile_kriging_.py=utf-8
 encoding/_45_plot_interpolated_\ and_obesrved_quantiles_at_dwd_stn_extreme_events_improvement_.py=utf-8
 encoding/_47_combine_all_dwd_interpolated_stns_in_one_df.py=utf-8
 encoding/_48_plot_interp_ppt_at_dwd_stns_.py=utf-8
