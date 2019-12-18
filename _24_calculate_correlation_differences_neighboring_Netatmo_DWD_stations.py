@@ -140,7 +140,7 @@ assert os.path.exists(path_to_netatmo_coords_df_file), 'wrong DWD coords file'
 path_to_netatmo_gd_stns_file = (
     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes"
     r"\plots_NetAtmo_ppt_DWD_ppt_correlation_"
-    r"\keep_stns_all_neighbor_99_0_per_60min_s0.csv")
+    r"\keep_stns_all_neighbor_99_0_per_60min_s0_comb.csv")
 #assert os.path.exists(path_to_netatmo_gd_stns_file), 'wrong netatmo stns file'
 
 path_to_shpfile = (r'F:\data_from_exchange\Netatmo'
@@ -164,23 +164,22 @@ x_col_name = 'lon'
 y_col_name = 'lat'
 
 # min distance threshold used for selecting neighbours
-min_dist_thr_ppt = 3 * 1e4  # 5000  # m
+min_dist_thr_ppt = 5 * 1e4  # 5000  # m
 
 # threshold for max ppt value per hour
 max_ppt_thr = 200.  # ppt above this value are not considered
 
 # only highest x% of the values are selected
-lower_percentile_val_lst = [97., 98., 99., 99.5]  # [80, 85, 90, 95, 99]
+lower_percentile_val_lst = [50]  # [80, 85, 90, 95, 99]
 
 
 # ['10min', '60min', '120min', '480min', '720min', '1440min']
-aggregation_frequencies = ['60min', '120min', '180min', '360min',
-                           '720min', '1440min']
+aggregation_frequencies = ['720min']
 
 # temporal aggregation of df
 
 # [0, 1, 2, 3, 4]  # refers to DWD neighbot (0=first)
-neighbors_to_chose_lst = [0, 1, 2]  # 4, 5, 6, 7
+neighbors_to_chose_lst = [0, 1, 2, 3]  # 4, 5, 6, 7
 # 30 days * 24 hours * 2month
 # minimum hourly values that should be available per station
 min_req_ppt_vals = 10  # 30 * 24 * 2
@@ -251,8 +250,8 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
 
     # read netatmo good stns df
 
-    in_df_stns = pd.read_csv(path_netatmo_gd_stns, index_col=0,
-                             sep=';')
+#     in_df_stns = pd.read_csv(path_netatmo_gd_stns, index_col=0,
+#                              sep=';')
     # good_stns = list(in_df_stns.values.ravel())
     # stns_ppt_ids = good_stns
 
@@ -403,9 +402,9 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                         print('\n****transform values to booleans*****\n')
 
                         df_netatmo_cmn_Bool = (
-                            df_netatmo_cmn >= netatmo_ppt_thr_per).astype(int)
+                            df_netatmo_cmn > netatmo_ppt_thr_per).astype(int)
                         df_dwd_cmn_Bool = (
-                            df_dwd_cmn >= dwd_ppt_thr_per).astype(int)
+                            df_dwd_cmn > dwd_ppt_thr_per).astype(int)
 
                         # calculate spearman correlations of booleans 1, 0
 
@@ -501,15 +500,15 @@ if __name__ == '__main__':
 
                 # call this function to get the df, one containing
                 # df_correlations comparing correlations
-
-                path_to_df_correlations = os.path.join(
-                    out_save_dir_orig,
-                    'pearson_year_allyears_df_comparing_correlations_max_sep_dist_%d_'
-                    'freq_%s_dwd_netatmo_upper_%s_percent_data_considered'
-                    '_neighbor_%d_filtered_99.csv'  # filtered_95
-                    % (min_dist_thr_ppt, temp_freq,
-                        str(lower_percentile_val).replace('.', '_'),
-                       neighbor_to_chose))
+                path_to_df_correlations = ''
+#                 path_to_df_correlations = os.path.join(
+#                     out_save_dir_orig,
+#                     'pearson_year_allyears_df_comparing_correlations_max_sep_dist_%d_'
+#                     'freq_%s_dwd_netatmo_upper_%s_percent_data_considered'
+#                     '_neighbor_%d_filtered_99.csv'  # filtered_95
+#                     % (min_dist_thr_ppt, temp_freq,
+#                         str(lower_percentile_val).replace('.', '_'),
+#                        neighbor_to_chose))
 
                 if (not os.path.exists(path_to_df_correlations)):
 

@@ -140,7 +140,7 @@ path_to_netatmo_gd_stns_file = Path(
 
 
 out_save_dir_orig = (main_dir /
-                     r'\plots_NetAtmo_ppt_DWD_ppt_correlation_')
+                     r'plots_NetAtmo_ppt_DWD_ppt_correlation_')
 
 
 if not os.path.exists(out_save_dir_orig):
@@ -173,21 +173,22 @@ x_col_name = 'lon'
 y_col_name = 'lat'
 
 # min distance threshold used for selecting neighbours
-min_dist_thr_ppt = 3 * 1e4  # 30000 m, 30km
+min_dist_thr_ppt = 5 * 1e4  # 30000 m, 30km
 
 # threshold for max ppt value per hour
 max_ppt_thr = 200.  # ppt above this value are not considered
 
 # only highest x% of the values are selected
-lower_percentile_val_lst = [97., 98., 99., 99.5]
+lower_percentile_val_lst = [50]  # 97., 98., 99., 99.5
 
 # temporal frequencies on which the filtering should be done
-aggregation_frequencies = ['60min', '120min', '180min',
-                           '360min', '720min', '1440min']
-
+aggregation_frequencies = ['60min', '180min', '360min', '720min', '1440min']
+#
+# , '120min', '180min',
+#                            '360min', '720min', '1440min'
 
 # [0, 1, 2, 3, 4]  # refers to DWD neighbot (0=first)
-neighbors_to_chose_lst = [0, 1, 2]  # 4, 5, 6, 7
+neighbors_to_chose_lst = [0, 1, 2, 3, 4, 5]  # 4, 5, 6, 7
 
 # Note: used Netatmo stations, are thos with more than 2months of data
 # this is done before when combining dfs
@@ -426,9 +427,9 @@ def compare_netatmo_dwd_indicator_correlations(
                         print('\n****transform values to booleans*****\n')
                         # if Xi > Ppt_thr then 1 else 0
                         df_netatmo_cmn_Bool = (
-                            df_netatmo_cmn >= netatmo_ppt_thr_per).astype(int)
+                            df_netatmo_cmn > netatmo_ppt_thr_per).astype(int)
                         df_dwd_cmn_Bool = (
-                            df_dwd_cmn >= dwd_ppt_thr_per).astype(int)
+                            df_dwd_cmn > dwd_ppt_thr_per).astype(int)
 
                         # calculate pearson correlations of booleans 1, 0
 
@@ -607,7 +608,7 @@ def compare_netatmo_dwd_indicator_correlations(
     df_results_correlations.to_csv(
         os.path.join(
             out_save_dir_orig,
-            'new_method_pearson_year_allyears_df_comparing_correlations_max_sep_dist_%d_'
+            '2pearson_year_allyears_df_comparing_correlations_max_sep_dist_%d_'
             'freq_%s_dwd_netatmo_upper_%s_percent_data_considered'
             '_neighbor_%d_.csv'  # filtered_95
             % (min_dist_thr_ppt, temp_freq_resample,
