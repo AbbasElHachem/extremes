@@ -68,7 +68,7 @@ assert data_dir_Netamto_netatmo_dfs.exists(), 'Wrong Netatmo Netatmo path'
 
 
 # allyears pearson_  new_method
-netatmo_path_acc = r'pearson_year_allyears_df_comparing_correlations_max_sep_dist_50000_'
+netatmo_path_acc = r'new_method_pearson_year_allyears_df_comparing_correlations_max_sep_dist_30000_'
 dwd_path_Acc = r'pearson_year_allyears_df_dwd_correlations'
 
 
@@ -78,15 +78,15 @@ path_to_netatmo_gd_stns_file = data_dir_Netamto_dfs / \
 #assert path_to_netatmo_gd_stns_file.exists(), 'wrong netatmo good stns file'
 
 # def percentage threshold, time frequency and data source
-percent = '50'
-time_freq = '1440min'  # '720min', 1440min, '480min', '360min', '180min', '120min'
+percent = '99_0'
+time_freq = '60min'  # '720min', 1440min, '480min', '360min', '180min', '120min'
 # '60min'
 data_source0 = 'Netatmo'  # 'DWD'  # 'Netatmo'  #   # reference station 'Netatmo'
 data_source = 'dwd'  # 'dwd'  # 'netatmo'  #   # compare to station 'netatmo'
 
 use_good_netatmo_stns = False
 use_filtered_data = False
-filtered_percent = '50'
+filtered_percent = '99_0'
 
 save_acc = ''
 # =============================================================================
@@ -119,7 +119,7 @@ if data_source0 == 'Netatmo' and data_source == 'dwd':
     save_dir = data_dir_Netamto_dfs
 
 data_source0 = 'DWD'
-# percent = '99'
+percent = '99'
 if data_source0 == 'DWD' and data_source == 'dwd':
     # for DWD stations neighbors start from 1 not 0  (1 is first)!
     df0_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
@@ -170,12 +170,13 @@ if data_source0 == 'Netatmo' and data_source == 'netatmo':
 
 in_df0_dwd = pd.read_csv(df0_dwd, index_col=0, sep=';').dropna(how='all')
 in_df1_dwd = pd.read_csv(df1_dwd, index_col=0, sep=';').dropna(how='all')
-in_df2_dwd = pd.read_csv(df2_dwd, index_col=0, sep=';').dropna(how='all')
+# in_df2_dwd = pd.read_csv(df2_dwd, index_col=0, sep=';').dropna(how='all')
 # Netatmo
 
+#'new_method_pearson_year_allyears_df_comparing_correlations_max_sep_dist_30000_freq_60min_dwd_netatmo_upper_99_0_percent_data_considered_neighbor_0_'
 in_df0 = pd.read_csv(df0, index_col=0, sep=';').dropna(how='all')
 in_df1 = pd.read_csv(df1, index_col=0, sep=';').dropna(how='all')
-in_df2 = pd.read_csv(df2, index_col=0, sep=';').dropna(how='all')
+# in_df2 = pd.read_csv(df2, index_col=0, sep=';').dropna(how='all')
 # in_df3 = pd.read_csv(df3, index_col=0, sep=';').dropna(how='all')
 # in_df4 = pd.read_csv(df4, index_col=0, sep=';').dropna(how='all')
 # in_df5 = pd.read_csv(df5, index_col=0, sep=';').dropna(how='all')
@@ -200,17 +201,17 @@ if use_good_netatmo_stns:
 
 x0_dwd0 = in_df0_dwd.loc[:, 'Distance to neighbor'].values.ravel()
 x1_dwd0 = in_df1_dwd.loc[:, 'Distance to neighbor'].values.ravel()
-x2_dwd0 = in_df2_dwd.loc[:, 'Distance to neighbor'].values.ravel()
+# x2_dwd0 = in_df2_dwd.loc[:, 'Distance to neighbor'].values.ravel()
 
 y0_dwd0 = in_df0_dwd.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
 y1_dwd0 = in_df1_dwd.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
-y2_dwd0 = in_df2_dwd.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
+# y2_dwd0 = in_df2_dwd.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
 
 
-# in_df0 = in_df0[in_df0['Bool_Pearson_Correlation_Netatmo_DWD'] > 0.2]
-# in_df1 = in_df1[in_df1['Bool_Pearson_Correlation_Netatmo_DWD'] > y1_dwd0.min()]
-# in_df0 = in_df0[in_df0['Bool_Pearson_Correlation_DWD_DWD'] > 0.2]
-# in_df1 = in_df1[in_df1['Bool_Pearson_Correlation_DWD_DWD'] > y1_dwd0.min()]
+in_df0 = in_df0[in_df0['Bool_Pearson_Correlation_Netatmo_DWD'] > 0.2]
+in_df1 = in_df1[in_df1['Bool_Pearson_Correlation_Netatmo_DWD'] > y1_dwd0.min()]
+in_df0 = in_df0[in_df0['Bool_Pearson_Correlation_DWD_DWD'] > 0.2]
+in_df1 = in_df1[in_df1['Bool_Pearson_Correlation_DWD_DWD'] > y1_dwd0.min()]
 
 # in_df0_dwd = in_df0_dwd[in_df0_dwd['Bool_Spearman_Correlation'] > 0.2]
 # in_df1_dwd = in_df1_dwd[in_df1_dwd['Bool_Spearman_Correlation'] > 0.2]
@@ -222,30 +223,30 @@ stns_keep_all_final_new = in_df0.index
 #cmn_stns = in_df0.index.intersection(in_df1.index)
 x0 = in_df0.loc[:, 'Distance to neighbor'].values.ravel()
 x1 = in_df1.loc[:, 'Distance to neighbor'].values.ravel()
-x2 = in_df2.loc[:, 'Distance to neighbor'].values.ravel()
+# x2 = in_df2.loc[:, 'Distance to neighbor'].values.ravel()
 # x3 = in_df3.loc[:, 'Distance to neighbor'].values.ravel()
 # x4 = in_df4.loc[:, 'Distance to neighbor'].values.ravel()
 # x5 = in_df5.loc[:, 'Distance to neighbor'].values.ravel()
 # x6 = in_df6.loc[:, 'Distance to neighbor'].values.ravel()
 # x7 = in_df7.loc[:, 'Distance to neighbor'].values.ravel()
 
-# y0 = in_df0.loc[stns_keep_all_final_new,
-#                 'Bool_Pearson_Correlation_Netatmo_DWD'].values.ravel()
-# y1 = in_df1.loc[stns_keep_all_final_new,
-#                 'Bool_Pearson_Correlation_Netatmo_DWD'].values.ravel()
-#
-# y0_dwd = in_df0.loc[stns_keep_all_final_new,
-#                     'Bool_Pearson_Correlation_DWD_DWD'].values.ravel()
-# y1_dwd = in_df1.loc[stns_keep_all_final_new,
-#                     'Bool_Pearson_Correlation_DWD_DWD'].values.ravel()
-
 y0 = in_df0.loc[:,
-                'Bool_Spearman_Correlation'].values.ravel()
+                'Bool_Pearson_Correlation_Netatmo_DWD'].values.ravel()
 y1 = in_df1.loc[:,
-                'Bool_Spearman_Correlation'].values.ravel()
+                'Bool_Pearson_Correlation_Netatmo_DWD'].values.ravel()
+#
+y0_dwd = in_df0.loc[:,
+                    'Bool_Pearson_Correlation_DWD_DWD'].values.ravel()
+y1_dwd = in_df1.loc[:,
+                    'Bool_Pearson_Correlation_DWD_DWD'].values.ravel()
 
-y2 = in_df2.loc[:,
-                'Bool_Spearman_Correlation'].values.ravel()
+# y0 = in_df0.loc[:,
+#                 'Bool_Spearman_Correlation'].values.ravel()
+# y1 = in_df1.loc[:,
+#                 'Bool_Spearman_Correlation'].values.ravel()
+
+# y2 = in_df2.loc[:,
+#                 'Bool_Spearman_Correlation'].values.ravel()
 # y0_sens = in_df0.loc[stns_keep_all_final_new,
 #                      'Bool_Sensored_Pearson_Correlation'].values.ravel()
 # y1_sens = in_df1.loc[stns_keep_all_final_new,
@@ -275,29 +276,41 @@ y2 = in_df2.loc[:,
 plt.ioff()
 plt.figure(figsize=(12, 8), dpi=300)
 
-plt.scatter(x0, y0, c='r', alpha=0.35, marker='x',
+plt.scatter(x0, y0, c='r', alpha=0.5, marker='x',
             label='First Neighbor %d Pairs' % y0.shape[0], s=34)
 
 # plt.scatter(x0, y0_dwd, c='orange', alpha=0.5, marker='o',
 #             label='DWD First Neighbor', s=34)
 
-plt.scatter(x1, y1, c='blue', alpha=0.35, marker='.',
+plt.scatter(x1, y1, c='blue', alpha=0.5, marker='.',
             label='Second Neighbor %d Pairs' % y1.shape[0], s=34)
 
-plt.scatter(x2, y2, c='green', alpha=0.35, marker='d',
-            label='Third Neighbor Stn nbr %d' % y2.shape[0], s=34)
+
+#
+#
+# plt.scatter(x0, y0_dwd, c='orange', alpha=0.35, marker='.',
+#             label='First Neighbor %d Pairs' % y0.shape[0], s=24)
+#
+# # plt.scatter(x0, y0_dwd, c='orange', alpha=0.5, marker='o',
+# #             label='DWD First Neighbor', s=34)
+#
+# plt.scatter(x1, y1_dwd, c='g', alpha=0.35, marker='1',
+#             label='Second Neighbor %d Pairs' % y1.shape[0], s=34)
+
+# plt.scatter(x2, y2, c='green', alpha=0.35, marker='d',
+#             label='Third Neighbor Stn nbr %d' % y2.shape[0], s=34)
 
 # plt.scatter(x1, y1_dwd, c='g', alpha=0.5, marker='*',
 #             label=' DWD Second Neighbor', s=34)
 
-plt.scatter(x0_dwd0, y0_dwd0, c='k', alpha=0.95, marker='x',
-            label=' DWD First Neighbor', s=34)
+plt.scatter(x0_dwd0, y0_dwd0, c='k', alpha=0.75, marker='x',
+            label='DWD First Neighbor', s=34)
 #
-plt.scatter(x1_dwd0, y1_dwd0, c='k', alpha=0.95, marker='.',
-            label=' DWD Second Neighbor', s=34)
+plt.scatter(x1_dwd0, y1_dwd0, c='k', alpha=0.75, marker='.',
+            label='DWD Second Neighbor', s=34)
 
-plt.scatter(x2_dwd0, y2_dwd0, c='k', alpha=0.95, marker='d',
-            label=' DWD Third Neighbor', s=34)
+# plt.scatter(x2_dwd0, y2_dwd0, c='k', alpha=0.95, marker='d',
+#             label=' DWD Third Neighbor', s=34)
 
 
 # plt.scatter(x3, y3, c='darkorange', alpha=0.5, marker='*',
@@ -311,11 +324,11 @@ plt.scatter(x2_dwd0, y2_dwd0, c='k', alpha=0.95, marker='d',
 # plt.scatter(x7, y7, c='c', alpha=0.5, marker='8',
 #             label='Eighth Neighbor Stn nbr %d' % y7.shape[0], s=34)
 plt.xlim([0, max(x1.max(), 25000) + 100])
-plt.xticks(np.arange(0, 30000 + 100, 5000))  # x1.max()
+plt.xticks(np.arange(0, 25000 + 100, 5000))  # x1.max()
 plt.ylim([-0.1, 1.1])
 plt.xlabel('Distance (m)')
 plt.ylabel('Indicator Correlation')
-# plt.legend(loc=0)
+plt.legend(loc=0)
 plt.grid(alpha=.25)
 plt.tight_layout()
 
@@ -331,9 +344,9 @@ if use_filtered_data:
 #          ' for upper %s percent of data values '
 #          % (data_source0, data_source, time_freq, percent))
 plt.savefig(save_dir /
-            (r'new_pearson__%s_%s_%s_percent_indic_corr_freq_%s_%s_.png'
+            (r'new_pearson__%s_%s_%s_percent_indic_corr_freq_%s_%s_2.png'
              % (data_source0, data_source, percent, time_freq, save_acc)),
             frameon=True, papertype='a4',
             bbox_inches='tight', pad_inches=.2)
 plt.close()
-# plt.show()
+plt.show()

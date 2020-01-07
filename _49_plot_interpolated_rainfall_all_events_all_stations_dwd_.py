@@ -20,8 +20,8 @@ from pandas.plotting import register_matplotlib_converters
 register_matplotlib_converters()
 
 plt.ioff()
-plt.rcParams.update({'font.size': 12})
-plt.rcParams.update({'axes.labelsize': 12})
+plt.rcParams.update({'font.size': 16})
+plt.rcParams.update({'axes.labelsize': 16})
 
 
 # In[12]:
@@ -129,8 +129,8 @@ if plot_filtered:
 
         #########################################################
 
-        path_to_use = path_to_Qt_ok_un_first_flt_1st_
-        data_to_use = Qt_ok_un_first_flt_1st_
+        path_to_use = path_to_Qt_ok_un_first_flt__temp_flt_1st_
+        data_to_use = Qt_ok_un_first_flt__temp_flt_1st_
 
         _interp_acc_ = str(r'%s' % (str(path_to_use).split('\\')[-1]))
         # for i in range(12):
@@ -339,7 +339,8 @@ if plot_filtered:
         # orig_edf_vals, dwd_interp_vals, netatmo_dwd_interp_vals
 
         df_compare.sort_index(inplace=True)
-
+#         df_compare.sort_values(by='pearson_corr_dwd_', inplace=True)
+#         df_compare.reset_index()
         # OK
         stations_with_improvements = sum(i >= j for (i, j) in zip(
             df_compare.pearson_corr_dwd_netatmo.values,
@@ -441,21 +442,21 @@ if plot_filtered:
                 label='DWD-Netatmo Interpolation %0.2f'
                 % mean_pearson_correlation_dwd_netatmo)
 
-        ax.plot(df_compare.index,
-                df_compare.pearson_corr_dwd_netatmo_unc2perc,
-                alpha=.5,
-                c='g',  # colors_arr,
-                marker='+',
-                label='DWD-Netatmo Interpolation 2percUnc %0.2f'
-                % mean_pearson_correlation_dwd_netatmo_unc2perc)
-
-        ax.plot(df_compare.index,
-                df_compare.pearson_corr_dwd_netatmo_unc5perc,
-                alpha=.5,
-                c='m',  # colors_arr,
-                marker='1',
-                label='DWD-Netatmo Interpolation 5percUnc %0.2f'
-                % mean_pearson_correlation_dwd_netatmo_unc5perc)
+#         ax.plot(df_compare.index,
+#                 df_compare.pearson_corr_dwd_netatmo_unc2perc,
+#                 alpha=.5,
+#                 c='g',  # colors_arr,
+#                 marker='+',
+#                 label='DWD-Netatmo Interpolation 2percUnc %0.2f'
+#                 % mean_pearson_correlation_dwd_netatmo_unc2perc)
+#
+#         ax.plot(df_compare.index,
+#                 df_compare.pearson_corr_dwd_netatmo_unc5perc,
+#                 alpha=.5,
+#                 c='m',  # colors_arr,
+#                 marker='1',
+#                 label='DWD-Netatmo Interpolation 5percUnc %0.2f'
+#                 % mean_pearson_correlation_dwd_netatmo_unc5perc)
 
         ax.plot(df_compare.index,
                 df_compare.pearson_corr_dwd_netatmo_unc10perc,
@@ -475,20 +476,20 @@ if plot_filtered:
 
         ax.set_title('Pearson Correlation Interpolated Quantiles from DWD or DWD-Netatmo\n '
                      'Precipitation of %s Extreme Events %s\n Events with Improvemnts %d / %d, Percentage %0.0f\n'
-                     'Events with Improvemnts with OK 2percUnc %d / %d, Percentage %0.0f'
-                     '\nEvents with Improvemnts with OK 5percUnc %d / %d, Percentage %0.0f'
+                     #                      'Events with Improvemnts with OK 2percUnc %d / %d, Percentage %0.0f'
+                     #                      '\nEvents with Improvemnts with OK 5percUnc %d / %d, Percentage %0.0f'
                      '\nEventswith Improvemnts with OK 10percUnc %d / %d, Percentage %0.0f'
                      '\nEvents with Improvemnts with OK 20percUnc %d / %d, Percentage %0.0f'
                      % (temp_freq, _interp_acc_,
                         stations_with_improvements,
                          df_compare.pearson_corr_dwd_netatmo.shape[0],
                         percent_of_improvment,
-                        stations_with_improvements_unc2perc,
-                        df_compare.pearson_corr_dwd_netatmo_unc2perc.shape[0],
-                        percent_of_improvment_unc2perc,
-                        stations_with_improvements_unc5perc,
-                        df_compare.pearson_corr_dwd_netatmo_unc2perc.shape[0],
-                        percent_of_improvment_unc5perc,
+                        #                         stations_with_improvements_unc2perc,
+                        #                         df_compare.pearson_corr_dwd_netatmo_unc2perc.shape[0],
+                        #                         percent_of_improvment_unc2perc,
+                        #                         stations_with_improvements_unc5perc,
+                        #                         df_compare.pearson_corr_dwd_netatmo_unc2perc.shape[0],
+                        #                         percent_of_improvment_unc5perc,
                         stations_with_improvements_unc10perc,
                         df_compare.pearson_corr_dwd_netatmo_unc2perc.shape[0],
                         percent_of_improvment_unc10perc,
@@ -510,13 +511,13 @@ if plot_filtered:
         ax.xaxis.set_major_formatter(years_fmt)
         # ax.xaxis.set_minor_formatter(mdates.DateFormatter('%H'))
 
-        ax.set_yticks(np.arange(0.5, 1.05, .10))
+        #ax.set_yticks(np.arange(0., 1.05, .10))
         ax.set_xlabel('Date of Event')
-        ax.legend(loc='upper right')
+        ax.legend(loc='lower right')
         ax.set_ylabel('Pearson Correlation')
 
         plt.savefig(os.path.join(path_to_use,
-                                 r'ppt_spatial_pears_corr_%s_events_dwd.png' % temp_freq,
+                                 r'ppt_spatial_pears_corr_%s_events_dwd2.png' % temp_freq,
                                  ),
                     frameon=True, papertype='a4', bbox_inches='tight', pad_inches=.2)
         plt.close()
@@ -602,21 +603,21 @@ if plot_filtered:
                 label='DWD-Netatmo Interpolation %0.2f'
                 % mean_spr_correlation_dwd_netatmo)
 
-        ax.plot(df_compare.index,
-                df_compare.spearman_corr_dwd_netatmo_unc2perc,
-                alpha=.5,
-                c='g',  # colors_arr,
-                marker='+',
-                label='DWD-Netatmo Interpolation 2percUnc %0.2f'
-                % mean_spr_correlation_dwd_netatmo_unc2perc)
-
-        ax.plot(df_compare.index,
-                df_compare.spearman_corr_dwd_netatmo_unc5perc,
-                alpha=.5,
-                c='m',  # colors_arr,
-                marker='1',
-                label='DWD-Netatmo Interpolation 5percUnc %0.2f'
-                % mean_spr_correlation_dwd_netatmo_unc5perc)
+#         ax.plot(df_compare.index,
+#                 df_compare.spearman_corr_dwd_netatmo_unc2perc,
+#                 alpha=.5,
+#                 c='g',  # colors_arr,
+#                 marker='+',
+#                 label='DWD-Netatmo Interpolation 2percUnc %0.2f'
+#                 % mean_spr_correlation_dwd_netatmo_unc2perc)
+#
+#         ax.plot(df_compare.index,
+#                 df_compare.spearman_corr_dwd_netatmo_unc5perc,
+#                 alpha=.5,
+#                 c='m',  # colors_arr,
+#                 marker='1',
+#                 label='DWD-Netatmo Interpolation 5percUnc %0.2f'
+#                 % mean_spr_correlation_dwd_netatmo_unc5perc)
 
         ax.plot(df_compare.index,
                 df_compare.spearman_corr_dwd_netatmo_unc10perc,
@@ -636,20 +637,20 @@ if plot_filtered:
 
         ax.set_title('Spearman Correlation Interpolated Quantiles from DWD or DWD-Netatmo \n '
                      'Rainfall of %s Extreme Events %s \n Events with Improvemnts %d / %d, Percentage %0.0f'
-                     '\nEvents with Improvemnts with OK 2percUnc %d / %d, Percentage %0.0f'
-                     '\nEvents with Improvemnts with OK 5percUnc %d / %d, Percentage %0.0f'
+                     #                      '\nEvents with Improvemnts with OK 2percUnc %d / %d, Percentage %0.0f'
+                     #                      '\nEvents with Improvemnts with OK 5percUnc %d / %d, Percentage %0.0f'
                      '\nEvents with Improvemnts with OK 10percUnc %d / %d, Percentage %0.0f'
                      '\nEvents with Improvemnts with OK 20percUnc %d / %d, Percentage %0.0f'
                      % (temp_freq, _interp_acc_,
                         stations_with_improvements,
                          df_compare.spearman_corr_dwd_netatmo.shape[0],
                         percent_of_improvment,
-                        stations_with_improvements_unc2perc,
-                        df_compare.spearman_corr_dwd_netatmo_unc2perc.shape[0],
-                        percent_of_improvment_unc2perc,
-                        stations_with_improvements_unc5perc,
-                        df_compare.spearman_corr_dwd_netatmo_unc2perc.shape[0],
-                        percent_of_improvment_unc5perc,
+                        #                         stations_with_improvements_unc2perc,
+                        #                         df_compare.spearman_corr_dwd_netatmo_unc2perc.shape[0],
+                        #                         percent_of_improvment_unc2perc,
+                        #                         stations_with_improvements_unc5perc,
+                        #                         df_compare.spearman_corr_dwd_netatmo_unc2perc.shape[0],
+                        #                         percent_of_improvment_unc5perc,
                         stations_with_improvements_unc10perc,
                         df_compare.spearman_corr_dwd_netatmo_unc2perc.shape[0],
                         percent_of_improvment_unc10perc,
@@ -676,13 +677,13 @@ if plot_filtered:
         ax.xaxis.set_major_formatter(years_fmt)
         # ax.xaxis.set_minor_formatter(years_fmt)
 
-        ax.set_yticks(np.arange(0.5, 1.05, .10))
+        #ax.set_yticks(np.arange(0.5, 1.05, .10))
         ax.set_xlabel('Date of Event')
-        ax.legend(loc='upper right')
+        ax.legend(loc='lower left')
         ax.set_ylabel('Spearman Correlation')
 
         plt.savefig(os.path.join(path_to_use,
-                                 r'ppt_spatial_spearm_corr_%s_events_dwd.png' % (temp_freq)),
+                                 r'ppt_spatial_spearm_corr_%s_events_dwd2.png' % (temp_freq)),
                     frameon=True, papertype='a4', bbox_inches='tight', pad_inches=.2)
         plt.close()
 
@@ -895,9 +896,9 @@ if plot_not_filtered:
         ax.xaxis.set_major_formatter(years_fmt)
         # ax.xaxis.set_minor_formatter(mdates.DateFormatter('%H'))
 
-        ax.set_yticks(np.arange(0.5, 1.05, .10))
+        #ax.set_yticks(np.arange(0.5, 1.05, .10))
         ax.set_xlabel('Date of Event')
-        ax.legend(loc='upper right')
+        ax.legend(loc='lower left')
         ax.set_ylabel('Pearson Correlation')
 
         plt.savefig(os.path.join(path_to_use,
@@ -966,9 +967,9 @@ if plot_not_filtered:
         ax.xaxis.set_major_formatter(years_fmt)
         # ax.xaxis.set_minor_formatter(years_fmt)
 
-        ax.set_yticks(np.arange(0.5, 1.05, .10))
+        #ax.set_yticks(np.arange(0.5, 1.05, .10))
         ax.set_xlabel('Date of Event')
-        ax.legend(loc='upper right')
+        ax.legend(loc='lower left')
         ax.set_ylabel('Spearman Correlation')
 
         plt.savefig(os.path.join(path_to_use,

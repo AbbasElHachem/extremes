@@ -70,22 +70,22 @@ for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
     print(temp_freq)
 
     path_to_Qt_ok_un_first_flt__temp_flt_1st_ = main_dir / (
-        r'Ppt_ok_ok_un_new_first_flt__temp_flt__1st_%s' % temp_freq)
+        r'Ppt_ok_ok_un_new2_first_flt__temp_flt__1st_%s' % temp_freq)
     Qt_ok_un_first_flt__temp_flt_1st_ = list_all_full_path(
         '.csv', path_to_Qt_ok_un_first_flt__temp_flt_1st_)
 
     path_to_Qt_ok_un_first_flt__temp_flt_comb_ = main_dir / (
-        r'Ppt_ok_ok_un_new_first_flt__temp_flt__comb_%s' % temp_freq)
+        r'Ppt_ok_ok_un_new2_first_flt__temp_flt__comb_%s' % temp_freq)
     Qt_ok_un_first_flt__temp_flt_comb_ = list_all_full_path(
         '.csv', path_to_Qt_ok_un_first_flt__temp_flt_comb_)
 
     path_to_Qt_ok_un_first_flt_1st_ = main_dir / (
-        r'Ppt_ok_ok_un_new_first_flt__1st_%s' % temp_freq)
+        r'Ppt_ok_ok_un_new2_first_flt__1st_%s' % temp_freq)
     Qt_ok_un_first_flt_1st_ = list_all_full_path(
         '.csv', path_to_Qt_ok_un_first_flt_1st_)
 
     path_to_Qt_ok_un_first_flt_comb_ = main_dir / (
-        r'Ppt_ok_ok_un_new_first_flt__comb_%s' % temp_freq)
+        r'Ppt_ok_ok_un_new2_first_flt__comb_%s' % temp_freq)
     Qt_ok_un_first_flt_comb_ = list_all_full_path(
         '.csv', path_to_Qt_ok_un_first_flt_comb_)
 
@@ -109,8 +109,8 @@ for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
 
     #########################################################
 
-    path_to_use = path_to_Quantiles_netatmo_no_flt___
-    data_to_use = Quantiles_netatmo_no_flt___
+    path_to_use = path_to_Qt_ok_un_first_flt__temp_flt_1st_
+    data_to_use = Qt_ok_un_first_flt__temp_flt_1st_
 
     _interp_acc_ = str(r'%s' % (str(path_to_use).split('\\')[-1]))
     # for i in range(12):
@@ -121,12 +121,12 @@ for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
             if ('using_dwd_only_grp_') in df_file:
                 print(df_file)
                 path_interpolated_using_dwd = df_file
-            if ('using_dwd_netamo_grp_') in df_file and 'unc' not in df_file:
+            if ('using_dwd_netamo_grp_') in df_file and 'perc' not in df_file:
 
                 print(df_file)
                 path_interpolated_using_netatmo_dwd = df_file
 
-            if ('using_dwd_netamo_grp_') in df_file and 'unc' in df_file:
+            if ('using_dwd_netamo_grp_') in df_file and 'unc10perc' in df_file:
                 print(df_file)
                 path_interpolated_using_netatmo_dwd_unc = df_file
 
@@ -158,12 +158,14 @@ for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
                                  parse_dates=True,
                                  infer_datetime_format=True).dropna(how='all')
 
-    df_netatmo_dwd_unc = pd.read_csv(path_interpolated_using_netatmo_dwd_unc,
-                                     skiprows=[1],
-                                     sep=';', index_col=0,
-                                     parse_dates=True,
-                                     infer_datetime_format=True).dropna(how='all')
-
+    try:
+        df_netatmo_dwd_unc = pd.read_csv(path_interpolated_using_netatmo_dwd_unc,
+                                         skiprows=[1],
+                                         sep=';', index_col=0,
+                                         parse_dates=True,
+                                         infer_datetime_format=True).dropna(how='all')
+    except Exception as msg:
+        df_netatmo_dwd_unc = df_netatmo_dwd
 #     cmn_interpolated_events = df_dwd.index.intersection(df_dwd_ppt.index)
 #
     df_sum_per_stn = pd.DataFrame(index=df_dwd_ppt.columns)
@@ -393,19 +395,19 @@ for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
                     stn_,
                     'dwd_netatmo_interp_unc_ppt_square_B4'] = diff_dwd_obs_dwd_netatmo_interp_unc_square
 
-    ax.grid(alpha=0.25)
-    ax.set_ylim([-200, 200])
-    ax.set_title(
-        'Difference Obsv-Interp for every station;'
-        '\n%s'
-        '\nDWD:blue, DWD-Netatmo:red' % _interp_acc_)
-    ax.set_xlabel('Extreme Events')
-    #ax.legend(loc='upper right')
-    ax.set_ylabel('(Z-Z*) mm/%s' % temp_freq)
-
-    fig.savefig((out_dir_bias_dfs / (
-        r'diff_obs_int_%s_events_dwd_%s_.png' % (temp_freq, _interp_acc_))),
-        frameon=True, papertype='a4', bbox_inches='tight', pad_inches=.2)
+#     ax.grid(alpha=0.25)
+#     ax.set_ylim([-200, 200])
+#     ax.set_title(
+#         'Difference Obsv-Interp for every station;'
+#         '\n%s'
+#         '\nDWD:blue, DWD-Netatmo:red' % _interp_acc_)
+#     ax.set_xlabel('Extreme Events')
+#     #ax.legend(loc='upper right')
+#     ax.set_ylabel('(Z-Z*) mm/%s' % temp_freq)
+#
+#     fig.savefig((out_dir_bias_dfs / (
+#         r'diff_obs_int_%s_events_dwd_%s_.png' % (temp_freq, _interp_acc_))),
+#         frameon=True, papertype='a4', bbox_inches='tight', pad_inches=.2)
 
 #     ax3.grid(alpha=0.25)
 #     ax3.set_ylim([-200, 200])
@@ -543,13 +545,22 @@ for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
     # calculate TERMS
     #==========================================================================
 
-    B1_dwd = (np.abs(df_sum_per_stn.loc[:, 'dwd_interp_ppt_B1'].values.sum()) /
+    B1_dwd = ((df_sum_per_stn.loc[:, 'dwd_interp_ppt_B1'].values.sum()**2) /
               (df_dwd_ppt.index.shape[0] * 111))
 
-    B1_netatmo = np.abs((df_sum_per_stn.loc[:, 'dwd_netatmo_interp_ppt_B1'].values.sum()) /
+    B1_netatmo = ((df_sum_per_stn.loc[:, 'dwd_netatmo_interp_ppt_B1'].values.sum()**2) /
+                  (df_dwd_ppt.index.shape[0] * 111))
+
+    B1_netatmo_unc = ((df_sum_per_stn.loc[:, 'dwd_netatmo_unc_interp_ppt_B1'].values.sum()**2) /
+                      (df_dwd_ppt.index.shape[0] * 111))
+
+    B6_dwd = (np.abs(df_sum_per_stn.loc[:, 'dwd_interp_ppt_B1'].values.sum()) /
+              (df_dwd_ppt.index.shape[0] * 111))
+
+    B6_netatmo = np.abs((df_sum_per_stn.loc[:, 'dwd_netatmo_interp_ppt_B1'].values.sum()) /
                         (df_dwd_ppt.index.shape[0] * 111))
 
-    B1_netatmo_unc = np.abs((df_sum_per_stn.loc[:, 'dwd_netatmo_unc_interp_ppt_B1'].values.sum()) /
+    B6_netatmo_unc = np.abs((df_sum_per_stn.loc[:, 'dwd_netatmo_unc_interp_ppt_B1'].values.sum()) /
                             (df_dwd_ppt.index.shape[0] * 111))
 
     # B!_abs
@@ -633,6 +644,10 @@ for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
     df_overall_bias.loc[temp_freq, 'B4_dwd'] = B4_dwd
     df_overall_bias.loc[temp_freq, 'B4_dwd_netatmo'] = B4_netatmo
     df_overall_bias.loc[temp_freq, 'B4_dwd_netatmo_unc'] = B4_netatmo_unc
+
+    df_overall_bias.loc[temp_freq, 'B6_dwd'] = B6_dwd
+    df_overall_bias.loc[temp_freq, 'B6_dwd_netatmo'] = B6_netatmo
+    df_overall_bias.loc[temp_freq, 'B6_dwd_netatmo_unc'] = B6_netatmo_unc
 
     df_overall_bias.loc[temp_freq, 'B1_dwd_abs'] = B1_dwd_abs
     df_overall_bias.loc[temp_freq, 'B1_dwd_netatmo_abs'] = B1_netatmo_abs

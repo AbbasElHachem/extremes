@@ -431,7 +431,7 @@ if plot_filtered:
 # plot_not_filtered
 #==============================================================================
 if plot_not_filtered:
-    for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
+    for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:  #
         print(temp_freq)
 
         path_to_Quantiles_netatmo_no_flt___ = main_dir / (
@@ -554,10 +554,10 @@ if plot_not_filtered:
                 df_improvements.loc[stn_,
                                     'mse_dwd_netatmo_interp_ppt'] = mse_dwd_netatmo_interp_ppt
 
-                values_x = df_compare['original_edf'].values
-                values_dwd = df_compare['interpolated_edf_dwd'].values
+                values_x = df_compare['original_ppt'].values
+                values_dwd = df_compare['interpolated_ppt_dwd'].values
                 # values_netatmo =df_compare['interpolated_quantile_netatmo'].values
-                values_netatmo_dwd = df_compare['interpolated_edf_netatmo_dwd'].values
+                values_netatmo_dwd = df_compare['interpolated_ppt_netatmo_dwd'].values
 
                 # calculate sqared error between obsv and interpolated
                 # quantiles
@@ -620,6 +620,14 @@ if plot_not_filtered:
 #             percent_of_mse_improvment_unc_ppt = 100 * (stations_with_mse_improvements_unc_ppt /
 #                                                        df_improvements.mse_dwd_interp_ppt.shape[0])
             #########################################################
+            mean_dwd = np.mean(df_improvements.mse_dwd_interp_ppt.values)
+            mean_dwd_netatmo = np.mean(
+                df_improvements.mse_dwd_netatmo_interp_ppt.values)
+
+            # for plotting
+            df_improvements['mse_dwd_netatmo_interp_ppt'].values[
+                df_improvements['mse_dwd_netatmo_interp_ppt'] > 700] = 700
+
             plt.ioff()
             fig = plt.figure(figsize=(24, 12), dpi=150)
 
@@ -630,15 +638,14 @@ if plot_not_filtered:
                     alpha=.8,
                     c='b',  # colors_arr,
                     marker='d',
-                    label='DWD Interpolation PPT RMSE mean = %0.4f' % np.mean(
-                        df_improvements.mse_dwd_interp_ppt.values))
+                    label='DWD Interpolation PPT RMSE mean = %0.4f' % mean_dwd)
             ax.plot(df_improvements.index,
                     df_improvements.mse_dwd_netatmo_interp_ppt,
                     alpha=.8,
                     c='r',  # colors_arr,
                     marker='*',
-                    label='DWD-Netatmo Interpolation PPT RMSE mean = %0.4f' % np.mean(
-                        df_improvements.mse_dwd_netatmo_interp_ppt.values))
+                    label='DWD-Netatmo Interpolation PPT RMSE mean = %0.4f'
+                    % mean_dwd_netatmo)
 
             ax.set_title('Root mean squared error Interpolated from DWD or DWD-Netatmo %s \n '
                          'PPT of %s Extreme Events \n Stations with Improvemnts %d / %d, Percentage %0.0f'
@@ -653,7 +660,7 @@ if plot_not_filtered:
             ax.set_ylabel('RMSE')
 
             plt.savefig((path_to_use / (
-                r'_pptrmse_%s_events_dwd_%s_.png' % (temp_freq, _interp_acc_))),
+                r'_pptrmse_%s_events_dwd_%s_2.png' % (temp_freq, _interp_acc_))),
                 frameon=True, papertype='a4', bbox_inches='tight', pad_inches=.2)
             plt.close()
 
