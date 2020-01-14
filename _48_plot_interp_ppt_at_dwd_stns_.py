@@ -20,8 +20,8 @@ from pandas.plotting import register_matplotlib_converters
 register_matplotlib_converters()
 
 plt.ioff()
-plt.rcParams.update({'font.size': 12})
-plt.rcParams.update({'axes.labelsize': 12})
+plt.rcParams.update({'font.size': 20})
+plt.rcParams.update({'axes.labelsize': 20})
 
 
 main_dir = Path(
@@ -59,23 +59,23 @@ if plot_filtered:
         print(temp_freq)
 
         path_to_Qt_ok_un_first_flt__temp_flt_1st_ = main_dir / (
-            r'Ppt_ok_ok_un_new2_first_flt__temp_flt__1st_%s' % temp_freq)
+            r'Final_results2/Ppt_ok_ok_un_new3_first_flt__temp_flt__1st_%s' % temp_freq)
         Qt_ok_un_first_flt__temp_flt_1st_ = list_all_full_path(
             '.csv', path_to_Qt_ok_un_first_flt__temp_flt_1st_)
 
         path_to_Qt_ok_un_first_flt__temp_flt_comb_ = main_dir / (
-            r'Ppt_ok_ok_un_new2_first_flt__temp_flt__comb_%s' % temp_freq)
+            r'Final_results/Ppt_ok_ok_un_new2_first_flt__temp_flt__comb_%s' % temp_freq)
     #         r'Qt_ok_ok_un_3_test_first_flt__temp_flt__comb_%s' % temp_freq)
         Qt_ok_un_first_flt__temp_flt_comb_ = list_all_full_path(
             '.csv', path_to_Qt_ok_un_first_flt__temp_flt_comb_)
 
         path_to_Qt_ok_un_first_flt_1st_ = main_dir / (
-            r'Ppt_ok_ok_un_new2_first_flt__1st_%s' % temp_freq)
+            r'Final_results/Ppt_ok_ok_un_new2_first_flt__1st_%s' % temp_freq)
         Qt_ok_un_first_flt_1st_ = list_all_full_path(
             '.csv', path_to_Qt_ok_un_first_flt_1st_)
 
         path_to_Qt_ok_un_first_flt_comb_ = main_dir / (
-            r'Ppt_ok_ok_un_new2_first_flt__comb_%s' % temp_freq)
+            r'Final_results/Ppt_ok_ok_un_new2_first_flt__comb_%s' % temp_freq)
         Qt_ok_un_first_flt_comb_ = list_all_full_path(
             '.csv', path_to_Qt_ok_un_first_flt_comb_)
 
@@ -85,7 +85,7 @@ if plot_filtered:
     #         '.csv', path_to_Qt_ok_un_first_flt_comb_)
 
         path_to_Quantiles_netatmo_no_flt___ = main_dir / (
-            r'Ppt_ok_ok_un_new_netatmo_no_flt___%s' % temp_freq)
+            r'Final_results/Ppt_ok_ok_un_new_netatmo_no_flt___%s' % temp_freq)
 
         Quantiles_netatmo_no_flt___ = list_all_full_path(
             '.csv', path_to_Quantiles_netatmo_no_flt___)
@@ -116,8 +116,8 @@ if plot_filtered:
 
         #########################################################
 
-        path_to_use = path_to_Qt_ok_un_first_flt__temp_flt_comb_
-        data_to_use = Qt_ok_un_first_flt__temp_flt_comb_
+        path_to_use = path_to_Qt_ok_un_first_flt__temp_flt_1st_
+        data_to_use = Qt_ok_un_first_flt__temp_flt_1st_
 
         _interp_acc_ = str(r'%s' % (str(path_to_use).split('\\')[-1]))
         # for i in range(12):
@@ -346,6 +346,15 @@ if plot_filtered:
         except Exception as msg:
             print(msg)
         # dwd stn '07135', with weird results
+
+        # hourly_events = ['2016-06-25 00:00:00',
+#                  '2018-06-11 17:00:00',
+#                  '2018-09-23 17:00:00',
+#                  '2018-09-23 18:00:00',
+#                  '2018-09-23 19:00:00']
+
+# daily_events = ['2018-12-23 00:00:00',
+#                 '2019-05-22 00:00:00']
         # OK
         stations_with_improvements = sum(i >= j for (i, j) in zip(
             df_improvements.pearson_corr_dwd_netatmo.values,
@@ -357,6 +366,11 @@ if plot_filtered:
 
         percent_of_improvment = 100 * (stations_with_improvements /
                                        df_improvements.pearson_corr_dwd_netatmo.shape[0])
+
+        id_stns_no_impv = [id_stn for (id_stn, i, j) in zip(
+            df_improvements.index,
+            df_improvements.pearson_corr_dwd_netatmo.values,
+            df_improvements.pearson_corr_dwd_.values) if i < j]
 
     #     # OK with Unc
         stations_with_improvements_unc2perc = sum(i >= j for (i, j) in zip(
@@ -459,46 +473,46 @@ if plot_filtered:
 #                 label='DWD-Netatmo Interpolation 5percUnc %0.2f'
 #                 % mean_pearson_correlation_dwd_netatmo_unc5perc)
 
-        ax.plot(df_improvements.index,
-                df_improvements.pearson_corr_dwd_netatmo_unc10perc,
-                alpha=.8,
-                c='c',  # colors_arr,
-                marker='3',
-                label='DWD-Netatmo Interpolation 10percUnc %0.2f'
-                % mean_pearson_correlation_dwd_netatmo_unc10perc)
-
-        ax.plot(df_improvements.index,
-                df_improvements.pearson_corr_dwd_netatmo_unc20perc,
-                alpha=.8,
-                c='orange',  # colors_arr,
-                marker=',',
-                label='DWD-Netatmo Interpolation 20percUnc %0.2f'
-                % mean_pearson_correlation_dwd_netatmo_unc20perc)
+#         ax.plot(df_improvements.index,
+#                 df_improvements.pearson_corr_dwd_netatmo_unc10perc,
+#                 alpha=.8,
+#                 c='c',  # colors_arr,
+#                 marker='3',
+#                 label='DWD-Netatmo Interpolation 10percUnc %0.2f'
+#                 % mean_pearson_correlation_dwd_netatmo_unc10perc)
+#
+#         ax.plot(df_improvements.index,
+#                 df_improvements.pearson_corr_dwd_netatmo_unc20perc,
+#                 alpha=.8,
+#                 c='orange',  # colors_arr,
+#                 marker=',',
+#                 label='DWD-Netatmo Interpolation 20percUnc %0.2f'
+#                 % mean_pearson_correlation_dwd_netatmo_unc20perc)
 
         ax.set_title('Pearson Correlation Interpolated Quantiles from DWD or DWD-Netatmo\n '
-                     'Precipitation of %s Extreme Events %s\n Events with Improvemnts %d / %d, Percentage %0.0f\n'
+                     'Precipitation of %s Intense Events \n Events with Improvemnts %d / %d, Percentage %0.0f\n'
                      #                      'Stations with Improvemnts with OK 2percUnc %d / %d, Percentage %0.0f'
                      #                      '\nStations with Improvemnts with OK 5percUnc %d / %d, Percentage %0.0f'
-                     '\nStations with Improvemnts with OK 10percUnc %d / %d, Percentage %0.0f'
-                     '\nStations with Improvemnts with OK 20percUnc %d / %d, Percentage %0.0f'
-                     % (temp_freq, _interp_acc_,
+                     #'\nStations with Improvemnts with OK 10percUnc %d / %d, Percentage %0.0f'
+                     #'\nStations with Improvemnts with OK 20percUnc %d / %d, Percentage %0.0f'
+                     % (temp_freq,  # _interp_acc_,
                         stations_with_improvements,
                          df_improvements.pearson_corr_dwd_netatmo.shape[0],
-                        percent_of_improvment,
-                        #                         stations_with_improvements_unc2perc,
-                        #                         df_improvements.pearson_corr_dwd_netatmo_unc2perc.shape[0],
-                        #                         percent_of_improvment_unc2perc,
-                        #                         stations_with_improvements_unc5perc,
-                        #                         df_improvements.pearson_corr_dwd_netatmo_unc2perc.shape[0],
-                        #                         percent_of_improvment_unc5perc,
-                        stations_with_improvements_unc10perc,
-                        df_improvements.pearson_corr_dwd_netatmo_unc2perc.shape[0],
-                        percent_of_improvment_unc10perc,
-                        stations_with_improvements_unc20perc,
-                        df_improvements.pearson_corr_dwd_netatmo_unc2perc.shape[0],
-                        percent_of_improvment_unc20perc))
+                        percent_of_improvment))
+        #                         stations_with_improvements_unc2perc,
+        #                         df_improvements.pearson_corr_dwd_netatmo_unc2perc.shape[0],
+        #                         percent_of_improvment_unc2perc,
+        #                         stations_with_improvements_unc5perc,
+        #                         df_improvements.pearson_corr_dwd_netatmo_unc2perc.shape[0],
+        #                         percent_of_improvment_unc5perc,
+        # stations_with_improvements_unc10perc,
+        # df_improvements.pearson_corr_dwd_netatmo_unc2perc.shape[0],
+        # percent_of_improvment_unc10perc
+        # stations_with_improvements_unc20perc,
+        # df_improvements.pearson_corr_dwd_netatmo_unc2perc.shape[0],
+        # percent_of_improvment_unc20perc))
         ax.grid(alpha=0.25)
-        plt.setp(ax.get_xticklabels(), rotation=45)
+        plt.setp(ax.get_xticklabels(), rotation=60)
         ax.grid(alpha=0.25)
         ax.set_yticks(np.arange(0, 1.05, .10))
         ax.set_xlabel('DWD Stations')
@@ -606,46 +620,46 @@ if plot_filtered:
 #                 label='DWD-Netatmo Interpolation 5percUnc %0.2f'
 #                 % mean_spr_correlation_dwd_netatmo_unc5perc)
 
-        ax.plot(df_improvements.index,
-                df_improvements.spearman_corr_dwd_netatmo_unc10perc,
-                alpha=.8,
-                c='c',  # colors_arr,
-                marker='3',
-                label='DWD-Netatmo Interpolation 10percUnc %0.2f'
-                % mean_spr_correlation_dwd_netatmo_unc10perc)
-
-        ax.plot(df_improvements.index,
-                df_improvements.spearman_corr_dwd_netatmo_unc20perc,
-                alpha=.8,
-                c='orange',  # colors_arr,
-                marker=',',
-                label='DWD-Netatmo Interpolation 20percUnc %0.2f'
-                % mean_spr_correlation_dwd_netatmo_unc20perc)
+#         ax.plot(df_improvements.index,
+#                 df_improvements.spearman_corr_dwd_netatmo_unc10perc,
+#                 alpha=.8,
+#                 c='c',  # colors_arr,
+#                 marker='3',
+#                 label='DWD-Netatmo Interpolation 10percUnc %0.2f'
+#                 % mean_spr_correlation_dwd_netatmo_unc10perc)
+#
+#         ax.plot(df_improvements.index,
+#                 df_improvements.spearman_corr_dwd_netatmo_unc20perc,
+#                 alpha=.8,
+#                 c='orange',  # colors_arr,
+#                 marker=',',
+#                 label='DWD-Netatmo Interpolation 20percUnc %0.2f'
+#                 % mean_spr_correlation_dwd_netatmo_unc20perc)
 
         ax.set_title('Spearman Correlation Interpolated Quantiles from DWD or DWD-Netatmo \n '
-                     'Rainfall of %s Extreme Events %s \n Events with Improvemnts %d / %d, Percentage %0.0f'
+                     'Rainfall of %s Intense Events \n Events with Improvemnts %d / %d, Percentage %0.0f'
                      #                      '\nStations with Improvemnts with OK 2percUnc %d / %d, Percentage %0.0f'
                      #                      '\nStations with Improvemnts with OK 5percUnc %d / %d, Percentage %0.0f'
-                     '\nStations with Improvemnts with OK 10percUnc %d / %d, Percentage %0.0f'
-                     '\nStations with Improvemnts with OK 20percUnc %d / %d, Percentage %0.0f'
-                     % (temp_freq, _interp_acc_,
+                     #'\nStations with Improvemnts with OK 10percUnc %d / %d, Percentage %0.0f'
+                     #'\nStations with Improvemnts with OK 20percUnc %d / %d, Percentage %0.0f'
+                     % (temp_freq,  # _interp_acc_,
                         stations_with_improvements,
                          df_improvements.spearman_corr_dwd_netatmo.shape[0],
-                        percent_of_improvment,
-                        #                         stations_with_improvements_unc2perc,
-                        #                         df_improvements.spearman_corr_dwd_netatmo_unc2perc.shape[0],
-                        #                         percent_of_improvment_unc2perc,
-                        #                         stations_with_improvements_unc5perc,
-                        #                         df_improvements.spearman_corr_dwd_netatmo_unc2perc.shape[0],
-                        #                         percent_of_improvment_unc5perc,
-                        stations_with_improvements_unc10perc,
-                        df_improvements.spearman_corr_dwd_netatmo_unc2perc.shape[0],
-                        percent_of_improvment_unc10perc,
-                        stations_with_improvements_unc20perc,
-                        df_improvements.spearman_corr_dwd_netatmo_unc2perc.shape[0],
-                        percent_of_improvment_unc20perc))
+                        percent_of_improvment))
+        #                         stations_with_improvements_unc2perc,
+        #                         df_improvements.spearman_corr_dwd_netatmo_unc2perc.shape[0],
+        #                         percent_of_improvment_unc2perc,
+        #                         stations_with_improvements_unc5perc,
+        #                         df_improvements.spearman_corr_dwd_netatmo_unc2perc.shape[0],
+        #                         percent_of_improvment_unc5perc,
+        # stations_with_improvements_unc10perc,
+        # df_improvements.spearman_corr_dwd_netatmo_unc2perc.shape[0],
+        # percent_of_improvment_unc10perc))
+        # stations_with_improvements_unc20perc,
+        # df_improvements.spearman_corr_dwd_netatmo_unc2perc.shape[0],
+        # percent_of_improvment_unc20perc))
         ax.grid(alpha=0.25)
-        plt.setp(ax.get_xticklabels(), rotation=45)
+        plt.setp(ax.get_xticklabels(), rotation=60)
         ax.grid(alpha=0.25)
         ax.set_yticks(np.arange(0, 1.05, .10))
         ax.set_xlabel('DWD Stations')
@@ -847,14 +861,14 @@ if plot_not_filtered:
                 % mean_pearson_correlation_dwd_netatmo)
 
         ax.set_title('Pearson Correlation Interpolated Quantiles from DWD or DWD-Netatmo\n '
-                     'Precipitation of %s Extreme Events %s\n Events with Improvemnts %d / %d, Percentage %0.0f\n'
+                     'Precipitation of %s Intense Events \n Events with Improvemnts %d / %d, Percentage %0.0f\n'
 
-                     % (temp_freq, _interp_acc_,
+                     % (temp_freq,  # _interp_acc_,
                         stations_with_improvements,
                          df_improvements.pearson_corr_dwd_netatmo.shape[0],
                         percent_of_improvment))
         ax.grid(alpha=0.25)
-        plt.setp(ax.get_xticklabels(), rotation=45)
+        plt.setp(ax.get_xticklabels(), rotation=60)
         ax.grid(alpha=0.25)
         ax.set_yticks(np.arange(0, 1.05, .10))
         ax.set_xlabel('DWD Stations')
@@ -901,15 +915,15 @@ if plot_not_filtered:
                 % mean_spr_correlation_dwd_netatmo)
 
         ax.set_title('Spearman Correlation Interpolated Quantiles from DWD or DWD-Netatmo \n '
-                     'Rainfall of %s Extreme Events %s \n Events with Improvemnts %d / %d, Percentage %0.0f'
+                     'Rainfall of %s Intense Events  \n Events with Improvemnts %d / %d, Percentage %0.0f'
 
-                     % (temp_freq, _interp_acc_,
+                     % (temp_freq,  # _interp_acc_,
                         stations_with_improvements,
                          df_improvements.spearman_corr_dwd_netatmo.shape[0],
                         percent_of_improvment,
                         ))
         ax.grid(alpha=0.25)
-        plt.setp(ax.get_xticklabels(), rotation=45)
+        plt.setp(ax.get_xticklabels(), rotation=60)
         ax.grid(alpha=0.25)
         ax.set_yticks(np.arange(0, 1.05, .10))
         ax.set_xlabel('DWD Stations')

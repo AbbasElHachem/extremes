@@ -70,27 +70,27 @@ for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
     print(temp_freq)
 
     path_to_Qt_ok_un_first_flt__temp_flt_1st_ = main_dir / (
-        r'Ppt_ok_ok_un_new2_first_flt__temp_flt__1st_%s' % temp_freq)
+        r'Final_results/Ppt_ok_ok_un_new2_first_flt__temp_flt__1st_%s' % temp_freq)
     Qt_ok_un_first_flt__temp_flt_1st_ = list_all_full_path(
         '.csv', path_to_Qt_ok_un_first_flt__temp_flt_1st_)
 
     path_to_Qt_ok_un_first_flt__temp_flt_comb_ = main_dir / (
-        r'Ppt_ok_ok_un_new2_first_flt__temp_flt__comb_%s' % temp_freq)
+        r'Final_results/Ppt_ok_ok_un_new2_first_flt__temp_flt__comb_%s' % temp_freq)
     Qt_ok_un_first_flt__temp_flt_comb_ = list_all_full_path(
         '.csv', path_to_Qt_ok_un_first_flt__temp_flt_comb_)
 
     path_to_Qt_ok_un_first_flt_1st_ = main_dir / (
-        r'Ppt_ok_ok_un_new2_first_flt__1st_%s' % temp_freq)
+        r'Final_results/Ppt_ok_ok_un_new2_first_flt__1st_%s' % temp_freq)
     Qt_ok_un_first_flt_1st_ = list_all_full_path(
         '.csv', path_to_Qt_ok_un_first_flt_1st_)
 
     path_to_Qt_ok_un_first_flt_comb_ = main_dir / (
-        r'Ppt_ok_ok_un_new2_first_flt__comb_%s' % temp_freq)
+        r'Final_results/Ppt_ok_ok_un_new2_first_flt__comb_%s' % temp_freq)
     Qt_ok_un_first_flt_comb_ = list_all_full_path(
         '.csv', path_to_Qt_ok_un_first_flt_comb_)
 
     path_to_Quantiles_netatmo_no_flt___ = main_dir / (
-        r'Ppt_ok_ok_un_new_netatmo_no_flt___%s' % temp_freq)
+        r'Final_results/Ppt_ok_ok_un_new_netatmo_no_flt___%s' % temp_freq)
 
     Quantiles_netatmo_no_flt___ = list_all_full_path(
         '.csv', path_to_Quantiles_netatmo_no_flt___)
@@ -109,8 +109,8 @@ for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
 
     #########################################################
 
-    path_to_use = path_to_Qt_ok_un_first_flt__temp_flt_1st_
-    data_to_use = Qt_ok_un_first_flt__temp_flt_1st_
+    path_to_use = path_to_Quantiles_netatmo_no_flt___
+    data_to_use = Quantiles_netatmo_no_flt___
 
     _interp_acc_ = str(r'%s' % (str(path_to_use).split('\\')[-1]))
     # for i in range(12):
@@ -481,8 +481,21 @@ for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
     #======================================================================
     # calculte B3
     #======================================================================
+    hourly_events = ['2016-06-25 00:00:00',
+                     '2018-06-11 16:00:00',
+                     '2018-06-11 17:00:00',
+                     '2018-06-11 18:00:00',
+                     '2018-09-23 17:00:00',
+                     '2018-09-23 18:00:00',
+                     '2018-09-23 19:00:00']
 
-    for event_date in cmn_events:
+    daily_events = ['2018-12-23 00:00:00',
+                    '2019-05-22 00:00:00',
+                    '2018-05-14 00:00:00',
+                    '2019-07-28 00:00:00']
+
+    for event_date in hourly_events:  # cmn_events:
+        print(event_date)
         df_compare_b3 = pd.DataFrame(index=df_dwd.columns)
         for stn_ in df_dwd.columns:
 
@@ -515,9 +528,31 @@ for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
                     interpolated_ppt_netatmo_dwd
                 df_compare_b3.loc[stn_, 'diff_dwd_netatmo_unc'] = original_ppt - \
                     interpolated_ppt_netatmo_dwd_unc
+
         # df_compare_b3 = df_compare_b3[df_compare_b3 >= 0]
         df_compare_b3.dropna(how='all', inplace=True)
 
+        values_x_ppt = df_compare_b3['original_ppt'].values
+        values_dwd_ppt = df_compare_b3['interpolated_ppt_dwd'].values
+
+        values_netatmo_dwd_ppt = df_compare_b3['interpolated_ppt_netatmo_dwd'].values
+        values_netatmo_dwd_unc2perc = df_compare_b3['interpolated_ppt_netatmo_dwd_unc'].values
+
+        try:
+            mse_dwd_interp_ppt = np.square(
+                np.subtract(values_x_ppt, values_dwd_ppt)).mean()
+        except Exception as msg:
+            print(msg)
+
+        mse_dwd_netatmo_interp_ppt = np.square(
+            np.subtract(values_x_ppt, values_netatmo_dwd_ppt)).mean()
+
+        mse_dwd_netatmo_interp_unc_ppt_2perc = np.square(
+            np.subtract(values_x_ppt, values_netatmo_dwd_unc2perc)).mean()
+
+        print('\nRMSE DWD', mse_dwd_interp_ppt)
+        print('\nRMSE DWD-Net', mse_dwd_netatmo_interp_ppt)
+        print('\nRMSE DWD-NEt unc', mse_dwd_netatmo_interp_unc_ppt_2perc)
         # difference obs-inter for B3
 
         diff_dwd_obs_interp_B3 = np.square(

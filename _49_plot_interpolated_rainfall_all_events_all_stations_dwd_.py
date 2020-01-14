@@ -15,7 +15,7 @@ from pathlib import Path
 
 from scipy.stats import spearmanr as spr
 from scipy.stats import pearsonr as pears
-
+from scipy.stats import kendalltau as kdl
 from pandas.plotting import register_matplotlib_converters
 register_matplotlib_converters()
 
@@ -31,7 +31,7 @@ main_dir = Path(
     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\oridinary_kriging_compare_DWD_Netatmo')
 
 
-plot_filtered = False
+plot_filtered = True
 plot_not_filtered = True
 
 
@@ -72,23 +72,23 @@ if plot_filtered:
         print(temp_freq)
 
         path_to_Qt_ok_un_first_flt__temp_flt_1st_ = main_dir / (
-            r'Ppt_ok_ok_un_new2_first_flt__temp_flt__1st_%s' % temp_freq)
+            r'Final_results2/Ppt_ok_ok_un_new3_first_flt__temp_flt__1st_%s' % temp_freq)
         Qt_ok_un_first_flt__temp_flt_1st_ = list_all_full_path(
             '.csv', path_to_Qt_ok_un_first_flt__temp_flt_1st_)
 
         path_to_Qt_ok_un_first_flt__temp_flt_comb_ = main_dir / (
-            r'Ppt_ok_ok_un_new2_first_flt__temp_flt__comb_%s' % temp_freq)
+            r'Final_results/Ppt_ok_ok_un_new2_first_flt__temp_flt__comb_%s' % temp_freq)
     #         r'Qt_ok_ok_un_3_test_first_flt__temp_flt__comb_%s' % temp_freq)
         Qt_ok_un_first_flt__temp_flt_comb_ = list_all_full_path(
             '.csv', path_to_Qt_ok_un_first_flt__temp_flt_comb_)
 
         path_to_Qt_ok_un_first_flt_1st_ = main_dir / (
-            r'Ppt_ok_ok_un_new2_first_flt__1st_%s' % temp_freq)
+            r'Final_results/Ppt_ok_ok_un_new2_first_flt__1st_%s' % temp_freq)
         Qt_ok_un_first_flt_1st_ = list_all_full_path(
             '.csv', path_to_Qt_ok_un_first_flt_1st_)
 
         path_to_Qt_ok_un_first_flt_comb_ = main_dir / (
-            r'Ppt_ok_ok_un_new2_first_flt__comb_%s' % temp_freq)
+            r'Final_results/Ppt_ok_ok_un_new2_first_flt__comb_%s' % temp_freq)
         Qt_ok_un_first_flt_comb_ = list_all_full_path(
             '.csv', path_to_Qt_ok_un_first_flt_comb_)
 
@@ -98,7 +98,7 @@ if plot_filtered:
     #         '.csv', path_to_Qt_ok_un_first_flt_comb_)
 
         path_to_Quantiles_netatmo_no_flt___ = main_dir / (
-            r'Ppt_ok_ok_un_new_netatmo_no_flt___%s' % temp_freq)
+            r'Final_results/Ppt_ok_ok_un_new_netatmo_no_flt___%s' % temp_freq)
 
         Quantiles_netatmo_no_flt___ = list_all_full_path(
             '.csv', path_to_Quantiles_netatmo_no_flt___)
@@ -260,6 +260,7 @@ if plot_filtered:
                             (edf_stn_interp_netatmo_dwd >= 0) and
 
                             (edf_stn_interp_netatmo_dwd_unc2perc >= 0)):
+
                         orig_edf_vals.append(edf_stn_orig)
                         dwd_interp_vals.append(edf_stn_interp_dwd)
                         netatmo_dwd_interp_vals.append(
@@ -336,8 +337,33 @@ if plot_filtered:
         except Exception as msg:
             print(msg)
 
-        # orig_edf_vals, dwd_interp_vals, netatmo_dwd_interp_vals
+#         df_compare.loc['2019-05-22 00:00:00', :]
 
+        # difference dwd- dwdnetatmo
+#         max_diff_pears = df_compare['pearson_corr_dwd_'] - \
+#             df_compare['pearson_corr_dwd_netatmo']
+#         max_diff_pears = pd.DataFrame(
+#             index=max_diff_pears.index, data=max_diff_pears.values)
+# #         sorted_vals = max_diff_pears.sort_values()
+# #         sorted_vals.to_csv(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\oridinary_kriging_compare_DWD_Netatmo\correlations_events\corr_dwd_minus_dwdnetatmo_pearson.csv', sep=';')
+#         max_diff_spr = df_compare['spearman_corr_dwd_'] - \
+#             df_compare['spearman_corr_dwd_netatmo']
+# #         sorted_vals = max_diff_spr.sort_values()
+#         # orig_edf_vals, dwd_interp_vals, netatmo_dwd_interp_vals
+#         max_diff_pears['spr'] = max_diff_spr.values.ravel()
+#         sorted_vals = max_diff_pears.sort_values(['spr'])
+#         sorted_vals.to_csv(
+# r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\oridinary_kriging_compare_DWD_Netatmo\correlations_events\corr_dwd_minus_dwdnetatmo_spearman_daily.csv',
+# sep=';')
+
+        # hourly_events = ['2016-06-25 00:00:00',
+#                  '2018-06-11 17:00:00',
+#                  '2018-09-23 17:00:00',
+#                  '2018-09-23 18:00:00',
+#                  '2018-09-23 19:00:00']
+
+# daily_events = ['2018-12-23 00:00:00',
+#                 '2019-05-22 00:00:00']
         df_compare.sort_index(inplace=True)
 #         df_compare.sort_values(by='pearson_corr_dwd_', inplace=True)
 #         df_compare.reset_index()
@@ -698,7 +724,7 @@ if plot_not_filtered:
         print(temp_freq)
 
         path_to_Quantiles_netatmo_no_flt___ = main_dir / (
-            r'Ppt_ok_ok_un_new_netatmo_no_flt___%s' % temp_freq)
+            r'Final_results/Ppt_ok_ok_un_new_netatmo_no_flt___%s' % temp_freq)
 
         Quantiles_netatmo_no_flt___ = list_all_full_path(
             '.csv', path_to_Quantiles_netatmo_no_flt___)
@@ -829,7 +855,7 @@ if plot_not_filtered:
         # orig_edf_vals, dwd_interp_vals, netatmo_dwd_interp_vals
 
         df_compare.sort_index(inplace=True)
-
+#         df_compare.loc['2018-06-11 16:00:00', :]
         # OK
         stations_with_improvements = sum(i >= j for (i, j) in zip(
             df_compare.pearson_corr_dwd_netatmo.values,
@@ -843,7 +869,14 @@ if plot_not_filtered:
                                        df_compare.pearson_corr_dwd_netatmo.shape[0])
 
         # OK with Unc
+        # hourly_events = ['2016-06-25 00:00:00',
+#                  '2018-06-11 17:00:00',
+#                  '2018-09-23 17:00:00',
+#                  '2018-09-23 18:00:00',
+#                  '2018-09-23 19:00:00']
 
+# daily_events = ['2018-12-23 00:00:00',
+#                 '2019-05-22 00:00:00']
         ####
         mean_pearson_correlation_dwd_only = df_compare.pearson_corr_dwd_.mean()
         mean_pearson_correlation_dwd_netatmo = df_compare.pearson_corr_dwd_netatmo.mean()
@@ -853,6 +886,9 @@ if plot_not_filtered:
         mean_spr_correlation_dwd_netatmo = df_compare.spearman_corr_dwd_netatmo.mean()
 
         #########################################################
+
+        df_compare.sort_values(by='pearson_corr_dwd_', inplace=True)
+        df_compare.reset_index()
         plt.ioff()
         fig = plt.figure(figsize=(24, 12), dpi=150)
 
@@ -874,7 +910,7 @@ if plot_not_filtered:
                 % mean_pearson_correlation_dwd_netatmo)
 
         ax.set_title('Pearson Correlation Interpolated Quantiles from DWD or DWD-Netatmo\n '
-                     'Precipitation of %s Extreme Events %s\n Events with Improvemnts %d / %d, Percentage %0.0f\n'
+                     'Precipitation of %s Intense Events %s\n Events with Improvemnts %d / %d, Percentage %0.0f\n'
 
                      % (temp_freq, _interp_acc_,
                         stations_with_improvements,
@@ -902,7 +938,7 @@ if plot_not_filtered:
         ax.set_ylabel('Pearson Correlation')
 
         plt.savefig(os.path.join(path_to_use,
-                                 r'ppt_spatial_pears_corr_%s_events_dwd.png' % temp_freq,
+                                 r'ppt_spatial_pears_corr_%s_events_dwd2.png' % temp_freq,
                                  ),
                     frameon=True, papertype='a4', bbox_inches='tight', pad_inches=.2)
         plt.close()
@@ -941,7 +977,7 @@ if plot_not_filtered:
                 % mean_spr_correlation_dwd_netatmo)
 
         ax.set_title('Spearman Correlation Interpolated Quantiles from DWD or DWD-Netatmo \n '
-                     'Rainfall of %s Extreme Events %s \n Events with Improvemnts %d / %d, Percentage %0.0f'
+                     'Rainfall of %s Intense Events %s \n Events with Improvemnts %d / %d, Percentage %0.0f'
 
                      % (temp_freq, _interp_acc_,
                         stations_with_improvements,
@@ -973,6 +1009,6 @@ if plot_not_filtered:
         ax.set_ylabel('Spearman Correlation')
 
         plt.savefig(os.path.join(path_to_use,
-                                 r'ppt_spatial_spearm_corr_%s_events_dwd.png' % (temp_freq)),
+                                 r'ppt_spatial_spearm_corr_%s_events_dwd2.png' % (temp_freq)),
                     frameon=True, papertype='a4', bbox_inches='tight', pad_inches=.2)
         plt.close()

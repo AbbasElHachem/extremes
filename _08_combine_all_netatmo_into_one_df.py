@@ -32,8 +32,8 @@ from _00_additional_functions import (list_all_full_path,
 # rain_bw_1hour'
 # dfs_loc = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\humidity_bw_1hour'
 
-# dfs_loc = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\rain_bw_1hour'
-dfs_loc = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\rain_UK_1hour'
+dfs_loc = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\rain_bw_1hour'
+# dfs_loc = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\rain_UK_1hour'
 # dfs_loc = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\temperature_bw_1hour'
 
 dfs_list = list_all_full_path('.csv', dfs_loc)
@@ -52,9 +52,9 @@ list_years = ['2015', '2016', '2017', '2018', '2019']
 #==============================================================================
 #
 #==============================================================================
-max_ppt_thr = 100  # maximum ppt values per hour
-initial_vals_to_remove = 4  # most likely calibration or test values
-minimal_number_of_vals = 2 * 30 * 24  # 1 month of hourly data
+max_ppt_thr = 1000  # maximum ppt values per hour
+initial_vals_to_remove = 0  # 4  # most likely calibration or test values
+minimal_number_of_vals = 0  # 2 * 30 * 24  # 1 month of hourly data
 
 data_mtx = np.zeros(
     shape=(date_range.shape[0], len(stn_ids))).astype('float')
@@ -118,13 +118,13 @@ for df_file in dfs_list_ppt:
 print('Saving Dataframe')
 df_all.dropna(how='all', inplace=True)
 df_all.to_csv(os.path.join(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW',
-                           r'ppt_all_netatmo_bw_hourly_stns_combined_new.csv'),  #
+                           r'ppt_all_netatmo_bw_hourly_everything.csv'),  #
               sep=';')  # , float_format='%.2f')  # temperature humidity ppt
 
-df_all.reset_index(inplace=True)
-df_all.rename(columns={'index': 'Time'}, inplace=True)
-df_all.to_feather(os.path.join(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW',
-                               r'ppt_all_netatmo_hourly_stns_combined_new.fk'))
+# df_all.reset_index(inplace=True)
+# df_all.rename(columns={'index': 'Time'}, inplace=True)
+# df_all.to_feather(os.path.join(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW',
+#                                r'ppt_all_netatmo_hourly_stns_combined_new.fk'))
 
 print('done with everything')
 
