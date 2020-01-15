@@ -2,6 +2,7 @@ eclipse.preferences.version=1
 encoding/_00_additional_functions.py=utf-8
 encoding/_04_plot_simultaneous_events_in_convex_hull.py=utf-8
 encoding/_08_combine_all_netatmo_into_one_df.py=utf-8
+encoding/_10_aggregate_plot_compare_2_DWD_stns.py=utf-8
 encoding/_18_disaggregate_DWD_based_on_NetAtmo.py=utf-8
 encoding/_24_calculate_correlation_differences_neighboring_Netatmo_DWD_stations.py=utf-8
 encoding/_25_calculate_correlation_differences_neighboring_DWD_DWD_stations.py=utf-8

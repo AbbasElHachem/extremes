@@ -31,7 +31,7 @@ main_dir = Path(
     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\oridinary_kriging_compare_DWD_Netatmo')
 
 
-plot_filtered = True
+plot_filtered = False
 plot_not_filtered = True
 
 
@@ -720,7 +720,7 @@ if plot_filtered:
 
 if plot_not_filtered:
         # , '180min', '360min', '720min', '1440min']:
-    for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
+    for temp_freq in ['1440min', '60min', '180min', '360min', '720min', '1440min']:
         print(temp_freq)
 
         path_to_Quantiles_netatmo_no_flt___ = main_dir / (
@@ -876,7 +876,9 @@ if plot_not_filtered:
 #                  '2018-09-23 19:00:00']
 
 # daily_events = ['2018-12-23 00:00:00',
-#                 '2019-05-22 00:00:00']
+#                 '2019-05-22 00:00:00',
+#                    '2018-05-14 00:00:00']
+#         df_compare.loc['2019-07-28 00:00:00', :]
         ####
         mean_pearson_correlation_dwd_only = df_compare.pearson_corr_dwd_.mean()
         mean_pearson_correlation_dwd_netatmo = df_compare.pearson_corr_dwd_netatmo.mean()

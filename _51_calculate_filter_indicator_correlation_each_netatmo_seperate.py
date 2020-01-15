@@ -74,9 +74,7 @@ from scipy.stats import pearsonr as pears
 from _00_additional_functions import (resample_intersect_2_dfs,
                                       select_convective_season,
                                       select_df_within_period,
-                                      get_cdf_part_abv_thr,
-                                      convert_coords_fr_wgs84_to_utm32_,
-                                      )
+                                      get_cdf_part_abv_thr)
 
 from _10_aggregate_plot_compare_2_DWD_stns import (get_dwd_stns_coords,
                                                    get_nearest_dwd_station)
@@ -95,7 +93,8 @@ os.chdir(main_dir)
 # =============================================================================
 
 # Note: for data DF, pandas feather format is used, it makes everything faster
-# it allows reading data station by station and not everything at once
+# it allows reading data, station by station and not everything at once
+# which saves memory and runs faster, changing from .csv to .fk is quite easy
 
 # netatmo hourly data
 path_to_ppt_netatmo_data_feather = Path(
@@ -149,21 +148,25 @@ if not os.path.exists(out_save_dir_orig):
 # =============================================================================
 # get dwd coordinates
 # =============================================================================
+# this could be used in case coordinates needs to be transformed, this was
+# done before, change Netatmo and DWD coordinates from degrees to metric
 wgs82 = "+init=EPSG:4326"
 utm32 = "+init=EPSG:32632"
 
 x_col_name_dwd = 'X'
 y_col_name_dwd = 'Y'
 
-
+# read dwd coords dataframe
 in_dwd_coords_df, _, _, _ = get_dwd_stns_coords(
     path_to_dwd_coords_df_file, x_col_name_dwd, y_col_name_dwd, index_col=0,
     sep_type=';')
 
+# this is done because if a station name starts with 0, pandas reads it as an
+# integer and the 0 (or 0s) are removed
 stndwd_ix = ['0' * (5 - len(str(stn_id))) + str(stn_id)
              if len(str(stn_id)) < 5 else str(stn_id)
              for stn_id in in_dwd_coords_df.index]
-
+# reindex dataframe
 in_dwd_coords_df.index = stndwd_ix
 # =============================================================================
 #
@@ -173,13 +176,13 @@ x_col_name = 'lon'
 y_col_name = 'lat'
 
 # min distance threshold used for selecting neighbours
-min_dist_thr_ppt = 5 * 1e4  # 30000 m, 30km
+min_dist_thr_ppt = 5 * 1e4  # in m, for ex: 30km or 50km
 
 # threshold for max ppt value per hour
 max_ppt_thr = 200.  # ppt above this value are not considered
 
 # only highest x% of the values are selected
-lower_percentile_val_lst = [50]  # 97., 98., 99., 99.5
+lower_percentile_val_lst = [99]  # 97., 98., 99., 99.5
 
 # temporal frequencies on which the filtering should be done
 aggregation_frequencies = ['60min', '180min', '360min', '720min', '1440min']
@@ -190,10 +193,10 @@ aggregation_frequencies = ['60min', '180min', '360min', '720min', '1440min']
 # [0, 1, 2, 3, 4]  # refers to DWD neighbot (0=first)
 neighbors_to_chose_lst = [0, 1, 2, 3, 4, 5]  # 4, 5, 6, 7
 
-# Note: used Netatmo stations, are thos with more than 2months of data
+# Note: used Netatmo stations, are those with more than 2months of data
 # this is done before when combining dfs
 
-# # all netatmos have more than 2 month data, this an extra check
+# all netatmos have more than 2 month data, this an extra check
 min_req_ppt_vals = 10
 
 # this is used to keep only data where month is not in this list
@@ -248,7 +251,6 @@ def compare_netatmo_dwd_indicator_correlations(
     stns_ppt_ids = [stn_id for stn_id in in_df_distance_netatmo_dwd.index]
 
     # Note: why is this here?
-
     # read netatmo good stns df
     # could be used to check how does a filtered dataset performs on other
     # temporal frequencies or other upper percentiles
