@@ -31,8 +31,8 @@ main_dir = Path(
     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\oridinary_kriging_compare_DWD_Netatmo')
 
 
-plot_filtered = False
-plot_not_filtered = True
+plot_filtered = True
+plot_not_filtered = False
 
 
 def list_all_full_path(ext, file_dir):
@@ -337,7 +337,8 @@ if plot_filtered:
         except Exception as msg:
             print(msg)
 
-#         df_compare.loc['2019-05-22 00:00:00', :]
+        df_compare.loc['2016-06-24 22:00:00', :]
+# ['2016-06-24 22:00:00'
 
         # difference dwd- dwdnetatmo
 #         max_diff_pears = df_compare['pearson_corr_dwd_'] - \
@@ -361,12 +362,27 @@ if plot_filtered:
 #                  '2018-09-23 17:00:00',
 #                  '2018-09-23 18:00:00',
 #                  '2018-09-23 19:00:00']
+        hourly_events = ['2019-07-27 19:00:00',
+                         '2019-07-27 20:00:00',
+                         '2018-05-13 16:00:00',
+                         '2018-05-13 22:00:00',
+                         '2018-06-12 18:00:00',
+                         '2018-07-05 05:00:00',
+                         '2018-08-02 01:00:00',
+                         '2018-08-23 15:00:00',
+                         '2018-09-06 18:00:00',
+                         '2016-06-24 22:00:00',
+                         '2016-06-25 00:00:00']
 
 # daily_events = ['2018-12-23 00:00:00',
 #                 '2019-05-22 00:00:00']
         df_compare.sort_index(inplace=True)
+
+        for evt in hourly_events:
+            print(df_compare.loc[evt, :])
 #         df_compare.sort_values(by='pearson_corr_dwd_', inplace=True)
 #         df_compare.reset_index()
+
         # OK
         stations_with_improvements = sum(i >= j for (i, j) in zip(
             df_compare.pearson_corr_dwd_netatmo.values,
@@ -720,7 +736,7 @@ if plot_filtered:
 
 if plot_not_filtered:
         # , '180min', '360min', '720min', '1440min']:
-    for temp_freq in ['1440min', '60min', '180min', '360min', '720min', '1440min']:
+    for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
         print(temp_freq)
 
         path_to_Quantiles_netatmo_no_flt___ = main_dir / (
@@ -878,7 +894,7 @@ if plot_not_filtered:
 # daily_events = ['2018-12-23 00:00:00',
 #                 '2019-05-22 00:00:00',
 #                    '2018-05-14 00:00:00']
-#         df_compare.loc['2019-07-28 00:00:00', :]
+#         df_compare.loc['2019-07-29 19:00:00', :]
         ####
         mean_pearson_correlation_dwd_only = df_compare.pearson_corr_dwd_.mean()
         mean_pearson_correlation_dwd_netatmo = df_compare.pearson_corr_dwd_netatmo.mean()

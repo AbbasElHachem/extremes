@@ -35,8 +35,8 @@ main_dir = Path(
 min_orig_qnt_thr = 0.
 _acc_ = ''
 
-plot_not_filtered = True  # False
-plot_filtered = False  # True
+plot_not_filtered = False  # False
+plot_filtered = True  # True
 #==============================================================================
 #
 #==============================================================================
@@ -48,23 +48,22 @@ if plot_filtered:
         print(temp_freq)
 
         path_to_Qt_ok_un_first_flt__temp_flt_1st_ = main_dir / (
-            r'Ppt_ok_ok_un_new2_first_flt__temp_flt__1st_%s' % temp_freq)
+            r'Final_results/Ppt_ok_ok_un_new2_first_flt__temp_flt__1st_%s' % temp_freq)
         Qt_ok_un_first_flt__temp_flt_1st_ = list_all_full_path(
             '.csv', path_to_Qt_ok_un_first_flt__temp_flt_1st_)
 
         path_to_Qt_ok_un_first_flt__temp_flt_comb_ = main_dir / (
-            r'Ppt_ok_ok_un_new2_first_flt__temp_flt__comb_%s' % temp_freq)
-    #         r'Qt_ok_ok_un_3_test_first_flt__temp_flt__comb_%s' % temp_freq)
+            r'Final_results/Ppt_ok_ok_un_new2_first_flt__temp_flt__comb_%s' % temp_freq)
         Qt_ok_un_first_flt__temp_flt_comb_ = list_all_full_path(
             '.csv', path_to_Qt_ok_un_first_flt__temp_flt_comb_)
 
         path_to_Qt_ok_un_first_flt_1st_ = main_dir / (
-            r'Ppt_ok_ok_un_new2_first_flt__1st_%s' % temp_freq)
+            r'Final_results/Ppt_ok_ok_un_new2_first_flt__1st_%s' % temp_freq)
         Qt_ok_un_first_flt_1st_ = list_all_full_path(
             '.csv', path_to_Qt_ok_un_first_flt_1st_)
 
         path_to_Qt_ok_un_first_flt_comb_ = main_dir / (
-            r'Ppt_ok_ok_un_new2_first_flt__comb_%s' % temp_freq)
+            r'Final_results/Ppt_ok_ok_un_new2_first_flt__comb_%s' % temp_freq)
         Qt_ok_un_first_flt_comb_ = list_all_full_path(
             '.csv', path_to_Qt_ok_un_first_flt_comb_)
 
@@ -97,8 +96,8 @@ if plot_filtered:
 
         #########################################################
 
-        path_to_use = path_to_Qt_ok_un_first_flt_comb_
-        data_to_use = Qt_ok_un_first_flt_comb_
+        path_to_use = path_to_Qt_ok_un_first_flt_1st_
+        data_to_use = Qt_ok_un_first_flt_1st_
 
         _interp_acc_ = str(r'%s' % (str(path_to_use).split('\\')[-1]))
         # for i in range(12):
@@ -238,25 +237,25 @@ if plot_filtered:
             # calculate sqared error between obsv and interpolated
             # ppt
             try:
-                mse_dwd_interp_ppt = np.square(
-                    np.subtract(values_x_ppt, values_dwd_ppt)).mean()
+                mse_dwd_interp_ppt = np.sqrt(np.square(
+                    np.subtract(values_x_ppt, values_dwd_ppt)).mean())
             except Exception as msg:
                 print(msg)
 
-            mse_dwd_netatmo_interp_ppt = np.square(
-                np.subtract(values_x_ppt, values_netatmo_dwd_ppt)).mean()
+            mse_dwd_netatmo_interp_ppt = np.sqrt(np.square(
+                np.subtract(values_x_ppt, values_netatmo_dwd_ppt)).mean())
 
-            mse_dwd_netatmo_interp_unc_ppt_2perc = np.square(
-                np.subtract(values_x_ppt, values_netatmo_dwd_unc2perc)).mean()
+            mse_dwd_netatmo_interp_unc_ppt_2perc = np.sqrt(np.square(
+                np.subtract(values_x_ppt, values_netatmo_dwd_unc2perc)).mean())
 
-            mse_dwd_netatmo_interp_unc_ppt_5perc = np.square(
-                np.subtract(values_x_ppt, values_netatmo_dwd_unc5perc)).mean()
+            mse_dwd_netatmo_interp_unc_ppt_5perc = np.sqrt(np.square(
+                np.subtract(values_x_ppt, values_netatmo_dwd_unc5perc)).mean())
 
-            mse_dwd_netatmo_interp_unc_ppt_10perc = np.square(
-                np.subtract(values_x_ppt, values_netatmo_dwd_unc10perc)).mean()
+            mse_dwd_netatmo_interp_unc_ppt_10perc = np.sqrt(np.square(
+                np.subtract(values_x_ppt, values_netatmo_dwd_unc10perc)).mean())
 
-            mse_dwd_netatmo_interp_unc_ppt_20perc = np.square(
-                np.subtract(values_x_ppt, values_netatmo_dwd_unc20perc)).mean()
+            mse_dwd_netatmo_interp_unc_ppt_20perc = np.sqrt(np.square(
+                np.subtract(values_x_ppt, values_netatmo_dwd_unc20perc)).mean())
 
             # calculate correlations (pearson and spearman)
 
@@ -435,7 +434,7 @@ if plot_not_filtered:
         print(temp_freq)
 
         path_to_Quantiles_netatmo_no_flt___ = main_dir / (
-            r'Ppt_ok_ok_un_new_netatmo_no_flt___%s' % temp_freq)
+            r'Final_results/Ppt_ok_ok_un_new_netatmo_no_flt___%s' % temp_freq)
 
         Quantiles_netatmo_no_flt___ = list_all_full_path(
             '.csv', path_to_Quantiles_netatmo_no_flt___)
@@ -542,10 +541,10 @@ if plot_not_filtered:
 
                 # calculate sqared error between obsv and interpolated
                 # ppt
-                mse_dwd_interp_ppt = np.square(
-                    np.subtract(values_x_ppt, values_dwd_ppt)).mean()
-                mse_dwd_netatmo_interp_ppt = np.square(
-                    np.subtract(values_x_ppt, values_netatmo_dwd_ppt)).mean()
+                mse_dwd_interp_ppt = np.sqrt(np.square(
+                    np.subtract(values_x_ppt, values_dwd_ppt)).mean())
+                mse_dwd_netatmo_interp_ppt = np.sqrt(np.square(
+                    np.subtract(values_x_ppt, values_netatmo_dwd_ppt)).mean())
 
                 # calculate correlations (pearson and spearman)
 
@@ -561,10 +560,10 @@ if plot_not_filtered:
 
                 # calculate sqared error between obsv and interpolated
                 # quantiles
-                mse_dwd_interp = np.square(
-                    np.subtract(values_x, values_dwd)).mean()
-                mse_dwd_netatmo_interp = np.square(
-                    np.subtract(values_x, values_netatmo_dwd)).mean()
+                mse_dwd_interp = np.sqrt(np.square(
+                    np.subtract(values_x, values_dwd)).mean())
+                mse_dwd_netatmo_interp = np.sqrt(np.square(
+                    np.subtract(values_x, values_netatmo_dwd)).mean())
 
                 # calculate correlations (pearson and spearman)
                 corr_dwd = pears(values_x, values_dwd)[0]

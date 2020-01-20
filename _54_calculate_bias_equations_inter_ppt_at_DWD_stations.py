@@ -65,7 +65,7 @@ def list_all_full_path(ext, file_dir):
 df_overall_bias = pd.DataFrame(index=['60min', '180min',
                                       '360min', '720min', '1440min'])
 # '60min', '180min', '360min', '720min', '1440min']: '60min', '180min', '360min', '720min',
-for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
+for temp_freq in ['1440min', '60min', '180min', '360min', '720min', '1440min']:
     # '60min', '360min',  '1440min'
     print(temp_freq)
 
@@ -109,8 +109,8 @@ for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
 
     #########################################################
 
-    path_to_use = path_to_Quantiles_netatmo_no_flt___
-    data_to_use = Quantiles_netatmo_no_flt___
+    path_to_use = path_to_Qt_ok_un_first_flt__temp_flt_1st_
+    data_to_use = Qt_ok_un_first_flt__temp_flt_1st_
 
     _interp_acc_ = str(r'%s' % (str(path_to_use).split('\\')[-1]))
     # for i in range(12):
@@ -481,20 +481,32 @@ for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
     #======================================================================
     # calculte B3
     #======================================================================
-    hourly_events = ['2016-06-25 00:00:00',
-                     '2018-06-11 16:00:00',
-                     '2018-06-11 17:00:00',
-                     '2018-06-11 18:00:00',
-                     '2018-09-23 17:00:00',
-                     '2018-09-23 18:00:00',
-                     '2018-09-23 19:00:00']
-
-    daily_events = ['2018-12-23 00:00:00',
-                    '2019-05-22 00:00:00',
+    hourly_events = ['2018-06-11 16:00:00',
+                     #                      '2018-06-12 18:00:00',
+                     #                      '2018-07-05 05:00:00',
+                     #                      '2018-08-02 01:00:00',
+                     #                      '2018-08-23 15:00:00',
+                     '2018-09-06 18:00:00',
+                     '2016-06-24 22:00:00',
+                     '2016-06-25 00:00:00']
+#     '2019-07-27 19:00:00',
+#                      '2019-07-27 20:00:00',
+#                      '2018-05-13 16:00:00',
+#                      '2018-05-13 22:00:00',
+# , 60min_2016_06_24_22_00_00_event_test_3
+#                      '2018-06-11 16:00:00',
+#                      '2018-06-11 17:00:00',
+#                      '2018-06-11 18:00:00',
+#                      '2018-09-23 17:00:00',
+#                      '2018-09-23 18:00:00',
+#                      '2018-09-23 19:00:00'
+    daily_events = ['2019-07-28 00:00:00',
+                    #         '2018-12-23 00:00:00',
+                    #                     '2019-05-22 00:00:00',
                     '2018-05-14 00:00:00',
-                    '2019-07-28 00:00:00']
+                    ]
 
-    for event_date in hourly_events:  # cmn_events:
+    for event_date in daily_events:  # cmn_events:
         print(event_date)
         df_compare_b3 = pd.DataFrame(index=df_dwd.columns)
         for stn_ in df_dwd.columns:
@@ -541,6 +553,8 @@ for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
         try:
             mse_dwd_interp_ppt = np.square(
                 np.subtract(values_x_ppt, values_dwd_ppt)).mean()
+            rmse_dwd_interp_ppt = np.sqrt(np.square(
+                np.subtract(values_x_ppt, values_dwd_ppt)).mean())
         except Exception as msg:
             print(msg)
 
@@ -550,9 +564,15 @@ for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
         mse_dwd_netatmo_interp_unc_ppt_2perc = np.square(
             np.subtract(values_x_ppt, values_netatmo_dwd_unc2perc)).mean()
 
-        print('\nRMSE DWD', mse_dwd_interp_ppt)
-        print('\nRMSE DWD-Net', mse_dwd_netatmo_interp_ppt)
-        print('\nRMSE DWD-NEt unc', mse_dwd_netatmo_interp_unc_ppt_2perc)
+        rmse_dwd_netatmo_interp_ppt = np.sqrt(np.square(
+            np.subtract(values_x_ppt, values_netatmo_dwd_ppt)).mean())
+
+        rmse_dwd_netatmo_interp_unc_ppt_2perc = np.sqrt(np.square(
+            np.subtract(values_x_ppt, values_netatmo_dwd_unc2perc)).mean())
+        print(event_date)
+        print('\nRMSE DWD', rmse_dwd_interp_ppt)
+        print('\nRMSE DWD-Net', rmse_dwd_netatmo_interp_ppt)
+        print('\nRMSE DWD-NEt unc', rmse_dwd_netatmo_interp_unc_ppt_2perc)
         # difference obs-inter for B3
 
         diff_dwd_obs_interp_B3 = np.square(
