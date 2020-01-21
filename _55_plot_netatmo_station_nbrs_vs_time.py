@@ -78,6 +78,7 @@ vals = np.cumsum(df_days.values)
 df3 = pd.DataFrame(index=df_days.index, data=vals)
 # sum_vals2 = df3.sum(axis=1)
 
+
 plt.rcParams.update({'font.size': 14})
 plt.rcParams.update({'axes.labelsize': 14})
 
@@ -92,9 +93,9 @@ ax = plt.subplot(111)
 # ax.get_yaxis().tick_left()
 
 
-xfmt = md.DateFormatter('%m-%Y')
+xfmt = md.DateFormatter('%Y')
 
-ax.xaxis.set_major_locator(MultipleLocator(90))
+# ax.xaxis.set_major_locator(MultipleLocator(365))
 # ax.yaxis.set_major_locator(MultipleLocator(2))
 
 ax.xaxis.set_major_formatter(xfmt)
@@ -102,16 +103,33 @@ ax.xaxis.set_major_formatter(xfmt)
 
 ax.grid(color='k', linestyle='--', linewidth=0.1, alpha=0.5)
 
-#plt.yticks(range(0, 2000, 200))
-# plt.xticks(fontsize=8)
-#ax.set_ylim([0, 2000])
+# ax.plot(['2015-12', '2015-12'],
+#         [df3.min().values[0],
+#          df3.max().values[0]], color='r', linestyle='--')
 
 ax.set_ylabel('Netatmo Stations in BW with valid Observations')
 # ax.set_xlabel('Time', ha="center")
 ax.plot(df3.index, df3.values, color='b',
         alpha=0.75)
-ax.set_yticks(np.arange(0, 3200, 200))
-plt.xticks(rotation=45)
+
+ax.axvline(x='2015-12-31 00:00:00', color='k', linestyle='--', alpha=0.25)
+ax.axvline(x='2016-12-31 00:00:00', color='k', linestyle='--', alpha=0.25)
+ax.axvline(x='2017-12-31 00:00:00', color='k', linestyle='--', alpha=0.25)
+ax.axvline(x='2018-12-31 00:00:00', color='k', linestyle='--', alpha=0.25)
+#ax.axvline(x='2019-12-31 00:00:00', color='k', linestyle='--', alpha=0.75)
+ax.set_yticks(np.arange(0, 3200, 500))
+# plt.xticks(rotation=45)
+# plt.xticks([])
+# Customize minor tick labels
+
+ax.set_xticks(['2015-06-30 00:00:00',
+               '2016-06-30 00:00:00',
+               '2017-06-30 00:00:00',
+               '2018-06-30 00:00:00',
+               '2019-03-30 00:00:00'],
+              minor=False)
+# ax.set_xticklabels(['2015','2016','2017','2018','2019'], minor=True)
+
 plt.xlim([df3.index[0] - pd.Timedelta(days=5),
           df3.index[-1] + pd.Timedelta(days=5)])
 # plt.legend(loc='lower right')

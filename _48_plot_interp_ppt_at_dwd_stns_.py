@@ -59,7 +59,7 @@ if plot_filtered:
         print(temp_freq)
 
         path_to_Qt_ok_un_first_flt__temp_flt_1st_ = main_dir / (
-            r'Final_results2/Ppt_ok_ok_un_new3_first_flt__temp_flt__1st_%s' % temp_freq)
+            r'Final_results/Ppt_ok_ok_un_new2_first_flt__temp_flt__1st_%s' % temp_freq)
         Qt_ok_un_first_flt__temp_flt_1st_ = list_all_full_path(
             '.csv', path_to_Qt_ok_un_first_flt__temp_flt_1st_)
 
@@ -199,8 +199,9 @@ if plot_filtered:
 
             for stn_ in df_dwd_edf.columns:
                 #                 if stn_ == '07135':
-                #                     raise Exception
+                    #                     raise Exception
                 #                     pass
+                #                     print(stn_)
                 df_compare = pd.DataFrame(index=df_dwd.index)
                 for event_date in df_dwd.index.intersection(df_dwd_edf.index):
                     # print(event_date)
@@ -267,7 +268,7 @@ if plot_filtered:
 
                 df_compare = df_compare[df_compare > 0]
                 df_compare.dropna(how='any', inplace=True)
-                if df_compare.values.shape[0] > 20:  # at least 20evnts
+                if df_compare.values.shape[0] > 1:  # at least 20evnts
                     values_x = df_compare['original_quantile'].values
                     values_dwd = df_compare['interpolated_quantile_dwd'].values
 
@@ -338,7 +339,7 @@ if plot_filtered:
                     df_improvements.loc[stn_,
                                         'spearman_corr_dwd_netatmo_unc20perc'] = rho_netatmo_dwd_unc20perc
 
-            df_improvements.dropna(how='all', inplace=True)
+            #df_improvements.dropna(how='all', inplace=True)
 
             # df_compare = df_compare[df_compare > 0]
             #df_compare.dropna(how='all', inplace=True)
@@ -437,6 +438,8 @@ if plot_filtered:
         mean_spr_correlation_dwd_netatmo_unc10perc = df_improvements.spearman_corr_dwd_netatmo_unc10perc.mean()
         mean_spr_correlation_dwd_netatmo_unc20perc = df_improvements.spearman_corr_dwd_netatmo_unc20perc.mean()
         #########################################################
+        df_improvements.iloc[np.where(
+            df_improvements.pearson_corr_dwd_.isna())]
         plt.ioff()
         fig = plt.figure(figsize=(24, 12), dpi=150)
 

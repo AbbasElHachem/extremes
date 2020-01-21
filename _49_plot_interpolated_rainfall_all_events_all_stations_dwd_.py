@@ -378,6 +378,7 @@ if plot_filtered:
 #                 '2019-05-22 00:00:00']
         df_compare.sort_index(inplace=True)
 
+        df_compare.loc['2018-09-06 18:00:00', :]
         for evt in hourly_events:
             print(df_compare.loc[evt, :])
 #         df_compare.sort_values(by='pearson_corr_dwd_', inplace=True)
