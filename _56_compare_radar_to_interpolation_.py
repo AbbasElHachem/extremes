@@ -118,18 +118,22 @@ daily_events = [  # '2018-12-23 00:00:00',
 bound = [0., 1,
          2, 5, 8,
          10, 15, 20,
-         25, 30, 35, 40, 45]
+         25, 30]  # , 35, 40, 45]
 
 cmap = plt.get_cmap('jet')
 norm = matplotlib.colors.BoundaryNorm(bound, cmap.N)
 
 for i, file in enumerate(files):
     #     file = file + '.gz'
-    print(i, ' / ', len(files), file[50:60])
+
     event_date = ('20' + file[50:52] + '-' + file[52:54] + '-' + file[54:56]
                   + ' ' + file[56:58] + ':' + file[58:60] + ':00')
+    print(i, '/', len(files),  event_date)
 
-    shifted_event = pd.DatetimeIndex([event_date]) + pd.Timedelta(minutes=10)
+    event_date_minus_one_hr = pd.DatetimeIndex(
+        [event_date]) - pd.Timedelta(minutes=60)
+
+    shifted_event = event_date_minus_one_hr + pd.Timedelta(minutes=10)
 
     rwdata, rwattrs = wrl.io.read_radolan_composite(file)
     # mask data
@@ -218,56 +222,56 @@ for i, file in enumerate(files):
 
 #         radolan_ppt.append(radolan_ppt_loc1)
 
-    mask = np.ones_like(lon1, dtype=np.bool)
-
-    for n, i_poly in enumerate(first['geometry']['coordinates']):
-        # print(n)
-        #         plt.plot(np.array(i_poly)[0, :, 0],
-        #                  np.array(i_poly)[0, :, 1],
-        #                  linestyle='-',
-        #                  linewidth=0.8,
-        #                  color='black'
-        #                  )
-        p = path.Path(np.array(i_poly)[0, :, :])
-        grid_mask = p.contains_points(
-            np.vstack((lon1.flatten(), lat1.flatten())).T).reshape(900, 900)
-        mask[grid_mask] = 0
-
-    rwdata[mask] = -1
-    rw_maskes = np.ma.masked_array(rwdata, rwdata < 0.)
-
-    plt.figure()
-#     min_x = xss[np.argmin([xs - x0 for xs in xss])]
-#     min_y = yss[np.argmin([ys - y0 for ys in yss])]
-
-    plt.pcolormesh(lon1, lat1, rw_maskes, cmap=cmap,
-                   vmin=0, norm=norm)
-
-    plt.ylabel('Latitude [°]')
-    plt.xlabel('Longitude [°]')
-
-    plt.xlim([7.1, 10.7])
-    plt.ylim([47.3, 50.0])
-
-
-#     plt.axis('equal')
-    # radar.set_aspect('equal', 'box')
-    # plt.xlim([netatmo.get_xlim()[0], netatmo.get_xlim()[1]])
-    # plt.ylim([netatmo.get_ylim()[0], netatmo.get_ylim()[1]])
-    cbar = plt.colorbar()
-    # cbar.set_label('Hourly Precipitation [mm]', rotation=270)
-    # colorbar.colorbar(ax0)
-#     plt.axis('equal')
-    plt.scatter(dwd_lons.values, dwd_lats.values,
-                marker='x', alpha=0.5, color='k', s=10)
-    plt.scatter(grid_lons, grid_lats, marker='.', color='r', alpha=0.5, s=10)
-
-    plt.tight_layout()
-    plt.savefig(
-        os.path.join(r'X:\exchange\ElHachem\Figures_Netatmo\new_events\radar',
-                     'event_{}.png'.format(file[49:59])), dpi=600)
-
-#     plt.show()
-#     break
-    plt.close()
-    # plt.show()
+#     mask = np.ones_like(lon1, dtype=np.bool)
+#
+#     for n, i_poly in enumerate(first['geometry']['coordinates']):
+#         # print(n)
+#         #         plt.plot(np.array(i_poly)[0, :, 0],
+#         #                  np.array(i_poly)[0, :, 1],
+#         #                  linestyle='-',
+#         #                  linewidth=0.8,
+#         #                  color='black'
+#         #                  )
+#         p = path.Path(np.array(i_poly)[0, :, :])
+#         grid_mask = p.contains_points(
+#             np.vstack((lon1.flatten(), lat1.flatten())).T).reshape(900, 900)
+#         mask[grid_mask] = 0
+#
+#     rwdata[mask] = -1
+#     rw_maskes = np.ma.masked_array(rwdata, rwdata < 0.)
+#
+#     plt.figure()
+# #     min_x = xss[np.argmin([xs - x0 for xs in xss])]
+# #     min_y = yss[np.argmin([ys - y0 for ys in yss])]
+#
+#     plt.pcolormesh(lon1, lat1, rw_maskes, cmap=cmap,
+#                    vmin=0, norm=norm)
+#
+#     plt.ylabel('Latitude [°]')
+#     plt.xlabel('Longitude [°]')
+#
+#     plt.xlim([7.1, 10.7])
+#     plt.ylim([47.3, 50.0])
+#
+#
+# #     plt.axis('equal')
+#     # radar.set_aspect('equal', 'box')
+#     # plt.xlim([netatmo.get_xlim()[0], netatmo.get_xlim()[1]])
+#     # plt.ylim([netatmo.get_ylim()[0], netatmo.get_ylim()[1]])
+#     cbar = plt.colorbar()
+#     # cbar.set_label('Hourly Precipitation [mm]', rotation=270)
+#     # colorbar.colorbar(ax0)
+# #     plt.axis('equal')
+#     plt.scatter(dwd_lons.values, dwd_lats.values,
+#                 marker='x', alpha=0.5, color='k', s=10)
+#     plt.scatter(grid_lons, grid_lats, marker='.', color='r', alpha=0.5, s=10)
+#
+#     plt.tight_layout()
+#     plt.savefig(
+#         os.path.join(r'X:\exchange\ElHachem\Figures_Netatmo\new_events\radar',
+#                      'event_{}.png'.format(file[49:59])), dpi=600)
+#
+# #     plt.show()
+# #     break
+#     plt.close()
+#     # plt.show()
