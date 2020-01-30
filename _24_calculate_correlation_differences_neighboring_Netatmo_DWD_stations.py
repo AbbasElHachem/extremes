@@ -89,6 +89,8 @@ rc('font', size=13)
 rc('font', family='serif')
 rc('axes', labelsize=13)
 rcParams['axes.labelpad'] = 13
+
+use_reduced_sample_dwd = True
 #==============================================================================
 #
 #==============================================================================
@@ -146,15 +148,23 @@ path_to_netatmo_gd_stns_file = (
 path_to_shpfile = (r'F:\data_from_exchange\Netatmo'
                    r'\Landesgrenze_ETRS89\Landesgrenze_10000_ETRS89_lon_lat.shp')
 
+
 # assert os.path.exists(path_to_shpfile), 'wrong shapefile path'
 
 out_save_dir_orig = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-                     r'\plots_NetAtmo_ppt_DWD_ppt_correlation_')
+                     r'\plots_NetAtmo_ppt_DWD_ppt_correlation_reduced')
 
 
 if not os.path.exists(out_save_dir_orig):
     os.mkdir(out_save_dir_orig)
 
+#==============================================================================
+
+if use_reduced_sample_dwd:
+    # path to DWD reduced station size
+    distance_matrix_netatmo_dwd_df_file = Path(
+        r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes"
+        r"\NetAtmo_BW\distance_mtx_in_m_NetAtmo_DWD_reduced.csv")
 
 #==============================================================================
 #
@@ -164,22 +174,22 @@ x_col_name = 'lon'
 y_col_name = 'lat'
 
 # min distance threshold used for selecting neighbours
-min_dist_thr_ppt = 5 * 1e4  # 5000  # m
+min_dist_thr_ppt = 100 * 1e4  # 5000  # m
 
 # threshold for max ppt value per hour
 max_ppt_thr = 200.  # ppt above this value are not considered
 
 # only highest x% of the values are selected
-lower_percentile_val_lst = [50]  # [80, 85, 90, 95, 99]
+lower_percentile_val_lst = [99]  # [80, 85, 90, 95, 99]
 
 
 # ['10min', '60min', '120min', '480min', '720min', '1440min']
-aggregation_frequencies = ['1440min']
+aggregation_frequencies = ['60min']
 
 # temporal aggregation of df
 
 # [0, 1, 2, 3, 4]  # refers to DWD neighbot (0=first)
-neighbors_to_chose_lst = [0, 1, 2, 3]  # 4, 5, 6, 7
+neighbors_to_chose_lst = [0, 1, 2, 3, 4, 5, 6, 7]
 # 30 days * 24 hours * 2month
 # minimum hourly values that should be available per station
 min_req_ppt_vals = 10  # 30 * 24 * 2

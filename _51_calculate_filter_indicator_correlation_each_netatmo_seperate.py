@@ -87,7 +87,7 @@ register_matplotlib_converters()
 main_dir = Path(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes')
 os.chdir(main_dir)
 
-
+use_reduced_sample_dwd = True
 # =============================================================================
 # define path of all the needed netatmo and dwd files
 # =============================================================================
@@ -100,6 +100,10 @@ os.chdir(main_dir)
 path_to_ppt_netatmo_data_feather = Path(
     main_dir /
     r'NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new_no_freezing_2.fk')
+# path_to_ppt_netatmo_data_feather = Path(
+#     main_dir /
+#     r'NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new_no_freezing_1deg.fk')
+
 assert os.path.exists(
     path_to_ppt_netatmo_data_feather), 'wrong NETATMO Ppt file'
 
@@ -139,12 +143,23 @@ path_to_netatmo_gd_stns_file = Path(
 
 
 out_save_dir_orig = (main_dir /
-                     r'plots_NetAtmo_ppt_DWD_ppt_correlation_')
+                     r'plots_NetAtmo_ppt_DWD_ppt_correlation_reduced')
 
 
 if not os.path.exists(out_save_dir_orig):
     os.mkdir(out_save_dir_orig)
 
+
+# =============================================================================
+if use_reduced_sample_dwd:
+    # path to DWD reduced station size
+    distance_matrix_netatmo_dwd_df_file = Path(
+        r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes"
+        r"\NetAtmo_BW\distance_mtx_in_m_NetAtmo_DWD_reduced.csv")
+
+    path_to_dwd_coords_df_file = Path(
+        main_dir /
+        r"NetAtmo_BW\reduced_smaple_dwd_stns_utm32.csv")
 # =============================================================================
 # get dwd coordinates
 # =============================================================================
@@ -176,7 +191,7 @@ x_col_name = 'lon'
 y_col_name = 'lat'
 
 # min distance threshold used for selecting neighbours
-min_dist_thr_ppt = 5 * 1e4  # in m, for ex: 30km or 50km
+min_dist_thr_ppt = 100 * 1e4  # in m, for ex: 30km or 50km
 
 # threshold for max ppt value per hour
 max_ppt_thr = 200.  # ppt above this value are not considered
@@ -185,13 +200,14 @@ max_ppt_thr = 200.  # ppt above this value are not considered
 lower_percentile_val_lst = [99]  # 97., 98., 99., 99.5
 
 # temporal frequencies on which the filtering should be done
-aggregation_frequencies = ['60min', '180min', '360min', '720min', '1440min']
+# , '180min', '360min', '720min', '1440min']
+aggregation_frequencies = ['60min']
 #
 # , '120min', '180min',
 #                            '360min', '720min', '1440min'
 
 # [0, 1, 2, 3, 4]  # refers to DWD neighbot (0=first)
-neighbors_to_chose_lst = [0, 1, 2, 3, 4, 5]  # 4, 5, 6, 7
+neighbors_to_chose_lst = [0, 1, 2, 3]  # 4, 5, 6, 7
 
 # Note: used Netatmo stations, are those with more than 2months of data
 # this is done before when combining dfs
@@ -610,7 +626,7 @@ def compare_netatmo_dwd_indicator_correlations(
     df_results_correlations.to_csv(
         os.path.join(
             out_save_dir_orig,
-            '2pearson_year_allyears_df_comparing_correlations_max_sep_dist_%d_'
+            'new_method_pearson_year_allyears_df_comparing_correlations_max_sep_dist_%d_'
             'freq_%s_dwd_netatmo_upper_%s_percent_data_considered'
             '_neighbor_%d_.csv'  # filtered_95
             % (min_dist_thr_ppt, temp_freq_resample,

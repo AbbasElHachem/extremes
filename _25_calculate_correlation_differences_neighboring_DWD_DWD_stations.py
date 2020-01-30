@@ -113,14 +113,14 @@ x_col_name = 'X'
 y_col_name = 'Y'
 
 # only highest x% of the values are selected
-lower_percentile_val_lst = [50]  # 80, 85, 90,
+lower_percentile_val_lst = [99]  # 80, 85, 90,
 
 
 # temporal aggregation of df
 # , '120min', '480min', '720min', '1440min']
 # , '120min', '480min', '720min', '1440min']
 # , '120min', '480min', '720min', '1440min']
-aggregation_frequencies = ['1440min']
+aggregation_frequencies = ['60min']
 
 # month number, no need to change
 # not_convective_season = [10, 11, 12, 1, 2, 3, 4]
@@ -129,8 +129,8 @@ not_convective_season = []
 
 # starts with one
 # , 2, 3, 4, 5]  # list of which neighbors to chose
-neighbors_to_chose_lst = [1, 2, 3]  # 4, 5, 6, 7, 8]  # 1
-max_dist_thr = 3 * 1e4  # 20km
+neighbors_to_chose_lst = [1, 2, 3, 4, 5, 6]  # 4, 5, 6, 7, 8]  # 1
+max_dist_thr = 100 * 1e4  # 20km
 min_req_ppt_vals = 30  # stations minimum required ppt values
 
 # select data only within this period (same as netatmo)

@@ -20,6 +20,10 @@ import matplotlib.dates as mdates
 from matplotlib.dates import DateFormatter
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 import matplotlib.dates as md
+
+
+from pandas.plotting import register_matplotlib_converters
+register_matplotlib_converters()
 # Set base folder
 basefolder = r'X:\exchange\hespen\05_netatmo'
 os.chdir(basefolder)
@@ -79,8 +83,8 @@ df3 = pd.DataFrame(index=df_days.index, data=vals)
 # sum_vals2 = df3.sum(axis=1)
 
 
-plt.rcParams.update({'font.size': 14})
-plt.rcParams.update({'axes.labelsize': 14})
+plt.rcParams.update({'font.size': 18})
+plt.rcParams.update({'axes.labelsize': 18})
 
 #%%
 plt.ioff()
@@ -107,7 +111,7 @@ ax.grid(color='k', linestyle='--', linewidth=0.1, alpha=0.5)
 #         [df3.min().values[0],
 #          df3.max().values[0]], color='r', linestyle='--')
 
-ax.set_ylabel('Netatmo Stations in BW with valid Observations')
+ax.set_ylabel('Netatmo Stations in BW with valid Observations', labelpad=16)
 # ax.set_xlabel('Time', ha="center")
 ax.plot(df3.index, df3.values, color='b',
         alpha=0.75)

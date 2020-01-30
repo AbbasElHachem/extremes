@@ -72,7 +72,7 @@ if plot_filtered:
         print(temp_freq)
 
         path_to_Qt_ok_un_first_flt__temp_flt_1st_ = main_dir / (
-            r'Final_results2/Ppt_ok_ok_un_new3_first_flt__temp_flt__1st_%s' % temp_freq)
+            r'Final_results3/Ppt_ok_ok_un_new2_first_flt__temp_flt__1st_%s' % temp_freq)
         Qt_ok_un_first_flt__temp_flt_1st_ = list_all_full_path(
             '.csv', path_to_Qt_ok_un_first_flt__temp_flt_1st_)
 
@@ -337,7 +337,7 @@ if plot_filtered:
         except Exception as msg:
             print(msg)
 
-        df_compare.loc['2016-06-24 22:00:00', :]
+#         df_compare.loc['2016-06-24 22:00:00', :]
 # ['2016-06-24 22:00:00'
 
         # difference dwd- dwdnetatmo
@@ -362,25 +362,25 @@ if plot_filtered:
 #                  '2018-09-23 17:00:00',
 #                  '2018-09-23 18:00:00',
 #                  '2018-09-23 19:00:00']
-        hourly_events = ['2019-07-27 19:00:00',
-                         '2019-07-27 20:00:00',
-                         '2018-05-13 16:00:00',
-                         '2018-05-13 22:00:00',
-                         '2018-06-12 18:00:00',
-                         '2018-07-05 05:00:00',
-                         '2018-08-02 01:00:00',
-                         '2018-08-23 15:00:00',
-                         '2018-09-06 18:00:00',
-                         '2016-06-24 22:00:00',
-                         '2016-06-25 00:00:00']
+#         hourly_events = ['2019-07-27 19:00:00',
+#                          '2019-07-27 20:00:00',
+#                          '2018-05-13 16:00:00',
+#                          '2018-05-13 22:00:00',
+#                          '2018-06-12 18:00:00',
+#                          '2018-07-05 05:00:00',
+#                          '2018-08-02 01:00:00',
+#                          '2018-08-23 15:00:00',
+#                          '2018-09-06 18:00:00',
+#                          '2016-06-24 22:00:00',
+#                          '2016-06-25 00:00:00']
 
 # daily_events = ['2018-12-23 00:00:00',
 #                 '2019-05-22 00:00:00']
         df_compare.sort_index(inplace=True)
 
-        df_compare.loc['2018-09-06 18:00:00', :]
-        for evt in hourly_events:
-            print(df_compare.loc[evt, :])
+#         df_compare.loc['2018-09-06 18:00:00', :]
+#         for evt in hourly_events:
+#             print(df_compare.loc[evt, :])
 #         df_compare.sort_values(by='pearson_corr_dwd_', inplace=True)
 #         df_compare.reset_index()
 
@@ -485,21 +485,21 @@ if plot_filtered:
                 label='DWD-Netatmo Interpolation %0.2f'
                 % mean_pearson_correlation_dwd_netatmo)
 
-#         ax.plot(df_compare.index,
-#                 df_compare.pearson_corr_dwd_netatmo_unc2perc,
-#                 alpha=.5,
-#                 c='g',  # colors_arr,
-#                 marker='+',
-#                 label='DWD-Netatmo Interpolation 2percUnc %0.2f'
-#                 % mean_pearson_correlation_dwd_netatmo_unc2perc)
-#
-#         ax.plot(df_compare.index,
-#                 df_compare.pearson_corr_dwd_netatmo_unc5perc,
-#                 alpha=.5,
-#                 c='m',  # colors_arr,
-#                 marker='1',
-#                 label='DWD-Netatmo Interpolation 5percUnc %0.2f'
-#                 % mean_pearson_correlation_dwd_netatmo_unc5perc)
+        ax.plot(df_compare.index,
+                df_compare.pearson_corr_dwd_netatmo_unc2perc,
+                alpha=.5,
+                c='g',  # colors_arr,
+                marker='+',
+                label='DWD-Netatmo Interpolation 2percUnc %0.2f'
+                % mean_pearson_correlation_dwd_netatmo_unc2perc)
+
+        ax.plot(df_compare.index,
+                df_compare.pearson_corr_dwd_netatmo_unc5perc,
+                alpha=.5,
+                c='m',  # colors_arr,
+                marker='1',
+                label='DWD-Netatmo Interpolation 5percUnc %0.2f'
+                % mean_pearson_correlation_dwd_netatmo_unc5perc)
 
         ax.plot(df_compare.index,
                 df_compare.pearson_corr_dwd_netatmo_unc10perc,
@@ -519,20 +519,20 @@ if plot_filtered:
 
         ax.set_title('Pearson Correlation Interpolated Quantiles from DWD or DWD-Netatmo\n '
                      'Precipitation of %s Extreme Events %s\n Events with Improvemnts %d / %d, Percentage %0.0f\n'
-                     #                      'Events with Improvemnts with OK 2percUnc %d / %d, Percentage %0.0f'
-                     #                      '\nEvents with Improvemnts with OK 5percUnc %d / %d, Percentage %0.0f'
+                     'Events with Improvemnts with OK 2percUnc %d / %d, Percentage %0.0f'
+                     '\nEvents with Improvemnts with OK 5percUnc %d / %d, Percentage %0.0f'
                      '\nEventswith Improvemnts with OK 10percUnc %d / %d, Percentage %0.0f'
                      '\nEvents with Improvemnts with OK 20percUnc %d / %d, Percentage %0.0f'
                      % (temp_freq, _interp_acc_,
                         stations_with_improvements,
                          df_compare.pearson_corr_dwd_netatmo.shape[0],
                         percent_of_improvment,
-                        #                         stations_with_improvements_unc2perc,
-                        #                         df_compare.pearson_corr_dwd_netatmo_unc2perc.shape[0],
-                        #                         percent_of_improvment_unc2perc,
-                        #                         stations_with_improvements_unc5perc,
-                        #                         df_compare.pearson_corr_dwd_netatmo_unc2perc.shape[0],
-                        #                         percent_of_improvment_unc5perc,
+                        stations_with_improvements_unc2perc,
+                        df_compare.pearson_corr_dwd_netatmo_unc2perc.shape[0],
+                        percent_of_improvment_unc2perc,
+                        stations_with_improvements_unc5perc,
+                        df_compare.pearson_corr_dwd_netatmo_unc2perc.shape[0],
+                        percent_of_improvment_unc5perc,
                         stations_with_improvements_unc10perc,
                         df_compare.pearson_corr_dwd_netatmo_unc2perc.shape[0],
                         percent_of_improvment_unc10perc,
@@ -646,21 +646,21 @@ if plot_filtered:
                 label='DWD-Netatmo Interpolation %0.2f'
                 % mean_spr_correlation_dwd_netatmo)
 
-#         ax.plot(df_compare.index,
-#                 df_compare.spearman_corr_dwd_netatmo_unc2perc,
-#                 alpha=.5,
-#                 c='g',  # colors_arr,
-#                 marker='+',
-#                 label='DWD-Netatmo Interpolation 2percUnc %0.2f'
-#                 % mean_spr_correlation_dwd_netatmo_unc2perc)
-#
-#         ax.plot(df_compare.index,
-#                 df_compare.spearman_corr_dwd_netatmo_unc5perc,
-#                 alpha=.5,
-#                 c='m',  # colors_arr,
-#                 marker='1',
-#                 label='DWD-Netatmo Interpolation 5percUnc %0.2f'
-#                 % mean_spr_correlation_dwd_netatmo_unc5perc)
+        ax.plot(df_compare.index,
+                df_compare.spearman_corr_dwd_netatmo_unc2perc,
+                alpha=.5,
+                c='g',  # colors_arr,
+                marker='+',
+                label='DWD-Netatmo Interpolation 2percUnc %0.2f'
+                % mean_spr_correlation_dwd_netatmo_unc2perc)
+
+        ax.plot(df_compare.index,
+                df_compare.spearman_corr_dwd_netatmo_unc5perc,
+                alpha=.5,
+                c='m',  # colors_arr,
+                marker='1',
+                label='DWD-Netatmo Interpolation 5percUnc %0.2f'
+                % mean_spr_correlation_dwd_netatmo_unc5perc)
 
         ax.plot(df_compare.index,
                 df_compare.spearman_corr_dwd_netatmo_unc10perc,
@@ -680,20 +680,20 @@ if plot_filtered:
 
         ax.set_title('Spearman Correlation Interpolated Quantiles from DWD or DWD-Netatmo \n '
                      'Rainfall of %s Extreme Events %s \n Events with Improvemnts %d / %d, Percentage %0.0f'
-                     #                      '\nEvents with Improvemnts with OK 2percUnc %d / %d, Percentage %0.0f'
-                     #                      '\nEvents with Improvemnts with OK 5percUnc %d / %d, Percentage %0.0f'
+                     '\nEvents with Improvemnts with OK 2percUnc %d / %d, Percentage %0.0f'
+                     '\nEvents with Improvemnts with OK 5percUnc %d / %d, Percentage %0.0f'
                      '\nEvents with Improvemnts with OK 10percUnc %d / %d, Percentage %0.0f'
                      '\nEvents with Improvemnts with OK 20percUnc %d / %d, Percentage %0.0f'
                      % (temp_freq, _interp_acc_,
                         stations_with_improvements,
                          df_compare.spearman_corr_dwd_netatmo.shape[0],
                         percent_of_improvment,
-                        #                         stations_with_improvements_unc2perc,
-                        #                         df_compare.spearman_corr_dwd_netatmo_unc2perc.shape[0],
-                        #                         percent_of_improvment_unc2perc,
-                        #                         stations_with_improvements_unc5perc,
-                        #                         df_compare.spearman_corr_dwd_netatmo_unc2perc.shape[0],
-                        #                         percent_of_improvment_unc5perc,
+                        stations_with_improvements_unc2perc,
+                        df_compare.spearman_corr_dwd_netatmo_unc2perc.shape[0],
+                        percent_of_improvment_unc2perc,
+                        stations_with_improvements_unc5perc,
+                        df_compare.spearman_corr_dwd_netatmo_unc2perc.shape[0],
+                        percent_of_improvment_unc5perc,
                         stations_with_improvements_unc10perc,
                         df_compare.spearman_corr_dwd_netatmo_unc2perc.shape[0],
                         percent_of_improvment_unc10perc,

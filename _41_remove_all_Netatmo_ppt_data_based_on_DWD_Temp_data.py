@@ -39,7 +39,7 @@ path_to_distance_mtx_Netatmo_ppt_DWD_temp = (
     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
     r"\distance_mtx_in_m_NetAtmo_ppt_DWD_temp.csv")
 
-freezing_temp = 5  # below 5 degrees it is snow
+freezing_temp = 1  # below 5 degrees it is snow
 
 #==============================================================================
 #
@@ -143,14 +143,14 @@ print('\nSaving new df')
 
 netatmo_stn_df_no_freezing_vals.to_csv(
     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW'
-    r'\ppt_all_netatmo_hourly_stns_combined_new_no_freezing.csv',
+    r'\ppt_all_netatmo_hourly_stns_combined_new_no_freezing_1deg.csv',
     sep=';', float_format='%0.2f')
 
 netatmo_stn_df_no_freezing_vals.reset_index(inplace=True)
 netatmo_stn_df_no_freezing_vals.rename(columns={'index': 'Time'}, inplace=True)
 netatmo_stn_df_no_freezing_vals.to_feather(
     os.path.join(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW',
-                 r'ppt_all_netatmo_hourly_stns_combined_new_no_freezing.fk'))
+                 r'ppt_all_netatmo_hourly_stns_combined_new_no_freezing_1deg.fk'))
 STOP = timeit.default_timer()  # Ending time
 print(('\n****Done with everything on %s.\nTotal run time was'
        ' about %0.4f seconds ***' % (time.asctime(), STOP - START)))

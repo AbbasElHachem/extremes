@@ -31,7 +31,7 @@ delete_zip_files = True
 
 
 build_one_df = True
-delete_df_files = True
+delete_df_files = False
 
 make_hdf5_dataset_new = False
 
@@ -43,8 +43,8 @@ ppt_act = 'kl'  # nieder 'rr' 'RR' 'RR'
 
 stn_name_len = 5  # length of dwd stns Id, ex: 00023
 
-start_date = '2018-01-01'  # 00:00:00'
-end_date = '2019-09-10'  # 23:59:00'
+start_date = '2010-01-01'  # 00:00:00'
+end_date = '2018-12-31'  # 23:59:00'
 
 temp_freq = 'D'  # '60Min'  # 'Min' '10Min' 'H' 'D'
 
@@ -53,7 +53,7 @@ time_fmt = '%Y%m%d'  # :%S  # for 10Min data use: '%Y%m%d%H%M:%S'
 
 # name of station id and rainfall column name in df
 stn_id_col_name = 'STATIONS_ID'
-temp_col_name = ' TMK'  # '  R1'  # RS_01 'RWS_10' '  R1' 'RS'
+temp_col_name = ' TXK'  # '  R1'  # RS_01 'RWS_10' '  R1' 'RS'
 
 freqs_list = ['1D']  # '60Min']  # '1D' '5Min',
 #==============================================================================
@@ -272,11 +272,11 @@ if build_one_df:
 #     final_df_combined_resampled = resampleDf(final_df_combined, '5min')
 
     print('Saving Dataframe')
-    final_df_combined.dropna(how='all', inplace=True, axis=1)
+#     final_df_combined.dropna(how='all', inplace=True, axis=1)
     #final_df_combined.set_index('Time', inplace=True, drop=True)
     final_df_combined.to_csv(
         os.path.join(out_dir,
-                     'BW_dwd_Temp_data_2018_2019.csv'),
+                     'BW_dwd_TEMP_data_2010_2018.csv'),
         sep=';', float_format='%0.2f')
 #     final_df_combined.reset_index(inplace=True)
 #     final_df_combined.rename({'index': 'Time'}, inplace=True)

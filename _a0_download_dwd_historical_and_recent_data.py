@@ -27,31 +27,31 @@ delete_zip_files = True
 
 
 build_one_df = True
-delete_df_files = False
+delete_df_files = True
 
 make_hdf5_dataset_new = False
 
-temporal_freq = '10_minutes'  # '1_minute' '10_minutes' 'hourly' 'daily'
-time_period = 'recent'  # 'recent' 'historical'
-temp_accr = '10minuten'  # '1minuten' '10minuten' 'stundenwerte'  'tages'
+temporal_freq = 'hourly'  # '1_minute' '10_minutes' 'hourly' 'daily'
+time_period = 'historical'  # 'recent' 'historical'
+temp_accr = 'stundenwerte'  # '1minuten' '10minuten' 'stundenwerte'  'tages'
 
-ppt_act = 'nieder'  # nieder 'rr' 'RR' 'RR'
+ppt_act = 'RR'  # nieder 'rr' 'RR' 'RR'
 
 stn_name_len = 5  # length of dwd stns Id, ex: 00023
 
-start_date = '2018-01-01 00:00:00'
-end_date = '2019-08-31 23:59:00'
+start_date = '1995-01-01 00:00:00'
+end_date = '2019-12-30 23:59:00'
 
-temp_freq = '10Min'  # '60Min'  # 'Min' '10Min' 'H' 'D'
+temp_freq = 'H'  # '60Min'  # 'Min' '10Min' 'H' 'D'
 
 # '%Y%m%d%H'  # when reading download dwd station df '%Y%m%d%H%M'
-time_fmt = '%Y%m%d%H%M'  # :%S' # for 10Min data use: '%Y%m%d%H%M:%S'
+time_fmt = '%Y%m%d%H'  # :%S' # for 10Min data use: '%Y%m%d%H%M:%S'
 
 # name of station id and rainfall column name in df
 stn_id_col_name = 'STATIONS_ID'
-ppt_col_name = 'RWS_10'  # '  R1'  # RS_01 'RWS_10' '  R1' 'RS'
+ppt_col_name = '  R1'  # 'TT_TU'  # RS_01 'RWS_10' '  R1' 'RS'
 
-freqs_list = ['10Min']  # '60Min']  # '1D' '5Min',
+freqs_list = ['60Min']  # '60Min']  # '1D' '5Min',
 #==============================================================================
 #
 #==============================================================================
@@ -108,6 +108,7 @@ os.chdir(out_dir)
 
 # generate url
 if download_data:  # download all zip files
+    # precipitation
     base_url = (r'https://opendata.dwd.de/climate_environment/CDC'
                 r'/observations_germany/climate/%s/precipitation/%s/'
                 % (temporal_freq, time_period))
@@ -181,8 +182,11 @@ if build_one_df:
     all_df_files = list_all_full_path(
         '.txt', out_dir)
 
-    all_df_files_bw = [_df_f for stn_name in stations_id_str_lst
-                       for _df_f in all_df_files if stn_name in _df_f]
+#     all_df_files_bw = [_df_f for stn_name in stations_id_str_lst
+#                        for _df_f in all_df_files if stn_name in _df_f]
+
+    all_df_files = [_df_f for _df_f in all_df_files]
+
     # get all downloaded station ids, used as columns for df_final
     available_stns = []
 
@@ -195,7 +199,7 @@ if build_one_df:
             available_stns.append(stn_name)
 
     # for stations only in BW do this
-    available_stns = stations_id_str_lst
+#     available_stns = stations_id_str_lst
 
     # create daterange and df full of nans
 
@@ -210,14 +214,14 @@ if build_one_df:
 #     final_df_combined = pd.DataFrame(columns=available_stns)
     # read df stn file and fill final df for all stns
     all_files_len = len(all_df_files)
-    stns_bw_len = len(all_df_files_bw)
+#     stns_bw_len = len(all_df_files_bw)
 
     for df_txt_file in all_df_files:
-        #print('\n++\n Total number of files is \n++\n', all_files_len)
+        print('\n++\n Total number of files is \n++\n', all_files_len)
 
         stn_name = df_txt_file.split('_')[-1].split('.')[0]
         if stn_name in stations_id_str_lst:
-            print('\n##\n Stations in BW \n##\n', stns_bw_len)
+            #             print('\n##\n Stations in BW \n##\n', stns_bw_len)
             print('\n##\n Station ID is \n##\n', stn_name)
             in_df = pd.read_csv(df_txt_file, sep=';', index_col=1, engine='c')
 
@@ -237,18 +241,24 @@ if build_one_df:
                 in_df.index = pd.to_datetime(in_df.index, format=time_fmt)
 
             in_df = select_df_within_period(in_df, start_date, end_date)
-            in_df = in_df[in_df[ppt_col_name] >= 0]
-            ppt_data = in_df[ppt_col_name].values.ravel()
+#             in_df = in_df[in_df[ppt_col_name] >= 0]
+            try:
+                ppt_data = in_df[ppt_col_name].values.ravel()
+            except Exception as msg:
+                print(msg)
+                pass
             print('\n++\n  Data shape is \n++\n', ppt_data.shape)
 
-#             try:
-            final_df_combined.loc[in_df.index, stn_name] = ppt_data
-
-            sum_vals = final_df_combined.loc[in_df.index, stn_name].sum()
-            if sum_vals < 0:
-                raise Exception
-            print('**Sum of station data \n**', sum_vals)
-            stns_bw_len -= 1
+            try:
+                final_df_combined.loc[in_df.index, stn_name] = ppt_data
+            except Exception:
+                print('Error')
+                pass
+#             sum_vals = final_df_combined.loc[in_df.index, stn_name].sum()
+#             if sum_vals < 0:
+#                 raise Exception
+#             print('**Sum of station data \n**', sum_vals)
+#             stns_bw_len -= 1
 
 #             except Exception as msg:
 #                 print(msg)
@@ -262,20 +272,21 @@ if build_one_df:
     final_df_combined = final_df_combined[final_df_combined >= 0]
 #     print('Resampling Dataframe')
 #     final_df_combined_resampled = resampleDf(final_df_combined, '5min')
-
+    final_df_combined.plot(legend=False)
     print('Saving Dataframe')
     final_df_combined.dropna(how='all', inplace=True)
     #final_df_combined.set_index('Time', inplace=True, drop=True)
     final_df_combined.to_csv(
         os.path.join(out_dir,
-                     'all_dwd_10min_ppt_data_combined_2018_2019.csv'),
+                     'all_dwd_60min_ppt_data_combined.csv'),
         sep=';')
-    final_df_combined.reset_index(inplace=True)
-    final_df_combined.rename({'index': 'Time'}, inplace=True)
-#
-    final_df_combined.to_feather(
-        os.path.join(out_dir,
-                     'all_dwd_10min_ppt_data_combined_2018_2019.fk'))
+    # all_dwd_60min_temp_data_combined_2010_2018.csv
+#     final_df_combined.reset_index(inplace=True)
+#     final_df_combined.rename({'index': 'Time'}, inplace=True)
+# #
+#     final_df_combined.to_feather(
+#         os.path.join(out_dir,
+#                      'all_dwd_10min_ppt_data_combined_2018_2019.fk'))
 
     print('done creating df')
 #==============================================================================

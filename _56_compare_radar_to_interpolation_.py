@@ -35,6 +35,7 @@ from matplotlib import path
 # import matplotlib
 # from matplotlib.patches import Circle, Wedge, Polygon
 # import os
+from scipy.spatial import cKDTree
 import pandas as pd
 # import tables
 import numpy as np
@@ -46,10 +47,10 @@ import matplotlib
 # from matplotlib.patches import Circle, Wedge, Polygon
 
 
-def find_nearest(array, value):
+def find_nearest_nbrs(array, value, nbr_ngbrs=9):
     ''' given a value, find nearest one to it in original data array'''
     array = np.asarray(array)
-    idx = (np.abs(array - value)).argmin()
+    idx = np.argsort((np.abs(array - value)))[:nbr_ngbrs]  # .argmin()
     return array[idx]
 
 
@@ -160,36 +161,66 @@ for i, file in enumerate(files):
     lon1 = radolan_grid_ll[:, :, 0]
     lat1 = radolan_grid_ll[:, :, 1]
 
+    radolan_coords = np.array([(lo, la) for lo, la in zip(
+        lon1.flatten(), lat1.flatten())])
+
+    radolan_coords_tree = cKDTree(radolan_coords)
+
     df_ppt_radolan = pd.DataFrame(index=dwd_in_coords_df.index)
+
     grid_lons, grid_lats = [], []
 
     for stn, x0, y0 in zip(dwd_in_coords_df.index,
                            dwd_lons.values, dwd_lats.values):
         #         print(x0, y0)
-        grd_lon_loc = find_nearest(lon1.flatten(), x0)
-        grd_lat_loc = find_nearest(lat1.flatten(), y0)
-        grid_lons.append(grd_lon_loc)
-        grid_lats.append(grd_lat_loc)
-#         plt.ioff()
-#         plt.scatter(x0, y0)
-#         plt.scatter(grd_lon_loc, grd_lat_loc)
-#         plt.show()
-        ix_lon_loc = np.where(lon1.flatten() == grd_lon_loc)[0]
-        ix_lat_loc = np.where(lat1.flatten() == grd_lat_loc)[0]
+        print(stn)
 
-        ix_lon_in_arr = np.unravel_index(ix_lon_loc, (900, 900))
+        dd, ii = radolan_coords_tree.query([x0, y0], k=6)
+
+        grd_lon_loc = lon1.flatten()[ii]
+        grd_lat_loc = lat1.flatten()[ii]
+
+        grd_lon_lat_coords = np.array([(lo, la) for lo, la in zip(
+            grd_lon_loc, grd_lat_loc)])
+
+#         grid_lons.append(grd_lon_loc)
+#         grid_lats.append(grd_lat_loc)
+        plt.ioff()
+        plt.scatter(x0, y0)
+        plt.scatter(grd_lon_loc, grd_lat_loc)
+        plt.show()
+
+        ppt_stns = []
+
+        for idx, (lon, lat) in enumerate(zip(lon1, lat1)):
+            print(idx)
+            for ix2, (lo0, la0) in enumerate(zip(lon, lat)):
+                for lon_d, lat_d in zip(grd_lon_loc, grd_lat_loc):
+
+                    if lon_d == lo0 and lat_d == la0:
+                        print('wew')
+                        radolan_ppt_loc0 = rwdata.data[idx, idx]
+                        if radolan_ppt_loc0 >= 0:
+                            ppt_stns.append(radolan_ppt_loc0)
+
+                    df_ppt_radolan.loc[stn, 'loc0'] = np.mean(ppt_stns)
+
+#         ix_lon_loc = np.where(lon1.flatten() == grd_lon_loc)[0]
+#         ix_lat_loc = np.where(lat1.flatten() == grd_lat_loc)[0]
+#
+#         ix_lon_in_arr = np.unravel_index(ix_lon_loc, (900, 900))
 #         lon1[]
-        ix_lat_in_arr = np.unravel_index(ix_lat_loc, (900, 900))
-
-        radolan_ppt_loc0 = rwdata.data[ix_lon_in_arr[0], ix_lat_in_arr[0]]
-        radolan_ppt_loc1 = rwdata.data[ix_lon_in_arr[1], ix_lat_in_arr[1]]
-
-        df_ppt_radolan.loc[stn, 'loc0'] = radolan_ppt_loc0
-        df_ppt_radolan.loc[stn, 'loc1'] = radolan_ppt_loc1
+#         ix_lat_in_arr = np.unravel_index(ix_lat_loc, (900, 900))
+#
+#         radolan_ppt_loc0 = rwdata.data[ix_lon_in_arr[0], ix_lat_in_arr[0]]
+#         radolan_ppt_loc1 = rwdata.data[ix_lon_in_arr[1], ix_lat_in_arr[1]]
+#
+#
+#         df_ppt_radolan.loc[stn, 'loc1'] = radolan_ppt_loc1
 
 
 #         print(ix_lon_in_arr[1], ix_lat_in_arr[1])
-
+        pass
     df_ppt_radolan[df_ppt_radolan < 0] = np.nan
     df_ppt_radolan.dropna(how='all')
 
