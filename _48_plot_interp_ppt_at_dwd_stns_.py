@@ -178,21 +178,25 @@ if plot_filtered:
 
         print(df_netatmo_dwd.isna().sum().max())
 
-        df_netatmo_dwd_unc2perc = pd.read_csv(path_interpolated_using_netatmo_dwd_unc2perc,
-                                              sep=';', index_col=0,
-                                              parse_dates=True, infer_datetime_format=True)
+        df_netatmo_dwd_unc2perc = pd.read_csv(
+            path_interpolated_using_netatmo_dwd_unc2perc,
+            sep=';', index_col=0,
+            parse_dates=True, infer_datetime_format=True)
 
-        df_netatmo_dwd_unc5perc = pd.read_csv(path_interpolated_using_netatmo_dwd_unc5perc,
-                                              sep=';', index_col=0,
-                                              parse_dates=True, infer_datetime_format=True)
+        df_netatmo_dwd_unc5perc = pd.read_csv(
+            path_interpolated_using_netatmo_dwd_unc5perc,
+            sep=';', index_col=0,
+            parse_dates=True, infer_datetime_format=True)
 
-        df_netatmo_dwd_unc10perc = pd.read_csv(path_interpolated_using_netatmo_dwd_unc10perc,
-                                               sep=';', index_col=0,
-                                               parse_dates=True, infer_datetime_format=True)
+        df_netatmo_dwd_unc10perc = pd.read_csv(
+            path_interpolated_using_netatmo_dwd_unc10perc,
+            sep=';', index_col=0,
+            parse_dates=True, infer_datetime_format=True)
 
-        df_netatmo_dwd_unc20perc = pd.read_csv(path_interpolated_using_netatmo_dwd_unc20perc,
-                                               sep=';', index_col=0,
-                                               parse_dates=True, infer_datetime_format=True)
+        df_netatmo_dwd_unc20perc = pd.read_csv(
+            path_interpolated_using_netatmo_dwd_unc20perc,
+            sep=';', index_col=0,
+            parse_dates=True, infer_datetime_format=True)
         #########################################################
 
         try:
@@ -523,7 +527,7 @@ if plot_filtered:
         ax.set_ylabel('Pearson Correlation')
 
         plt.savefig(os.path.join(path_to_use,
-                                 r'ppt_temporal_pears_corr_%s_events_dwd2.png' % temp_freq,
+                                 r'ppt_temporal_pears_corr_%s_events_dwd_2.png' % temp_freq,
                                  ),
                     frameon=True, papertype='a4', bbox_inches='tight', pad_inches=.2)
         plt.close()
@@ -670,7 +674,7 @@ if plot_filtered:
         ax.set_ylabel('Spearman Correlation')
 
         plt.savefig(os.path.join(path_to_use,
-                                 r'ppt_temporal_spearm_corr_%s_events_dwd2.png' % (temp_freq)),
+                                 r'ppt_temporal_spearm_corr_%s_events_dwd_2.png' % (temp_freq)),
                     frameon=True, papertype='a4', bbox_inches='tight', pad_inches=.2)
         plt.close()
 

@@ -44,6 +44,8 @@ import glob
 import fiona
 import matplotlib.pyplot as plt
 import matplotlib
+
+from pathlib import Path
 # from matplotlib.patches import Circle, Wedge, Polygon
 
 
@@ -54,12 +56,16 @@ def find_nearest_nbrs(array, value, nbr_ngbrs=9):
     return array[idx]
 
 
-database = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\oridinary_kriging_compare_DWD_Netatmo\Final_results\Ppt_ok_ok_un_new2_first_flt__temp_flt__1st_1440min\*.csv'
+database = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
+            r'\oridinary_kriging_compare_DWD_Netatmo\Final_results'
+            r'\Ppt_ok_ok_un_new2_first_flt__temp_flt__1st_1440min\*.csv')
 #base_path = r'C:\Users\hachem\Downloads\SF201907\*'
-base_path = r'C:\Users\hachem\Downloads\RW201606\*'
+base_path = r'C:\Users\hachem\Downloads\RW201812\*'
 
-path_to_dwd_ppt = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\all_dwd_hourly_ppt_data_combined_2014_2019_.csv"
-path_to_dwd_coords = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\station_coordinates_names_hourly_only_in_BW.csv"
+path_to_dwd_ppt = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes"
+                   r"\NetAtmo_BW\all_dwd_hourly_ppt_data_combined_2014_2019_.csv")
+path_to_dwd_coords = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes"
+                      r"\NetAtmo_BW\station_coordinates_names_hourly_only_in_BW.csv")
 
 files = glob.glob(base_path)
 ppt_data = glob.glob(database)
@@ -161,49 +167,49 @@ for i, file in enumerate(files):
     lon1 = radolan_grid_ll[:, :, 0]
     lat1 = radolan_grid_ll[:, :, 1]
 
-    radolan_coords = np.array([(lo, la) for lo, la in zip(
-        lon1.flatten(), lat1.flatten())])
+#     radolan_coords = np.array([(lo, la) for lo, la in zip(
+#         lon1.flatten(), lat1.flatten())])
 
-    radolan_coords_tree = cKDTree(radolan_coords)
+#     radolan_coords_tree = cKDTree(radolan_coords)
 
-    df_ppt_radolan = pd.DataFrame(index=dwd_in_coords_df.index)
+#     df_ppt_radolan = pd.DataFrame(index=dwd_in_coords_df.index)
 
-    grid_lons, grid_lats = [], []
+#     grid_lons, grid_lats = [], []
 
-    for stn, x0, y0 in zip(dwd_in_coords_df.index,
-                           dwd_lons.values, dwd_lats.values):
-        #         print(x0, y0)
-        print(stn)
+#     for stn, x0, y0 in zip(dwd_in_coords_df.index,
+#                            dwd_lons.values, dwd_lats.values):
+#         #         print(x0, y0)
+#         print(stn)
+#
+#         dd, ii = radolan_coords_tree.query([x0, y0], k=6)
 
-        dd, ii = radolan_coords_tree.query([x0, y0], k=6)
-
-        grd_lon_loc = lon1.flatten()[ii]
-        grd_lat_loc = lat1.flatten()[ii]
-
-        grd_lon_lat_coords = np.array([(lo, la) for lo, la in zip(
-            grd_lon_loc, grd_lat_loc)])
-
-#         grid_lons.append(grd_lon_loc)
-#         grid_lats.append(grd_lat_loc)
-        plt.ioff()
-        plt.scatter(x0, y0)
-        plt.scatter(grd_lon_loc, grd_lat_loc)
-        plt.show()
-
-        ppt_stns = []
-
-        for idx, (lon, lat) in enumerate(zip(lon1, lat1)):
-            print(idx)
-            for ix2, (lo0, la0) in enumerate(zip(lon, lat)):
-                for lon_d, lat_d in zip(grd_lon_loc, grd_lat_loc):
-
-                    if lon_d == lo0 and lat_d == la0:
-                        print('wew')
-                        radolan_ppt_loc0 = rwdata.data[idx, idx]
-                        if radolan_ppt_loc0 >= 0:
-                            ppt_stns.append(radolan_ppt_loc0)
-
-                    df_ppt_radolan.loc[stn, 'loc0'] = np.mean(ppt_stns)
+#         grd_lon_loc = lon1.flatten()[ii]
+#         grd_lat_loc = lat1.flatten()[ii]
+#
+#         grd_lon_lat_coords = np.array([(lo, la) for lo, la in zip(
+#             grd_lon_loc, grd_lat_loc)])
+#
+# #         grid_lons.append(grd_lon_loc)
+# #         grid_lats.append(grd_lat_loc)
+#         plt.ioff()
+#         plt.scatter(x0, y0)
+#         plt.scatter(grd_lon_loc, grd_lat_loc)
+#         plt.show()
+#
+#         ppt_stns = []
+#
+#         for idx, (lon, lat) in enumerate(zip(lon1, lat1)):
+#             print(idx)
+#             for ix2, (lo0, la0) in enumerate(zip(lon, lat)):
+#                 for lon_d, lat_d in zip(grd_lon_loc, grd_lat_loc):
+#
+#                     if lon_d == lo0 and lat_d == la0:
+#                         print('wew')
+#                         radolan_ppt_loc0 = rwdata.data[idx, idx]
+#                         if radolan_ppt_loc0 >= 0:
+#                             ppt_stns.append(radolan_ppt_loc0)
+#
+#                     df_ppt_radolan.loc[stn, 'loc0'] = np.mean(ppt_stns)
 
 #         ix_lon_loc = np.where(lon1.flatten() == grd_lon_loc)[0]
 #         ix_lat_loc = np.where(lat1.flatten() == grd_lat_loc)[0]
@@ -220,89 +226,91 @@ for i, file in enumerate(files):
 
 
 #         print(ix_lon_in_arr[1], ix_lat_in_arr[1])
-        pass
-    df_ppt_radolan[df_ppt_radolan < 0] = np.nan
-    df_ppt_radolan.dropna(how='all')
+#         pass
+#     df_ppt_radolan[df_ppt_radolan < 0] = np.nan
+#     df_ppt_radolan.dropna(how='all')
 
     # obsv
-    df_ppt_obsv = dwd_in_ppt_vals_df.loc[shifted_event, :]
-
-    plt.ioff()
-
-    plt.figure()
-    plt.plot(df_ppt_obsv.columns.to_list(),
-             df_ppt_obsv.values[0], c='r', alpha=0.75,
-             label='Obs')
-    plt.plot(df_ppt_radolan.index, df_ppt_radolan.loc0.values, c='b', alpha=0.75,
-             label='Radar loc0')
-    plt.plot(df_ppt_radolan.index, df_ppt_radolan.loc1.values, c='g', alpha=0.75,
-             label='Radar loc1')
-    plt.xticks([])
-    plt.ylabel('mm/h')
-#     plt.xlabel([df_ppt_obsv.columns.to_list()[::10]], rotation=90)
-    plt.legend(loc=0)
-    plt.tight_layout()
-    plt.savefig(
-        os.path.join(r'X:\exchange\ElHachem\Figures_Netatmo\new_events\radar',
-                     'ppt_event_{}.png'.format(file[49:59])), dpi=600)
-
-#     plt.show()
-#     break
-    plt.close()
-
-
-#         radolan_ppt.append(radolan_ppt_loc1)
-
-#     mask = np.ones_like(lon1, dtype=np.bool)
+#     df_ppt_obsv = dwd_in_ppt_vals_df.loc[shifted_event, :]
 #
-#     for n, i_poly in enumerate(first['geometry']['coordinates']):
-#         # print(n)
-#         #         plt.plot(np.array(i_poly)[0, :, 0],
-#         #                  np.array(i_poly)[0, :, 1],
-#         #                  linestyle='-',
-#         #                  linewidth=0.8,
-#         #                  color='black'
-#         #                  )
-#         p = path.Path(np.array(i_poly)[0, :, :])
-#         grid_mask = p.contains_points(
-#             np.vstack((lon1.flatten(), lat1.flatten())).T).reshape(900, 900)
-#         mask[grid_mask] = 0
-#
-#     rwdata[mask] = -1
-#     rw_maskes = np.ma.masked_array(rwdata, rwdata < 0.)
+#     plt.ioff()
 #
 #     plt.figure()
-# #     min_x = xss[np.argmin([xs - x0 for xs in xss])]
-# #     min_y = yss[np.argmin([ys - y0 for ys in yss])]
-#
-#     plt.pcolormesh(lon1, lat1, rw_maskes, cmap=cmap,
-#                    vmin=0, norm=norm)
-#
-#     plt.ylabel('Latitude [°]')
-#     plt.xlabel('Longitude [°]')
-#
-#     plt.xlim([7.1, 10.7])
-#     plt.ylim([47.3, 50.0])
-#
-#
-# #     plt.axis('equal')
-#     # radar.set_aspect('equal', 'box')
-#     # plt.xlim([netatmo.get_xlim()[0], netatmo.get_xlim()[1]])
-#     # plt.ylim([netatmo.get_ylim()[0], netatmo.get_ylim()[1]])
-#     cbar = plt.colorbar()
-#     # cbar.set_label('Hourly Precipitation [mm]', rotation=270)
-#     # colorbar.colorbar(ax0)
-# #     plt.axis('equal')
-#     plt.scatter(dwd_lons.values, dwd_lats.values,
-#                 marker='x', alpha=0.5, color='k', s=10)
-#     plt.scatter(grid_lons, grid_lats, marker='.', color='r', alpha=0.5, s=10)
-#
+#     plt.plot(df_ppt_obsv.columns.to_list(),
+#              df_ppt_obsv.values[0], c='r', alpha=0.75,
+#              label='Obs')
+#     plt.plot(df_ppt_radolan.index, df_ppt_radolan.loc0.values,
+#              c='b', alpha=0.75,
+#              label='Radar loc0')
+#     plt.plot(df_ppt_radolan.index, df_ppt_radolan.loc1.values,
+#              c='g', alpha=0.75,
+#              label='Radar loc1')
+#     plt.xticks([])
+#     plt.ylabel('mm/h')
+# #     plt.xlabel([df_ppt_obsv.columns.to_list()[::10]], rotation=90)
+#     plt.legend(loc=0)
 #     plt.tight_layout()
 #     plt.savefig(
 #         os.path.join(r'X:\exchange\ElHachem\Figures_Netatmo\new_events\radar',
-#                      'event_{}.png'.format(file[49:59])), dpi=600)
+#                      'ppt_event_{}.png'.format(file[49:59])), dpi=600)
 #
 # #     plt.show()
 # #     break
 #     plt.close()
-#     # plt.show()
+
+
+#         radolan_ppt.append(radolan_ppt_loc1)
+
+    mask = np.ones_like(lon1, dtype=np.bool)
+
+    for n, i_poly in enumerate(first['geometry']['coordinates']):
+        # print(n)
+        #         plt.plot(np.array(i_poly)[0, :, 0],
+        #                  np.array(i_poly)[0, :, 1],
+        #                  linestyle='-',
+        #                  linewidth=0.8,
+        #                  color='black'
+        #                  )
+        p = path.Path(np.array(i_poly)[0, :, :])
+        grid_mask = p.contains_points(
+            np.vstack((lon1.flatten(), lat1.flatten())).T).reshape(900, 900)
+        mask[grid_mask] = 0
+
+    rwdata[mask] = -1
+    rw_maskes = np.ma.masked_array(rwdata, rwdata < 0.)
+
+    plt.figure()
+#     min_x = xss[np.argmin([xs - x0 for xs in xss])]
+#     min_y = yss[np.argmin([ys - y0 for ys in yss])]
+
+    plt.pcolormesh(lon1, lat1, rw_maskes, cmap=cmap,
+                   vmin=0, norm=norm)
+
+    plt.ylabel('Latitude [°]')
+    plt.xlabel('Longitude [°]')
+
+    plt.xlim([7.1, 10.7])
+    plt.ylim([47.3, 50.0])
+
+
+#     plt.axis('equal')
+    # radar.set_aspect('equal', 'box')
+    # plt.xlim([netatmo.get_xlim()[0], netatmo.get_xlim()[1]])
+    # plt.ylim([netatmo.get_ylim()[0], netatmo.get_ylim()[1]])
+    cbar = plt.colorbar()
+    # cbar.set_label('Hourly Precipitation [mm]', rotation=270)
+    # colorbar.colorbar(ax0)
+#     plt.axis('equal')
+#     plt.scatter(dwd_lons.values, dwd_lats.values,
+#                 marker='x', alpha=0.5, color='k', s=10)
+#     plt.scatter(grid_lons, grid_lats, marker='.', color='r', alpha=0.5, s=10)
+
+    plt.tight_layout()
+    plt.savefig(
+        Path(os.path.join(r'C:\Users\hachem\Desktop\radar',
+                          'event_{}.png'.format(file[50:59]))), dpi=600)
+
+#     plt.show()
+#     break
+    plt.close()
+    # plt.show()

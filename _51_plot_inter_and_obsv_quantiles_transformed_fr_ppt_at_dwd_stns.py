@@ -421,7 +421,7 @@ if plot_filtered:
         ax.set_ylabel('RMSE')
 
         plt.savefig((path_to_use / (
-            r'_pptrmse_%s_events_dwd_%s_.png' % (temp_freq, _interp_acc_))),
+            r'_pptrmse_%s_events_dwd_%s_2.png' % (temp_freq, _interp_acc_))),
             frameon=True, papertype='a4', bbox_inches='tight', pad_inches=.2)
         plt.close()
 
@@ -440,24 +440,29 @@ if plot_not_filtered:
             '.csv', path_to_Quantiles_netatmo_no_flt___)
 
         #########################################################
-        path_dwd_edf_data = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\edf_ppt_all_dwd_%s_.csv" % temp_freq
+        path_dwd_edf_data = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes"
+                             r"\NetAtmo_BW\edf_ppt_all_dwd_%s_.csv"
+                             % temp_freq)
 
-        path_to_dwd_ppt = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\ppt_all_dwd_%s_.csv"
+        path_to_dwd_ppt = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes"
+                           r"\NetAtmo_BW\ppt_all_dwd_%s_.csv"
                            % temp_freq)
 
         df_dwd_edf = pd.read_csv(path_dwd_edf_data, sep=';', index_col=0,
                                  parse_dates=True, infer_datetime_format=True)
 
         # DWD ppt
-        path_dwd_ppt_data = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\ppt_all_dwd_%s_.csv" % temp_freq
+        path_dwd_ppt_data = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes"
+                             r"\NetAtmo_BW\ppt_all_dwd_%s_.csv" % temp_freq)
 
         df_dwd_ppt = pd.read_csv(path_dwd_ppt_data, sep=';', index_col=0,
                                  parse_dates=True, infer_datetime_format=True)
 
         #########################################################
-        df_improvements = pd.DataFrame(index=df_dwd_edf.columns,
-                                       columns=['pearson_corr_dwd_', 'spearman_corr_dwd_',
-                                                'pearson_corr_dwd_netatmo', 'spearman_corr_dwd_netatmo'])
+        df_improvements = pd.DataFrame(
+            index=df_dwd_edf.columns,
+            columns=['pearson_corr_dwd_', 'spearman_corr_dwd_',
+                     'pearson_corr_dwd_netatmo', 'spearman_corr_dwd_netatmo'])
 
         #########################################################
         path_interpolated_using_dwd_list = []
@@ -495,7 +500,8 @@ if plot_not_filtered:
                                  sep=';', index_col=0, parse_dates=True,
                                  infer_datetime_format=True)
 
-            df_netatmo_dwd = pd.read_csv(path_interpolated_using_netatmo_dwd, skiprows=[1],
+            df_netatmo_dwd = pd.read_csv(path_interpolated_using_netatmo_dwd,
+                                         skiprows=[1],
                                          sep=';', index_col=0, parse_dates=True,
                                          infer_datetime_format=True)
 
@@ -519,15 +525,18 @@ if plot_not_filtered:
                     # original quantile when transforming ppt to edf
                     original_ppt = df_dwd_ppt.loc[event_date, stn_]
 
-                    df_compare.loc[event_date,
-                                   'original_ppt'] = original_ppt
+                    df_compare.loc[
+                        event_date,
+                        'original_ppt'] = original_ppt
 
-                    df_compare.loc[event_date,
-                                   'interpolated_ppt_dwd'] = interpolated_ppt_dwd
+                    df_compare.loc[
+                        event_date,
+                        'interpolated_ppt_dwd'] = interpolated_ppt_dwd
                     # df_compare.loc[event_date,
                     #               'interpolated_quantile_netatmo'] = interpolated_quantile_netatmo
-                    df_compare.loc[event_date,
-                                   'interpolated_ppt_netatmo_dwd'] = interpolated_ppt_netatmo_dwd
+                    df_compare.loc[
+                        event_date,
+                        'interpolated_ppt_netatmo_dwd'] = interpolated_ppt_netatmo_dwd
 
                 df_compare = df_compare[df_compare >= 0]
                 df_compare.dropna(how='any', inplace=True)
@@ -548,10 +557,12 @@ if plot_not_filtered:
 
                 # calculate correlations (pearson and spearman)
 
-                df_improvements.loc[stn_,
-                                    'mse_dwd_interp_ppt'] = mse_dwd_interp_ppt
-                df_improvements.loc[stn_,
-                                    'mse_dwd_netatmo_interp_ppt'] = mse_dwd_netatmo_interp_ppt
+                df_improvements.loc[
+                    stn_,
+                    'mse_dwd_interp_ppt'] = mse_dwd_interp_ppt
+                df_improvements.loc[
+                    stn_,
+                    'mse_dwd_netatmo_interp_ppt'] = mse_dwd_netatmo_interp_ppt
 
                 values_x = df_compare['original_ppt'].values
                 values_dwd = df_compare['interpolated_ppt_dwd'].values
@@ -577,15 +588,19 @@ if plot_not_filtered:
 
                 df_improvements.loc[stn_, 'pearson_corr_dwd_'] = corr_dwd
                 df_improvements.loc[stn_, 'spearman_corr_dwd_'] = rho_dwd
-                df_improvements.loc[stn_,
-                                    'pearson_corr_dwd_netatmo'] = corr_netatmo_dwd
-                df_improvements.loc[stn_,
-                                    'spearman_corr_dwd_netatmo'] = rho_netatmo_dwd
+                df_improvements.loc[
+                    stn_,
+                    'pearson_corr_dwd_netatmo'] = corr_netatmo_dwd
+                df_improvements.loc[
+                    stn_,
+                    'spearman_corr_dwd_netatmo'] = rho_netatmo_dwd
 
-                df_improvements.loc[stn_,
-                                    'mse_dwd_interp'] = mse_dwd_interp
-                df_improvements.loc[stn_,
-                                    'mse_dwd_netatmo_interp'] = mse_dwd_netatmo_interp
+                df_improvements.loc[
+                    stn_,
+                    'mse_dwd_interp'] = mse_dwd_interp
+                df_improvements.loc[
+                    stn_,
+                    'mse_dwd_netatmo_interp'] = mse_dwd_netatmo_interp
 
             df_improvements.sort_values(by=['mse_dwd_interp_ppt'],
                                         ascending=True, inplace=True)
@@ -604,8 +619,9 @@ if plot_not_filtered:
                 df_improvements.mse_dwd_netatmo_interp_ppt.values,
                 df_improvements.mse_dwd_interp_ppt.values))
 
-            percent_of_mse_improvment_ppt = 100 * (stations_with_mse_improvements_ppt /
-                                                   df_improvements.mse_dwd_interp_ppt.shape[0])
+            percent_of_mse_improvment_ppt = 100 * (
+                stations_with_mse_improvements_ppt /
+                df_improvements.mse_dwd_interp_ppt.shape[0])
 
             ##########################
 #             stations_with_mse_improvements_unc_ppt = sum(i < j for (i, j) in zip(
@@ -646,11 +662,13 @@ if plot_not_filtered:
                     label='DWD-Netatmo Interpolation PPT RMSE mean = %0.4f'
                     % mean_dwd_netatmo)
 
-            ax.set_title('Root mean squared error Interpolated from DWD or DWD-Netatmo %s \n '
-                         'PPT of %s Extreme Events \n Stations with Improvemnts %d / %d, Percentage %0.0f'
-                         #                          '\n Stations with Improvemnts Unc %d / %d, Percentage %0.0f'
-                         % (_acc_, temp_freq, stations_with_mse_improvements_ppt,
-                            df_improvements.mse_dwd_interp_ppt.shape[0], percent_of_mse_improvment_ppt))
+            ax.set_title(
+                'Root mean squared error Interpolated from DWD or DWD-Netatmo %s \n '
+                'PPT of %s Extreme Events \n Stations with Improvemnts %d / %d, Percentage %0.0f'
+                #                          '\n Stations with Improvemnts Unc %d / %d, Percentage %0.0f'
+                % (_acc_, temp_freq, stations_with_mse_improvements_ppt,
+                   df_improvements.mse_dwd_interp_ppt.shape[0],
+                    percent_of_mse_improvment_ppt))
             ax.grid(alpha=0.25)
             plt.setp(ax.get_xticklabels(), rotation=45)
             #ax.set_yticks(np.arange(0, 1.05, .10))
