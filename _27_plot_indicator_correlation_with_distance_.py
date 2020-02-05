@@ -53,7 +53,8 @@ plt.rcParams.update({'axes.labelsize': 26})
 #==============================================================================
 main_dir = Path(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes')
 
-data_dir_Netamto_dfs = main_dir / r'plots_NetAtmo_ppt_DWD_ppt_correlation_reduced'
+data_dir_Netamto_dfs = main_dir / r'plots_NetAtmo_ppt_DWD_ppt_correlation_'
+# r'plots_NetAtmo_1Deg_ppt_DWD_ppt_correlation_'
 
 assert data_dir_Netamto_dfs.exists(), 'Wrong Netatmo path'
 
@@ -68,15 +69,17 @@ assert data_dir_Netamto_netatmo_dfs.exists(), 'Wrong Netatmo Netatmo path'
 
 
 # allyears pearson_  new_method new_method_pearson_
-netatmo_path_acc_b4 = r'pearson_year_allyears_df_comparing_correlations_max_sep_dist_1000000_'
+netatmo_path_acc_b4 = r'pearson_year_allyears_df_comparing_correlations_max_sep_dist_30000_'
 
-netatmo_path_acc_after = r'new_method_pearson_year_allyears_df_comparing_correlations_max_sep_dist_1000000_'
+# netatmo_path_acc_after = r'new_method_pearson_year_allyears_df_comparing_correlations_max_sep_dist_1000000_'
+
+netatmo_path_acc_after = r'2pearson_year_allyears_df_comparing_correlations_max_sep_dist_50000_'
 
 dwd_path_Acc = r'pearson_year_allyears_df_dwd_correlations'
 # freq_60min_dwd_netatmo_upper_99_0_percent_data_considered_neighbor_0_
 
 path_to_netatmo_gd_stns_file = data_dir_Netamto_dfs / \
-    r'keep_stns_all_neighbor_99_per_60min_s0_comb.csv'
+    r'keep_stns_all_neighbor_99_per_60min_s0_1st.csv'
 
 #assert path_to_netatmo_gd_stns_file.exists(), 'wrong netatmo good stns file'
 
@@ -310,14 +313,14 @@ y0_after = in_df0_after.loc[stns_keep_all_final_new,
 # y7 = in_df7.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
 
 
-stns_keep_al_sr = pd.DataFrame(data=stns_keep_all_final_new,
-                               columns=['Stations'])
-#
-stns_keep_al_sr.to_csv(
-    (save_dir /
-        (r'keep_stns_all_neighbor_%s_per_%s_s0_1st_2.csv'
-         % (percent, time_freq))),
-    sep=';')
+# stns_keep_al_sr = pd.DataFrame(data=stns_keep_all_final_new,
+#                                columns=['Stations'])
+# #
+# stns_keep_al_sr.to_csv(
+#     (save_dir /
+#         (r'keep_stns_all_neighbor_%s_per_%s_s0_1st_2.csv'
+#          % (percent, time_freq))),
+#     sep=';')
 
 
 # s0, x0, y0, in_df0 = read_filter_df_corr_return_stns_x_y_vals(df0)
@@ -382,11 +385,11 @@ axs[1].legend(title='b)', loc='upper left',
 #             label='Seventh Neighbor Stn nbr %d' % y6.shape[0], s=34)
 # plt.scatter(x7, y7, c='c', alpha=0.5, marker='8',
 #             label='Eighth Neighbor Stn nbr %d' % y7.shape[0], s=34)
-axs[0].set_xlim([0, 41000 + 100])
-axs[1].set_xlim([0, 41000 + 100])
+axs[0].set_xlim([0, 21000 + 100])
+axs[1].set_xlim([0, 21000 + 100])
 
-axs[0].set_xticks(np.arange(0, 41000 + 100, 5000))
-axs[1].set_xticks(np.arange(0, 41000 + 100, 5000))
+axs[0].set_xticks(np.arange(0, 21000 + 100, 5000))
+axs[1].set_xticks(np.arange(0, 21000 + 100, 5000))
 
 # plt.xticks(np.arange(0, 21000 + 100, 5000))  # x1.max()
 axs[0].set_ylim([-0.1, 1.1])
@@ -410,7 +413,7 @@ if use_filtered_data:
 #          ' for upper %s percent of data values '
 #          % (data_source0, data_source, time_freq, percent))
 plt.savefig(save_dir /
-            (r'new_pearson__%s_%s_%s_percent_indic_corr_freq_%s_%s_10_new.png'
+            (r'new_pearson__%s_%s_%s_percent_indic_corr_freq_%s_%s_1D.png'
              % (data_source0, data_source, percent, time_freq, save_acc)),
             frameon=True, papertype='a4',
             bbox_inches='tight', pad_inches=.2)
