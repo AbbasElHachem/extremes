@@ -76,12 +76,13 @@ main_dir = Path(os.getcwd())
 os.chdir(main_dir)
 
 path_to_ppt_dwd_data = (
-    r"F:\download_DWD_data_recent\all_dwd_hourly_ppt_data_combined_2014_2019_.fk")
+    r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
+    r"\all_dwd_hourly_ppt_data_combined_2014_2019_.fk")
 assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
 
 path_to_ppt_csv_data = (
-    r'F:\download_DWD_data_recent'
-    r'\all_dwd_hourly_ppt_data_combined_2014_2019_.csv')
+    r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
+    r"\all_dwd_hourly_ppt_data_combined_2014_2019_.csv")
 
 assert os.path.exists(path_to_ppt_csv_data), 'wrong DWD Ppt file'
 
@@ -89,15 +90,17 @@ coords_df_file = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
                   r"\station_coordinates_names_hourly_only_in_BW_utm32.csv")
 assert os.path.exists(coords_df_file), 'wrong DWD coords file'
 
-path_to_shpfile = (r'F:\data_from_exchange\Netatmo'
-                   r'\Landesgrenze_ETRS89\Landesgrenze_10000_ETRS89_lon_lat.shp')
+path_to_shpfile = (r"P:\2020_DFG_Netatmo\02_Import\00_Shapefiles"
+                   r"\BW_Landesgrenze_WGS84_UTM32N\Landesgrenze_WGS84.shp")
 
 assert os.path.exists(path_to_shpfile), 'wrong shapefile path'
 
 
-out_save_dir_orig = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-                     r'\plots_DWD_ppt_DWD_ppt_correlation_')
+# out_save_dir_orig = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
+#                      r'\plots_DWD_ppt_DWD_ppt_correlation_')
 
+out_save_dir_orig = (r'X:\staff\elhachem\Netatmo_2020\pwsflt_testdata'
+                     r'\plots_DWD_ppt_DWD_ppt_correlation_')
 
 if not os.path.exists(out_save_dir_orig):
     os.mkdir(out_save_dir_orig)
@@ -139,7 +142,7 @@ end_date = '2019-09-01 00:00:00'
 
 date_fmt = '%Y-%m-%d %H:%M:%S'
 
-plt_figures = False  # if true plot correlations seperatly and on map
+plt_figures = True  # if true plot correlations seperatly and on map
 #==============================================================================
 #
 #==============================================================================
