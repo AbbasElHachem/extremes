@@ -23,4 +23,6 @@ encoding/_48_plot_interp_ppt_at_dwd_stns_.py=utf-8
 encoding/_49_plot_interpolated_rainfall_all_events_all_stations_dwd_.py=utf-8
 encoding/_50_plot_interpolated_\ and_obesrved_ppt_transformed_fr_quantiles_at_dwd_stn_extreme_events_improvement_.py=utf-8
 encoding/_51_calculate_filter_indicator_correlation_each_netatmo_seperate.py=utf-8
+encoding/_57_plot_radar_events_BW_.py=utf-8
+encoding/_58_compare_radar_to_stn_data_.py=utf-8
 encoding/_a0_download_dwd_historical_and_recent_Temp_data.py=utf-8
