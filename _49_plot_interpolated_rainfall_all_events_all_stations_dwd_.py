@@ -72,7 +72,7 @@ if plot_filtered:
         print(temp_freq)
 
         path_to_Qt_ok_un_first_flt__temp_flt_1st_ = main_dir / (
-            r'Final_results3/Ppt_ok_ok_un_new2_first_flt__temp_flt__1st_%s' % temp_freq)
+            r'Final_results4/Ppt_ok_ok_un_new3_first_flt__temp_flt__1st_%s' % temp_freq)
         Qt_ok_un_first_flt__temp_flt_1st_ = list_all_full_path(
             '.csv', path_to_Qt_ok_un_first_flt__temp_flt_1st_)
 
@@ -221,6 +221,8 @@ if plot_filtered:
     #
     #     df_dwd_edf = df_dwd_edf[df_dwd_edf > 0]
         # df_dwd_edf.dropna(how='all')
+        # stns to remove from orig edf, because no data for 2015-2019
+        df_dwd_edf.drop(columns=['00384', '13672', '05155'], inplace=True)
 
         try:
 
