@@ -59,7 +59,7 @@ if plot_filtered:
         print(temp_freq)
 
         path_to_Qt_ok_un_first_flt__temp_flt_1st_ = main_dir / (
-            r'Final_results4/Ppt_ok_ok_un_new3_first_flt__temp_flt__1st_%s' % temp_freq)
+            r'Final_results3/Ppt_ok_ok_un_new2_first_flt__temp_flt__1st_%s' % temp_freq)
         Qt_ok_un_first_flt__temp_flt_1st_ = list_all_full_path(
             '.csv', path_to_Qt_ok_un_first_flt__temp_flt_1st_)
 
@@ -346,7 +346,7 @@ if plot_filtered:
                     df_improvements.loc[stn_,
                                         'spearman_corr_dwd_netatmo_unc20perc'] = rho_netatmo_dwd_unc20perc
 
-            #df_improvements.dropna(how='all', inplace=True)
+            df_improvements.dropna(how='all', inplace=True)
 
             # df_compare = df_compare[df_compare > 0]
             #df_compare.dropna(how='all', inplace=True)
@@ -500,7 +500,8 @@ if plot_filtered:
                 % mean_pearson_correlation_dwd_netatmo_unc20perc)
 
         ax.set_title('Pearson Correlation Interpolated Quantiles from DWD or DWD-Netatmo\n '
-                     'Precipitation of %s Intense Events \n Events with Improvemnts %d / %d, Percentage %0.0f\n'
+                     'Precipitation of %s Intense Events \n Stations with Improvemnts %d / %d,'
+                     ' Percentage %0.0f\n'
                      'Stations with Improvemnts with OK 2percUnc %d / %d, Percentage %0.0f'
                      '\nStations with Improvemnts with OK 5percUnc %d / %d, Percentage %0.0f'
                      '\nStations with Improvemnts with OK 10percUnc %d / %d, Percentage %0.0f'
@@ -647,7 +648,7 @@ if plot_filtered:
                 % mean_spr_correlation_dwd_netatmo_unc20perc)
 
         ax.set_title('Spearman Correlation Interpolated Quantiles from DWD or DWD-Netatmo \n '
-                     'Rainfall of %s Intense Events \n Events with Improvemnts %d / %d, Percentage %0.0f'
+                     'Rainfall of %s Intense Events \n Stations with Improvemnts %d / %d, Percentage %0.0f'
                      '\nStations with Improvemnts with OK 2percUnc %d / %d, Percentage %0.0f'
                      '\nStations with Improvemnts with OK 5percUnc %d / %d, Percentage %0.0f'
                      '\nStations with Improvemnts with OK 10percUnc %d / %d, Percentage %0.0f'

@@ -60,9 +60,6 @@ def list_all_full_path(ext, file_dir):
 # In[14]:
 
 
-main_dir
-
-
 # In[26]:
 
 
@@ -72,7 +69,7 @@ if plot_filtered:
         print(temp_freq)
 
         path_to_Qt_ok_un_first_flt__temp_flt_1st_ = main_dir / (
-            r'Final_results4/Ppt_ok_ok_un_new3_first_flt__temp_flt__1st_%s' % temp_freq)
+            r'Final_results3/Ppt_ok_ok_un_new2_first_flt__temp_flt__1st_%s' % temp_freq)
         Qt_ok_un_first_flt__temp_flt_1st_ = list_all_full_path(
             '.csv', path_to_Qt_ok_un_first_flt__temp_flt_1st_)
 
@@ -379,7 +376,7 @@ if plot_filtered:
 # daily_events = ['2018-12-23 00:00:00',
 #                 '2019-05-22 00:00:00']
         df_compare.sort_index(inplace=True)
-
+        df_compare.dropna(how='all', inplace=True)
 #         df_compare.loc['2018-09-06 18:00:00', :]
 #         for evt in hourly_events:
 #             print(df_compare.loc[evt, :])
