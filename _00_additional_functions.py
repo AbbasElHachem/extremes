@@ -302,6 +302,8 @@ def remove_one_elt_lst(elt, lst):
 
 def resampleDf(df, agg, closed='right', label='right',
                shift=False, leave_nan=True,
+               label_shift=None,
+               temp_shift=0,
                max_nan=0):
     """
     Purpose: Aggregate precipitation data
@@ -322,6 +324,10 @@ def resampleDf(df, agg, closed='right', label='right',
         True, data is aggregated from 06:00 - 06:00
         False, data is aggregated from 00:00 - 00:00
         Default is False
+
+    temp_shift: shift the data based on timestamps (+- 0 to 5), default: 0
+
+    label_shift: shift time label by certain values (used for timezones)
 
     leave_nan: boolean, optional
         True, if the nan values should remain in the aggregated data set.
@@ -355,7 +361,7 @@ def resampleDf(df, agg, closed='right', label='right',
 
     if shift == True:
         df_copy = df.copy()
-        if agg != 'D':
+        if agg != 'D' or agg != '1440min':
             raise Exception('Shift can only be applied to daily aggregations')
         df = df.shift(-6, 'H')
 
@@ -369,13 +375,17 @@ def resampleDf(df, agg, closed='right', label='right',
             df = df.fillna(-100000000000.)
             df_agg = df.resample(agg,
                                  closed=closed,
-                                 label=label).sum()
+                                 label=label,
+                                 base=temp_shift,
+                                 loffset=label_shift).sum()
             # Replace negative values with nan values
             df_agg.values[df_agg.values[:] < 0.] = np.nan
         else:
             df_agg = df.resample(rule=agg,
                                  closed=closed,
-                                 label=label).sum()
+                                 label=label,
+                                 base=temp_shift,
+                                 loffset=label_shift).sum()
             # find data with nan in original aggregation
             g_agg = df.groupby(pd.Grouper(freq=agg,
                                           closed=closed,
@@ -390,7 +400,9 @@ def resampleDf(df, agg, closed='right', label='right',
     elif leave_nan == False:
         df_agg = df.resample(agg,
                              closed=closed,
-                             label=label).sum()
+                             label=label,
+                             base=temp_shift,
+                             loffset=label_shift).sum()
     if shift == True:
         df = df_copy
     return df_agg
