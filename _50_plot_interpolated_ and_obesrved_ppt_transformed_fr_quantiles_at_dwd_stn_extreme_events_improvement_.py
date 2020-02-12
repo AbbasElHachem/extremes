@@ -120,7 +120,7 @@ if plot_filtered:
                     print(df_file)
                     path_interpolated_using_netatmo_dwd_list.append(df_file)
 
-                if ('interpolated_quantiles_un_dwd_') in df_file and (
+                if ('interpolated_ppts_un_dwd_') in df_file and (
                         ('std_dev') not in df_file):
                     print(df_file)
                     path_interpolated_using_netatmo_dwd_list_un.append(df_file)
@@ -136,7 +136,7 @@ if plot_filtered:
                     path_interpolated_using_netatmo_dwd_list_std_dev.append(
                         df_file)
 
-                if (('interpolated_quantiles_un_dwd_') in df_file) and (
+                if (('interpolated_ppts_un_dwd_') in df_file) and (
                         ('std_dev') in df_file):
                     print(df_file)
                     path_interpolated_using_netatmo_dwd_list_un_std_dev.append(
@@ -208,28 +208,28 @@ if plot_filtered:
                     # print(event_date)
                     #                 if str(event_date) == '2015-06-07 22:00:00':
                     #                     print(event_date)
-                    # interpolated_quantile_netatmo = df_netatmo.loc[event_date, stn_]
+                    # interpolated_ppt_netatmo = df_netatmo.loc[event_date, stn_]
                     #event_date = cmn_interpolated_events[0]
-                    interpolated_quantile_dwd = df_dwd.loc[event_date, stn_]
+                    interpolated_ppt_dwd = df_dwd.loc[event_date, stn_]
 
-                    interpolated_quantile_netatmo_dwd = df_netatmo_dwd.loc[event_date, stn_]
+                    interpolated_ppt_netatmo_dwd = df_netatmo_dwd.loc[event_date, stn_]
 
-                    interpolated_quantile_netatmo_dwd_unc = df_netatmo_dwd_unc.loc[event_date, stn_]
+                    interpolated_ppt_netatmo_dwd_unc = df_netatmo_dwd_unc.loc[event_date, stn_]
                     # std dev
-                    interpolated_quantile_dwd_std_dev = df_dwd_std_dev.loc[event_date, stn_]
+                    interpolated_ppt_dwd_std_dev = df_dwd_std_dev.loc[event_date, stn_]
 
-                    interpolated_quantile_netatmo_dwd_std_dev = df_netatmo_dwd_std_dev.loc[
+                    interpolated_ppt_netatmo_dwd_std_dev = df_netatmo_dwd_std_dev.loc[
                         event_date, stn_]
 
-                    interpolated_quantile_netatmo_dwd_unc_std_dev = df_netatmo_dwd_unc_std_dev.loc[
+                    interpolated_ppt_netatmo_dwd_unc_std_dev = df_netatmo_dwd_unc_std_dev.loc[
                         event_date, stn_]
 
-                    # original quantile when transforming ppt to edf
-                    original_quantile = df_dwd_edf.loc[event_date, stn_]
+                    # original ppt when transforming ppt to edf
+                    original_ppt = df_dwd_edf.loc[event_date, stn_]
 
-                    if original_quantile >= 0:
+                    if original_ppt >= 0:
                         # calculate p0, since used when generating original
-                        # quantiles
+                        # ppts
 
                          # original data of ppt
                         original_ppt_stn = df_dwd_ppt.loc[:,
@@ -237,15 +237,15 @@ if plot_filtered:
                         p0_stn = calculate_probab_ppt_below_thr(
                             original_ppt_stn, 0)
 
-                        if np.isclose(interpolated_quantile_dwd,
+                        if np.isclose(interpolated_ppt_dwd,
                                       p0_stn / 2, atol=0.1):
                             ppt_interp_fr_dwd = 0
 
-                        if np.isclose(interpolated_quantile_netatmo_dwd,
+                        if np.isclose(interpolated_ppt_netatmo_dwd,
                                       p0_stn / 2, atol=0.1):
                             ppt_interp_fr_dwd_netatmo = 0
 
-                        if np.isclose(original_quantile,
+                        if np.isclose(original_ppt,
                                       p0_stn / 2, atol=0.1):
                             ppt_orig_fr_edf = 0
 
@@ -255,43 +255,43 @@ if plot_filtered:
                                 original_ppt_stn)
 
                             edf_orig_fr_dist = find_nearest(
-                                edf_stn_dist, original_quantile)
+                                edf_stn_dist, original_ppt)
 
                             # plt.plot(ppt_stn, edf_stn_dist)
                             ppt_orig_ = df_dwd_ppt.loc[event_date, stn_]
 
-                            # backtransform quantiles to ppt, new method
+                            # backtransform ppts to ppt, new method
                             # interpolated from DWD
                             ppt_interp_fr_dwd = ppt_stn_dist[
                                 np.where(edf_stn_dist == find_nearest(
                                     edf_stn_dist,
-                                    interpolated_quantile_dwd
+                                    interpolated_ppt_dwd
                                 )
                                 )][0]
 
                             ppt_interp_fr_dwd_netatmo = ppt_stn_dist[
                                 np.where(edf_stn_dist == find_nearest(
                                     edf_stn_dist,
-                                    interpolated_quantile_netatmo_dwd
+                                    interpolated_ppt_netatmo_dwd
                                 )
                                 )][0]
                             ppt_interp_fr_dwd_netatmo_unc = ppt_stn_dist[
                                 np.where(edf_stn_dist == find_nearest(
                                     edf_stn_dist,
-                                    interpolated_quantile_netatmo_dwd_unc)
+                                    interpolated_ppt_netatmo_dwd_unc)
                                 )][0]
 #                             ppt_interp_fr_dwd_min_std_dev = ppt_stn_dist[
 #                                 np.where(edf_stn_dist == find_nearest(
 #                                     edf_stn_dist,
-#                                     interpolated_quantile_dwd -
-#                                     interpolated_quantile_dwd_std_dev)
+#                                     interpolated_ppt_dwd -
+#                                     interpolated_ppt_dwd_std_dev)
 #                                 )][0]
 #
 #                             ppt_interp_fr_dwd_plus_std_dev = ppt_stn_dist[
 #                                 np.where(edf_stn_dist == find_nearest(
 #                                     edf_stn_dist,
-#                                     interpolated_quantile_dwd +
-#                                     interpolated_quantile_dwd_std_dev)
+#                                     interpolated_ppt_dwd +
+#                                     interpolated_ppt_dwd_std_dev)
 #                                 )][0]
 #
 #                             ppt_interp_fr_dwd = (
@@ -301,15 +301,15 @@ if plot_filtered:
 #                             ppt_interp_fr_dwd_netatmo_min_std_dev = ppt_stn_dist[
 #                                 np.where(edf_stn_dist == find_nearest(
 #                                     edf_stn_dist,
-#                                     interpolated_quantile_netatmo_dwd -
-#                                     interpolated_quantile_netatmo_dwd_std_dev)
+#                                     interpolated_ppt_netatmo_dwd -
+#                                     interpolated_ppt_netatmo_dwd_std_dev)
 #                                 )][0]
 #
 #                             ppt_interp_fr_dwd_netatmo_plus_std_dev = ppt_stn_dist[
 #                                 np.where(edf_stn_dist == find_nearest(
 #                                     edf_stn_dist,
-#                                     interpolated_quantile_netatmo_dwd +
-#                                     interpolated_quantile_netatmo_dwd_std_dev)
+#                                     interpolated_ppt_netatmo_dwd +
+#                                     interpolated_ppt_netatmo_dwd_std_dev)
 #                                 )][0]
 #
 #                             ppt_interp_fr_dwd_netatmo = (
@@ -320,27 +320,27 @@ if plot_filtered:
 #                             ppt_interp_fr_dwd_netatmo_unc_min_std_dev = ppt_stn_dist[
 #                                 np.where(edf_stn_dist == find_nearest(
 #                                     edf_stn_dist,
-#                                     interpolated_quantile_netatmo_dwd_unc -
-#                                     interpolated_quantile_netatmo_dwd_std_dev)
+#                                     interpolated_ppt_netatmo_dwd_unc -
+#                                     interpolated_ppt_netatmo_dwd_std_dev)
 #                                 )][0]
 #                             ppt_interp_fr_dwd_netatmo_unc_plus_std_dev = ppt_stn_dist[
 #                                 np.where(edf_stn_dist == find_nearest(
 #                                     edf_stn_dist,
-#                                     interpolated_quantile_netatmo_dwd_unc +
-#                                     interpolated_quantile_netatmo_dwd_std_dev)
+#                                     interpolated_ppt_netatmo_dwd_unc +
+#                                     interpolated_ppt_netatmo_dwd_std_dev)
 #                                 )][0]
 #                             ppt_interp_fr_dwd_netatmo_unc = (
 #                                 (ppt_interp_fr_dwd_netatmo_unc_min_std_dev +
 # ppt_interp_fr_dwd_netatmo_unc_plus_std_dev)) / 2
 
                             if ppt_orig_ >= 0.2:
-                                # print(original_quantile)
+                                # print(original_ppt)
                                 df_compare.loc[event_date,
                                                'original_ppt'] = ppt_orig_
                                 df_compare.loc[event_date,
                                                'interpolated_ppt_dwd'] = ppt_interp_fr_dwd
                                 # df_compare.loc[event_date,
-                                #               'interpolated_quantile_netatmo'] = interpolated_quantile_netatmo
+                                #               'interpolated_ppt_netatmo'] = interpolated_ppt_netatmo
                                 df_compare.loc[event_date,
                                                'interpolated_ppt_netatmo_dwd'] = ppt_interp_fr_dwd_netatmo
                                 df_compare.loc[event_date,
@@ -352,7 +352,7 @@ if plot_filtered:
                                 df_compare.loc[event_date,
                                                'interpolated_ppt_dwd'] = np.nan
                                 # df_compare.loc[event_date,
-                                #               'interpolated_quantile_netatmo'] = np.nan
+                                #               'interpolated_ppt_netatmo'] = np.nan
                                 df_compare.loc[event_date,
                                                'interpolated_ppt_netatmo_dwd'] = np.nan
                                 df_compare.loc[event_date,
@@ -363,7 +363,7 @@ if plot_filtered:
                         df_compare.loc[event_date,
                                        'interpolated_ppt_dwd'] = np.nan
                         # df_compare.loc[event_date,
-                        #               'interpolated_quantile_netatmo'] = np.nan
+                        #               'interpolated_ppt_netatmo'] = np.nan
                         df_compare.loc[event_date,
                                        'interpolated_ppt_netatmo_dwd'] = np.nan
                         df_compare.loc[event_date,
@@ -374,7 +374,7 @@ if plot_filtered:
 
                 values_x = df_compare['original_ppt'].values
                 values_dwd = df_compare['interpolated_ppt_dwd'].values
-                # values_netatmo =df_compare['interpolated_quantile_netatmo'].values
+                # values_netatmo =df_compare['interpolated_ppt_netatmo'].values
                 values_netatmo_dwd = df_compare['interpolated_ppt_netatmo_dwd'].values
                 values_netatmo_dwd_unc = df_compare['interpolated_ppt_netatmo_dwd_unc'].values
 
@@ -699,10 +699,10 @@ if plot_not_filtered:
     for temp_freq in ['60min', '360min', '720min', '1440min']:
         print(temp_freq)
 
-        path_to_Quantiles_netatmo_no_flt___ = main_dir / (
+        path_to_ppts_netatmo_no_flt___ = main_dir / (
             r'Qt_ok_ok_un_netatmo_no_flt___%s' % temp_freq)
-        Quantiles_netatmo_no_flt___ = list_all_full_path(
-            '.csv', path_to_Quantiles_netatmo_no_flt___)
+        ppts_netatmo_no_flt___ = list_all_full_path(
+            '.csv', path_to_ppts_netatmo_no_flt___)
 
         #########################################################
         path_dwd_edf_data = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\edf_ppt_all_dwd_%s_.csv" % temp_freq
@@ -721,15 +721,17 @@ if plot_not_filtered:
 
         #########################################################
         df_improvements = pd.DataFrame(index=df_dwd_edf.columns,
-                                       columns=['pearson_corr_dwd_', 'spearman_corr_dwd_',
-                                                'pearson_corr_dwd_netatmo', 'spearman_corr_dwd_netatmo'])
+                                       columns=['pearson_corr_dwd_',
+                                                'spearman_corr_dwd_',
+                                                'pearson_corr_dwd_netatmo',
+                                                'spearman_corr_dwd_netatmo'])
 
         #########################################################
         path_interpolated_using_dwd_list = []
         path_interpolated_using_netatmo_dwd_list = []
 
-        path_to_use = path_to_Quantiles_netatmo_no_flt___
-        data_to_use = Quantiles_netatmo_no_flt___
+        path_to_use = path_to_ppts_netatmo_no_flt___
+        data_to_use = ppts_netatmo_no_flt___
 
         _interp_acc_ = str(r'%s' % (str(path_to_use).split('\\')[-1]))
         # for i in range(12):
@@ -760,8 +762,10 @@ if plot_not_filtered:
                                  sep=';', index_col=0, parse_dates=True,
                                  infer_datetime_format=True)
 
-            df_netatmo_dwd = pd.read_csv(path_interpolated_using_netatmo_dwd, skiprows=[1],
-                                         sep=';', index_col=0, parse_dates=True,
+            df_netatmo_dwd = pd.read_csv(path_interpolated_using_netatmo_dwd,
+                                         skiprows=[1],
+                                         sep=';', index_col=0,
+                                         parse_dates=True,
                                          infer_datetime_format=True)
 
             df_compare = pd.DataFrame(index=df_dwd.index)
@@ -785,34 +789,35 @@ if plot_not_filtered:
                     # print(event_date)
                     #                 if str(event_date) == '2015-06-07 22:00:00':
                     #                     print(event_date)
-                    # interpolated_quantile_netatmo = df_netatmo.loc[event_date, stn_]
+                    # interpolated_ppt_netatmo = df_netatmo.loc[event_date, stn_]
                     #event_date = cmn_interpolated_events[0]
-                    interpolated_quantile_dwd = df_dwd.loc[event_date, stn_]
+                    interpolated_ppt_dwd = df_dwd.loc[event_date, stn_]
 
-                    interpolated_quantile_netatmo_dwd = df_netatmo_dwd.loc[event_date, stn_]
+                    interpolated_ppt_netatmo_dwd = df_netatmo_dwd.loc[
+                        event_date, stn_]
 
-                    # original quantile when transforming ppt to edf
-                    original_quantile = df_dwd_edf.loc[event_date, stn_]
+                    # original ppt when transforming ppt to edf
+                    original_ppt = df_dwd_edf.loc[event_date, stn_]
 
-                    if original_quantile >= 0:
+                    if original_ppt >= 0:
                         # calculate p0, since used when generating original
-                        # quantiles
+                        # ppts
 
                          # original data of ppt
-                        original_ppt_stn = df_dwd_ppt.loc[:,
-                                                          stn_].dropna().values.ravel()
+                        original_ppt_stn = df_dwd_ppt.loc[
+                            :, stn_].dropna().values.ravel()
                         p0_stn = calculate_probab_ppt_below_thr(
                             original_ppt_stn, 0)
 
-                        if np.isclose(interpolated_quantile_dwd,
+                        if np.isclose(interpolated_ppt_dwd,
                                       p0_stn / 2, atol=0.1):
                             ppt_interp_fr_dwd = 0
 
-                        if np.isclose(interpolated_quantile_netatmo_dwd,
+                        if np.isclose(interpolated_ppt_netatmo_dwd,
                                       p0_stn / 2, atol=0.1):
                             ppt_interp_fr_dwd_netatmo = 0
 
-                        if np.isclose(original_quantile,
+                        if np.isclose(original_ppt,
                                       p0_stn / 2, atol=0.1):
                             ppt_orig_fr_edf = 0
 
@@ -822,7 +827,7 @@ if plot_not_filtered:
                                 original_ppt_stn)
 
                             edf_orig_fr_dist = find_nearest(
-                                edf_stn_dist, original_quantile)
+                                edf_stn_dist, original_ppt)
 
                             # plt.plot(ppt_stn, edf_stn_dist)
                             ppt_orig_ = df_dwd_ppt.loc[event_date, stn_]
@@ -831,34 +836,41 @@ if plot_not_filtered:
                             ppt_interp_fr_dwd = ppt_stn_dist[
                                 np.where(edf_stn_dist == find_nearest(
                                     edf_stn_dist,
-                                    interpolated_quantile_dwd))][0]
+                                    interpolated_ppt_dwd))][0]
 
                             # interpolated from DWD-Netatmo
                             ppt_interp_fr_dwd_netatmo = ppt_stn_dist[
                                 np.where(edf_stn_dist == find_nearest(
                                     edf_stn_dist,
-                                    interpolated_quantile_netatmo_dwd))][0]
+                                    interpolated_ppt_netatmo_dwd))][0]
 
                             if ppt_orig_ >= 0.2:
-                                # print(original_quantile)
-                                df_compare.loc[event_date,
-                                               'original_ppt'] = ppt_orig_
-                                df_compare.loc[event_date,
-                                               'interpolated_ppt_dwd'] = ppt_interp_fr_dwd
+                                # print(original_ppt)
+                                df_compare.loc[
+                                    event_date,
+                                    'original_ppt'] = ppt_orig_
+                                df_compare.loc[
+                                    event_date,
+                                    'interpolated_ppt_dwd'] = ppt_interp_fr_dwd
                                 # df_compare.loc[event_date,
-                                #               'interpolated_quantile_netatmo'] = interpolated_quantile_netatmo
-                                df_compare.loc[event_date,
-                                               'interpolated_ppt_netatmo_dwd'] = ppt_interp_fr_dwd_netatmo
+                                #               'interpolated_ppt_netatmo'] = interpolated_ppt_netatmo
+                                df_compare.loc[
+                                    event_date,
+                                    'interpolated_ppt_netatmo_dwd'
+                                ] = ppt_interp_fr_dwd_netatmo
 
                             else:
-                                df_compare.loc[event_date,
-                                               'original_ppt'] = np.nan
-                                df_compare.loc[event_date,
-                                               'interpolated_ppt_dwd'] = np.nan
+                                df_compare.loc[
+                                    event_date,
+                                    'original_ppt'] = np.nan
+                                df_compare.loc[
+                                    event_date,
+                                    'interpolated_ppt_dwd'] = np.nan
                                 # df_compare.loc[event_date,
-                                #               'interpolated_quantile_netatmo'] = np.nan
-                                df_compare.loc[event_date,
-                                               'interpolated_ppt_netatmo_dwd'] = np.nan
+                                #               'interpolated_ppt_netatmo'] = np.nan
+                                df_compare.loc[
+                                    event_date,
+                                    'interpolated_ppt_netatmo_dwd'] = np.nan
 
                     else:
                         df_compare.loc[event_date,
@@ -866,7 +878,7 @@ if plot_not_filtered:
                         df_compare.loc[event_date,
                                        'interpolated_ppt_dwd'] = np.nan
                         # df_compare.loc[event_date,
-                        #               'interpolated_quantile_netatmo'] = np.nan
+                        #               'interpolated_ppt_netatmo'] = np.nan
                         df_compare.loc[event_date,
                                        'interpolated_ppt_netatmo_dwd'] = np.nan
 
@@ -875,7 +887,7 @@ if plot_not_filtered:
 
                 values_x = df_compare['original_ppt'].values
                 values_dwd = df_compare['interpolated_ppt_dwd'].values
-                # values_netatmo =df_compare['interpolated_quantile_netatmo'].values
+                # values_netatmo =df_compare['interpolated_ppt_netatmo'].values
                 values_netatmo_dwd = df_compare['interpolated_ppt_netatmo_dwd'].values
 
                 # calculate sqared error between obsv and interpolated rainfall
