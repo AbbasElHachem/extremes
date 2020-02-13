@@ -504,12 +504,12 @@ class HDF5(object):
 if __name__ == '__main__':
 
     ##
-
-    HDF52 = HDF5(
-        infile=r'X:\exchange\ElHachem\niederschlag_deutschland\1993_2016_5min_merge_nan.h5')
-
-    ids = HDF52.get_all_ids()
-    metadata = HDF52.get_metadata(ids=ids)
+    pass
+#     HDF52 = HDF5(
+#         infile=r'X:\exchange\ElHachem\niederschlag_deutschland\1993_2016_5min_merge_nan.h5')
+#
+#     ids = HDF52.get_all_ids()
+#     metadata = HDF52.get_metadata(ids=ids)
     # data = HDF52.get_data(ids = ['5100', '2115'])
 
 #     ids_bw = metadata['id'][metadata['state_s'] == 'BW']

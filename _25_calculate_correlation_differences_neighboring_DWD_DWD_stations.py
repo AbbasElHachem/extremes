@@ -64,11 +64,10 @@ from _00_additional_functions import (convert_coords_fr_wgs84_to_utm32_,
                                       select_convective_season,
                                       resample_intersect_2_dfs,
                                       get_cdf_part_abv_thr,
+                                      get_dwd_stns_coords,
+                                      get_nearest_dwd_station,
                                       plt_on_map_agreements,
                                       plt_correlation_with_distance)
-
-from _10_aggregate_plot_compare_2_DWD_stns import (get_dwd_stns_coords,
-                                                   get_nearest_dwd_station)
 
 
 # =============================================================================
@@ -77,12 +76,12 @@ os.chdir(main_dir)
 
 path_to_ppt_dwd_data = (
     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
-    r"\all_dwd_hourly_ppt_data_combined_2014_2019_.fk")
+    r"\all_dwd_hourly_ppt_data_combined_2015_2019_.fk")
 assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
 
 path_to_ppt_csv_data = (
     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
-    r"\all_dwd_hourly_ppt_data_combined_2014_2019_.csv")
+    r"\all_dwd_hourly_ppt_data_combined_2015_2019_.csv")
 
 assert os.path.exists(path_to_ppt_csv_data), 'wrong DWD Ppt file'
 
@@ -158,14 +157,14 @@ def calc_indicator_correlatione_two_dwd_stns(
 ):
 
     in_coords_df, _, _, _ = get_dwd_stns_coords(
-        coords_df_file, x_col_name, y_col_name, index_col=0,
+        coords_df_file, x_col_name, y_col_name, index_col_name='ID',
         sep_type=';')
 
-    stndwd_ix = ['0' * (5 - len(str(stn_id))) + str(stn_id)
-                 if len(str(stn_id)) < 5 else str(stn_id)
-                 for stn_id in in_coords_df.index]
+#     stndwd_ix = ['0' * (5 - len(str(stn_id))) + str(stn_id)
+#                  if len(str(stn_id)) < 5 else str(stn_id)
+#                  for stn_id in in_coords_df.index]
 
-    in_coords_df.index = stndwd_ix
+#     in_coords_df.index = stndwd_ix
 
     # intersect coordinates and stns list, get only stns in BW
 
@@ -214,7 +213,7 @@ def calc_indicator_correlatione_two_dwd_stns(
                 coords_df_file=coords_df_file,
                 x_col_name=x_col_name,
                 y_col_name=y_col_name,
-                index_col=0,
+                index_col_name='ID',
                 sep_type=';',
                 neighbor_to_chose=neighbor_to_chose)
 

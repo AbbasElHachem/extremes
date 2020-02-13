@@ -660,14 +660,43 @@ def get_cdf_part_abv_thr(ppt_data, ppt_thr):
 #==============================================================================
 
 
-def get_dwd_stns_coords(coords_df_file, x_col_name, y_col_name):
-    """function used to return to coordinates dataframe of the DWD stations"""
-    in_coords_df = pd.read_csv(coords_df_file, sep=';',
-                               index_col=3, engine='c')
+def get_dwd_stns_coords(coords_df_file, x_col_name, y_col_name, index_col_name,
+                        sep_type):
+    '''function used to return to coordinates dataframe of the DWD stations'''
+    in_coords_df = pd.read_csv(coords_df_file, sep=sep_type,
+                               dtype={index_col_name: str},
+                               engine='c')
+    in_coords_df.set_index(index_col_name, inplace=True)
     stn_ids = in_coords_df.index
     x_vals = in_coords_df[x_col_name].values.ravel()
     y_vals = in_coords_df[y_col_name].values.ravel()
     return in_coords_df, x_vals, y_vals, stn_ids
+#==============================================================================
+#
+#==============================================================================
+
+
+def get_nearest_dwd_station(first_stn_id, coords_df_file,
+                            x_col_name, y_col_name, index_col_name,
+                            sep_type, neighbor_to_chose):
+    ''' Find for one station, the closest neibhouring station'''
+    # read df coordinates and get station ids, and x, y values
+    in_coords_df, x_vals, y_vals, stn_ids = get_dwd_stns_coords(
+        coords_df_file, x_col_name, y_col_name, index_col_name, sep_type)
+    # make a tupples from the coordinates
+    coords_tuples = np.array([(x, y) for x, y in zip(x_vals, y_vals)])
+    # create a tree from coordinates
+    points_tree = spatial.cKDTree(coords_tuples)
+
+    xstn = in_coords_df.loc[first_stn_id, x_col_name]
+    ystn = in_coords_df.loc[first_stn_id, y_col_name]
+
+    distances, indices = points_tree.query([xstn, ystn], k=10)
+    coords_nearest_nbr = coords_tuples[indices[neighbor_to_chose]]
+    stn_near = str(stn_ids[indices[neighbor_to_chose]])
+    distance_near = distances[neighbor_to_chose]
+
+    return coords_nearest_nbr, stn_near, distance_near
 
 #==============================================================================
 #
@@ -685,6 +714,8 @@ def get_netatmo_stns_coords(coords_df_file, x_col_name, y_col_name):
     lat_vals = in_coords_df[y_col_name].values.ravel()
 
     return in_coords_df, lon_vals, lat_vals, stn_ids
+
+
 #==============================================================================
 #
 #==============================================================================

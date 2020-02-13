@@ -44,11 +44,14 @@ from collections import OrderedDict
 from _00_additional_functions import (resample_intersect_2_dfs,
                                       get_cdf_part_abv_thr,
                                       calculate_probab_ppt_below_thr,
-                                      constrcut_contingency_table)
+                                      constrcut_contingency_table,
+                                      get_nearest_dwd_station)
 
+# TODO: FIX HDF5
 from b_get_data import HDF5
 
 register_matplotlib_converters()
+
 
 #==============================================================================
 #
@@ -93,47 +96,6 @@ aggregation_frequencies = ['5min', '10min',  '60min',
 
 # which neighbor to chose ,starts with 1
 neighbor_to_chose = 1
-
-#==============================================================================
-#
-#==============================================================================
-
-
-def get_dwd_stns_coords(coords_df_file, x_col_name, y_col_name, index_col,
-                        sep_type):
-    '''function used to return to coordinates dataframe of the DWD stations'''
-    in_coords_df = pd.read_csv(coords_df_file, sep=sep_type,
-                               index_col=index_col, engine='c')
-    stn_ids = in_coords_df.index
-    x_vals = in_coords_df[x_col_name].values.ravel()
-    y_vals = in_coords_df[y_col_name].values.ravel()
-    return in_coords_df, x_vals, y_vals, stn_ids
-#==============================================================================
-#
-#==============================================================================
-
-
-def get_nearest_dwd_station(first_stn_id, coords_df_file,
-                            x_col_name, y_col_name, index_col,
-                            sep_type, neighbor_to_chose):
-    ''' Find for one station, the closest neibhouring station'''
-    # read df coordinates and get station ids, and x, y values
-    in_coords_df, x_vals, y_vals, stn_ids = get_dwd_stns_coords(
-        coords_df_file, x_col_name, y_col_name, index_col, sep_type)
-    # make a tupples from the coordinates
-    coords_tuples = np.array([(x, y) for x, y in zip(x_vals, y_vals)])
-    # create a tree from coordinates
-    points_tree = spatial.cKDTree(coords_tuples)
-
-    xstn = in_coords_df.loc[int(first_stn_id), x_col_name]
-    ystn = in_coords_df.loc[int(first_stn_id), y_col_name]
-
-    distances, indices = points_tree.query([xstn, ystn], k=10)
-    coords_nearest_nbr = coords_tuples[indices[neighbor_to_chose]]
-    stn_near = str(stn_ids[indices[neighbor_to_chose]])
-    distance_near = distances[neighbor_to_chose]
-
-    return coords_nearest_nbr, stn_near, distance_near
 
 
 #==============================================================================
@@ -697,8 +659,13 @@ def compare_two_dwd_stns(stns_ids):
             idf1.dropna(axis=0, inplace=True)
 
             _, stn_near, distance_near = get_nearest_dwd_station(
-                iid, coords_df_file, x_col_name, y_col_name, 3, ';',
-                neighbor_to_chose)
+                first_stn_id=iid,
+                coords_df_file=coords_df_file,
+                x_col_name=x_col_name,
+                y_col_name=y_col_name,
+                index_col_name='ID',
+                sep_type=';',
+                neighbor_to_chose=neighbor_to_chose)
 
             assert iid != stn_near, 'wrong neighbour selected'
             idf2 = HDF52.get_pandas_dataframe(ids=stn_near)

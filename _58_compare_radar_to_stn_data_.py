@@ -36,7 +36,7 @@ mask = np.load(r'C:\Users\hachem\Desktop\radar\masked_array_bw',
 
 # temp_freq = '1440min'
 
-temp_freq = '1440min'
+temp_freq = '60min'
 #
 main_dir = Path(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
                 r'\oridinary_kriging_compare_DWD_Netatmo\Final_results')
@@ -268,9 +268,17 @@ for event_date, radar_evt in zip(df_radar_events_to_keep.index,
             sorted(interpolated_ppt_netatmo_dwd_unc10perc.columns), axis=1))
 
     # for plotting
-    start_minutes = 50 + float(temp_freq.replace('min', ''))
-    event_start_date = radolan_event_date - pd.Timedelta(minutes=start_minutes)
-    event_date_minus_one_hr = radolan_event_date - pd.Timedelta(minutes=50)
+    if temp_freq == '60min':
+        start_minutes = 50
+        event_start_date = radolan_event_date - \
+            pd.Timedelta(minutes=start_minutes)
+        event_date_minus_one_hr = event_date
+
+    if temp_freq == '1440min':
+        start_minutes = 50 + float(temp_freq.replace('min', ''))
+        event_start_date = radolan_event_date - \
+            pd.Timedelta(minutes=start_minutes)
+        event_date_minus_one_hr = radolan_event_date - pd.Timedelta(minutes=50)
 
 #     event_end_date = event_date + pd.Timedelta(minutes=10)
 #
@@ -411,6 +419,7 @@ for event_date, radar_evt in zip(df_radar_events_to_keep.index,
 #     interpolated_ppt_netatmo_dwd_unc10perc.columns = original_ppt.columns
     # leave common stns per all data
     cmn_stns = [stn for stn in original_ppt.columns
+                if original_ppt[stn].values >= 0
                 if interpolated_ppt_dwd[stn].values >= 0
                 if interpolated_ppt_netatmo_dwd[stn].values >= 0
                 if interpolated_ppt_netatmo_dwd_unc10perc[stn].values >= 0
@@ -443,7 +452,7 @@ for event_date, radar_evt in zip(df_radar_events_to_keep.index,
     try:
         mse_dwd_radar = np.nanmean(np.sqrt(np.square(
             np.subtract(original_ppt.values[0],
-                        np.nanmean(df_ppt_radolan.values)))))
+                        np.nanmean(df_ppt_radolan_mean_stn.values)))))
     except Exception as msg:
         print(msg)
         pass
