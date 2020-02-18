@@ -20,8 +20,8 @@ from pandas.plotting import register_matplotlib_converters
 register_matplotlib_converters()
 
 plt.ioff()
-plt.rcParams.update({'font.size': 20})
-plt.rcParams.update({'axes.labelsize': 20})
+plt.rcParams.update({'font.size': 16})
+plt.rcParams.update({'axes.labelsize': 16})
 
 
 main_dir = Path(
@@ -59,9 +59,14 @@ if plot_filtered:
         print(temp_freq)
 
         path_to_Qt_ok_un_first_flt__temp_flt_1st_ = main_dir / (
-            r'Final_results3/Ppt_ok_ok_un_new2_first_flt__temp_flt__1st_%s' % temp_freq)
+            r'Final_results2/Ppt_ok_ok_un_new3_first_flt__temp_flt__1st_%s' % temp_freq)
         Qt_ok_un_first_flt__temp_flt_1st_ = list_all_full_path(
             '.csv', path_to_Qt_ok_un_first_flt__temp_flt_1st_)
+
+        path_to_Qt_ok_un_first_flt__temp_flt_1st_2 = main_dir / (
+            r'Final_results5/Ppt_ok_ok_un_new4_first_flt__temp_flt__1st_%s' % temp_freq)
+        Qt_ok_un_first_flt__temp_flt_1st_2 = list_all_full_path(
+            '.csv', path_to_Qt_ok_un_first_flt__temp_flt_1st_2)
 
         path_to_Qt_ok_un_first_flt__temp_flt_comb_ = main_dir / (
             r'Final_results/Ppt_ok_ok_un_new2_first_flt__temp_flt__comb_%s' % temp_freq)
@@ -119,6 +124,9 @@ if plot_filtered:
         path_to_use = path_to_Qt_ok_un_first_flt__temp_flt_1st_
         data_to_use = Qt_ok_un_first_flt__temp_flt_1st_
 
+        path_to_use2 = path_to_Qt_ok_un_first_flt__temp_flt_1st_2
+        data_to_use2 = Qt_ok_un_first_flt__temp_flt_1st_2
+
         _interp_acc_ = str(r'%s' % (str(path_to_use).split('\\')[-1]))
         # for i in range(12):
         #   i = int(i)
@@ -165,11 +173,30 @@ if plot_filtered:
             continue
         #########################################################
 
+        try:
+            for df_file in data_to_use2:
+
+                if ('dwd_netamo') in df_file and 'unc' not in df_file:
+                    print(df_file)
+                    path_interpolated_using_netatmo_dwd2 = df_file
+
+        except Exception as msg:
+            print(msg)
+            continue
+        df_netatmo_dwd2 = pd.read_csv(path_interpolated_using_netatmo_dwd2,
+                                      sep=';', index_col=0,
+                                      parse_dates=True,
+                                      infer_datetime_format=True)
+
+        #======================================================================
+        #
+        #======================================================================
         df_dwd = pd.read_csv(path_interpolated_using_dwd,
                              sep=';', index_col=0, parse_dates=True,
                              infer_datetime_format=True)
 
-        print(df_dwd.isna().sum().max())
+        events_to_compare = df_netatmo_dwd2.index.intersection(df_dwd.index)
+        # print(df_dwd.isna().sum().max())
 
         df_netatmo_dwd = pd.read_csv(path_interpolated_using_netatmo_dwd,
                                      sep=';', index_col=0,
@@ -210,6 +237,8 @@ if plot_filtered:
                 #                     pass
                 #                     print(stn_)
                 df_compare = pd.DataFrame(index=df_dwd.index)
+
+                # :
                 for event_date in df_dwd.index.intersection(df_dwd_edf.index):
                     # print(event_date)
                     edf_stn_orig = df_dwd_edf.loc[event_date, stn_]
@@ -499,7 +528,7 @@ if plot_filtered:
                 label='DWD-Netatmo Interpolation 20percUnc %0.2f'
                 % mean_pearson_correlation_dwd_netatmo_unc20perc)
 
-        ax.set_title('Pearson Correlation Interpolated Quantiles from DWD or DWD-Netatmo\n '
+        ax.set_title('Pearson Correlation Interpolated Rainfall from DWD or DWD-Netatmo\n '
                      'Precipitation of %s Intense Events \n Stations with Improvemnts %d / %d,'
                      ' Percentage %0.0f\n'
                      'Stations with Improvemnts with OK 2percUnc %d / %d, Percentage %0.0f'
@@ -522,16 +551,16 @@ if plot_filtered:
                         stations_with_improvements_unc20perc,
                         df_improvements.pearson_corr_dwd_netatmo_unc2perc.shape[0],
                         percent_of_improvment_unc20perc))
-        ax.grid(alpha=0.25)
-        plt.setp(ax.get_xticklabels(), rotation=60)
+
+        plt.setp(ax.get_xticklabels(), rotation=90)
         ax.grid(alpha=0.25)
         ax.set_yticks(np.arange(0, 1.05, .10))
         ax.set_xlabel('DWD Stations')
-        ax.legend(loc='lower right')
+        #ax.legend(loc='lower right')
         ax.set_ylabel('Pearson Correlation')
 
         plt.savefig(os.path.join(path_to_use,
-                                 r'ppt_temporal_pears_corr_%s_events_dwd_2.png' % temp_freq,
+                                 r'ppt_temporal_pears_corr_%s_events_dwd_cr.png' % temp_freq,
                                  ),
                     frameon=True, papertype='a4', bbox_inches='tight', pad_inches=.2)
         plt.close()
@@ -647,7 +676,7 @@ if plot_filtered:
                 label='DWD-Netatmo Interpolation 20percUnc %0.2f'
                 % mean_spr_correlation_dwd_netatmo_unc20perc)
 
-        ax.set_title('Spearman Correlation Interpolated Quantiles from DWD or DWD-Netatmo \n '
+        ax.set_title('Spearman Correlation Interpolated Rainfall from DWD or DWD-Netatmo \n '
                      'Rainfall of %s Intense Events \n Stations with Improvemnts %d / %d, Percentage %0.0f'
                      '\nStations with Improvemnts with OK 2percUnc %d / %d, Percentage %0.0f'
                      '\nStations with Improvemnts with OK 5percUnc %d / %d, Percentage %0.0f'
@@ -669,16 +698,17 @@ if plot_filtered:
                         stations_with_improvements_unc20perc,
                         df_improvements.spearman_corr_dwd_netatmo_unc2perc.shape[0],
                         percent_of_improvment_unc20perc))
-        ax.grid(alpha=0.25)
-        plt.setp(ax.get_xticklabels(), rotation=60)
+
+        plt.setp(ax.get_xticklabels(), rotation=90)
         ax.grid(alpha=0.25)
         ax.set_yticks(np.arange(0, 1.05, .10))
         ax.set_xlabel('DWD Stations')
-        ax.legend(loc='lower right')
+
+        # ax.legend(loc='lower right')
         ax.set_ylabel('Spearman Correlation')
 
         plt.savefig(os.path.join(path_to_use,
-                                 r'ppt_temporal_spearm_corr_%s_events_dwd_2.png' % (temp_freq)),
+                                 r'ppt_temporal_spearm_corr_%s_events_dwd_cr.png' % (temp_freq)),
                     frameon=True, papertype='a4', bbox_inches='tight', pad_inches=.2)
         plt.close()
 
