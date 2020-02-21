@@ -9,7 +9,7 @@ import pandas as pd
 import numpy as np
 
 import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
+# import matplotlib.dates as mdates
 import fnmatch
 from pathlib import Path
 
@@ -59,7 +59,7 @@ if plot_filtered:
         print(temp_freq)
 
         path_to_Qt_ok_un_first_flt__temp_flt_1st_ = main_dir / (
-            r'Final_results2/Ppt_ok_ok_un_new3_first_flt__temp_flt__1st_%s' % temp_freq)
+            r'Final_results8/Ppt_ok_ok_un_new6_first_flt__temp_flt__1st_%s' % temp_freq)
         Qt_ok_un_first_flt__temp_flt_1st_ = list_all_full_path(
             '.csv', path_to_Qt_ok_un_first_flt__temp_flt_1st_)
 
@@ -108,6 +108,8 @@ if plot_filtered:
                      'spearman_corr_dwd_',
                      'pearson_corr_dwd_netatmo',
                      'spearman_corr_dwd_netatmo',
+                     'pearson_corr_dwd_netatmo_unc05perc',
+                     'spearman_corr_dwd_netatmo_unc05perc',
                      'pearson_corr_dwd_netatmo_unc2perc',
                      'spearman_corr_dwd_netatmo_unc2perc',
                      'pearson_corr_dwd_netatmo_unc5perc',
@@ -140,6 +142,10 @@ if plot_filtered:
                 if ('dwd_netamo') in df_file and 'unc' not in df_file:
                     print(df_file)
                     path_interpolated_using_netatmo_dwd = df_file
+
+                if ('dwd_netamo') in df_file and 'unc05perc' in df_file:
+                    print(df_file)
+                    path_interpolated_using_netatmo_dwd_unc05perc = df_file
 
                 if ('dwd_netamo') in df_file and 'unc2perc' in df_file:
                     print(df_file)
@@ -205,6 +211,11 @@ if plot_filtered:
 
         print(df_netatmo_dwd.isna().sum().max())
 
+        df_netatmo_dwd_unc05perc = pd.read_csv(
+            path_interpolated_using_netatmo_dwd_unc05perc,
+            sep=';', index_col=0,
+            parse_dates=True, infer_datetime_format=True)
+
         df_netatmo_dwd_unc2perc = pd.read_csv(
             path_interpolated_using_netatmo_dwd_unc2perc,
             sep=';', index_col=0,
@@ -244,6 +255,8 @@ if plot_filtered:
                     edf_stn_orig = df_dwd_edf.loc[event_date, stn_]
                     edf_stn_interp_dwd = df_dwd.loc[event_date, stn_]
                     edf_stn_interp_netatmo_dwd = df_netatmo_dwd.loc[event_date, stn_]
+                    edf_stn_interp_netatmo_dwd_unc05perc = df_netatmo_dwd_unc05perc.loc[
+                        event_date, stn_]
                     edf_stn_interp_netatmo_dwd_unc2perc = df_netatmo_dwd_unc2perc.loc[
                         event_date, stn_]
                     edf_stn_interp_netatmo_dwd_unc5perc = df_netatmo_dwd_unc5perc.loc[
@@ -255,7 +268,8 @@ if plot_filtered:
                     if ((edf_stn_orig >= 0) and
                         (edf_stn_interp_dwd >= 0) and
                             (edf_stn_interp_netatmo_dwd >= 0 and
-                             (edf_stn_interp_netatmo_dwd_unc2perc >= 0))):
+                             (edf_stn_interp_netatmo_dwd_unc2perc >= 0) and
+                             (edf_stn_interp_netatmo_dwd_unc05perc >= 0))):
 
                         df_compare.loc[
                             event_date,
@@ -267,6 +281,10 @@ if plot_filtered:
                         df_compare.loc[
                             event_date,
                             'interpolated_quantile_netatmo_dwd'] = edf_stn_interp_netatmo_dwd
+                        df_compare.loc[
+                            event_date,
+                            'interpolated_quantile_netatmo_dwd_unc05perc'] = edf_stn_interp_netatmo_dwd_unc05perc
+
                         df_compare.loc[
                             event_date,
                             'interpolated_quantile_netatmo_dwd_unc2perc'] = edf_stn_interp_netatmo_dwd_unc2perc
@@ -292,6 +310,9 @@ if plot_filtered:
                         df_compare.loc[event_date,
                                        'interpolated_quantile_netatmo_dwd'] = np.nan
                         df_compare.loc[event_date,
+                                       'interpolated_quantile_netatmo_dwd_unc05perc'] = np.nan
+
+                        df_compare.loc[event_date,
                                        'interpolated_quantile_netatmo_dwd_unc2perc'] = np.nan
 
                         df_compare.loc[event_date,
@@ -309,6 +330,8 @@ if plot_filtered:
                     values_dwd = df_compare['interpolated_quantile_dwd'].values
 
                     values_netatmo_dwd = df_compare['interpolated_quantile_netatmo_dwd'].values
+                    values_netatmo_dwd_unc05perc = df_compare['interpolated_quantile_netatmo_dwd_unc05perc'].values
+
                     values_netatmo_dwd_unc2perc = df_compare['interpolated_quantile_netatmo_dwd_unc2perc'].values
 
                     values_netatmo_dwd_unc5perc = df_compare['interpolated_quantile_netatmo_dwd_unc5perc'].values
@@ -328,6 +351,11 @@ if plot_filtered:
                     corr_netatmo_dwd = pears(values_x, values_netatmo_dwd)[0]
                     rho_netatmo_dwd = spr(values_x, values_netatmo_dwd)[0]
                     # netatmo dwd unc
+                    corr_netatmo_dwd_unc05perc = pears(
+                        values_x, values_netatmo_dwd_unc05perc)[0]
+                    rho_netatmo_dwd_unc05perc = spr(
+                        values_x, values_netatmo_dwd_unc05perc)[0]
+
                     corr_netatmo_dwd_unc2perc = pears(
                         values_x, values_netatmo_dwd_unc2perc)[0]
                     rho_netatmo_dwd_unc2perc = spr(
@@ -354,6 +382,10 @@ if plot_filtered:
                                         'pearson_corr_dwd_netatmo'] = corr_netatmo_dwd
                     df_improvements.loc[stn_,
                                         'spearman_corr_dwd_netatmo'] = rho_netatmo_dwd
+                    df_improvements.loc[stn_,
+                                        'pearson_corr_dwd_netatmo_unc05perc'] = corr_netatmo_dwd_unc05perc
+                    df_improvements.loc[stn_,
+                                        'spearman_corr_dwd_netatmo_unc05perc'] = rho_netatmo_dwd_unc05perc
 
                     df_improvements.loc[stn_,
                                         'pearson_corr_dwd_netatmo_unc2perc'] = corr_netatmo_dwd_unc2perc
@@ -410,6 +442,16 @@ if plot_filtered:
             df_improvements.pearson_corr_dwd_.values) if i < j]
 
     #     # OK with Unc
+        stations_with_improvements_unc05perc = sum(i >= j for (i, j) in zip(
+            df_improvements.pearson_corr_dwd_netatmo_unc05perc.values,
+            df_improvements.pearson_corr_dwd_.values))
+        stations_without_improvements_unc05perc = sum(i < j for (i, j) in zip(
+            df_improvements.pearson_corr_dwd_netatmo_unc05perc.values,
+            df_improvements.pearson_corr_dwd_.values))
+        percent_of_improvment_unc05perc = 100 * (
+            stations_with_improvements_unc05perc /
+            df_improvements.pearson_corr_dwd_netatmo_unc2perc.shape[0])
+
         stations_with_improvements_unc2perc = sum(i >= j for (i, j) in zip(
             df_improvements.pearson_corr_dwd_netatmo_unc2perc.values,
             df_improvements.pearson_corr_dwd_.values))
@@ -461,6 +503,8 @@ if plot_filtered:
         ####
         mean_pearson_correlation_dwd_only = df_improvements.pearson_corr_dwd_.mean()
         mean_pearson_correlation_dwd_netatmo = df_improvements.pearson_corr_dwd_netatmo.mean()
+
+        mean_pearson_correlation_dwd_netatmo_unc05perc = df_improvements.pearson_corr_dwd_netatmo_unc05perc.mean()
         mean_pearson_correlation_dwd_netatmo_unc2perc = df_improvements.pearson_corr_dwd_netatmo_unc2perc.mean()
 
         mean_pearson_correlation_dwd_netatmo_unc5perc = df_improvements.pearson_corr_dwd_netatmo_unc5perc.mean()
@@ -469,6 +513,8 @@ if plot_filtered:
         #########################################################
         mean_spr_correlation_dwd_only = df_improvements.spearman_corr_dwd_.mean()
         mean_spr_correlation_dwd_netatmo = df_improvements.spearman_corr_dwd_netatmo.mean()
+
+        mean_spr_correlation_dwd_netatmo_unc05perc = df_improvements.spearman_corr_dwd_netatmo_unc05perc.mean()
         mean_spr_correlation_dwd_netatmo_unc2perc = df_improvements.spearman_corr_dwd_netatmo_unc2perc.mean()
         mean_spr_correlation_dwd_netatmo_unc5perc = df_improvements.spearman_corr_dwd_netatmo_unc5perc.mean()
         mean_spr_correlation_dwd_netatmo_unc10perc = df_improvements.spearman_corr_dwd_netatmo_unc10perc.mean()
@@ -477,7 +523,7 @@ if plot_filtered:
         df_improvements.iloc[np.where(
             df_improvements.pearson_corr_dwd_.isna())]
         plt.ioff()
-        fig = plt.figure(figsize=(24, 12), dpi=150)
+        fig = plt.figure(figsize=(32, 12), dpi=150)
 
         ax = fig.add_subplot(111)
 
@@ -495,7 +541,13 @@ if plot_filtered:
                 marker='*',
                 label='DWD-Netatmo Interpolation %0.2f'
                 % mean_pearson_correlation_dwd_netatmo)
-
+        ax.plot(df_improvements.index,
+                df_improvements.pearson_corr_dwd_netatmo_unc05perc,
+                alpha=.8,
+                c='k',  # colors_arr,
+                marker='2',
+                label='DWD-Netatmo Interpolation 05percUnc %0.2f'
+                % mean_pearson_correlation_dwd_netatmo_unc05perc)
         ax.plot(df_improvements.index,
                 df_improvements.pearson_corr_dwd_netatmo_unc2perc,
                 alpha=.8,
@@ -531,7 +583,8 @@ if plot_filtered:
         ax.set_title('Pearson Correlation Interpolated Rainfall from DWD or DWD-Netatmo\n '
                      'Precipitation of %s Intense Events \n Stations with Improvemnts %d / %d,'
                      ' Percentage %0.0f\n'
-                     'Stations with Improvemnts with OK 2percUnc %d / %d, Percentage %0.0f'
+                     'Stations with Improvemnts with OK 05percUnc %d / %d, Percentage %0.0f'
+                     '\nStations with Improvemnts with OK 2percUnc %d / %d, Percentage %0.0f'
                      '\nStations with Improvemnts with OK 5percUnc %d / %d, Percentage %0.0f'
                      '\nStations with Improvemnts with OK 10percUnc %d / %d, Percentage %0.0f'
                      '\nStations with Improvemnts with OK 20percUnc %d / %d, Percentage %0.0f'
@@ -539,6 +592,9 @@ if plot_filtered:
                         stations_with_improvements,
                          df_improvements.pearson_corr_dwd_netatmo.shape[0],
                         percent_of_improvment,
+                        stations_with_improvements_unc05perc,
+                        df_improvements.pearson_corr_dwd_netatmo_unc05perc.shape[0],
+                        percent_of_improvment_unc05perc,
                         stations_with_improvements_unc2perc,
                         df_improvements.pearson_corr_dwd_netatmo_unc2perc.shape[0],
                         percent_of_improvment_unc2perc,
@@ -556,7 +612,7 @@ if plot_filtered:
         ax.grid(alpha=0.25)
         ax.set_yticks(np.arange(0, 1.05, .10))
         ax.set_xlabel('DWD Stations')
-        #ax.legend(loc='lower right')
+        ax.legend(loc='lower left')
         ax.set_ylabel('Pearson Correlation')
 
         plt.savefig(os.path.join(path_to_use,
@@ -578,6 +634,18 @@ if plot_filtered:
                                        df_improvements.spearman_corr_dwd_netatmo.shape[0])
 
         # ok with Un
+        stations_with_improvements_unc05perc = sum(i >= j for (i, j) in zip(
+            df_improvements.spearman_corr_dwd_netatmo_unc05perc.values,
+            df_improvements.spearman_corr_dwd_.values))
+
+        stations_without_improvements_unc05perc = sum(i < j for (i, j) in zip(
+            df_improvements.spearman_corr_dwd_netatmo_unc05perc.values,
+            df_improvements.spearman_corr_dwd_.values))
+
+        percent_of_improvment_unc05perc = 100 * (
+            stations_with_improvements_unc05perc /
+            df_improvements.spearman_corr_dwd_netatmo_unc2perc.shape[0])
+
         stations_with_improvements_unc2perc = sum(i >= j for (i, j) in zip(
             df_improvements.spearman_corr_dwd_netatmo_unc2perc.values,
             df_improvements.spearman_corr_dwd_.values))
@@ -586,8 +654,9 @@ if plot_filtered:
             df_improvements.spearman_corr_dwd_netatmo_unc2perc.values,
             df_improvements.spearman_corr_dwd_.values))
 
-        percent_of_improvment_unc2perc = 100 * (stations_with_improvements_unc2perc /
-                                                df_improvements.spearman_corr_dwd_netatmo_unc2perc.shape[0])
+        percent_of_improvment_unc2perc = 100 * (
+            stations_with_improvements_unc2perc /
+            df_improvements.spearman_corr_dwd_netatmo_unc2perc.shape[0])
 
         stations_with_improvements_unc5perc = sum(i >= j for (i, j) in zip(
             df_improvements.spearman_corr_dwd_netatmo_unc5perc.values,
@@ -626,7 +695,7 @@ if plot_filtered:
             df_improvements.spearman_corr_dwd_netatmo_unc2perc.shape[0])
         #########################################################
         plt.ioff()
-        fig = plt.figure(figsize=(24, 12), dpi=150)
+        fig = plt.figure(figsize=(32, 12), dpi=150)
 
         ax = fig.add_subplot(111)
 
@@ -644,6 +713,13 @@ if plot_filtered:
                 marker='*',
                 label='DWD-Netatmo Interpolation %0.2f'
                 % mean_spr_correlation_dwd_netatmo)
+        ax.plot(df_improvements.index,
+                df_improvements.spearman_corr_dwd_netatmo_unc05perc,
+                alpha=.8,
+                c='k',  # colors_arr,
+                marker='2',
+                label='DWD-Netatmo Interpolation 05percUnc %0.2f'
+                % mean_spr_correlation_dwd_netatmo_unc2perc)
         ax.plot(df_improvements.index,
                 df_improvements.spearman_corr_dwd_netatmo_unc2perc,
                 alpha=.8,
@@ -678,6 +754,7 @@ if plot_filtered:
 
         ax.set_title('Spearman Correlation Interpolated Rainfall from DWD or DWD-Netatmo \n '
                      'Rainfall of %s Intense Events \n Stations with Improvemnts %d / %d, Percentage %0.0f'
+                     '\nStations with Improvemnts with OK 05percUnc %d / %d, Percentage %0.0f'
                      '\nStations with Improvemnts with OK 2percUnc %d / %d, Percentage %0.0f'
                      '\nStations with Improvemnts with OK 5percUnc %d / %d, Percentage %0.0f'
                      '\nStations with Improvemnts with OK 10percUnc %d / %d, Percentage %0.0f'
@@ -686,6 +763,9 @@ if plot_filtered:
                         stations_with_improvements,
                          df_improvements.spearman_corr_dwd_netatmo.shape[0],
                         percent_of_improvment,
+                        stations_with_improvements_unc05perc,
+                        df_improvements.spearman_corr_dwd_netatmo_unc05perc.shape[0],
+                        percent_of_improvment_unc05perc,
                         stations_with_improvements_unc2perc,
                         df_improvements.spearman_corr_dwd_netatmo_unc2perc.shape[0],
                         percent_of_improvment_unc2perc,
@@ -704,7 +784,7 @@ if plot_filtered:
         ax.set_yticks(np.arange(0, 1.05, .10))
         ax.set_xlabel('DWD Stations')
 
-        # ax.legend(loc='lower right')
+        ax.legend(loc='lower left')
         ax.set_ylabel('Spearman Correlation')
 
         plt.savefig(os.path.join(path_to_use,

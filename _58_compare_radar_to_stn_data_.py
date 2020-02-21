@@ -25,8 +25,8 @@ from _00_additional_functions import (list_all_full_path,
                                       )
 
 plt.ioff()
-plt.rcParams.update({'font.size': 12})
-plt.rcParams.update({'axes.labelsize': 12})
+plt.rcParams.update({'font.size': 16})
+plt.rcParams.update({'axes.labelsize': 16})
 #==============================================================================
 #
 #==============================================================================
@@ -323,7 +323,7 @@ for event_date, radar_evt in zip(df_radar_events_to_keep.index,
     df_ppt_radolan = pd.DataFrame(index=original_ppt.columns)
 
     plt.ioff()
-    fig = plt.figure(figsize=(20, 12), dpi=200)
+    fig = plt.figure(figsize=(20, 20), dpi=200)
     ax = fig.add_subplot(111)
 
     print('\nGetting station data\n')
@@ -378,27 +378,28 @@ for event_date, radar_evt in zip(df_radar_events_to_keep.index,
 
     rw_maskes = np.ma.masked_array(rwdata, rwdata < 0.)
 
-    plt.pcolormesh(lon1, lat1, rw_maskes, cmap=cmap_ppt,
-                   vmin=0, norm=norm, vmax=bound[-1])
-    cbar = plt.colorbar(extend='max', label='[mm/%s]' % temp_freq)
+    im = ax.pcolormesh(lon1, lat1, rw_maskes, cmap=cmap_ppt,
+                       vmin=0, norm=norm, vmax=bound[-1])
+    fig.colorbar(im, ax=ax, extend='max', label='[mm/%s]' % temp_freq)
 
-    plt.scatter(ix_lon_loc, ix_lat_loc,
-                marker='.', color='k', alpha=0.5, s=10)
+    ax.scatter(ix_lon_loc, ix_lat_loc,
+               marker='.', color='k', alpha=0.5, s=10)
 
-    plt.scatter(dwd_lons.values, dwd_lats.values,
-                marker='x', alpha=0.5, color='m', s=10)
+    ax.scatter(dwd_lons.values, dwd_lats.values,
+               marker='x', alpha=0.5, color='m', s=10)
 
 #     adjust_text(texts, ax=ax,
 #                 arrowprops=dict(arrowstyle='->',
 #                                 color='g', lw=0.25))
-    plt.title(str(event_date[0]))
-    plt.ylabel('Latitude [°]')
-    plt.xlabel('Longitude [°]')
+    ax.set_title('Event date %s' % str(event_date[0]))
+    ax.set_ylabel('Latitude [°]')
+    ax.set_xlabel('Longitude [°]')
 
-    plt.xlim([7.1, 10.7])
-    plt.ylim([47.3, 50.0])
-
-    plt.tight_layout()
+    ax.set_xlim([7.1, 10.7])
+    ax.set_ylim([47.3, 50.0])
+    ax.grid(alpha=0.5)
+#     ax.axis('equal')
+#     plt.tight_layout()
     plt.savefig(
         os.path.join(
             out_dir,
