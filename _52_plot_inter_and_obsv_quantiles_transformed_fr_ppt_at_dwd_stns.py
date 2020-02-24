@@ -85,6 +85,8 @@ if plot_filtered:
                      'spearman_corr_dwd_',
                      'pearson_corr_dwd_netatmo',
                      'spearman_corr_dwd_netatmo',
+                     'pearson_corr_dwd_netatmo_unc05perc',
+                     'spearman_corr_dwd_netatmo_unc05perc',
                      'pearson_corr_dwd_netatmo_unc2perc',
                      'spearman_corr_dwd_netatmo_unc2perc',
                      'pearson_corr_dwd_netatmo_unc5perc',
@@ -112,6 +114,9 @@ if plot_filtered:
                 if ('dwd_netamo') in df_file and 'unc' not in df_file:
                     print(df_file)
                     path_interpolated_using_netatmo_dwd = df_file
+                if ('dwd_netamo') in df_file and 'unc05perc' in df_file:
+                    print(df_file)
+                    path_interpolated_using_netatmo_dwd_unc05perc = df_file
 
                 if ('dwd_netamo') in df_file and 'unc2perc' in df_file:
                     print(df_file)
@@ -138,30 +143,40 @@ if plot_filtered:
                              sep=';', index_col=0, parse_dates=True,
                              infer_datetime_format=True)
 
-        print(df_dwd.isna().sum().max())
+        # print(df_dwd.isna().sum().max())
 
         df_netatmo_dwd = pd.read_csv(path_interpolated_using_netatmo_dwd,
                                      sep=';', index_col=0,
                                      parse_dates=True,
                                      infer_datetime_format=True)
 
-        print(df_netatmo_dwd.isna().sum().max())
+        # print(df_netatmo_dwd.isna().sum().max())
+        try:
+            df_netatmo_dwd_unc05perc = pd.read_csv(
+                path_interpolated_using_netatmo_dwd_unc05perc,
+                sep=';', index_col=0,
+                parse_dates=True, infer_datetime_format=True)
+        except Exception as msg:
+            df_netatmo_dwd_unc05perc = df_netatmo_dwd
+        df_netatmo_dwd_unc2perc = pd.read_csv(
+            path_interpolated_using_netatmo_dwd_unc2perc,
+            sep=';', index_col=0,
+            parse_dates=True, infer_datetime_format=True)
 
-        df_netatmo_dwd_unc2perc = pd.read_csv(path_interpolated_using_netatmo_dwd_unc2perc,
-                                              sep=';', index_col=0,
-                                              parse_dates=True, infer_datetime_format=True)
+        df_netatmo_dwd_unc5perc = pd.read_csv(
+            path_interpolated_using_netatmo_dwd_unc5perc,
+            sep=';', index_col=0,
+            parse_dates=True, infer_datetime_format=True)
 
-        df_netatmo_dwd_unc5perc = pd.read_csv(path_interpolated_using_netatmo_dwd_unc5perc,
-                                              sep=';', index_col=0,
-                                              parse_dates=True, infer_datetime_format=True)
+        df_netatmo_dwd_unc10perc = pd.read_csv(
+            path_interpolated_using_netatmo_dwd_unc10perc,
+            sep=';', index_col=0,
+            parse_dates=True, infer_datetime_format=True)
 
-        df_netatmo_dwd_unc10perc = pd.read_csv(path_interpolated_using_netatmo_dwd_unc10perc,
-                                               sep=';', index_col=0,
-                                               parse_dates=True, infer_datetime_format=True)
-
-        df_netatmo_dwd_unc20perc = pd.read_csv(path_interpolated_using_netatmo_dwd_unc20perc,
-                                               sep=';', index_col=0,
-                                               parse_dates=True, infer_datetime_format=True)
+        df_netatmo_dwd_unc20perc = pd.read_csv(
+            path_interpolated_using_netatmo_dwd_unc20perc,
+            sep=';', index_col=0,
+            parse_dates=True, infer_datetime_format=True)
 
         cmn_interpolated_events = df_netatmo_dwd.index.intersection(
             df_dwd.index).intersection(df_dwd_edf.index)
@@ -184,7 +199,8 @@ if plot_filtered:
                 interpolated_ppt_dwd = df_dwd.loc[event_date, stn_]
 
                 interpolated_ppt_netatmo_dwd = df_netatmo_dwd.loc[event_date, stn_]
-
+                interpolated_quantile_netatmo_dwd_unc05perc = df_netatmo_dwd_unc05perc.loc[
+                    event_date, stn_]
                 interpolated_quantile_netatmo_dwd_unc2perc = df_netatmo_dwd_unc2perc.loc[
                     event_date, stn_]
                 interpolated_quantile_netatmo_dwd_unc5perc = df_netatmo_dwd_unc5perc.loc[
@@ -207,6 +223,9 @@ if plot_filtered:
                 df_compare.loc[
                     event_date,
                     'interpolated_ppt_netatmo_dwd'] = interpolated_ppt_netatmo_dwd
+                df_compare.loc[
+                    event_date,
+                    'interpolated_ppt_netatmo_dwd_unc05perc'] = interpolated_quantile_netatmo_dwd_unc05perc
                 df_compare.loc[
                     event_date,
                     'interpolated_ppt_netatmo_dwd_unc2perc'] = interpolated_quantile_netatmo_dwd_unc2perc
@@ -232,6 +251,7 @@ if plot_filtered:
             values_dwd_ppt = df_compare['interpolated_ppt_dwd'].values
 
             values_netatmo_dwd_ppt = df_compare['interpolated_ppt_netatmo_dwd'].values
+            values_netatmo_dwd_unc05perc = df_compare['interpolated_ppt_netatmo_dwd_unc05perc'].values
             values_netatmo_dwd_unc2perc = df_compare['interpolated_ppt_netatmo_dwd_unc2perc'].values
 
             values_netatmo_dwd_unc5perc = df_compare['interpolated_ppt_netatmo_dwd_unc5perc'].values
@@ -249,6 +269,9 @@ if plot_filtered:
             mse_dwd_netatmo_interp_ppt = np.sqrt(np.square(
                 np.subtract(values_x_ppt, values_netatmo_dwd_ppt)).mean())
 
+            mse_dwd_netatmo_interp_unc_ppt_05perc = np.sqrt(np.square(
+                np.subtract(values_x_ppt, values_netatmo_dwd_unc05perc)).mean())
+
             mse_dwd_netatmo_interp_unc_ppt_2perc = np.sqrt(np.square(
                 np.subtract(values_x_ppt, values_netatmo_dwd_unc2perc)).mean())
 
@@ -263,21 +286,35 @@ if plot_filtered:
 
             # calculate correlations (pearson and spearman)
 
-            df_improvements.loc[stn_,
-                                'mse_dwd_interp_ppt'] = mse_dwd_interp_ppt
-            df_improvements.loc[stn_,
-                                'mse_dwd_netatmo_interp_ppt'] = mse_dwd_netatmo_interp_ppt
-            df_improvements.loc[stn_,
-                                'mse_dwd_netatmo_interp_unc_ppt_2perc'] = mse_dwd_netatmo_interp_unc_ppt_2perc
+            df_improvements.loc[
+                stn_,
+                'mse_dwd_interp_ppt'] = mse_dwd_interp_ppt
+            df_improvements.loc[
+                stn_,
+                'mse_dwd_netatmo_interp_ppt'] = mse_dwd_netatmo_interp_ppt
+            df_improvements.loc[
+                stn_,
+                'mse_dwd_netatmo_interp_unc_ppt_05perc'
+            ] = mse_dwd_netatmo_interp_unc_ppt_05perc
+            df_improvements.loc[
+                stn_,
+                'mse_dwd_netatmo_interp_unc_ppt_2perc'
+            ] = mse_dwd_netatmo_interp_unc_ppt_2perc
 
-            df_improvements.loc[stn_,
-                                'mse_dwd_netatmo_interp_unc_ppt_5perc'] = mse_dwd_netatmo_interp_unc_ppt_5perc
+            df_improvements.loc[
+                stn_,
+                'mse_dwd_netatmo_interp_unc_ppt_5perc'
+            ] = mse_dwd_netatmo_interp_unc_ppt_5perc
 
-            df_improvements.loc[stn_,
-                                'mse_dwd_netatmo_interp_unc_ppt_10perc'] = mse_dwd_netatmo_interp_unc_ppt_10perc
+            df_improvements.loc[
+                stn_,
+                'mse_dwd_netatmo_interp_unc_ppt_10perc'
+            ] = mse_dwd_netatmo_interp_unc_ppt_10perc
 
-            df_improvements.loc[stn_,
-                                'mse_dwd_netatmo_interp_unc_ppt_20perc'] = mse_dwd_netatmo_interp_unc_ppt_20perc
+            df_improvements.loc[
+                stn_,
+                'mse_dwd_netatmo_interp_unc_ppt_20perc'
+            ] = mse_dwd_netatmo_interp_unc_ppt_20perc
 
         df_improvements.sort_values(by=['mse_dwd_interp_ppt'],
                                     ascending=True, inplace=True)
@@ -293,55 +330,82 @@ if plot_filtered:
             df_improvements.mse_dwd_netatmo_interp_ppt.values,
             df_improvements.mse_dwd_interp_ppt.values))
 
-        percent_of_mse_improvment_ppt = 100 * (stations_with_mse_improvements_ppt /
-                                               df_improvements.mse_dwd_interp_ppt.shape[0])
+        percent_of_mse_improvment_ppt = 100 * (
+            stations_with_mse_improvements_ppt /
+            df_improvements.mse_dwd_interp_ppt.shape[0])
 
         ##########################
-        stations_with_mse_improvements_unc_ppt_2perc = sum(i < j for (i, j) in zip(
-            df_improvements.mse_dwd_netatmo_interp_unc_ppt_2perc.values,
-            df_improvements.mse_dwd_interp_ppt.values))
+        stations_with_mse_improvements_unc_ppt_05perc = sum(
+            i < j for (i, j) in zip(
+                df_improvements.mse_dwd_netatmo_interp_unc_ppt_05perc.values,
+                df_improvements.mse_dwd_interp_ppt.values))
 
-        stations_without_mse_improvements_unc_ppt_2perc = sum(i >= j for (i, j) in zip(
-            df_improvements.mse_dwd_netatmo_interp_unc_ppt_2perc.values,
-            df_improvements.mse_dwd_interp_ppt.values))
+        stations_without_mse_improvements_unc_ppt_05perc = sum(
+            i >= j for (i, j) in zip(
+                df_improvements.mse_dwd_netatmo_interp_unc_ppt_05perc.values,
+                df_improvements.mse_dwd_interp_ppt.values))
 
-        percent_of_mse_improvment_unc_ppt_2perc = 100 * (stations_with_mse_improvements_unc_ppt_2perc /
-                                                         df_improvements.mse_dwd_interp_ppt.shape[0])
+        percent_of_mse_improvment_unc_ppt_05perc = 100 * (
+            stations_with_mse_improvements_unc_ppt_05perc /
+            df_improvements.mse_dwd_interp_ppt.shape[0])
+
+        stations_with_mse_improvements_unc_ppt_2perc = sum(
+            i < j for (i, j) in zip(
+                df_improvements.mse_dwd_netatmo_interp_unc_ppt_2perc.values,
+                df_improvements.mse_dwd_interp_ppt.values))
+
+        stations_without_mse_improvements_unc_ppt_2perc = sum(
+            i >= j for (i, j) in zip(
+                df_improvements.mse_dwd_netatmo_interp_unc_ppt_2perc.values,
+                df_improvements.mse_dwd_interp_ppt.values))
+
+        percent_of_mse_improvment_unc_ppt_2perc = 100 * (
+            stations_with_mse_improvements_unc_ppt_2perc /
+            df_improvements.mse_dwd_interp_ppt.shape[0])
         # 5perc
-        stations_with_mse_improvements_unc_ppt_5perc = sum(i < j for (i, j) in zip(
-            df_improvements.mse_dwd_netatmo_interp_unc_ppt_5perc.values,
-            df_improvements.mse_dwd_interp_ppt.values))
+        stations_with_mse_improvements_unc_ppt_5perc = sum(
+            i < j for (i, j) in zip(
+                df_improvements.mse_dwd_netatmo_interp_unc_ppt_5perc.values,
+                df_improvements.mse_dwd_interp_ppt.values))
 
-        stations_without_mse_improvements_unc_ppt_5perc = sum(i >= j for (i, j) in zip(
-            df_improvements.mse_dwd_netatmo_interp_unc_ppt_5perc.values,
-            df_improvements.mse_dwd_interp_ppt.values))
+        stations_without_mse_improvements_unc_ppt_5perc = sum(
+            i >= j for (i, j) in zip(
+                df_improvements.mse_dwd_netatmo_interp_unc_ppt_5perc.values,
+                df_improvements.mse_dwd_interp_ppt.values))
 
-        percent_of_mse_improvment_unc_ppt_5perc = 100 * (stations_with_mse_improvements_unc_ppt_5perc /
-                                                         df_improvements.mse_dwd_interp_ppt.shape[0])
+        percent_of_mse_improvment_unc_ppt_5perc = 100 * (
+            stations_with_mse_improvements_unc_ppt_5perc /
+            df_improvements.mse_dwd_interp_ppt.shape[0])
 
         # 10perc
-        stations_with_mse_improvements_unc_ppt_10perc = sum(i < j for (i, j) in zip(
-            df_improvements.mse_dwd_netatmo_interp_unc_ppt_10perc.values,
-            df_improvements.mse_dwd_interp_ppt.values))
+        stations_with_mse_improvements_unc_ppt_10perc = sum(
+            i < j for (i, j) in zip(
+                df_improvements.mse_dwd_netatmo_interp_unc_ppt_10perc.values,
+                df_improvements.mse_dwd_interp_ppt.values))
 
-        stations_without_mse_improvements_unc_ppt_10perc = sum(i >= j for (i, j) in zip(
-            df_improvements.mse_dwd_netatmo_interp_unc_ppt_10perc.values,
-            df_improvements.mse_dwd_interp_ppt.values))
+        stations_without_mse_improvements_unc_ppt_10perc = sum(
+            i >= j for (i, j) in zip(
+                df_improvements.mse_dwd_netatmo_interp_unc_ppt_10perc.values,
+                df_improvements.mse_dwd_interp_ppt.values))
 
-        percent_of_mse_improvment_unc_ppt_10perc = 100 * (stations_with_mse_improvements_unc_ppt_10perc /
-                                                          df_improvements.mse_dwd_interp_ppt.shape[0])
+        percent_of_mse_improvment_unc_ppt_10perc = 100 * (
+            stations_with_mse_improvements_unc_ppt_10perc /
+            df_improvements.mse_dwd_interp_ppt.shape[0])
 
         # 20perc
-        stations_with_mse_improvements_unc_ppt_20perc = sum(i < j for (i, j) in zip(
-            df_improvements.mse_dwd_netatmo_interp_unc_ppt_20perc.values,
-            df_improvements.mse_dwd_interp_ppt.values))
+        stations_with_mse_improvements_unc_ppt_20perc = sum(
+            i < j for (i, j) in zip(
+                df_improvements.mse_dwd_netatmo_interp_unc_ppt_20perc.values,
+                df_improvements.mse_dwd_interp_ppt.values))
 
-        stations_without_mse_improvements_unc_ppt_20perc = sum(i >= j for (i, j) in zip(
-            df_improvements.mse_dwd_netatmo_interp_unc_ppt_20perc.values,
-            df_improvements.mse_dwd_interp_ppt.values))
+        stations_without_mse_improvements_unc_ppt_20perc = sum(
+            i >= j for (i, j) in zip(
+                df_improvements.mse_dwd_netatmo_interp_unc_ppt_20perc.values,
+                df_improvements.mse_dwd_interp_ppt.values))
 
-        percent_of_mse_improvment_unc_ppt_20perc = 100 * (stations_with_mse_improvements_unc_ppt_20perc /
-                                                          df_improvements.mse_dwd_interp_ppt.shape[0])
+        percent_of_mse_improvment_unc_ppt_20perc = 100 * (
+            stations_with_mse_improvements_unc_ppt_20perc /
+            df_improvements.mse_dwd_interp_ppt.shape[0])
         #########################################################
         plt.ioff()
         fig = plt.figure(figsize=(24, 12), dpi=150)
@@ -362,6 +426,13 @@ if plot_filtered:
                 marker='*',
                 label='DWD-Netatmo Interpolation PPT RMSE mean = %0.4f' % np.mean(
                     df_improvements.mse_dwd_netatmo_interp_ppt.values))
+        ax.plot(df_improvements.index,
+                df_improvements.mse_dwd_netatmo_interp_unc_ppt_05perc,
+                alpha=.5,
+                c='k',  # colors_arr,
+                marker='3',
+                label='DWD-Netatmo Interpolation Unc 05perc PPT RMSE mean = %0.4f' % np.mean(
+                    df_improvements.mse_dwd_netatmo_interp_unc_ppt_05perc.values))
         ax.plot(df_improvements.index,
                 df_improvements.mse_dwd_netatmo_interp_unc_ppt_2perc,
                 alpha=.5,
@@ -395,13 +466,20 @@ if plot_filtered:
                     df_improvements.mse_dwd_netatmo_interp_unc_ppt_20perc.values))
 
         ax.set_title('Root mean squared error Interpolated from DWD or DWD-Netatmo %s \n '
-                     'PPT of %s Extreme Events \n Stations with Improvemnts %d / %d, Percentage %0.0f'
+                     'PPT of %s Intense Events \n Stations with Improvemnts %d / %d, Percentage %0.0f'
+                     '\n Stations with Improvemnts 05perc Unc %d / %d, Percentage %0.0f'
                      '\n Stations with Improvemnts 2perc Unc %d / %d, Percentage %0.0f'
                      '\n Stations with Improvemnts 5perc Unc %d / %d, Percentage %0.0f'
                      '\n Stations with Improvemnts 10perc Unc %d / %d, Percentage %0.0f'
                      '\n Stations with Improvemnts 20perc Unc %d / %d, Percentage %0.0f'
                      % (_acc_, temp_freq, stations_with_mse_improvements_ppt,
-                        df_improvements.mse_dwd_interp_ppt.shape[0], percent_of_mse_improvment_ppt,
+                        df_improvements.mse_dwd_interp_ppt.shape[0],
+                        percent_of_mse_improvment_ppt,
+
+                        stations_with_mse_improvements_unc_ppt_05perc,
+                        df_improvements.mse_dwd_interp_ppt.shape[0],
+                         percent_of_mse_improvment_unc_ppt_05perc,
+
                          stations_with_mse_improvements_unc_ppt_2perc,
                         df_improvements.mse_dwd_interp_ppt.shape[0],
                          percent_of_mse_improvment_unc_ppt_2perc,
@@ -421,7 +499,7 @@ if plot_filtered:
         plt.setp(ax.get_xticklabels(), rotation=45)
         #ax.set_yticks(np.arange(0, 1.05, .10))
         ax.set_xlabel('DWD Stations')
-        ax.legend(loc='upper right')
+        ax.legend(loc='upper left')
         ax.set_ylabel('RMSE')
 
         plt.savefig((path_to_use / (
