@@ -31,25 +31,25 @@ delete_df_files = True
 
 make_hdf5_dataset_new = False
 
-temporal_freq = 'hourly'  # '1_minute' '10_minutes' 'hourly' 'daily'
+temporal_freq = '1_minute'  # '1_minute' '10_minutes' 'hourly' 'daily'
 time_period = 'historical'  # 'recent' 'historical'
-temp_accr = 'stundenwerte'  # '1minuten' '10minuten' 'stundenwerte'  'tages'
+temp_accr = '1minutenwerte'  # '1minuten' '10minuten' 'stundenwerte'  'tages'
 
-ppt_act = 'RR'  # nieder 'rr' 'RR' 'RR'
+ppt_act = 'nieder'  # nieder 'rr' 'RR' 'RR'
 
 stn_name_len = 5  # length of dwd stns Id, ex: 00023
 
 start_date = '1995-01-01 00:00:00'
 end_date = '2019-12-30 23:59:00'
 
-temp_freq = 'H'  # '60Min'  # 'Min' '10Min' 'H' 'D'
+temp_freq = 'Min'  # '60Min'  # 'Min' '10Min' 'H' 'D'
 
 # '%Y%m%d%H'  # when reading download dwd station df '%Y%m%d%H%M'
-time_fmt = '%Y%m%d%H'  # :%S' # for 10Min data use: '%Y%m%d%H%M:%S'
+time_fmt = '%Y%m%d%H%M:%S'  # for 10Min data use: '%Y%m%d%H%M:%S'
 
 # name of station id and rainfall column name in df
 stn_id_col_name = 'STATIONS_ID'
-ppt_col_name = '  R1'  # 'TT_TU'  # RS_01 'RWS_10' '  R1' 'RS'
+ppt_col_name = 'RWH_01'  # 'TT_TU'  # RS_01 'RWS_10' '  R1' 'RS'
 
 freqs_list = ['60Min']  # '60Min']  # '1D' '5Min',
 #==============================================================================
