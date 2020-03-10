@@ -36,7 +36,7 @@ mask = np.load(r'C:\Users\hachem\Desktop\radar\masked_array_bw',
 
 # temp_freq = '1440min'
 
-temp_freq = '60min'
+temp_freq = '1440min'
 #
 main_dir = Path(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
                 r'\oridinary_kriging_compare_DWD_Netatmo\Final_results')
@@ -166,7 +166,13 @@ for df_file in Qt_ok_un_first_flt__temp_flt_1st_:
 df_dwd = pd.read_csv(path_interpolated_using_dwd,
                      sep=';', index_col=0, parse_dates=True,
                      infer_datetime_format=True)
-
+# temp_freq = '1440min'
+intense_events_df_index_lst = pd.read_csv(
+    r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\dwd_%s_maximum_100_event.csv"
+    % temp_freq,
+    index_col=0, sep=';',
+    parse_dates=True,
+    infer_datetime_format=True).index.to_list()
 # f_dwd.dropna(inplace=True)
 
 # print(df_dwd.isna().sum().max())
@@ -202,12 +208,12 @@ df_netatmo_dwd_unc20perc = pd.read_csv(
 
 try:
     df_radar_events_to_keep = pd.read_csv(r'X:\exchange\ElHachem'
-                                          r'\%s_intense_events_radolan_files.csv'
+                                          r'\%s_intense_events_radolan_filess.csv'
                                           % temp_freq, index_col=0,
                                           sep=';')
 except Exception as msg:
     df_radar_events_to_keep = get_radar_intense_events(files,
-                                                       df_dwd,
+                                                       intense_events_df_index_lst,
                                                        temp_freq)
 
 

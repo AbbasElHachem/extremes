@@ -1517,7 +1517,7 @@ def find_nearest(array, value):
 #==============================================================================
 
 
-def get_radar_intense_events(radar_files_loc, intense_events_df, temp_freq):
+def get_radar_intense_events(radar_files_loc, intense_events_df_index_lst, temp_freq):
     ''' Given a list of radolan files and rainfall intense events df
         find the corresponding radolan files, save to a new df,
         index=Event Time; columns=file_path
@@ -1535,7 +1535,7 @@ def get_radar_intense_events(radar_files_loc, intense_events_df, temp_freq):
 
         event_end_date = event_date + pd.Timedelta(minutes=10)
 
-        if event_end_date[0] in intense_events_df.index:
+        if event_end_date[0] in intense_events_df_index_lst:
             print('Event: ', i, '/', len(radar_files_loc),  event_date)
             radolan_events_to_keep.append(file)
             event_dates.append(event_end_date[0])

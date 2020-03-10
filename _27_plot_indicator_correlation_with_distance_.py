@@ -69,11 +69,11 @@ assert data_dir_Netamto_netatmo_dfs.exists(), 'Wrong Netatmo Netatmo path'
 
 
 # allyears pearson_  new_method new_method_pearson_
-netatmo_path_acc_b4 = r'pearson_year_allyears_df_comparing_correlations_max_sep_dist_30000_'
+netatmo_path_acc_b4 = r'pearson_year_allyears_df_comparing_correlations_max_sep_dist_1000000_'
 
 # netatmo_path_acc_after = r'new_method_pearson_year_allyears_df_comparing_correlations_max_sep_dist_1000000_'
 
-netatmo_path_acc_after = r'2pearson_year_allyears_df_comparing_correlations_max_sep_dist_50000_'
+netatmo_path_acc_after = r'new_method_pearson_year_allyears_df_comparing_correlations_max_sep_dist_1000000_'
 
 dwd_path_Acc = r'pearson_year_allyears_df_dwd_correlations'
 # freq_60min_dwd_netatmo_upper_99_0_percent_data_considered_neighbor_0_
@@ -84,7 +84,7 @@ path_to_netatmo_gd_stns_file = data_dir_Netamto_dfs / \
 #assert path_to_netatmo_gd_stns_file.exists(), 'wrong netatmo good stns file'
 
 # def percentage threshold, time frequency and data source
-percent = '99_0'
+percent = '50'
 time_freq = '60min'  # '720min', 1440min, '480min', '360min', '180min', '120min'
 # '60min'
 data_source0 = 'Netatmo'  # 'DWD'  # 'Netatmo'  #   # reference station 'Netatmo'
@@ -92,7 +92,7 @@ data_source = 'dwd'  # 'dwd'  # 'netatmo'  #   # compare to station 'netatmo'
 
 use_good_netatmo_stns = False
 use_filtered_data = False
-filtered_percent = '99_0'
+filtered_percent = '50_0'
 
 save_acc = ''
 # =============================================================================
@@ -139,7 +139,7 @@ if data_source0 == 'Netatmo' and data_source == 'dwd':
     save_dir = data_dir_Netamto_dfs
 
 data_source0 = 'DWD'
-percent = '99'
+percent = '50'
 if data_source0 == 'DWD' and data_source == 'dwd':
     # for DWD stations neighbors start from 1 not 0  (1 is first)!
     df0_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
@@ -286,6 +286,9 @@ x0_after = in_df0_after.loc[
 
 y0_after = in_df0_after.loc[stns_keep_all_final_new,
                             'Bool_Pearson_Correlation_Netatmo_DWD'].values.ravel()
+
+y0_after_dwd = in_df0_after.loc[stns_keep_all_final_new,
+                                'Bool_Pearson_Correlation_DWD_DWD'].values.ravel()
 # y1 = in_df1.loc[stns_keep_all_final_new,
 #                 'Bool_Pearson_Correlation_Netatmo_DWD'].values.ravel()
 
@@ -313,14 +316,14 @@ y0_after = in_df0_after.loc[stns_keep_all_final_new,
 # y7 = in_df7.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
 
 
-# stns_keep_al_sr = pd.DataFrame(data=stns_keep_all_final_new,
-#                                columns=['Stations'])
-# #
-# stns_keep_al_sr.to_csv(
-#     (save_dir /
-#         (r'keep_stns_all_neighbor_%s_per_%s_s0_1st_2.csv'
-#          % (percent, time_freq))),
-#     sep=';')
+stns_keep_al_sr = pd.DataFrame(data=stns_keep_all_final_new,
+                               columns=['Stations'])
+#
+stns_keep_al_sr.to_csv(
+    (save_dir /
+        (r'keep_stns_all_neighbor_%s_per_%s_s0_1st_.csv'
+         % (percent, time_freq))),
+    sep=';')
 
 
 # s0, x0, y0, in_df0 = read_filter_df_corr_return_stns_x_y_vals(df0)
@@ -337,6 +340,8 @@ axs[0].scatter(x0_b4, y0_b4, c='r', alpha=0.75, marker='x', s=34)
 #label='First Neighbor %d Pairs' % y0.shape[0],
 
 axs[1].scatter(x0_after, y0_after, c='r', alpha=0.75, marker='x', s=34)
+axs[1].scatter(x0_after, y0_after_dwd, c='b', alpha=0.75, marker='1', s=34)
+
 
 axs[1].scatter(x0_dwd0, y0_dwd0, c='k', alpha=0.5, marker='o', s=34)
 axs[1].scatter(x1_dwd0, y1_dwd0, c='k', alpha=0.5, marker='o', s=34)
@@ -413,7 +418,7 @@ if use_filtered_data:
 #          ' for upper %s percent of data values '
 #          % (data_source0, data_source, time_freq, percent))
 plt.savefig(save_dir /
-            (r'new_pearson__%s_%s_%s_percent_indic_corr_freq_%s_%s_1D.png'
+            (r'_%s_%s_%s_per_indic_corr_freq_%s_%s_.png'
              % (data_source0, data_source, percent, time_freq, save_acc)),
             frameon=True, papertype='a4',
             bbox_inches='tight', pad_inches=.2)

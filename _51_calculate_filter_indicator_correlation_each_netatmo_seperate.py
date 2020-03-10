@@ -509,7 +509,8 @@ def compare_netatmo_dwd_indicator_correlations(
                                 try:
                                     # resample and intersect the 2 dfs
                                     # now all 3 stations have same periods
-                                    df_common1_dwd, df_common2_dwd = resample_intersect_2_dfs(
+                                    (df_common1_dwd,
+                                        df_common2_dwd) = resample_intersect_2_dfs(
                                         df_dwd_cmn, idf2, temp_freq)
                                 except Exception as msg:
                                     raise Exception

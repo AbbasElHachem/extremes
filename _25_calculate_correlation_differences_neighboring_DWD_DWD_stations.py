@@ -57,7 +57,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import spearmanr as spr
 from scipy.stats import pearsonr as pears
 
-from b_get_data import HDF5
+# from b_get_data import HDF5
 
 from _00_additional_functions import (convert_coords_fr_wgs84_to_utm32_,
                                       select_df_within_period,
@@ -89,17 +89,17 @@ coords_df_file = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
                   r"\station_coordinates_names_hourly_only_in_BW_utm32.csv")
 assert os.path.exists(coords_df_file), 'wrong DWD coords file'
 
-path_to_shpfile = (r"P:\2020_DFG_Netatmo\02_Import\00_Shapefiles"
+path_to_shpfile = (r"P:\2020_DFG_Netatmo\02_WPs\02_WP2\00_shapefiles"
                    r"\BW_Landesgrenze_WGS84_UTM32N\Landesgrenze_WGS84.shp")
 
 assert os.path.exists(path_to_shpfile), 'wrong shapefile path'
 
 
-# out_save_dir_orig = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-#                      r'\plots_DWD_ppt_DWD_ppt_correlation_')
-
-out_save_dir_orig = (r'X:\staff\elhachem\Netatmo_2020\pwsflt_testdata'
+out_save_dir_orig = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
                      r'\plots_DWD_ppt_DWD_ppt_correlation_')
+
+# out_save_dir_orig = (r'X:\staff\elhachem\Netatmo_2020\pwsflt_testdata'
+#                      r'\plots_DWD_ppt_DWD_ppt_correlation_')
 
 if not os.path.exists(out_save_dir_orig):
     os.mkdir(out_save_dir_orig)
@@ -115,7 +115,7 @@ x_col_name = 'X'
 y_col_name = 'Y'
 
 # only highest x% of the values are selected
-lower_percentile_val_lst = [99]  # 80, 85, 90,
+lower_percentile_val_lst = [50]  # 80, 85, 90,
 
 
 # temporal aggregation of df
@@ -131,7 +131,7 @@ not_convective_season = []
 
 # starts with one
 # , 2, 3, 4, 5]  # list of which neighbors to chose
-neighbors_to_chose_lst = [1, 2, 3, 4, 5, 6]  # 4, 5, 6, 7, 8]  # 1
+neighbors_to_chose_lst = [1]  # 4, 5, 6, 7, 8]  # 1
 max_dist_thr = 100 * 1e4  # 20km
 min_req_ppt_vals = 30  # stations minimum required ppt values
 
@@ -141,7 +141,7 @@ end_date = '2019-09-01 00:00:00'
 
 date_fmt = '%Y-%m-%d %H:%M:%S'
 
-plt_figures = True  # if true plot correlations seperatly and on map
+plt_figures = False  # if true plot correlations seperatly and on map
 #==============================================================================
 #
 #==============================================================================
