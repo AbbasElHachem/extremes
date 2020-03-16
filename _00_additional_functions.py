@@ -24,7 +24,7 @@ import osr
 import numpy as np
 import pandas as pd
 import seaborn as sn
-import wradlib as wrl
+# import wradlib as wrl
 
 import scipy.spatial as spatial
 import matplotlib.colors as mcolors
@@ -1554,47 +1554,47 @@ def get_radar_intense_events(radar_files_loc, intense_events_df_index_lst, temp_
 #==============================================================================
 
 
-def mask_radolan_based_on_shp(radolan_file, shp_file):
-    '''
-        read a radolan file, transform from Polar to WGS84
-        get longitude and latitude, create mask based on 
-        shapefile location, save the mask using numpy dump
-
-    '''
-    rwdata, rwattrs = wrl.io.read_radolan_composite(radolan_file)
-    # mask data
-    sec = rwattrs['secondary']
-    rwdata.flat[sec] = -9999
-    rwdata = np.ma.masked_equal(rwdata, -9999)
-
-    # create radolan projection object
-    proj_stereo = wrl.georef.create_osr("dwd-radolan")
-
-    # create wgs84 projection object
-    proj_wgs = osr.SpatialReference()
-    proj_wgs.ImportFromEPSG(4326)
-
-    # get radolan grid
-    radolan_grid_xy = wrl.georef.get_radolan_grid(900, 900)
-#         # convert to lonlat
-    radolan_grid_ll = wrl.georef.reproject(radolan_grid_xy,
-                                           projection_source=proj_stereo,
-                                           projection_target=proj_wgs)
-    lon1 = radolan_grid_ll[:, :, 0]
-    lat1 = radolan_grid_ll[:, :, 1]
-    # read shapefile
-    ishape = fiona.open(shp_file)
-    first = ishape.next()
-
-    mask = np.ones_like(lon1, dtype=np.bool)
-
-    for _, i_poly in enumerate(first['geometry']['coordinates']):
-
-        p = path.Path(np.array(i_poly)[0, :, :])
-        grid_mask = p.contains_points(
-            np.vstack((lon1.flatten(),
-                       lat1.flatten())).T).reshape(900, 900)
-    mask[grid_mask] = 0
-    mask.dump(r'C:\Users\hachem\Desktop\radar\masked_array_bw')
-
-    return mask
+# def mask_radolan_based_on_shp(radolan_file, shp_file):
+#     '''
+#         read a radolan file, transform from Polar to WGS84
+#         get longitude and latitude, create mask based on
+#         shapefile location, save the mask using numpy dump
+#
+#     '''
+#     rwdata, rwattrs = wrl.io.read_radolan_composite(radolan_file)
+#     # mask data
+#     sec = rwattrs['secondary']
+#     rwdata.flat[sec] = -9999
+#     rwdata = np.ma.masked_equal(rwdata, -9999)
+#
+#     # create radolan projection object
+#     proj_stereo = wrl.georef.create_osr("dwd-radolan")
+#
+#     # create wgs84 projection object
+#     proj_wgs = osr.SpatialReference()
+#     proj_wgs.ImportFromEPSG(4326)
+#
+#     # get radolan grid
+#     radolan_grid_xy = wrl.georef.get_radolan_grid(900, 900)
+# #         # convert to lonlat
+#     radolan_grid_ll = wrl.georef.reproject(radolan_grid_xy,
+#                                            projection_source=proj_stereo,
+#                                            projection_target=proj_wgs)
+#     lon1 = radolan_grid_ll[:, :, 0]
+#     lat1 = radolan_grid_ll[:, :, 1]
+#     # read shapefile
+#     ishape = fiona.open(shp_file)
+#     first = ishape.next()
+#
+#     mask = np.ones_like(lon1, dtype=np.bool)
+#
+#     for _, i_poly in enumerate(first['geometry']['coordinates']):
+#
+#         p = path.Path(np.array(i_poly)[0, :, :])
+#         grid_mask = p.contains_points(
+#             np.vstack((lon1.flatten(),
+#                        lat1.flatten())).T).reshape(900, 900)
+#     mask[grid_mask] = 0
+#     mask.dump(r'C:\Users\hachem\Desktop\radar\masked_array_bw')
+#
+#     return mask

@@ -69,7 +69,7 @@ if plot_filtered:
         print(temp_freq)
 
         path_to_Qt_ok_un_first_flt__temp_flt_1st_ = main_dir / (
-            r'Final_results6/Ppt_ok_ok_un_new4_first_flt__temp_flt__1st_%s' % temp_freq)
+            r'Final_results/Ppt_ok_ok_un_new2_first_flt__temp_flt__1st_%s' % temp_freq)
         Qt_ok_un_first_flt__temp_flt_1st_ = list_all_full_path(
             '.csv', path_to_Qt_ok_un_first_flt__temp_flt_1st_)
 
@@ -336,7 +336,9 @@ if plot_filtered:
         except Exception as msg:
             print(msg)
 
-#         df_compare.loc['2016-06-24 22:00:00', :]
+#         df_compare.loc['2019-07-27 20:00:00', :]
+
+        pass
 # ['2016-06-24 22:00:00'
 
         # difference dwd- dwdnetatmo

@@ -74,20 +74,37 @@ from _00_additional_functions import (convert_coords_fr_wgs84_to_utm32_,
 main_dir = Path(os.getcwd())
 os.chdir(main_dir)
 
+# path_to_ppt_dwd_data = (
+#     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
+#     r"\all_dwd_hourly_ppt_data_combined_2015_2019_.fk")
+# assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
+#
+# path_to_ppt_csv_data = (
+#     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
+#     r"\all_dwd_hourly_ppt_data_combined_2015_2019_.csv")
+#
+# assert os.path.exists(path_to_ppt_csv_data), 'wrong DWD Ppt file'
+#
+# coords_df_file = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
+#                   r"\station_coordinates_names_hourly_only_in_BW_utm32.csv")
+# assert os.path.exists(coords_df_file), 'wrong DWD coords file'
+
+# for RH
 path_to_ppt_dwd_data = (
-    r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
-    r"\all_dwd_hourly_ppt_data_combined_2015_2019_.fk")
+    r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz"
+    r"\ppt_dwd_2014_2019_60min_no_freezing_5deg.fk")
 assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
 
 path_to_ppt_csv_data = (
-    r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
-    r"\all_dwd_hourly_ppt_data_combined_2015_2019_.csv")
+    r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz"
+    r"\ppt_dwd_2014_2019_60min.csv")
 
 assert os.path.exists(path_to_ppt_csv_data), 'wrong DWD Ppt file'
 
-coords_df_file = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
-                  r"\station_coordinates_names_hourly_only_in_BW_utm32.csv")
+coords_df_file = (r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz"
+                  r"\dwd_coords_in_around_RH_utm32.csv")
 assert os.path.exists(coords_df_file), 'wrong DWD coords file'
+
 
 path_to_shpfile = (r"P:\2020_DFG_Netatmo\02_WPs\02_WP2\00_shapefiles"
                    r"\BW_Landesgrenze_WGS84_UTM32N\Landesgrenze_WGS84.shp")
@@ -95,12 +112,14 @@ path_to_shpfile = (r"P:\2020_DFG_Netatmo\02_WPs\02_WP2\00_shapefiles"
 assert os.path.exists(path_to_shpfile), 'wrong shapefile path'
 
 
-out_save_dir_orig = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-                     r'\plots_DWD_ppt_DWD_ppt_correlation_')
+# out_save_dir_orig = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
+#                      r'\plots_DWD_ppt_DWD_ppt_correlation_')
 
 # out_save_dir_orig = (r'X:\staff\elhachem\Netatmo_2020\pwsflt_testdata'
 #                      r'\plots_DWD_ppt_DWD_ppt_correlation_')
 
+out_save_dir_orig = (
+    r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\indicator_correlation')
 if not os.path.exists(out_save_dir_orig):
     os.mkdir(out_save_dir_orig)
 
@@ -115,7 +134,7 @@ x_col_name = 'X'
 y_col_name = 'Y'
 
 # only highest x% of the values are selected
-lower_percentile_val_lst = [50]  # 80, 85, 90,
+lower_percentile_val_lst = [95.0, 98.0, 99.0, 99.5]  # 80, 85, 90,
 
 
 # temporal aggregation of df
@@ -131,13 +150,13 @@ not_convective_season = []
 
 # starts with one
 # , 2, 3, 4, 5]  # list of which neighbors to chose
-neighbors_to_chose_lst = [1]  # 4, 5, 6, 7, 8]  # 1
+neighbors_to_chose_lst = [1, 2, 3]  # 4, 5, 6, 7, 8]  # 1
 max_dist_thr = 100 * 1e4  # 20km
 min_req_ppt_vals = 30  # stations minimum required ppt values
 
 # select data only within this period (same as netatmo)
-start_date = '2015-01-01 00:00:00'
-end_date = '2019-09-01 00:00:00'
+start_date = '2014-01-01 00:00:00'
+end_date = '2019-12-30 00:00:00'
 
 date_fmt = '%Y-%m-%d %H:%M:%S'
 
@@ -190,10 +209,19 @@ def calc_indicator_correlatione_two_dwd_stns(
         print('First Stn Id is', iid)
         try:
             # read for DWD station
-            idf1 = pd.read_feather(path_to_ppt_dwd_data,
-                                   columns=['Time', iid],
-                                   use_threads=True)
-            idf1.set_index('Time', inplace=True)
+            try:
+                idf1 = pd.read_feather(path_to_ppt_dwd_data,
+                                       columns=[
+                                           'Time', iid],
+                                       use_threads=True)
+                idf1.set_index('Time', inplace=True)
+            except Exception as msg:
+                #print('error reading dwd', msg)
+                idf1 = pd.read_feather(path_to_ppt_dwd_data,
+                                       columns=[
+                                           'index', iid],
+                                       use_threads=True)
+                idf1.set_index('index', inplace=True)
 
             idf1.index = pd.to_datetime(
                 idf1.index, format=date_fmt)
@@ -223,10 +251,19 @@ def calc_indicator_correlatione_two_dwd_stns(
                 stn_near = '0' * (5 - len(str(stn_near))) + str(stn_near)
             try:
                 #                 idf2 = HDF52.get_pandas_dataframe(ids=stn_near)
-                idf2 = pd.read_feather(path_to_ppt_dwd_data,
-                                       columns=['Time', stn_near],
-                                       use_threads=True)
-                idf2.set_index('Time', inplace=True)
+                try:
+                    idf2 = pd.read_feather(path_to_ppt_dwd_data,
+                                           columns=[
+                                               'Time', stn_near],
+                                           use_threads=True)
+                    idf2.set_index('Time', inplace=True)
+                except Exception as msg:
+                    #print('error reading dwd', msg)
+                    idf2 = pd.read_feather(path_to_ppt_dwd_data,
+                                           columns=[
+                                               'index', stn_near],
+                                           use_threads=True)
+                    idf2.set_index('index', inplace=True)
 
                 idf2.index = pd.to_datetime(
                     idf2.index, format=date_fmt)

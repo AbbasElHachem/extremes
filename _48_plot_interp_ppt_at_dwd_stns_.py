@@ -59,7 +59,7 @@ if plot_filtered:
         print(temp_freq)
 
         path_to_Qt_ok_un_first_flt__temp_flt_1st_ = main_dir / (
-            r'Final_results8/Ppt_ok_ok_un_new6_first_flt__temp_flt__1st_%s' % temp_freq)
+            r'Final_results/Ppt_ok_ok_un_new2_first_flt__temp_flt__1st_%s' % temp_freq)
         Qt_ok_un_first_flt__temp_flt_1st_ = list_all_full_path(
             '.csv', path_to_Qt_ok_un_first_flt__temp_flt_1st_)
 
@@ -211,10 +211,10 @@ if plot_filtered:
 
         print(df_netatmo_dwd.isna().sum().max())
 
-        df_netatmo_dwd_unc05perc = pd.read_csv(
-            path_interpolated_using_netatmo_dwd_unc05perc,
-            sep=';', index_col=0,
-            parse_dates=True, infer_datetime_format=True)
+#         df_netatmo_dwd_unc05perc = pd.read_csv(
+#             path_interpolated_using_netatmo_dwd_unc05perc,
+#             sep=';', index_col=0,
+#             parse_dates=True, infer_datetime_format=True)
 
         df_netatmo_dwd_unc2perc = pd.read_csv(
             path_interpolated_using_netatmo_dwd_unc2perc,
@@ -252,11 +252,13 @@ if plot_filtered:
                 # :
                 for event_date in df_dwd.index.intersection(df_dwd_edf.index):
                     # print(event_date)
+
+                    # event_date = '2019-07-27 20:00:00'
                     edf_stn_orig = df_dwd_edf.loc[event_date, stn_]
                     edf_stn_interp_dwd = df_dwd.loc[event_date, stn_]
                     edf_stn_interp_netatmo_dwd = df_netatmo_dwd.loc[event_date, stn_]
-                    edf_stn_interp_netatmo_dwd_unc05perc = df_netatmo_dwd_unc05perc.loc[
-                        event_date, stn_]
+#                     edf_stn_interp_netatmo_dwd_unc05perc = df_netatmo_dwd_unc05perc.loc[
+#                         event_date, stn_]
                     edf_stn_interp_netatmo_dwd_unc2perc = df_netatmo_dwd_unc2perc.loc[
                         event_date, stn_]
                     edf_stn_interp_netatmo_dwd_unc5perc = df_netatmo_dwd_unc5perc.loc[
@@ -268,9 +270,9 @@ if plot_filtered:
                     if ((edf_stn_orig >= 0) and
                         (edf_stn_interp_dwd >= 0) and
                             (edf_stn_interp_netatmo_dwd >= 0 and
-                             (edf_stn_interp_netatmo_dwd_unc2perc >= 0) and
-                             (edf_stn_interp_netatmo_dwd_unc05perc >= 0))):
-
+                             (edf_stn_interp_netatmo_dwd_unc2perc >= 0)
+                             )):
+                        # and(edf_stn_interp_netatmo_dwd_unc05perc >= 0)
                         df_compare.loc[
                             event_date,
                             'original_quantile'] = edf_stn_orig
@@ -281,9 +283,9 @@ if plot_filtered:
                         df_compare.loc[
                             event_date,
                             'interpolated_quantile_netatmo_dwd'] = edf_stn_interp_netatmo_dwd
-                        df_compare.loc[
-                            event_date,
-                            'interpolated_quantile_netatmo_dwd_unc05perc'] = edf_stn_interp_netatmo_dwd_unc05perc
+#                         df_compare.loc[
+#                             event_date,
+#                             'interpolated_quantile_netatmo_dwd_unc05perc'] = edf_stn_interp_netatmo_dwd_unc05perc
 
                         df_compare.loc[
                             event_date,

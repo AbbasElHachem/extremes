@@ -8,13 +8,16 @@ import os
 import time
 import timeit
 import fnmatch
+import tables
 import pandas as pd
 import requests
+import glob
 import zipfile
 import numpy as np
 import math
 
-from _00_additional_functions import (list_all_full_path, resampleDf,
+from _00_additional_functions import (list_all_full_path,
+                                      resampleDf,
                                       select_df_within_period)
 
 #==============================================================================
@@ -31,27 +34,33 @@ delete_df_files = True
 
 make_hdf5_dataset_new = False
 
-temporal_freq = '1_minute'  # '1_minute' '10_minutes' 'hourly' 'daily'
+temporal_freq = 'hourly'  # '1_minute' '10_minutes' 'hourly' 'daily'
 time_period = 'historical'  # 'recent' 'historical'
-temp_accr = '1minutenwerte'  # '1minuten' '10minuten' 'stundenwerte'  'tages'
+temp_accr = 'stundenwerte'  # '1minuten' '10minuten' 'stundenwerte'  'tages'
 
-ppt_act = 'nieder'  # nieder 'rr' 'RR' 'RR'
+ppt_act = 'RR'  # nieder 'rr' 'RR' 'RR'
 
 stn_name_len = 5  # length of dwd stns Id, ex: 00023
 
-start_date = '1995-01-01 00:00:00'
-end_date = '2019-12-30 23:59:00'
+start_date = '2014-01-01 00:00:00'
+end_date = '2019-12-30 23:00:00'
 
-temp_freq = 'Min'  # '60Min'  # 'Min' '10Min' 'H' 'D'
+temp_freq = 'H'  # '60Min'  # 'Min' '10Min' 'H' 'D'
 
 # '%Y%m%d%H'  # when reading download dwd station df '%Y%m%d%H%M'
-time_fmt = '%Y%m%d%H%M:%S'  # for 10Min data use: '%Y%m%d%H%M:%S'
+time_fmt = '%Y%m%d%H%M'  # for 10Min data use: '%Y%m%d%H%M:%S'
 
 # name of station id and rainfall column name in df
 stn_id_col_name = 'STATIONS_ID'
-ppt_col_name = 'RWH_01'  # 'TT_TU'  # RS_01 'RWS_10' '  R1' 'RS'
+ppt_col_name = '  R1'  # 'TT_TU'  # RS_01 'RWS_10' '  R1' 'RS'
 
 freqs_list = ['60Min']  # '60Min']  # '1D' '5Min',
+
+
+date_range = pd.date_range(start=start_date,
+                           end=end_date, freq=temp_freq)
+
+# years_ = [year for year in date_range.years]
 #==============================================================================
 #
 #==============================================================================
@@ -61,10 +70,21 @@ main_dir = r'X:\staff\elhachem\Data\DWD_DE_Data'
 # r'F:\download_DWD_data_recent'
 os.chdir(main_dir)
 
+dwd_in_coords_df = pd.read_csv(
+    r"X:\staff\elhachem\Data\DWD_DE_Data\station_coordinates_names_hourly.csv",
+    sep=',', index_col=0, encoding='latin-1')
 
+# added by Abbas, for DWD stations
+stndwd_ix = ['0' * (5 - len(str(stn_id))) + str(stn_id)
+             if len(str(stn_id)) < 5 else str(stn_id)
+             for stn_id in dwd_in_coords_df.index]
+
+dwd_in_coords_df.index = stndwd_ix
+dwd_in_coords_df.index = list(map(str, dwd_in_coords_df.index))
 #==============================================================================
 #
 #==============================================================================
+
 
 def firstNonNan(listfloats):
     '''return first non NaN value in python list'''
@@ -107,14 +127,16 @@ if not os.path.exists(out_dir):
 
 os.chdir(out_dir)
 
+year_period = '1993'
+
 # generate url
 if download_data:  # download all zip files
-    year_period = '1993'
+
     # precipitation
     base_url = (r'https://opendata.dwd.de/climate_environment/CDC'
-                r'/observations_germany/climate/%s/precipitation/%s/%s'
-                % (temporal_freq, time_period, year_period))
-
+                r'/observations_germany/climate/%s/precipitation/%s/'  # %s/
+                % (temporal_freq, time_period))  # , year_period))
+    # r'https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/1_minute/precipitation/historical/1993/'
     r = requests.get(base_url, stream=True)
 
     all_urls = r.content.split(b'\n')
@@ -126,6 +148,11 @@ if download_data:  # download all zip files
 
     all_urls_zip = [url_zip.split(b'>')[-2].replace(b'</a', b'').decode('utf-8')
                     for url_zip in all_urls if b'.zip' in url_zip]
+
+    if temporal_freq == '1_minute':
+        all_urls_zip = [url_zip.split(b'>')[0].replace(
+            b'<a', b'').replace(b' href=', b'').strip(b'"').decode('utf-8')
+            for url_zip in all_urls if b'.zip' in url_zip]
 
     for file_name in all_urls_zip:
 
@@ -143,7 +170,6 @@ if download_data:  # download all zip files
                 if chunk:  # filter out keep-alive new chunks
                     f.write(chunk)
         zip_url.close()
-        break
 
     r.close()
     print('\n####\n Done Getting all Data \n#####\n')
@@ -177,129 +203,290 @@ if download_data:  # download all zip files
     #==========================================================================
     #
     #==========================================================================
+if build_one_df:
+    #     all_df_files = list_all_full_path('.txt', out_extract_df_dir)
 
-# get all df files as list
-# if build_one_df:
-#     #     all_df_files = list_all_full_path('.txt', out_extract_df_dir)
-#
-#     all_df_files = list_all_full_path(
-#         '.txt', out_dir)
-#
-# #     all_df_files_bw = [_df_f for stn_name in stations_id_str_lst
-# #                        for _df_f in all_df_files if stn_name in _df_f]
-#
-#     all_df_files = [_df_f for _df_f in all_df_files]
-#
-#     # get all downloaded station ids, used as columns for df_final
-#     available_stns = []
-#
-#     for df_txt_file in all_df_files:
-#
-#         stn_name = df_txt_file.split('_')[-1].split('.')[0]
-#         print('getting station name from file ', stn_name)
-#         assert len(stn_name) == 5
-#         if stn_name not in available_stns:
-#             available_stns.append(stn_name)
-#
-#     # for stations only in BW do this
-# #     available_stns = stations_id_str_lst
-#
-#     # create daterange and df full of nans
-#
-#     date_range = pd.date_range(start=start_date, end=end_date, freq=temp_freq)
-#
-#     data = np.zeros(shape=(date_range.shape[0], len(available_stns)))
-#     data[data == 0] = np.nan
-#
-#     final_df_combined = pd.DataFrame(data=data,
-#                                      index=date_range,
-#                                      columns=available_stns)
-# #     final_df_combined = pd.DataFrame(columns=available_stns)
-#     # read df stn file and fill final df for all stns
-#     all_files_len = len(all_df_files)
-# #     stns_bw_len = len(all_df_files_bw)
-#
-#     for df_txt_file in all_df_files:
-#         print('\n++\n Total number of files is \n++\n', all_files_len)
-#
-#         stn_name = df_txt_file.split('_')[-1].split('.')[0]
+    all_df_files = list_all_full_path('.txt', out_dir)
+
+#     all_df_files_bw = [_df_f for stn_name in stations_id_str_lst
+#                        for _df_f in all_df_files if stn_name in _df_f]
+    # get all downloaded station ids, used as columns for df_final
+    available_stns = []
+
+    for df_txt_file in all_df_files:
+
+        stn_name = df_txt_file.split('_')[-1].split('.')[0]
+        print('getting station name from file ', stn_name)
+        assert len(stn_name) == 5
+        if stn_name not in available_stns:
+            available_stns.append(stn_name)
+
+    # for stations only in BW do this
+#     available_stns = stations_id_str_lst
+
+    # create daterange and df full of nans
+
+    date_range = pd.date_range(start=start_date, end=end_date, freq=temp_freq)
+
+    data = np.zeros(shape=(date_range.shape[0], len(available_stns)))
+    data[data == 0] = np.nan
+
+    final_df_combined = pd.DataFrame(data=data,
+                                     index=date_range,
+                                     columns=available_stns)
+#     final_df_combined = pd.DataFrame(columns=available_stns)
+    # read df stn file and fill final df for all stns
+    all_files_len = len(all_df_files)
+
+    for df_txt_file in all_df_files:
+        print('\n++\n Total number of files is \n++\n', all_files_len)
+
+        stn_name = df_txt_file.split('_')[-1].split('.')[0]
 #         if stn_name in stations_id_str_lst:
-#             #             print('\n##\n Stations in BW \n##\n', stns_bw_len)
-#             print('\n##\n Station ID is \n##\n', stn_name)
-#             in_df = pd.read_csv(df_txt_file, sep=';', index_col=1, engine='c')
-#
-#             assert int(stn_name) == in_df.loc[:, stn_id_col_name].values[0]
-#             assert stn_name in final_df_combined.columns
-#
-#             if temporal_freq == '10_minutes':
-#                 try:
-#                     in_df.index = pd.to_datetime(in_df.index, format=time_fmt)
-#                 except AttributeError as msg:
-#                     print(msg)
-#                     in_df.index = [ix.split(":")[0] for ix in in_df.index]
-#                     in_df.index = pd.to_datetime(in_df.index, format=time_fmt)
-#                     continue
-#
-#             else:
-#                 in_df.index = pd.to_datetime(in_df.index, format=time_fmt)
-#
-#             in_df = select_df_within_period(in_df, start_date, end_date)
-# #             in_df = in_df[in_df[ppt_col_name] >= 0]
+#             print('\n##\n Stations in BW \n##\n', stns_bw_len)
+        print('\n##\n Station ID is \n##\n', stn_name)
+        in_df = pd.read_csv(df_txt_file, sep=';', index_col=1, engine='c')
+
+        assert int(stn_name) == in_df.loc[:, stn_id_col_name].values[0]
+        assert stn_name in final_df_combined.columns, 'assertion error'
+
+        if temporal_freq == '10_minutes':
+            try:
+                in_df.index = pd.to_datetime(in_df.index, format=time_fmt)
+            except AttributeError as msg:
+                print(msg)
+                in_df.index = [ix.split(":")[0] for ix in in_df.index]
+                in_df.index = pd.to_datetime(in_df.index, format=time_fmt)
+                continue
+
+        else:
+            in_df.index = pd.to_datetime(in_df.index, format=time_fmt)
+
+        in_df = select_df_within_period(in_df, start_date, end_date)
+        in_df = in_df[in_df[ppt_col_name] >= -100]
+        ppt_data = in_df[ppt_col_name].values.ravel()
+
+        if ppt_data.shape[0] > 0:
+            print('\n++\n  Data shape is \n++\n', ppt_data.shape)
 #             try:
-#                 ppt_data = in_df[ppt_col_name].values.ravel()
+            cmn_idx = final_df_combined.index.intersection(
+                in_df.index)
+            try:
+                final_df_combined.loc[cmn_idx, stn_name] = ppt_data
+            except Exception as msg:
+                print(msg)
+
+            sum_vals = final_df_combined.loc[in_df.index, stn_name].sum()
+
+            print('**Sum of station data \n**', sum_vals)
+
+
 #             except Exception as msg:
 #                 print(msg)
-#                 pass
-#             print('\n++\n  Data shape is \n++\n', ppt_data.shape)
-#
-#             try:
-#                 final_df_combined.loc[in_df.index, stn_name] = ppt_data
-#             except Exception:
-#                 print('Error')
-#                 pass
-# #             sum_vals = final_df_combined.loc[in_df.index, stn_name].sum()
-# #             if sum_vals < 0:
-# #                 raise Exception
-# #             print('**Sum of station data \n**', sum_vals)
-# #             stns_bw_len -= 1
-#
-# #             except Exception as msg:
-# #                 print(msg)
-# #                 continue
-#         # break
-#             #all_files_len -= 1
-#
-#         # break
-# #             if delete_df_files:
-# #                 os.remove(df_txt_file)
-#     final_df_combined = final_df_combined[final_df_combined >= 0]
-# #     print('Resampling Dataframe')
-# #     final_df_combined_resampled = resampleDf(final_df_combined, '5min')
-#     final_df_combined.plot(legend=False)
-#     print('Saving Dataframe')
-#     final_df_combined.dropna(how='all', inplace=True)
-#     #final_df_combined.set_index('Time', inplace=True, drop=True)
-#     final_df_combined.to_csv(
+#                 continue
+        # break
+        all_files_len -= 1
+
+        # break
+        if delete_df_files:
+            os.remove(df_txt_file)
+    #final_df_combined = final_df_combined[final_df_combined >= 0]
+#     print('Resampling Dataframe')
+#     final_df_combined_resampled = resampleDf(final_df_combined, '5min')
+
+    print('Saving Dataframe')
+    final_df_combined.dropna(how='all', inplace=True)
+    #final_df_combined.set_index('Time', inplace=True, drop=True)
+    final_df_combined.to_csv(
+        os.path.join(out_dir,
+                     'DE_dwd_PPT_data_2014_2019.csv'),
+        sep=';', float_format='%0.2f')
+#     final_df_combined.reset_index(inplace=True)
+#     final_df_combined.rename({'index': 'Time'}, inplace=True)
+# #
+#     final_df_combined.to_feather(
 #         os.path.join(out_dir,
-#                      'all_dwd_60min_ppt_data_combined.csv'),
-#         sep=';')
-#     # all_dwd_60min_temp_data_combined_2010_2018.csv
-# #     final_df_combined.reset_index(inplace=True)
-# #     final_df_combined.rename({'index': 'Time'}, inplace=True)
-# # #
-# #     final_df_combined.to_feather(
-# #         os.path.join(out_dir,
-# #                      'all_dwd_10min_ppt_data_combined_2018_2019.fk'))
+#                      'all_dwd_10min_ppt_data_combined_2018_2019.fk'))
+
+    print('done creating df')
+
+# # get all df files as list
+# all_df_files = list_all_full_path('.txt', out_dir)
 #
-#     print('done creating df')
-# #==============================================================================
-# # # In[129]:
-# #==============================================================================
+# # get all downloaded station ids, used as columns for df_final
+# available_stns = []
 #
+# for df_txt_file in all_df_files:
+#
+#     stn_name = df_txt_file.split('_')[-1].split('.')[0]
+#     print('getting station name from file ', stn_name)
+#     assert len(stn_name) == 5
+#     if stn_name not in available_stns:
+#         available_stns.append(stn_name)
+#
+#
+# nstats = len(available_stns)
+#
+# hdf5_path = os.path.join(out_dir, 'DWD_DE_data_%s_.h5' % temporal_freq)
+# blank_df = pd.DataFrame(index=date_range)  # , data=np.zeros(dates.shape))
 #
 # if make_hdf5_dataset_new:
-#     from a_functions import create_hdf5
+#     # number of maximum timesteps
+#     nts_max = date_range.shape[0]
 #
+#     hf = tables.open_file(hdf5_path, 'w', filters=tables.Filters(complevel=6))
+#
+#     # timestamps
+#     hf.create_group(where=hf.root,
+#                     name='timestamps',
+#                     title='Timestamps of respective Aggregation as Start Time')
+#     hf.create_carray(where=hf.root.timestamps,
+#                      name='isoformat',
+#                      atom=tables.StringAtom(19),
+#                      shape=(nts_max,),
+#                      chunkshape=(10000,),
+#                      title='Strings of Timestamps in Isoformat')
+#     hf.create_carray(where=hf.root.timestamps,
+#                      name='year',
+#                      atom=tables.IntAtom(),
+#                      shape=(nts_max,),
+#                      chunkshape=(10000,),
+#                      title='Yearly Timestamps')
+#     hf.create_carray(where=hf.root.timestamps,
+#                      name='month',
+#                      atom=tables.IntAtom(),
+#                      shape=(nts_max,),
+#                      chunkshape=(10000,),
+#                      title='Monthly Timestamps')
+#     hf.create_carray(where=hf.root.timestamps,
+#                      name='day',
+#                      atom=tables.IntAtom(),
+#                      shape=(nts_max,),
+#                      chunkshape=(10000,),
+#                      title='Daily Timestamps')
+#     hf.create_carray(where=hf.root.timestamps,
+#                      name='yday',
+#                      atom=tables.IntAtom(),
+#                      shape=(nts_max,),
+#                      chunkshape=(10000,),
+#                      title='Yearday Timestamps')
+#
+#     # data
+#     hf.create_carray(where=hf.root,
+#                      name='data',
+#                      atom=tables.FloatAtom(dflt=np.nan),
+#                      shape=(nts_max, nstats),
+#                      chunkshape=(10000, 1),
+#                      title='DWD %s' % temporal_freq)
+#
+#     # coordinates
+#     hf.create_group(where=hf.root,
+#                     name='coord',
+#                     title='WGS84 of Stations')
+#     hf.create_carray(where=hf.root.coord,
+#                      name='lon',
+#                      atom=tables.FloatAtom(dflt=np.nan),
+#                      shape=(nstats,),
+#                      title='Longitude')
+#     hf.create_carray(where=hf.root.coord,
+#                      name='lat',
+#                      atom=tables.FloatAtom(dflt=np.nan),
+#                      shape=(nstats,),
+#                      title='Latitude')
+#     hf.create_carray(where=hf.root.coord,
+#                      name='z',
+#                      atom=tables.FloatAtom(dflt=np.nan),
+#                      shape=(nstats,),
+#                      title='Z-Coordinate')
+#
+#     # metadata
+#     hf.create_carray(where=hf.root,
+#                      name='name',
+#                      atom=tables.StringAtom(50),
+#                      shape=(nstats,),
+#                      title='Name of Station')
+#
+#     # convert timestamp to isoformat
+#     ts_iso = []
+#     ts_year = []
+#     ts_month = []
+#     ts_day = []
+#     ts_yday = []
+#
+#     for ii in range(date_range.shape[0]):
+#         ts = date_range[ii]
+#         ts_iso.append(ts.isoformat())
+#         # get timestamp years
+#         ts_year.append(ts.year)
+#         # get timestamp months
+#         ts_month.append(ts.month)
+#         # get timestamp days
+#         ts_day.append(ts.day)
+#         # get timestamp year days
+#         ts_yday.append(ts.timetuple().tm_yday)
+#
+#     # fill hf5 with predefined stamps
+#     hf.root.timestamps.isoformat[:] = ts_iso[:]
+#     hf.root.timestamps.year[:] = ts_year[:]
+#     hf.root.timestamps.month[:] = ts_month[:]
+#     hf.root.timestamps.day[:] = ts_day[:]
+#     hf.root.timestamps.yday[:] = ts_yday[:]
+#     hf.close()
+#
+# #==============================================================================
+# #
+# #==============================================================================
+# # write station data
+# hf = tables.open_file(hdf5_path, 'r+')
+#
+# # get all df files as list
+# all_df_files = list_all_full_path('.txt', out_dir)
+#
+#
+# all_files_len = len(all_df_files)
+# #     stns_bw_len = len(all_df_files_bw)
+#
+# for df_txt_file in all_df_files:
+#     print('\n++\n Total number of files is \n++\n', all_files_len)
+#
+#     stn_name = df_txt_file.split('_')[-1].split('.')[0]
+#
+#     i_stn = np.where(stn_name in available_stns)[0][0]
+#     print('\n##\n Station ID is \n##\n', stn_name)
+#     in_df = pd.read_csv(df_txt_file, sep=';', index_col=1, engine='c')
+#
+#     assert int(stn_name) == in_df.loc[:, stn_id_col_name].values[0]
+#
+#     in_df = in_df[in_df[ppt_col_name] >= 0]
+#     in_df = in_df[~in_df.index.duplicated()]
+#     assert not in_df.index.duplicated().any(), 'still duplicates in DF'
+#     try:
+#         in_df = in_df[ppt_col_name]
+#     except Exception as msg:
+#         print(msg)
+#         pass
+#     print('\n++\n  Data shape is \n++\n', in_df.shape)
+#
+#     # TODO: check resampling
+#     # resample station data
+# #     temp_station = resampleDf(df=temp_station, agg=freq,
+# #                               closed='right', label='right',
+# #                               shift=False, leave_nan=True,
+# #                               label_shift=None,
+# #                               temp_shift=0,
+#                               max_nan=0)
+    # assert (temp_station_res.values.sum() == temp_station.values.sum(),
+    #        'error in resampling')
+    # if temp_station.index.freq
+#     hf.root.data[:, i_stn] = blank_df.join(in_df).values.flatten()
+#     hf.root.coord.lon[i_stn] = dwd_in_coords_df['geoLaenge'].loc[stn_name]
+#     hf.root.coord.lat[i_stn] = dwd_in_coords_df['geoBreite'].loc[stn_name]
+#     hf.root.coord.z[i_stn] = dwd_in_coords_df['Stationshoehe'].loc[stn_name]
+#     hf.root.name[i_stn] = np.string_(stn_name)
+
+# hf.close()
+"""
+
 #     print('\n+++\n reading df \n+++\n')
 #     final_df_combined = pd.read_csv(
 #         os.path.join(
@@ -341,3 +528,6 @@ if download_data:  # download all zip files
 #                     in_ppt_df=df_resampled,
 #                     in_stns_df=stn_names_df,
 #                     utm=False)
+
+
+"""

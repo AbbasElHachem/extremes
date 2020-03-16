@@ -56,16 +56,23 @@ main_dir = Path(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes')
 data_dir_Netamto_dfs = main_dir / r'plots_NetAtmo_ppt_DWD_ppt_correlation_'
 # r'plots_NetAtmo_1Deg_ppt_DWD_ppt_correlation_'
 
+# for RH
+data_dir_Netamto_dfs = Path(
+    r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\indicator_correlation')
+
+data_dir_DWD_dfs = data_dir_Netamto_dfs
+
 assert data_dir_Netamto_dfs.exists(), 'Wrong Netatmo path'
 
 
-data_dir_DWD_dfs = main_dir / r'plots_DWD_ppt_DWD_ppt_correlation_'
-assert data_dir_DWD_dfs.exists(), 'Wrong dwd path'
+# data_dir_DWD_dfs = main_dir / r'plots_DWD_ppt_DWD_ppt_correlation_'
+# assert data_dir_DWD_dfs.exists(), 'Wrong dwd path'
 
-data_dir_Netamto_netatmo_dfs = main_dir / \
-    r'plots_NetAtmo_ppt_Netatmo_ppt_correlation_'
 
-assert data_dir_Netamto_netatmo_dfs.exists(), 'Wrong Netatmo Netatmo path'
+# data_dir_Netamto_netatmo_dfs = main_dir / \
+#     r'plots_NetAtmo_ppt_Netatmo_ppt_correlation_'
+
+# assert data_dir_Netamto_netatmo_dfs.exists(), 'Wrong Netatmo Netatmo path'
 
 
 # allyears pearson_  new_method new_method_pearson_
@@ -77,14 +84,14 @@ netatmo_path_acc_after = r'new_method_pearson_year_allyears_df_comparing_correla
 
 dwd_path_Acc = r'pearson_year_allyears_df_dwd_correlations'
 # freq_60min_dwd_netatmo_upper_99_0_percent_data_considered_neighbor_0_
-
-path_to_netatmo_gd_stns_file = data_dir_Netamto_dfs / \
-    r'keep_stns_all_neighbor_99_per_60min_s0_1st.csv'
+#
+# path_to_netatmo_gd_stns_file = data_dir_Netamto_dfs / \
+#     r'keep_stns_all_neighbor_99_per_60min_s0_1st.csv'
 
 #assert path_to_netatmo_gd_stns_file.exists(), 'wrong netatmo good stns file'
 
 # def percentage threshold, time frequency and data source
-percent = '50'
+percent = '95_0'
 time_freq = '60min'  # '720min', 1440min, '480min', '360min', '180min', '120min'
 # '60min'
 data_source0 = 'Netatmo'  # 'DWD'  # 'Netatmo'  #   # reference station 'Netatmo'
@@ -92,40 +99,40 @@ data_source = 'dwd'  # 'dwd'  # 'netatmo'  #   # compare to station 'netatmo'
 
 use_good_netatmo_stns = False
 use_filtered_data = False
-filtered_percent = '50_0'
+filtered_percent = '95_0'
 
 save_acc = ''
 # =============================================================================
 
 
-if data_source0 == 'Netatmo' and data_source == 'dwd':
-    # for Netatmo stations neighbors start from 0 !
-    df0_b4 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc_b4, time_freq,
-                              data_source, percent, 0,
-                              use_filtered_data=use_filtered_data,
-                              filter_percent=filtered_percent)
-    df1_b4 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc_b4, time_freq,
-                              data_source, percent, 1,
-                              use_filtered_data=use_filtered_data,
-                              filter_percent=filtered_percent)
-    df2_b4 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc_b4, time_freq,
-                              data_source, percent, 2,
-                              use_filtered_data=use_filtered_data,
-                              filter_percent=filtered_percent)
+# if data_source0 == 'Netatmo' and data_source == 'dwd':
+# for Netatmo stations neighbors start from 0 !
+df0_b4 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc_b4, time_freq,
+                          data_source, percent, 0,
+                          use_filtered_data=use_filtered_data,
+                          filter_percent=filtered_percent)
+df1_b4 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc_b4, time_freq,
+                          data_source, percent, 1,
+                          use_filtered_data=use_filtered_data,
+                          filter_percent=filtered_percent)
+df2_b4 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc_b4, time_freq,
+                          data_source, percent, 2,
+                          use_filtered_data=use_filtered_data,
+                          filter_percent=filtered_percent)
 
-    # after filtering
-    df0_after = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc_after, time_freq,
-                                 data_source, percent, 0,
-                                 use_filtered_data=use_filtered_data,
-                                 filter_percent=filtered_percent)
-    df1_after = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc_after, time_freq,
-                                 data_source, percent, 1,
-                                 use_filtered_data=use_filtered_data,
-                                 filter_percent=filtered_percent)
-    df2_after = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc_after, time_freq,
-                                 data_source, percent, 2,
-                                 use_filtered_data=use_filtered_data,
-                                 filter_percent=filtered_percent)
+# after filtering
+df0_after = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc_after, time_freq,
+                             data_source, percent, 0,
+                             use_filtered_data=use_filtered_data,
+                             filter_percent=filtered_percent)
+df1_after = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc_after, time_freq,
+                             data_source, percent, 1,
+                             use_filtered_data=use_filtered_data,
+                             filter_percent=filtered_percent)
+df2_after = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc_after, time_freq,
+                             data_source, percent, 2,
+                             use_filtered_data=use_filtered_data,
+                             filter_percent=filtered_percent)
 #     df3 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
 #                            data_source, percent, 3, use_filtered_data)
 #     df4 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
@@ -136,26 +143,28 @@ if data_source0 == 'Netatmo' and data_source == 'dwd':
 #                            data_source, percent, 6, use_filtered_data)
 #     df7 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc, time_freq,
 #                            data_source, percent, 7, use_filtered_data)
-    save_dir = data_dir_Netamto_dfs
 
-data_source0 = 'DWD'
-percent = '50'
-if data_source0 == 'DWD' and data_source == 'dwd':
-    # for DWD stations neighbors start from 1 not 0  (1 is first)!
-    df0_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
-                               data_source, percent, 1)
-    df1_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
-                               data_source, percent, 2)
-    df2_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
-                               data_source, percent, 3)
-    df3_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
-                               data_source, percent, 4)
-    df4_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
-                               data_source, percent, 5)
-    df5_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
-                               data_source, percent, 6)
-    df6_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
-                               data_source, percent, 7)
+
+# percent = '95_0'
+
+# if data_source0 == 'DWD' and data_source == 'dwd':
+# for DWD stations neighbors start from 1 not 0  (1 is first)!
+df0_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+                           data_source, percent, 1)
+df1_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+                           data_source, percent, 2)
+df2_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+                           data_source, percent, 3)
+
+
+# df3_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+#                            data_source, percent, 4)
+# df4_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+#                            data_source, percent, 5)
+# df5_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+#                            data_source, percent, 6)
+# df6_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+#                            data_source, percent, 7)
 #     df3 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
 #                            data_source, percent, 4)
 #     df4 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
@@ -167,7 +176,6 @@ if data_source0 == 'DWD' and data_source == 'dwd':
 #     df7 = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
 #                            data_source, percent, 8)
 
-    save_dir = data_dir_DWD_dfs
 
 # if data_source0 == 'Netatmo' and data_source == 'netatmo':
 #     # for Netatmo stations neighbors start from 0 !
@@ -201,23 +209,21 @@ save_dir = data_dir_Netamto_dfs
 in_df0_dwd = pd.read_csv(df0_dwd, index_col=0, sep=';').dropna(how='all')
 in_df1_dwd = pd.read_csv(df1_dwd, index_col=0, sep=';').dropna(how='all')
 in_df2_dwd = pd.read_csv(df2_dwd, index_col=0, sep=';').dropna(how='all')
-in_df3_dwd = pd.read_csv(df3_dwd, index_col=0, sep=';').dropna(how='all')
-in_df4_dwd = pd.read_csv(df4_dwd, index_col=0, sep=';').dropna(how='all')
-in_df5_dwd = pd.read_csv(df5_dwd, index_col=0, sep=';').dropna(how='all')
+# in_df3_dwd = pd.read_csv(df3_dwd, index_col=0, sep=';').dropna(how='all')
+# in_df4_dwd = pd.read_csv(df4_dwd, index_col=0, sep=';').dropna(how='all')
+# in_df5_dwd = pd.read_csv(df5_dwd, index_col=0, sep=';').dropna(how='all')
 # in_df6_dwd = pd.read_csv(df6_dwd, index_col=0, sep=';').dropna(how='all')
 # Netatmo
 
 #'new_method_pearson_year_allyears_df_comparing_correlations_max_sep_dist_30000_freq_60min_dwd_netatmo_upper_99_0_percent_data_considered_neighbor_0_'
 in_df0_b4 = pd.read_csv(df0_b4, index_col=0, sep=';').dropna(how='all')
+in_df1_b4 = pd.read_csv(df1_b4, index_col=0, sep=';').dropna(how='all')
+in_df2_b4 = pd.read_csv(df2_b4, index_col=0, sep=';').dropna(how='all')
+
 
 in_df0_after = pd.read_csv(df0_after, index_col=0, sep=';').dropna(how='all')
-# in_df1 = pd.read_csv(df1, index_col=0, sep=';').dropna(how='all')
-# in_df2 = pd.read_csv(df2, index_col=0, sep=';').dropna(how='all')
-# in_df3 = pd.read_csv(df3, index_col=0, sep=';').dropna(how='all')
-# in_df4 = pd.read_csv(df4, index_col=0, sep=';').dropna(how='all')
-# in_df5 = pd.read_csv(df5, index_col=0, sep=';').dropna(how='all')
-# in_df6 = pd.read_csv(df6, index_col=0, sep=';').dropna(how='all')
-# in_df7 = pd.read_csv(df7, index_col=0, sep=';').dropna(how='all')
+in_df1_after = pd.read_csv(df1_after, index_col=0, sep=';').dropna(how='all')
+in_df2_after = pd.read_csv(df2_after, index_col=0, sep=';').dropna(how='all')
 
 # if use_good_netatmo_stns:
 #     df_good_stns = pd.read_csv(path_to_netatmo_gd_stns_file, sep=';',
@@ -236,31 +242,44 @@ in_df0_after = pd.read_csv(df0_after, index_col=0, sep=';').dropna(how='all')
 
 
 x0_dwd0 = in_df0_dwd.loc[:, 'Distance to neighbor'].values.ravel()
-
-
-# in_df1_dwd = in_df1_dwd[in_df1_dwd.loc[:, 'Distance to neighbor'] < 50000]
-# in_df2_dwd = in_df2_dwd[in_df2_dwd.loc[:, 'Distance to neighbor'] < 50000]
 x1_dwd0 = in_df1_dwd.loc[:, 'Distance to neighbor'].values.ravel()
 x2_dwd0 = in_df2_dwd.loc[:, 'Distance to neighbor'].values.ravel()
-x3_dwd0 = in_df3_dwd.loc[:, 'Distance to neighbor'].values.ravel()
-x4_dwd0 = in_df4_dwd.loc[:, 'Distance to neighbor'].values.ravel()
-x5_dwd0 = in_df5_dwd.loc[:, 'Distance to neighbor'].values.ravel()
+
+# x3_dwd0 = in_df3_dwd.loc[:, 'Distance to neighbor'].values.ravel()
+# x4_dwd0 = in_df4_dwd.loc[:, 'Distance to neighbor'].values.ravel()
+# x5_dwd0 = in_df5_dwd.loc[:, 'Distance to neighbor'].values.ravel()
 
 
 y0_dwd0 = in_df0_dwd.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
 y1_dwd0 = in_df1_dwd.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
 y2_dwd0 = in_df2_dwd.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
-y3_dwd0 = in_df3_dwd.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
-y4_dwd0 = in_df4_dwd.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
-y5_dwd0 = in_df5_dwd.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
+
+# y3_dwd0 = in_df3_dwd.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
+# y4_dwd0 = in_df4_dwd.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
+# y5_dwd0 = in_df5_dwd.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
 
 x0_b4 = in_df0_b4.loc[
     :, 'Distance to neighbor'].values.ravel()
 y0_b4 = in_df0_b4.loc[:,
                       'Bool_Spearman_Correlation'].values.ravel()
 
+x1_b4 = in_df1_b4.loc[
+    :, 'Distance to neighbor'].values.ravel()
+y1_b4 = in_df1_b4.loc[:,
+                      'Bool_Spearman_Correlation'].values.ravel()
+
+x2_b4 = in_df2_b4.loc[
+    :, 'Distance to neighbor'].values.ravel()
+y2_b4 = in_df2_b4.loc[:,
+                      'Bool_Spearman_Correlation'].values.ravel()
+
 in_df0_after = in_df0_after[
-    in_df0_after['Bool_Pearson_Correlation_Netatmo_DWD'] > 0.2]
+    in_df0_after['Bool_Pearson_Correlation_Netatmo_DWD'] > 0.0]
+in_df1_after = in_df1_after[
+    in_df1_after['Bool_Pearson_Correlation_Netatmo_DWD'] > 0.0]
+
+in_df2_after = in_df2_after[
+    in_df2_after['Bool_Pearson_Correlation_Netatmo_DWD'] > 0.0]
 
 # in_df1 = in_df1[in_df1['Bool_Pearson_Correlation_Netatmo_DWD'] > y1_dwd0.min()]
 # in_df0 = in_df0[in_df0['Bool_Pearson_Correlation_DWD_DWD'] > 0.2]
@@ -276,15 +295,24 @@ stns_keep_all_final_new = in_df0_after.index
 #cmn_stns = in_df0.index.intersection(in_df1.index)
 x0_after = in_df0_after.loc[
     stns_keep_all_final_new, 'Distance to neighbor'].values.ravel()
-# x1 = in_df1.loc[stns_keep_all_final_new, 'Distance to neighbor'].values.ravel()
-# x2 = in_df2.loc[:, 'Distance to neighbor'].values.ravel()
-# x3 = in_df3.loc[:, 'Distance to neighbor'].values.ravel()
-# x4 = in_df4.loc[:, 'Distance to neighbor'].values.ravel()
-# x5 = in_df5.loc[:, 'Distance to neighbor'].values.ravel()
-# x6 = in_df6.loc[:, 'Distance to neighbor'].values.ravel()
-# x7 = in_df7.loc[:, 'Distance to neighbor'].values.ravel()
+
+
+x1_after = in_df1_after.loc[
+    :, 'Distance to neighbor'].values.ravel()
+
+x2_after = in_df2_after.loc[
+    :, 'Distance to neighbor'].values.ravel()
+
 
 y0_after = in_df0_after.loc[stns_keep_all_final_new,
+                            'Bool_Pearson_Correlation_Netatmo_DWD'].values.ravel()
+
+
+y1_after = in_df1_after.loc[:,
+                            'Bool_Pearson_Correlation_Netatmo_DWD'].values.ravel()
+
+
+y2_after = in_df2_after.loc[:,
                             'Bool_Pearson_Correlation_Netatmo_DWD'].values.ravel()
 
 y0_after_dwd = in_df0_after.loc[stns_keep_all_final_new,
@@ -321,7 +349,7 @@ stns_keep_al_sr = pd.DataFrame(data=stns_keep_all_final_new,
 #
 stns_keep_al_sr.to_csv(
     (save_dir /
-        (r'keep_stns_all_neighbor_%s_per_%s_s0_1st_.csv'
+        (r'keep_stns_all_neighbor_%s_per_%s_s0_1st_rh.csv'
          % (percent, time_freq))),
     sep=';')
 
@@ -329,6 +357,8 @@ stns_keep_al_sr.to_csv(
 # s0, x0, y0, in_df0 = read_filter_df_corr_return_stns_x_y_vals(df0)
 # =============================================================================
 
+max_x = max(x0_b4.max(), x1_b4.max(), x2_b4.max())
+#
 plt.ioff()
 
 fig, axs = plt.subplots(1, 2, sharex=True, sharey=True,
@@ -337,18 +367,23 @@ fig, axs = plt.subplots(1, 2, sharex=True, sharey=True,
 # plt.figure(figsize=(12, 8), dpi=300)
 
 axs[0].scatter(x0_b4, y0_b4, c='r', alpha=0.75, marker='x', s=34)
+axs[0].scatter(x1_b4, y1_b4, c='b', alpha=0.75, marker='x', s=34)
+axs[0].scatter(x2_b4, y2_b4, c='g', alpha=0.75, marker='x', s=34)
+
 #label='First Neighbor %d Pairs' % y0.shape[0],
 
 axs[1].scatter(x0_after, y0_after, c='r', alpha=0.75, marker='x', s=34)
-axs[1].scatter(x0_after, y0_after_dwd, c='b', alpha=0.75, marker='1', s=34)
+axs[1].scatter(x1_after, y1_after, c='b', alpha=0.75, marker='x', s=34)
+axs[1].scatter(x2_after, y2_after, c='g', alpha=0.75, marker='x', s=34)
 
 
 axs[1].scatter(x0_dwd0, y0_dwd0, c='k', alpha=0.5, marker='o', s=34)
 axs[1].scatter(x1_dwd0, y1_dwd0, c='k', alpha=0.5, marker='o', s=34)
 axs[1].scatter(x2_dwd0, y2_dwd0, c='k', alpha=0.5, marker='o', s=34)
-axs[1].scatter(x3_dwd0, y3_dwd0, c='k', alpha=0.5, marker='o', s=34)
-axs[1].scatter(x4_dwd0, y4_dwd0, c='k', alpha=0.5, marker='o', s=34)
-axs[1].scatter(x5_dwd0, y5_dwd0, c='k', alpha=0.5, marker='o', s=34)
+
+# axs[1].scatter(x3_dwd0, y3_dwd0, c='k', alpha=0.5, marker='o', s=34)
+# axs[1].scatter(x4_dwd0, y4_dwd0, c='k', alpha=0.5, marker='o', s=34)
+# axs[1].scatter(x5_dwd0, y5_dwd0, c='k', alpha=0.5, marker='o', s=34)
 #            label='DWD First Neighbor',
 # plt.scatter(x1, y1, c='blue', alpha=0.5, marker='.',
 #             label='Second Neighbor %d Pairs' % y1.shape[0], s=34)
@@ -374,10 +409,10 @@ axs[1].scatter(x5_dwd0, y5_dwd0, c='k', alpha=0.5, marker='o', s=34)
 #             label='DWD Second Neighbor', s=34)
 
 
-axs[0].legend(title='a)', loc='upper left',
-              frameon=False, fontsize=26)._legend_box.align = 'left'
-axs[1].legend(title='b)', loc='upper left',
-              frameon=False, fontsize=26)._legend_box.align = 'left'
+axs[0].legend(title='%d pairs' % y0_b4.shape[0], loc='upper right',  # a) left
+              frameon=False, fontsize=26)._legend_box.align = 'right'
+axs[1].legend(title='%d pairs' % y0_after.shape[0], loc='upper right',
+              frameon=False, fontsize=26)._legend_box.align = 'right'
 # ,
 #             label=' DWD Third Neighbor'
 # plt.scatter(x3, y3, c='darkorange', alpha=0.5, marker='*',
@@ -390,11 +425,11 @@ axs[1].legend(title='b)', loc='upper left',
 #             label='Seventh Neighbor Stn nbr %d' % y6.shape[0], s=34)
 # plt.scatter(x7, y7, c='c', alpha=0.5, marker='8',
 #             label='Eighth Neighbor Stn nbr %d' % y7.shape[0], s=34)
-axs[0].set_xlim([0, 21000 + 100])
-axs[1].set_xlim([0, 21000 + 100])
+axs[0].set_xlim([0, max_x + 300])
+axs[1].set_xlim([0, max_x + 300])
 
-axs[0].set_xticks(np.arange(0, 21000 + 100, 5000))
-axs[1].set_xticks(np.arange(0, 21000 + 100, 5000))
+axs[0].set_xticks(np.arange(0, max_x + 300, 5000))
+axs[1].set_xticks(np.arange(0, max_x + 300, 5000))
 
 # plt.xticks(np.arange(0, 21000 + 100, 5000))  # x1.max()
 axs[0].set_ylim([-0.1, 1.1])

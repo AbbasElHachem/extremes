@@ -21,6 +21,8 @@ import time
 
 import pandas as pd
 import numpy as np
+
+from _00_additional_functions import resample_Humidity_Df
 #==============================================================================
 #
 #==============================================================================
@@ -29,17 +31,21 @@ import numpy as np
 #     r'x:\exchange\ElHachem\DWD_Reutlingen_Temperature\dwd_reutlingen_temp_2014_2019.csv')
 
 path_to_DWD_temp_data = (
-    r"X:\exchange\ElHachem\DWD_Reutlingen_Temperature\all_dwd_daily_temp_data_combined_2014_2019.csv")
+    r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\temp_dwd_2014_2019_60min.csv")
+
+# path_to_Netatmo_ppt_data = (
+#     r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\ppt_all_netatmo_rh_hourly.csv")
 
 path_to_Netatmo_ppt_data = (
-    r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW'
-    r'\ppt_all_netatmo_hourly_stns_combined_new.csv')
+    r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\ppt_all_netatmo_rh_hourly.csv")
+# ppt_dwd_2014_2019_60min
+# path_to_distance_mtx_Netatmo_ppt_DWD_temp = (
+#     r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\distance_mtx_in_m_Netatmo_DWD_temp.csv")
 
 path_to_distance_mtx_Netatmo_ppt_DWD_temp = (
-    r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
-    r"\distance_mtx_in_m_NetAtmo_ppt_DWD_temp.csv")
+    r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\distance_mtx_in_m_Netatmo_DWD_temp.csv")
 
-freezing_temp = 1  # below 5 degrees it is snow
+freezing_temp = 5  # below 5 degrees it is snow
 
 #==============================================================================
 #
@@ -66,7 +72,8 @@ in_df_dwd_temp_data.index = pd.to_datetime(in_df_dwd_temp_data.index,
 # in_df_dwd_temp_data.index = pd.to_datetime(in_df_dwd_temp_data.index,
 #                                            format='%d-%m-%Y')
 
-
+in_df_dwd_temp_data_daily = resample_Humidity_Df(in_df_dwd_temp_data,
+                                                 temp_freq='D')
 # read Netatmo ppt data
 in_df_netatmo_ppt_data = pd.read_csv(
     path_to_Netatmo_ppt_data,
@@ -82,7 +89,7 @@ in_df_distance_netatmo_dwd = pd.read_csv(
 
 # keep only stations in BW with data from (2014-2019)
 in_df_distance_netatmo_dwd_bw = in_df_distance_netatmo_dwd.loc[
-    in_df_netatmo_ppt_data.columns, in_df_dwd_temp_data.columns]
+    in_df_netatmo_ppt_data.columns, in_df_dwd_temp_data_daily.columns]
 
 # in_df_distance_netatmo_dwd_bw = in_df_distance_netatmo_dwd
 
@@ -100,7 +107,8 @@ for netatmo_stn in in_df_netatmo_ppt_data.columns:
     dwd_stn_id = distance_to_dwd_stns.sort_values().index[0]
 
     print('Distance to DWD Temp station', np.round(min_distance, 2))
-    dwd_temp_data = in_df_dwd_temp_data.loc[:, dwd_stn_id].drop_duplicates()
+    dwd_temp_data = in_df_dwd_temp_data_daily.loc[:, dwd_stn_id].dropna()
+    #.drop_duplicates()
 #     dwd_temp_data = in_df_dwd_temp_data.drop_duplicates()
 
     dwd_temp_data_freezing = dwd_temp_data[
@@ -115,6 +123,7 @@ for netatmo_stn in in_df_netatmo_ppt_data.columns:
     # generate time period based on netatmo freq for freezing days
     intersect_ix_temp_res = []
     for freez_ix in dwd_freezing_days:
+
         time_range_freez = pd.date_range(start=freez_ix - pd.Timedelta(days=1),
                                          end=freez_ix + pd.Timedelta(days=1),
                                          freq=temp_res)
@@ -142,15 +151,15 @@ for netatmo_stn in in_df_netatmo_ppt_data.columns:
 print('\nSaving new df')
 
 netatmo_stn_df_no_freezing_vals.to_csv(
-    r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW'
-    r'\ppt_all_netatmo_hourly_stns_combined_new_no_freezing_1deg.csv',
+    r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz'
+    r'\ppt_all_netatmo_rh_2014_2019_60min_no_freezing_5deg.csv',
     sep=';', float_format='%0.2f')
-
+# \ppt_dwd_2014_2019_60min_no_freezing_5deg.csv'
 netatmo_stn_df_no_freezing_vals.reset_index(inplace=True)
 netatmo_stn_df_no_freezing_vals.rename(columns={'index': 'Time'}, inplace=True)
 netatmo_stn_df_no_freezing_vals.to_feather(
-    os.path.join(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW',
-                 r'ppt_all_netatmo_hourly_stns_combined_new_no_freezing_1deg.fk'))
+    os.path.join(r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz'
+                 r'\ppt_all_netatmo_rh_2014_2019_60min_no_freezing_5deg.fk'))
 STOP = timeit.default_timer()  # Ending time
 print(('\n****Done with everything on %s.\nTotal run time was'
        ' about %0.4f seconds ***' % (time.asctime(), STOP - START)))

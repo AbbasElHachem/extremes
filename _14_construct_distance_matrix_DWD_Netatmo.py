@@ -29,22 +29,30 @@ use_new_dwd_data = True
 
 if use_new_dwd_data:
     # for DWD Ppt stations
-    #     coords_dwd_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-    #                           r'\NetAtmo_BW\station_coordinates_names_hourly_only_in_BW_utm32.csv')
+    coords_dwd_df_file = (
+        r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\dwd_temp_coords_in_around_RH.csv")
     #     # for DWD temperature stations
     #     coords_dwd_df_file = (r'F:\DWD_download_Temperature_data'
     #                           r'\Dwd_temperature_stations_coords_in_BW_utm32.csv')
 
-    coords_dwd_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-                          r'\NetAtmo_BW\\reduced_smaple_dwd_stns.csv')
+#     coords_dwd_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
+#                           r'\NetAtmo_BW\\reduced_smaple_dwd_stns.csv')
 
 else:
     coords_dwd_df_file = (r'F:\data_from_exchange\niederschlag_deutschland'
                           r'\1993_2016_5min_merge_nan.csv')
 assert os.path.exists(coords_dwd_df_file), 'wrong DWD coords file'
 
-coords_netatmo_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-                          r'\NetAtmo_BW\rain_bw_1hour\netatmo_bw_1hour_coords.csv')
+coords_netatmo_df_file = (
+    r"X:\staff\elhachem\Data\Netatmo_data\rain_Rheinland-Pfalz_1hour\netatmo_Rheinland-Pfalz_1hour_coords.csv")
+
+# coords_netatmo_df_file = (
+#         r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\dwd_coords_in_around_RH.csv")
+
+
+# coords_netatmo_df_file = (
+#     r"X:\staff\elhachem\Data\Netatmo_data\rain_Rheinland-Pfalz_1hour\netatmo_Rheinland-Pfalz_1hour_coords.csv")
+
 
 # coords_netatmo_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
 #                           r'\NetAtmo_BW\rain_bw_5min\netatmo_bw_1hour_coords.csv')
@@ -52,9 +60,9 @@ coords_netatmo_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
 # coords_netatmo_df_file = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
 #                           r'\NetAtmo_BW\\temperature_bw_1hour\netatmo_bw_1hour_coords.csv')
 
-assert os.path.exists(coords_netatmo_df_file), 'wrong NETATMO coords file'
+# assert os.path.exists(coords_netatmo_df_file), 'wrong NETATMO coords file'
 
-out_save_dir = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW')
+out_save_dir = (r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz')
 
 
 if not os.path.exists(out_save_dir):
@@ -91,7 +99,7 @@ xnetatmo, ynetatmo = convert_coords_fr_wgs84_to_utm32_(
 if use_new_dwd_data:
 
     in_df_dwd_coords = pd.read_csv(coords_dwd_df_file, index_col=0,
-                                   sep=',', encoding='latin-1')  # ','
+                                   sep=';', encoding='latin-1')  # ','
     # get all station ids, make them a string for generating file_names
 #     stations_id_str_lst = []
 #     for stn_id in in_df_dwd_coords.index:
@@ -99,11 +107,11 @@ if use_new_dwd_data:
 #         if len(stn_id) < 5:
 #             stn_id = '0' * (5 - len(stn_id)) + stn_id
 #         stations_id_str_lst.append(stn_id)
-    stations_id_str_lst = ['0' * (5 - len(str(stn_id))) + str(stn_id)
-                           if len(str(stn_id)) < 5 else str(stn_id)
-                           for stn_id in in_df_dwd_coords.index]
+#     stations_id_str_lst = ['0' * (5 - len(str(stn_id))) + str(stn_id)
+#                            if len(str(stn_id)) < 5 else str(stn_id)
+#                            for stn_id in in_df_dwd_coords.index]
 
-    in_df_dwd_coords.index = stations_id_str_lst
+#     in_df_dwd_coords.index = stations_id_str_lst
 
 #     x_dwd, y_dwd = (in_df_dwd_coords.loc[:, x_col_name].values.ravel(),
 #                     in_df_dwd_coords.loc[:, y_col_name].values.ravel())
@@ -160,7 +168,7 @@ for stn_mac in in_df_netatmo_coords.index:
         continue
 
 df_distance.to_csv(os.path.join(out_save_dir,  # 'distance_mtx_in_m_NetAtmo_DWD.csv'),
-                                'distance_mtx_in_m_NetAtmo_DWD_reduced.csv'),
+                                'distance_mtx_in_m_Netatmo_DWD.csv'),
                    # distance_mtx_in_m_NetAtmo_ppt_DWD_temp
                    sep=';', float_format='%.4f')
 

@@ -30,22 +30,25 @@ from _00_additional_functions import (list_all_full_path,
 #
 #==============================================================================
 # rain_bw_1hour'
-# dfs_loc = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\humidity_bw_1hour'
-
-dfs_loc = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\rain_bw_1hour'
+dfs_loc = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\rain_bw_5min'
+# dfs_loc = r'X:\staff\elhachem\Data\Netatmo_data\rain_Reutlingen_5min'
+# dfs_loc = r'X:\staff\elhachem\Data\Netatmo_data\rain_Rheinland-Pfalz_1hour'
 # dfs_loc = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\rain_UK_1hour'
 # dfs_loc = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\temperature_bw_1hour'
 
 dfs_list = list_all_full_path('.csv', dfs_loc)
-dfs_list_ppt = list(filter(lambda x: 'coords' not in x, dfs_list))
+dfs_list_ppt = list(filter(lambda x: ('coords' not in x and
+                                      'current_position' not in x), dfs_list))
 
 stn_ids = split_df_file_to_get_alls_stn_ids(dfs_list_ppt)
 # 2014-04-01 00:00:00 for ppt
 
 
 date_range = pd.date_range('2015-01-01 00:00:00',
-                           '2019-10-01 00:00:00',
+                           '2019-12-31 00:00:00',
                            freq='H')  # 'H'
+
+df_nans_sum = pd.DataFrame(index=stn_ids)
 
 do_it_yearly_basis = False
 list_years = ['2015', '2016', '2017', '2018', '2019']
@@ -53,8 +56,8 @@ list_years = ['2015', '2016', '2017', '2018', '2019']
 #
 #==============================================================================
 max_ppt_thr = 1000  # maximum ppt values per hour
-initial_vals_to_remove = 0  # 4  # most likely calibration or test values
-minimal_number_of_vals = 0  # 2 * 30 * 24  # 1 month of hourly data
+initial_vals_to_remove = 4  # 4  # most likely calibration or test values
+minimal_number_of_vals = 2 * 30 * 24  # 1 month of hourly data
 
 data_mtx = np.zeros(
     shape=(date_range.shape[0], len(stn_ids))).astype('float')
@@ -74,6 +77,8 @@ for df_file in dfs_list_ppt:
                         parse_dates=True,
                         infer_datetime_format=True,
                         engine='c')
+
+    df_nans_sum.loc[stn_id, 'nan_sums'] = in_df.isna().sum()[0]
     # in_df.dropna(inplace=True)
     in_df = in_df[(0 <= in_df) & (in_df <= max_ppt_thr)]  # (0 <= in_df) &
 
@@ -117,14 +122,14 @@ for df_file in dfs_list_ppt:
 
 print('Saving Dataframe')
 df_all.dropna(how='all', inplace=True)
-df_all.to_csv(os.path.join(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW',
-                           r'ppt_all_netatmo_bw_hourly_everything.csv'),  #
-              sep=';')  # , float_format='%.2f')  # temperature humidity ppt
+df_all.to_csv(os.path.join(r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz',
+                           r'ppt_all_netatmo_rh_hourly.csv'),  #
+              sep=';', float_format='%.3f')  # temperature humidity ppt
 
-# df_all.reset_index(inplace=True)
-# df_all.rename(columns={'index': 'Time'}, inplace=True)
-# df_all.to_feather(os.path.join(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW',
-#                                r'ppt_all_netatmo_hourly_stns_combined_new.fk'))
+df_all.reset_index(inplace=True)
+df_all.rename(columns={'index': 'Time'}, inplace=True)
+df_all.to_feather(os.path.join(r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz',
+                               r'ppt_all_netatmo_rh_hourly.fk'))
 
 print('done with everything')
 

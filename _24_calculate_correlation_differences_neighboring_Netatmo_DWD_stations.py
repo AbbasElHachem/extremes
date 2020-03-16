@@ -95,17 +95,27 @@ use_reduced_sample_dwd = False
 #
 #==============================================================================
 
-# for getting station names
+# for getting station names in BW
+# path_to_ppt_netatmo_data_csv = (
+#     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
+#     r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new_no_freezing_2.csv')
+# assert os.path.exists(path_to_ppt_netatmo_data_csv), 'wrong NETATMO Ppt file'
+
 path_to_ppt_netatmo_data_csv = (
-    r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-    r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new_no_freezing_2.csv')
+    r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz'
+    r'\ppt_all_netatmo_rh_hourly_no_freezing_5deg.csv')
 assert os.path.exists(path_to_ppt_netatmo_data_csv), 'wrong NETATMO Ppt file'
 
 # for reading ppt data station by station
 # HOURLY DATA
+
+# path_to_ppt_netatmo_data_feather = (
+#     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
+#     r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new_no_freezing_2.fk')
+
 path_to_ppt_netatmo_data_feather = (
-    r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-    r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new_no_freezing_2.fk')
+    r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz'
+    r'\ppt_all_netatmo_rh_hourly_no_freezing_5deg.fk')
 assert os.path.exists(
     path_to_ppt_netatmo_data_feather), 'wrong NETATMO Ppt file'
 
@@ -118,8 +128,8 @@ assert os.path.exists(
 
 # HOURLY DATA
 path_to_ppt_dwd_data = (
-    r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-    r"\NetAtmo_BW\all_dwd_hourly_ppt_data_combined_2014_2019_.fk")
+    r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz'
+    r'\ppt_dwd_2014_2019_60min_no_freezing_5deg.fk')
 assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
 
 # 10Min DATA
@@ -127,17 +137,29 @@ assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
 #     r"F:\download_DWD_data_recent\all_data_10min_ppt_data_combined_2014_2019.fk")
 # assert os.path.exists(path_to_ppt_dwd_data), 'wrong 10 min DWD Ppt file'
 
+# BW
+# distance_matrix_netatmo_dwd_df_file = (
+#     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
+#     r'\NetAtmo_BW\distance_mtx_in_m_NetAtmo_DWD.csv')
+# assert os.path.exists(
+#     distance_matrix_netatmo_dwd_df_file), 'wrong Distance MTX  file'
+#
+# path_to_netatmo_coords_df_file = (
+#     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
+#     r"\rain_bw_1hour"
+#     r"\netatmo_bw_1hour_coords.csv")
+# assert os.path.exists(path_to_netatmo_coords_df_file), 'wrong DWD coords file'
+
+
 distance_matrix_netatmo_dwd_df_file = (
-    r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-    r'\NetAtmo_BW\distance_mtx_in_m_NetAtmo_DWD.csv')
+    r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz'
+    r'\distance_mtx_in_m_Netatmo_DWD.csv')
 assert os.path.exists(
     distance_matrix_netatmo_dwd_df_file), 'wrong Distance MTX  file'
 
 path_to_netatmo_coords_df_file = (
-    r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
-    r"\rain_bw_1hour"
-    r"\netatmo_bw_1hour_coords.csv")
-assert os.path.exists(path_to_netatmo_coords_df_file), 'wrong DWD coords file'
+    r"X:\staff\elhachem\Data\Netatmo_data\rain_Rheinland-Pfalz_1hour\netatmo_Rheinland-Pfalz_1hour_coords.csv")
+
 
 path_to_netatmo_gd_stns_file = (
     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes"
@@ -153,8 +175,8 @@ path_to_shpfile = (r'F:\data_from_exchange\Netatmo'
 
 # out_save_dir_orig = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
 #                      r'\plots_NetAtmo_ppt_DWD_ppt_correlation_reduced')
-out_save_dir_orig = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-                     r'\plots_NetAtmo_ppt_DWD_ppt_correlation_')
+out_save_dir_orig = (
+    r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\indicator_correlation')
 
 if not os.path.exists(out_save_dir_orig):
     os.mkdir(out_save_dir_orig)
@@ -181,7 +203,7 @@ min_dist_thr_ppt = 100 * 1e4  # 5000  # m
 max_ppt_thr = 200.  # ppt above this value are not considered
 
 # only highest x% of the values are selected
-lower_percentile_val_lst = [50]  # [80, 85, 90, 95, 99]
+lower_percentile_val_lst = [95.0, 98.0, 99.0, 99.5]  # [80, 85, 90, 95, 99]
 
 
 # ['10min', '60min', '120min', '480min', '720min', '1440min']
@@ -190,7 +212,7 @@ aggregation_frequencies = ['60min']
 # temporal aggregation of df
 
 # [0, 1, 2, 3, 4]  # refers to DWD neighbot (0=first)
-neighbors_to_chose_lst = [0]
+neighbors_to_chose_lst = [0, 1, 2]
 # 30 days * 24 hours * 2month
 # minimum hourly values that should be available per station
 min_req_ppt_vals = 10  # 30 * 24 * 2
@@ -204,8 +226,8 @@ plot_figures = False
 date_fmt = '%Y-%m-%d %H:%M:%S'
 
 # select data only within this period (same as netatmo)
-start_date = '2015-01-01 00:00:00'
-end_date = '2019-09-30 00:00:00'
+start_date = '2014-01-01 00:00:00'
+end_date = '2019-12-30 00:00:00'
 
 #==============================================================================
 #
@@ -274,6 +296,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
     alls_stns_len = len(stns_ppt_ids)  # good_stns
 
     for ppt_stn_id in stns_ppt_ids:
+
         print('\n********\n Total number of Netatmo stations is\n********\n',
               alls_stns_len)
         alls_stns_len -= 1
@@ -291,7 +314,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
             netatmo_ppt_stn1.set_index('Time', inplace=True)
             netatmo_ppt_stn1.index = pd.to_datetime(
                 netatmo_ppt_stn1.index, format=date_fmt)
-
+            # netatmo_ppt_stn1.isna().sum()
 #             netatmo_ppt_stn1 = in_netatmo_ppt_stns_df.loc[:, ppt_stn_id]
             netatmo_ppt_stn1.dropna(axis=0, inplace=True)
             netatmo_ppt_stn1 = netatmo_ppt_stn1[netatmo_ppt_stn1 < max_ppt_thr]
@@ -322,11 +345,18 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
             if min_dist_ppt_dwd <= min_dist_thr_ppt:
                 # check if dwd station is near, select and read dwd stn
                 stn_2_dwd = sorted_distances_ppt_dwd.index[0]
-
-                df_dwd = pd.read_feather(path_to_dwd_data,
-                                         columns=['Time', stn_2_dwd],
-                                         use_threads=True)
-                df_dwd.set_index('Time', inplace=True)
+                # TODO: FIX add TIME
+                try:
+                    df_dwd = pd.read_feather(path_to_dwd_data,
+                                             columns=['Time', stn_2_dwd],
+                                             use_threads=True)
+                    df_dwd.set_index('Time', inplace=True)
+                except Exception as msg:
+                    #print('error reading dwd', msg)
+                    df_dwd = pd.read_feather(path_to_dwd_data,
+                                             columns=['index', stn_2_dwd],
+                                             use_threads=True)
+                    df_dwd.set_index('index', inplace=True)
 
                 df_dwd.index = pd.to_datetime(
                     df_dwd.index, format=date_fmt)
