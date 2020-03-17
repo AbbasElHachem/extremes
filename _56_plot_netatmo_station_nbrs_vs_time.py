@@ -22,6 +22,10 @@ from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 import matplotlib.dates as md
 
 
+plt.rcParams.update({'font.size': 20})
+plt.rcParams.update({'axes.labelsize': 22})
+
+
 from pandas.plotting import register_matplotlib_converters
 register_matplotlib_converters()
 # Set base folder
@@ -31,7 +35,10 @@ os.chdir(basefolder)
 #%%
 path_netatmo_ppt_data = r"ppt_all_netatmo_bw_hourly_everything.csv"
 
-df = pd.read_csv(path_netatmo_ppt_data, sep=';', index_col=0,
+path_netatmo_ppt_data_daily = (r"X:\hiwi\ElHachem\Prof_Bardossy"
+                               r"\Extremes\NetAtmo_BW\ppt_all_netatmo_1440min_.csv")
+
+df = pd.read_csv(path_netatmo_ppt_data, sep=';', index_col=0, engine='c',
                  parse_dates=True, infer_datetime_format=True)
 
 df.dropna(how='all', inplace=True)
@@ -40,29 +47,9 @@ df = df.loc[:'2019-08-18 23:00:00', :]
 #%%
 #df.index = pd.to_datetime(df.index, format='%Y-%m-%d')
 
-#%%
-# resample from hour to month
-#df_monthly = resampleDf(df, '1M')
-
-# df2 = df.notnull().astype('int')
-# sum_vals = df2.sum(axis=1)
-
-
-# set all values >= 0 to 1
-# df = df.apply(lambda x: [1 if y >= 0 else np.nan for y in x])
-# df.fillna(1,)
-# This is wrong because it sets np.nan equal to 1
-#df = df.apply(lambda x: [y if y <= 0 else 1 for y in x])
-
-#%%
-# # sum up number of stations with data for each day
-# df.loc[:, 'sum'] = pd.Series(df.sum(axis=1, skipna=True), index=df.index)
-#
-# # df_sum = df.loc[:, 'sum'][df.loc[:, 'sum'].values > 65]
-# df_sum = df.loc[:, 'sum']
-# df_sum = df_sum.iloc[:-1]
-
-
+#==============================================================================
+# observation wit time
+#==============================================================================
 df_operation_times = pd.DataFrame(index=df.index)
 dict_days = {ix: [0] for ix in df.index}
 # find first valid idx per station
@@ -80,65 +67,114 @@ vals = np.cumsum(df_days.values)
 
 
 df3 = pd.DataFrame(index=df_days.index, data=vals)
+
+#==============================================================================
+# observation per station
+#==============================================================================
 # sum_vals2 = df3.sum(axis=1)
+df_netatmo_ppt = pd.read_csv(path_netatmo_ppt_data_daily, sep=';', index_col=0,
+                             parse_dates=True, infer_datetime_format=True)
+df_netatmo_ppt.dropna(how='all', inplace=True)
 
 
-plt.rcParams.update({'font.size': 18})
-plt.rcParams.update({'axes.labelsize': 18})
+nbr_days_per_stn = []
+for stn in df_netatmo_ppt.columns:
+    df_stn = df_netatmo_ppt.loc[:, stn].dropna(how='all')
+    nbr_days_per_stn.append(df_stn.size)
 
-#%%
+nbr_days_per_stn = np.array(nbr_days_per_stn)
+
+number_of_data_per_stn = nbr_days_per_stn
+
+df_count = pd.Series(data=number_of_data_per_stn,
+                     index=range(1, number_of_data_per_stn.shape[0] + 1))
+
+# df_count.plot(legend=False)
+
+#==============================================================================
+# PLOT
+#==============================================================================
 plt.ioff()
-plt.figure(figsize=(12, 8), dpi=200)
-ax = plt.subplot(111)
+fig, axs = plt.subplots(1, 2, sharex=False, sharey=False,
+                        figsize=(31, 12), dpi=300)
 
-# ax.xaxis.set_major_formatter(myFmt)
-# ax.xaxis.set_minor_locator(mdates.MonthLocator(interval=10))
-# ax.get_xaxis().tick_bottom()
-# ax.get_yaxis().tick_left()
+bins = [0, 360, 720, 1095, 1460, 1825]
+
+hist_, bin_edges = np.histogram(df_count,
+                                bins=bins, density=False)
+hist_vals = [v for v in hist_]
+axs[1].bar(bins[1:], hist_vals, facecolor='b', alpha=0.95, width=50,
+           align='center',
+           ec="k", lw=1.)
+#
+axs[1].set_yticks([0, 300, 600, 900])
+
+#     np.arange(0, 1100, 200))
+# axs[1].set_xlim([0, 1830])
+
+#axs[1].set_ylabel("Number of Netatmo stations")
+axs[1].set_xlabel("Years with valid observations", labelpad=16)
+
+# axs[1].axvline(x=180, color='k', linestyle='--', alpha=0.05)
+axs[1].axvline(x=540, color='k', linestyle='--', alpha=0.1)
+axs[1].axvline(x=907.5, color='k', linestyle='--', alpha=0.1)
+axs[1].axvline(x=1277.5, color='k', linestyle='--', alpha=0.1)
+axs[1].axvline(x=1642.5, color='k', linestyle='--', alpha=0.1)
+axs[1].set_xticks(bins[1:])
+
+#[180, 540, 907.5, 1277.5, 1642.5]
+# axs[0].set_xticklabels(['< 1 [y]', '1-2 [y]', '2-3 [y]', '3-4 [y]', '>4 [y]'])
+axs[1].set_xticklabels(['< 1', '1-2', '2-3', '3-4', '>4'])
 
 
-xfmt = md.DateFormatter('%Y')
-
-# ax.xaxis.set_major_locator(MultipleLocator(365))
-# ax.yaxis.set_major_locator(MultipleLocator(2))
-
-ax.xaxis.set_major_formatter(xfmt)
-# ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-
-ax.grid(color='k', linestyle='--', linewidth=0.1, alpha=0.5)
+axs[1].grid(color='k', linestyle='--', linewidth=0.1, alpha=0.5)
 
 # ax.plot(['2015-12', '2015-12'],
 #         [df3.min().values[0],
 #          df3.max().values[0]], color='r', linestyle='--')
 
-ax.set_ylabel('Netatmo Stations in BW with valid Observations', labelpad=16)
+axs[0].set_ylabel(
+    'Netatmo Stations in BW with valid Observations', labelpad=16)
 # ax.set_xlabel('Time', ha="center")
-ax.plot(df3.index, df3.values, color='b',
-        alpha=0.75)
+axs[0].plot(df3.index, df3.values, color='b',
+            alpha=0.75)
+xfmt = md.DateFormatter('%Y')
 
-ax.axvline(x='2015-12-31 00:00:00', color='k', linestyle='--', alpha=0.25)
-ax.axvline(x='2016-12-31 00:00:00', color='k', linestyle='--', alpha=0.25)
-ax.axvline(x='2017-12-31 00:00:00', color='k', linestyle='--', alpha=0.25)
-ax.axvline(x='2018-12-31 00:00:00', color='k', linestyle='--', alpha=0.25)
+axs[0].xaxis.set_major_formatter(xfmt)
+# ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+
+axs[0].grid(color='k', linestyle='--', linewidth=0.1, alpha=0.5)
+
+axs[0].axvline(x='2015-12-31 00:00:00', color='k', linestyle='--', alpha=0.25)
+axs[0].axvline(x='2016-12-31 00:00:00', color='k', linestyle='--', alpha=0.25)
+axs[0].axvline(x='2017-12-31 00:00:00', color='k', linestyle='--', alpha=0.25)
+axs[0].axvline(x='2018-12-31 00:00:00', color='k', linestyle='--', alpha=0.25)
 #ax.axvline(x='2019-12-31 00:00:00', color='k', linestyle='--', alpha=0.75)
-ax.set_yticks(np.arange(0, 3200, 500))
-# plt.xticks(rotation=45)
-# plt.xticks([])
-# Customize minor tick labels
+axs[0].set_yticks([0, 500, 1000, 1500, 2000, 2500, 3000])
+# np.arange(0, 3200, 250))
 
-ax.set_xticks(['2015-06-30 00:00:00',
-               '2016-06-30 00:00:00',
-               '2017-06-30 00:00:00',
-               '2018-06-30 00:00:00',
-               '2019-03-30 00:00:00'],
-              minor=False)
+axs[0].set_xticks(['2015-06-30 00:00:00',
+                   '2016-06-30 00:00:00',
+                   '2017-06-30 00:00:00',
+                   '2018-06-30 00:00:00',
+                   '2019-03-30 00:00:00'],
+                  minor=False)
+axs[0].set_xlim([df3.index[0] - pd.Timedelta(days=5),
+                 df3.index[-1] + pd.Timedelta(days=5)])
 # ax.set_xticklabels(['2015','2016','2017','2018','2019'], minor=True)
 
-plt.xlim([df3.index[0] - pd.Timedelta(days=5),
-          df3.index[-1] + pd.Timedelta(days=5)])
+axs[0].legend(title='a)', loc='upper left',  # a) left
+              frameon=False, fontsize=26)._legend_box.align = 'left'
+
+axs[1].legend(title='b)', loc='upper left',
+              frameon=False, fontsize=26)._legend_box.align = 'left'
+
+
 # plt.legend(loc='lower right')
-# plt.tight_layout()
+plt.tight_layout()
 # can also save it as a PDF, JPEG, etc.
-plt.savefig("netatmo_station_measurements2.png", papertype='a4',
-            bbox_inches="tight")
+plt.savefig(
+    r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\netatmo_station_measurements_2.png",
+    papertype='a4',
+    bbox_inches="tight")
 plt.close('all')

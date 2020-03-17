@@ -1541,11 +1541,6 @@ def get_radar_intense_events(radar_files_loc, intense_events_df_index_lst, temp_
             event_dates.append(event_end_date[0])
     df_radar_events_to_keep = pd.DataFrame(index=event_dates,
                                            data=radolan_events_to_keep)
-    # TODO: change path
-    df_radar_events_to_keep.to_csv(r'X:\exchange\ElHachem'
-                                   r'\%s_intense_events_radolan_files.csv'
-                                   % temp_freq,
-                                   sep=';')
 
     return df_radar_events_to_keep
 

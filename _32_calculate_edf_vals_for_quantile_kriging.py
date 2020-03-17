@@ -40,42 +40,57 @@ plt.ioff()
 # def values to replace edf of ppt=0
 ppt_min_thr_0_vals = 0.1  # everything below it gets value of P0
 
-netatmo_data = True
+netatmo_data = False
 use_good_netatmo_stns = False
 
-dwd_data = False
+dwd_data = True
 resample_data = True
 
 # select data only within this period (same as netatmo / dwd)
-start_date = '2015-01-01 00:00:00'
-end_date = '2019-09-01 00:00:00'
+start_date = '2014-01-01 00:00:00'
+end_date = '2019-12-30 00:00:00'
 
 resample_frequencies = ['60min', '120min', '180min',
                         '360min', '720min', '1440min']
+
+resample_frequencies = ['60min']
 # =============================================================================
 
 if netatmo_data:
-
-    df_file = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
+    # for BW
+    #     df_file = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
+    #                # r"\all_netatmo_ppt_data_daily_.csv")
+    #                r"\ppt_all_netatmo_hourly_stns_combined_new_no_freezing_2.csv")
+    #     save_acc = 'netatmo'
+    # for RH
+    df_file = (r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz"
                # r"\all_netatmo_ppt_data_daily_.csv")
-               r"\ppt_all_netatmo_hourly_stns_combined_new_no_freezing_2.csv")
+               r"\ppt_all_netatmo_rh_2014_2019_60min_no_freezing_5deg.csv")
     save_acc = 'netatmo'
+
+
 # list of Netatmo stations with good indicator correlations
 if use_good_netatmo_stns:
     df_stns = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes"
                r"\plots_NetAtmo_ppt_DWD_ppt_correlation_"
                r"\keep_stns_all_neighbor_99_0_per_60min_s0.csv")
     save_acc = 'netatmo_good_stns'
-if dwd_data:
-    df_file = (
-        # \all_dwd_ppt_data_daily_.csv")
-        r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
-        r"\all_dwd_hourly_ppt_data_combined_2014_2019_.csv")
 
+if dwd_data:
+    # for BW
+    #     df_file = (
+    #         # \all_dwd_ppt_data_daily_.csv")
+    #         r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
+    #         r"\all_dwd_hourly_ppt_data_combined_2014_2019_.csv")
+
+    #     df_file = (
+    #         # \all_dwd_ppt_data_daily_.csv")
+    #         r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
+    #         r"\ppt_all_dwd_old_60min_.csv")
     df_file = (
         # \all_dwd_ppt_data_daily_.csv")
-        r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
-        r"\ppt_all_dwd_old_60min_.csv")
+        r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz"
+        r"\ppt_dwd_2014_2019_60min_no_freezing_5deg.csv")
 
     save_acc = 'dwd'
     # df_file = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
@@ -171,9 +186,11 @@ if resample_data:
                 continue
 
         df_all.dropna(how='all', inplace=True)
-        df_all.to_csv((r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
-                       r"\edf_ppt_all_%s_%s_.csv" % (save_acc, agg_freq)),  # old_
-                      sep=';', float_format='%.10f')
+        df_all.to_csv(
+            (r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz"
+             # r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
+             r"\edf_ppt_all_%s_%s_.csv" % (save_acc, agg_freq)),  # old_
+            sep=';', float_format='%.10f')
 
     print('DONE WITH EVERYTHNG !')
 

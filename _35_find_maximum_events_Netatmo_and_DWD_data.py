@@ -34,16 +34,19 @@ path_to_daily_netatmo_ppt = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW
 path_to_daily_dwd_ppt = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\all_dwd_daily_ppt_data_combined_2014_2019_.csv"
 
 
-path_to_hourly_netatmo_ppt = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new_no_freezing.csv"
-path_to_hourly_dwd_ppt = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\all_dwd_hourly_ppt_data_combined_2014_2019_.csv"
+# path_to_hourly_netatmo_ppt = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new_no_freezing.csv"
+# path_to_hourly_dwd_ppt = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\all_dwd_hourly_ppt_data_combined_2014_2019_.csv"
+
+path_to_hourly_netatmo_ppt = r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\ppt_all_netatmo_rh_2014_2019_60min_no_freezing_5deg.csv"
+path_to_hourly_dwd_ppt = r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\ppt_dwd_2014_2019_60min_no_freezing_5deg.csv"
 
 # if True, stations how measure high value consecutively
 # are investigated and removed if often high values seen
 remove_bad_hours_ = True
 
 # select data only within this period (same as netatmo / dwd)
-start_date = '2015-01-01 00:00:00'
-end_date = '2019-09-30 00:00:00'
+start_date = '2014-01-01 00:00:00'
+end_date = '2019-12-31 00:00:00'
 
 resample_data = True
 resample_frequencies = ['60min', '120min', '180min',
@@ -105,6 +108,39 @@ df_dwd_hourly = select_df_within_period(df_dwd_hourly,
 #         pass
 #
 #     raise Exception
+
+# special events for RH
+
+# events = ['29-07-2014', '20-09-2014', '12-06-2015', '17-09-2015',
+#           '30-05-2016', '04-06-2016', '03-06-2017', '07-05-2018', '27-05-2018',
+#           '11-06-2018', '10-03-2019', '17-03-2019', '21-05-2019', '12-07-2019',
+#           '26-07-2019', '27-08-2019']
+#
+# events_idx = pd.DatetimeIndex(events)
+# hourly_range = [pd.date_range(
+#     start=(pd.DatetimeIndex([day_start]) - pd.Timedelta(days=1))[0],
+#     end=(pd.DatetimeIndex([day_start]) + pd.Timedelta(days=1))[0],
+#     freq='60min') for day_start in events_idx]
+# hourly_ranges = pd.DataFrame(pd.DatetimeIndex([idx for item in hourly_range
+#                                                for idx in item]))
+#
+# df_dwd_events = df_dwd_hourly.loc[hourly_ranges.values.ravel(), :]
+# df_dwd_events2 = df_dwd_events[
+#     df_dwd_events.values > 5].drop_duplicates().max(axis=1)
+#
+# df_dwd_events2 = pd.DataFrame(index=df_dwd_events2.index,
+#                               data=df_dwd_events2.values)
+# stns_dwd_events = df_dwd_events.loc[df_dwd_events2.index, :].idxmax(
+#     axis=1)
+#
+# # df_dwd_events2['Station ID'] = np.empty(shape=stns_dwd_events.shape[0])
+# # for ix in stns_dwd_events.index:
+# df_dwd_events2.loc[:, 'Station ID'] = stns_dwd_events.values
+# #
+# df_dwd_events2.to_csv(
+#     r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\dwd_hourly_special_events_5mm_.csv",
+#     sep=';', header=False)
+
 #==============================================================================
 #
 #==============================================================================
@@ -132,7 +168,7 @@ bad_stns = df_many_duplicates_per_stn['Station Id'].values
 # good_hours = stns_netatmo[~stns_netatmo.duplicated()]
 
 dwd_maximum_hrs_dates = df_dwd_hourly.max(axis=1).sort_values()[::-1]
-dwd_max_100_hours = dwd_maximum_hrs_dates[:100].sort_index()
+dwd_max_100_hours = dwd_maximum_hrs_dates[:300].sort_index()
 dwd_max_100_hours = pd.DataFrame(data=dwd_max_100_hours.values,
                                  index=dwd_max_100_hours.index)
 stns_dwd = df_dwd_hourly.loc[dwd_max_100_hours.index, :].idxmax(
@@ -149,9 +185,14 @@ dwd_max_100_hours['Station Id'] = stns_dwd.values
 #     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\netatmo_hourly_maximum_100_hours_stns.csv",
 #     sep=';', header=False)
 
+# for bw
 # dwd_max_100_hours.to_csv(
 #     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\dwd_hourly_maximum_100_hours.csv",
 #     sep=';', header=False)
+
+dwd_max_100_hours.to_csv(
+    r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\dwd_hourly_maximum_100_hours.csv",
+    sep=';', header=False)
 
 #==============================================================================
 # # daily data
