@@ -82,7 +82,7 @@ netatmo_path_acc = r'pearson_year_allyears_df_comparing_correlations_max_sep_dis
 dwd_path_Acc = r'pearson_year_allyears_df_dwd_correlations'
 
 # def percentage threshold, time frequency and data source
-percent = '99_0' 
+percent = '98_0' 
 time_freq = '60min'
 
 data_source0 = 'Netatmo'  # reference station 'Netatmo'
@@ -93,7 +93,7 @@ remove_upper_limit = False
 
 plot_dwd_on_top = True
 
-shift_factor = 2
+shift_factor = 3
 shift_by_percent = 10
 #==============================================================================
     
@@ -261,7 +261,7 @@ def fit_exp_fct_get_vals_below_abv(x, y, exp_func, stns, shift_factor=1):
             xvals_above_curve, yvals_above_curve, stns_below_curve,
             stns_above_curve)
     
-
+#shift_factor = 5
 (y_fitted_shifted0_exp, xvals_below_curve0_exp,
  yvals_below_curve0_exp, xvals_above_curve0_exp,
  yvals_above_curve0_exp, stnbelow0_exp, stnabove0_exp) = fit_exp_fct_get_vals_below_abv(
@@ -271,7 +271,7 @@ def fit_exp_fct_get_vals_below_abv(x, y, exp_func, stns, shift_factor=1):
 #x0 = np.insert(x0, 0 ,0)
 #y0 = np.insert(y0, 0, 1)
 #s0 = np.insert(s0, 0, s0[0])
-
+#shift_by_percent = 20
 (y_fitted_shifted0, xvals_below_curve0,
  yvals_below_curve0, xvals_above_curve0,
  yvals_above_curve0, stnbelow0, stnabove0) = fit_curve_get_vals_below_curve(
