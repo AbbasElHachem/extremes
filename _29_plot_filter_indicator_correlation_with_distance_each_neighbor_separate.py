@@ -82,7 +82,7 @@ netatmo_path_acc = r'pearson_year_allyears_df_comparing_correlations_max_sep_dis
 dwd_path_Acc = r'pearson_year_allyears_df_dwd_correlations'
 
 # def percentage threshold, time frequency and data source
-percent = '98_0' 
+percent = '99_0' 
 time_freq = '60min'
 
 data_source0 = 'Netatmo'  # reference station 'Netatmo'
@@ -93,8 +93,8 @@ remove_upper_limit = False
 
 plot_dwd_on_top = True
 
-shift_factor = 3
-shift_by_percent = 10
+shift_factor = 5
+shift_by_percent = 1
 #==============================================================================
     
 #==============================================================================
