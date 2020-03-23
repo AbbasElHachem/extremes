@@ -572,7 +572,7 @@ def resample_intersect_2_dfs(df1,  # first dataframe to resample
             if df_common1.isna().sum()[0] > 0:
                 ix_df1_nans = df_common1.index[np.where(df_common1.isna())[0]]
                 print('first station has Nans on ', len(ix_df1_nans), ' dates')
-                df_common1.dropna(inplace=True)
+                df_common1.dropna(axis=0, inplace=True)
         except IndexError:
             df_common1 = df_common1
 
