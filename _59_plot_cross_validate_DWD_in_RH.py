@@ -32,9 +32,11 @@ main_dir = Path(
     r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz')
 
 plot_results_per_stn = True
-plot_results_per_event = True
+plot_rmse_per_stn = True
 
-used_data_acc = r'98_20_5'
+plot_results_per_event = False
+plot_rmse_per_event = True
+used_data_acc = r'98_20_3'
 
 
 
@@ -57,11 +59,6 @@ if plot_results_per_stn:
             (r'df_interpolated_dwd_netatmos_comb_%s_data_%s.csv' %(
                  temp_freq, used_data_acc)))
                 
-    #     path_to_Qt_ok_un_first_flt_comb_ = main_dir / (
-    #         r'Qt_ok_ok_un_3_first_flt__comb_%s' % temp_freq)
-    #     Qt_ok_un_first_flt_comb_ = list_all_full_path(
-    #         '.csv', path_to_Qt_ok_un_first_flt_comb_)
-
 
         path_dwd_ppt_data = main_dir / (
             r"ppt_dwd_2014_2019_%s_no_freezing_5deg.csv" % temp_freq)
@@ -165,8 +162,6 @@ if plot_results_per_stn:
 
                     values_netatmo_dwd = df_compare['interpolated_quantile_netatmo_dwd'].values
 
-
-
                     # calculate correlations (pearson and spearman) dwd-dwd
                     corr_dwd = pears(values_x, values_dwd)[0]
                     rho_dwd = spr(values_x, values_dwd)[0]
@@ -181,21 +176,35 @@ if plot_results_per_stn:
                     corr_netatmo_dwd = pears(values_x, values_netatmo_dwd)[0]
                     rho_netatmo_dwd = spr(values_x, values_netatmo_dwd)[0]
                     
-
-
+                    #===========================================================
+                    # RMSE
+                    #===========================================================
+                    rmse_dwd_interp_ppt = np.sqrt(np.square(
+                np.subtract(values_x, values_dwd)).mean())
+                    
+                    rmse_netatmo_interp_ppt = np.sqrt(np.square(
+                np.subtract(values_x, values_netatmo)).mean())
+                    
+                    rmse_netatmo_dwd_interp_ppt = np.sqrt(np.square(
+                np.subtract(values_x, values_netatmo_dwd)).mean())
+                    
+                    
                     df_improvements.loc[stn_, 'pearson_corr_dwd_'] = corr_dwd
                     df_improvements.loc[stn_, 'spearman_corr_dwd_'] = rho_dwd
+                    df_improvements.loc[stn_, 'rmse_dwd_'] = rmse_dwd_interp_ppt
                     
                     df_improvements.loc[stn_,
                                         'pearson_corr_netatmo_'] = corr_netatmo
                     df_improvements.loc[stn_,
                                         'spearman_corr_netatmo_'] = rho_netatmo
-                                        
-                    df_improvements.loc[stn_,
-                                        'pearson_corr_dwd_netatmo'] = corr_netatmo_dwd
-                    df_improvements.loc[stn_,
-                                        'spearman_corr_dwd_netatmo'] = rho_netatmo_dwd
+                    df_improvements.loc[stn_, 'rmse_netatmo_'] = rmse_netatmo_interp_ppt
                     
+                    df_improvements.loc[
+                        stn_, 'pearson_corr_dwd_netatmo'] = corr_netatmo_dwd
+                    df_improvements.loc[
+                        stn_, 'spearman_corr_dwd_netatmo'] = rho_netatmo_dwd
+                    df_improvements.loc[
+                        stn_, 'rmse_netatmo_dwd_'] = rmse_netatmo_dwd_interp_ppt
 
 
             df_improvements.dropna(how='all', inplace=True)
@@ -204,7 +213,8 @@ if plot_results_per_stn:
 
         except Exception as msg:
             print(msg)
-
+        
+        # OK with dwd-netatmo
         stations_with_improvements = sum(i >= j for (i, j) in zip(
             df_improvements.pearson_corr_dwd_netatmo.values,
             df_improvements.pearson_corr_dwd_.values))
@@ -221,7 +231,7 @@ if plot_results_per_stn:
             df_improvements.pearson_corr_dwd_netatmo.values,
             df_improvements.pearson_corr_dwd_.values) if i < j]
 
-    #     # OK with netatmo
+    #    # OK with netatmo
         stations_with_improvements_netatmo= sum(i >= j for (i, j) in zip(
             df_improvements.pearson_corr_netatmo_.values,
             df_improvements.pearson_corr_dwd_.values))
@@ -231,12 +241,39 @@ if plot_results_per_stn:
         percent_of_improvment_netatmo= 100 * (
             stations_with_improvements_netatmo /
             df_improvements.pearson_corr_dwd_netatmo.shape[0])
-
-
+        #=======================================================================
+        # 
+        #=======================================================================
+        # RMSE OK with dwd-netatmo
+        stations_with_improvements_dwd_netatmo_rmse= sum(i >= j for (i, j) in zip(
+            df_improvements.rmse_netatmo_dwd_.values,
+            df_improvements.rmse_dwd_.values))
+        stations_without_improvements_dwd_netatmo_rmse = sum(i < j for (i, j) in zip(
+            df_improvements.rmse_netatmo_dwd_.values,
+            df_improvements.rmse_dwd_.values))
+        percent_of_improvment_dwd_netatmo_rmse= 100 * (
+            stations_with_improvements_dwd_netatmo_rmse /
+            df_improvements.pearson_corr_dwd_netatmo.shape[0])
+        
+        # RMSE OK with netatmo
+        stations_with_improvements_netatmo_rmse= sum(i >= j for (i, j) in zip(
+            df_improvements.rmse_netatmo_.values,
+            df_improvements.rmse_dwd_.values))
+        stations_without_improvements_netatmo_rmse = sum(i < j for (i, j) in zip(
+            df_improvements.rmse_netatmo_.values,
+            df_improvements.rmse_dwd_.values))
+        percent_of_improvment_netatmo_rmse= 100 * (
+            stations_with_improvements_netatmo_rmse /
+            df_improvements.pearson_corr_dwd_netatmo.shape[0])
+        
         ######################################################
         mean_pearson_correlation_dwd_only = df_improvements.pearson_corr_dwd_.mean()
         mean_pearson_correlation_netatmo_only = df_improvements.pearson_corr_netatmo_.mean()
         mean_pearson_correlation_dwd_netatmo = df_improvements.pearson_corr_dwd_netatmo.mean()
+        
+        mean_rmse_dwd_only = df_improvements.rmse_dwd_.mean()
+        mean_rmse_netatmo_only  = df_improvements.rmse_netatmo_.mean()
+        mean_rmse_netatmo_dwd_only  = df_improvements.rmse_netatmo_dwd_.mean()
 
         #########################################################
         df_improvements.iloc[np.where(
@@ -257,7 +294,7 @@ if plot_results_per_stn:
         ax.plot(df_improvements.index,
                 df_improvements.pearson_corr_netatmo_,
                 alpha=.8,
-                c='k',  # colors_arr,
+                c='g',  # colors_arr,
                 marker='2',
                 label='Netatmo Interpolation %0.2f'
                 % mean_pearson_correlation_netatmo_only)
@@ -354,7 +391,7 @@ if plot_results_per_stn:
         ax.plot(df_improvements.index,
                 df_improvements.spearman_corr_netatmo_,
                 alpha=.8,
-                c='k',  # colors_arr,
+                c='g',  # colors_arr,
                 marker='2',
                 label='Netatmo Interpolation %0.2f'
                 % mean_spearman_correlation_netatmo_only)
@@ -390,6 +427,66 @@ if plot_results_per_stn:
 
         plt.savefig((main_dir / r'ppt_cross_valid_RH_60min' / (
              r'ppt_temporal_spr_corr_%s_events_%s.png'
+                                  % (temp_freq, used_data_acc ))),
+                    papertype='a4', bbox_inches='tight', pad_inches=.2)
+        plt.close()
+        
+    #===========================================================================
+    # PLOT RMSE
+    #===========================================================================
+    if plot_rmse_per_stn:
+        plt.ioff()
+        fig = plt.figure(figsize=(32, 12), dpi=150)
+
+        ax = fig.add_subplot(111)
+
+        ax.plot(df_improvements.index,
+                df_improvements.rmse_dwd_,
+                alpha=.8,
+                c='b',  # colors_arr,
+                marker='d',
+                label='DWD Interpolation %0.2f'
+                % mean_rmse_dwd_only)
+        
+        ax.plot(df_improvements.index,
+                df_improvements.rmse_netatmo_,
+                alpha=.8,
+                c='g',  # colors_arr,
+                marker='2',
+                label='Netatmo Interpolation %0.2f'
+                % mean_rmse_netatmo_only)
+        
+        ax.plot(df_improvements.index,
+                df_improvements.rmse_netatmo_dwd_,
+                alpha=.8,
+                c='r',  # colors_arr,
+                marker='*',
+                label='DWD-Netatmo Interpolation %0.2f'
+                % mean_rmse_netatmo_dwd_only)
+
+        ax.set_title('RMSE Interpolated Rainfall from DWD or Netatmo or DWD-Netatmo\n '
+                     
+                     'Precipitation of %s Intense Events \n'
+                     'Stations with Improvemnts with OK Netatmo no Filter %d / %d, Percentage %0.0f'
+                     '\nStations with Improvemnts with OK DWD-Netatmo %d / %d,'
+                     ' Percentage %0.0f\n'
+                     
+                     % (temp_freq, stations_with_improvements_netatmo_rmse,
+                        df_improvements.rmse_dwd_.shape[0],
+                        percent_of_improvment_netatmo_rmse,
+                         stations_with_improvements_dwd_netatmo_rmse,
+                         df_improvements.rmse_dwd_.shape[0],
+                        percent_of_improvment_dwd_netatmo_rmse ))
+
+        plt.setp(ax.get_xticklabels(), rotation=90)
+        ax.grid(alpha=0.25)
+        #ax.set_yticks(np.arange(0, 1.05, .10))
+        ax.set_xlabel('DWD Stations')
+        ax.legend(loc='lower left')
+        ax.set_ylabel('RMSE')
+
+        plt.savefig((main_dir / r'ppt_cross_valid_RH_60min' / (
+             r'ppt_rmse_per_stn_%s_events_%s.png'
                                   % (temp_freq, used_data_acc ))),
                     papertype='a4', bbox_inches='tight', pad_inches=.2)
         plt.close()
@@ -543,7 +640,7 @@ if plot_results_per_event:
             df_compare.pearson_corr_dwd_.values))
 
         percent_of_improvment = 100 * (stations_with_improvements /
-                                       df_improvements.pearson_corr_dwd_netatmo.shape[0])
+                                       df_compare.pearson_corr_dwd_netatmo.shape[0])
 
         id_stns_no_impv = [id_stn for (id_stn, i, j) in zip(
             df_compare.index,
@@ -563,9 +660,9 @@ if plot_results_per_event:
 
 
         ######################################################
-        mean_pearson_correlation_dwd_only = df_improvements.pearson_corr_dwd_.mean()
-        mean_pearson_correlation_netatmo_only = df_improvements.pearson_corr_netatmo_.mean()
-        mean_pearson_correlation_dwd_netatmo = df_improvements.pearson_corr_dwd_netatmo.mean()
+        mean_pearson_correlation_dwd_only = df_compare.pearson_corr_dwd_.mean()
+        mean_pearson_correlation_netatmo_only = df_compare.pearson_corr_netatmo_.mean()
+        mean_pearson_correlation_dwd_netatmo = df_compare.pearson_corr_dwd_netatmo.mean()
 
         #########################################################
 
@@ -579,15 +676,15 @@ if plot_results_per_event:
                 alpha=.8,
                 c='b',  # colors_arr,
                 marker='d',
-                label='DWD Interpolation %0.2f'
+                label='DWD Interpolation %0.3f'
                 % mean_pearson_correlation_dwd_only)
         
         ax.plot(df_compare.index,
                 df_compare.pearson_corr_netatmo_,
                 alpha=.8,
-                c='k',  # colors_arr,
+                c='g',  # colors_arr,
                 marker='2',
-                label='Netatmo Interpolation %0.2f'
+                label='Netatmo Interpolation %0.3f'
                 % mean_pearson_correlation_netatmo_only)
         
         ax.plot(df_compare.index,
@@ -595,15 +692,15 @@ if plot_results_per_event:
                 alpha=.8,
                 c='r',  # colors_arr,
                 marker='*',
-                label='DWD-Netatmo Interpolation %0.2f'
+                label='DWD-Netatmo Interpolation %0.3f'
                 % mean_pearson_correlation_dwd_netatmo)
 
         ax.set_title('Pearson Correlation Interpolated Rainfall'
                      ' from DWD or Netatmo or DWD-Netatmo\n '
                      
                      'Precipitation of %s Intense Events \n'
-                     'Stations with Improvemnts with OK Netatmo no Filter %d / %d, Percentage %0.0f'
-                     '\nStations with Improvemnts with OK DWD-Netatmo %d / %d,'
+                     'Events with Improvemnts with OK Netatmo no Filter %d / %d, Percentage %0.0f'
+                     '\nEvents with Improvemnts with OK DWD-Netatmo %d / %d,'
                      ' Percentage %0.0f\n'
                      
                      %(temp_freq, stations_with_improvements_netatmo,
@@ -636,98 +733,98 @@ if plot_results_per_event:
         plt.close()
 
 #===============================================================================
+  
+  
+        stations_with_improvements = sum(i >= j for (i, j) in zip(
+             df_compare.spearman_corr_dwd_netatmo.values,
+             df_compare.spearman_corr_dwd_.values))
 #  
+        stations_without_improvements = sum(i < j for (i, j) in zip(
+            df_compare.spearman_corr_dwd_netatmo.values,
+            df_compare.spearman_corr_dwd_.values))
 #  
-#         stations_with_improvements = sum(i >= j for (i, j) in zip(
-#             df_improvements.spearman_corr_dwd_netatmo.values,
-#             df_improvements.spearman_corr_dwd_.values))
+        percent_of_improvment = 100 * (
+            stations_with_improvements /
+            df_compare.spearman_corr_dwd_netatmo.shape[0])
+  
+        id_stns_no_impv = [id_stn for (id_stn, i, j) in zip(
+            df_compare.index,
+            df_compare.spearman_corr_dwd_netatmo.values,
+            df_compare.spearman_corr_dwd_.values) if i < j]
 #  
-#         stations_without_improvements = sum(i < j for (i, j) in zip(
-#             df_improvements.spearman_corr_dwd_netatmo.values,
-#             df_improvements.spearman_corr_dwd_.values))
-#  
-#         percent_of_improvment = 100 * (
-#             stations_with_improvements /
-#            df_improvements.spearman_corr_dwd_netatmo.shape[0])
-#  
-#         id_stns_no_impv = [id_stn for (id_stn, i, j) in zip(
-#             df_improvements.index,
-#             df_improvements.spearman_corr_dwd_netatmo.values,
-#             df_improvements.spearman_corr_dwd_.values) if i < j]
-#  
-#     #     # OK with netatmo
-#         stations_with_improvements_netatmo= sum(i >= j for (i, j) in zip(
-#             df_improvements.spearman_corr_netatmo_.values,
-#             df_improvements.spearman_corr_dwd_.values))
-#         stations_without_improvements_netatmo = sum(i < j for (i, j) in zip(
-#             df_improvements.spearman_corr_netatmo_.values,
-#             df_improvements.spearman_corr_dwd_.values))
-#         percent_of_improvment_netatmo= 100 * (
-#             stations_with_improvements_netatmo /
-#             df_improvements.spearman_corr_dwd_netatmo.shape[0])
-#  
-#         ####
-#         mean_spearman_correlation_dwd_only = df_improvements.spearman_corr_dwd_.mean()
-#         mean_spearman_correlation_netatmo_only = df_improvements.spearman_corr_netatmo_.mean()
-#  
-#         mean_spearman_correlation_dwd_netatmo = df_improvements.spearman_corr_dwd_netatmo.mean()
-#  
-#         #########################################################
-#  
-#         plt.ioff()
-#         fig = plt.figure(figsize=(32, 12), dpi=150)
-#  
-#         ax = fig.add_subplot(111)
-#  
-#         ax.plot(df_improvements.index,
-#                 df_improvements.spearman_corr_dwd_,
-#                 alpha=.8,
-#                 c='b',  # colors_arr,
-#                 marker='d',
-#                 label='DWD Interpolation %0.2f'
-#                 % mean_spearman_correlation_dwd_only)
-#          
-#         ax.plot(df_improvements.index,
-#                 df_improvements.spearman_corr_netatmo_,
-#                 alpha=.8,
-#                 c='k',  # colors_arr,
-#                 marker='2',
-#                 label='Netatmo Interpolation %0.2f'
-#                 % mean_spearman_correlation_netatmo_only)
-#          
-#         ax.plot(df_improvements.index,
-#                 df_improvements.spearman_corr_dwd_netatmo,
-#                 alpha=.8,
-#                 c='r',  # colors_arr,
-#                 marker='*',
-#                 label='DWD-Netatmo Interpolation %0.2f'
-#                 % mean_spearman_correlation_dwd_netatmo)
-#  
-#         ax.set_title('Spearman Correlation Interpolated Rainfall from DWD or Netatmo or DWD-Netatmo\n '
-#                       
-#                      'Precipitation of %s Intense Events \n'
-#                      'Stations with Improvemnts with OK Netatmo no Filter %d / %d, Percentage %0.0f'
-#                      '\nStations with Improvemnts with OK DWD-Netatmo %d / %d,'
-#                      ' Percentage %0.0f\n'
-#                       
-#                      % (temp_freq, stations_with_improvements_netatmo,
-#                         df_improvements.spearman_corr_netatmo_.shape[0],
-#                         percent_of_improvment_netatmo,
-#                          stations_with_improvements,
-#                          df_improvements.spearman_corr_dwd_netatmo.shape[0],
-#                         percent_of_improvment ))
-#  
-#         plt.setp(ax.get_xticklabels(), rotation=90)
-#         ax.grid(alpha=0.25)
-#         ax.set_yticks(np.arange(0, 1.05, .10))
-#         ax.set_xlabel('DWD Stations')
-#         ax.legend(loc='lower left')
-#         ax.set_ylabel('Spearman Correlation')
-#  
-#         plt.savefig((main_dir / r'ppt_cross_valid_RH_60min' / (
-#              r'ppt_temporal_spr_corr_%s_events_%s.png'
-#                                   % (temp_freq, used_data_acc ))),
-#                     papertype='a4', bbox_inches='tight', pad_inches=.2)
-#         plt.close()
+    #     # OK with netatmo
+        stations_with_improvements_netatmo= sum(i >= j for (i, j) in zip(
+            df_compare.spearman_corr_netatmo_.values,
+            df_compare.spearman_corr_dwd_.values))
+        stations_without_improvements_netatmo = sum(i < j for (i, j) in zip(
+            df_compare.spearman_corr_netatmo_.values,
+            df_compare.spearman_corr_dwd_.values))
+        percent_of_improvment_netatmo= 100 * (
+            stations_with_improvements_netatmo /
+            df_compare.spearman_corr_dwd_netatmo.shape[0])
+  
+        ####
+        mean_spearman_correlation_dwd_only = df_compare.spearman_corr_dwd_.mean()
+        mean_spearman_correlation_netatmo_only = df_compare.spearman_corr_netatmo_.mean()
+  
+        mean_spearman_correlation_dwd_netatmo = df_compare.spearman_corr_dwd_netatmo.mean()
+  
+        #########################################################
+  
+        plt.ioff()
+        fig = plt.figure(figsize=(32, 12), dpi=150)
+  
+        ax = fig.add_subplot(111)
+  
+        ax.plot(df_compare.index,
+                df_compare.spearman_corr_dwd_,
+                alpha=.8,
+                c='b',  # colors_arr,
+                marker='d',
+                label='DWD Interpolation %0.2f'
+                % mean_spearman_correlation_dwd_only)
+          
+        ax.plot(df_compare.index,
+                df_compare.spearman_corr_netatmo_,
+                alpha=.8,
+                c='g',  # colors_arr,
+                marker='2',
+                label='Netatmo Interpolation %0.2f'
+                % mean_spearman_correlation_netatmo_only)
+          
+        ax.plot(df_compare.index,
+                df_compare.spearman_corr_dwd_netatmo,
+                alpha=.8,
+                c='r',  # colors_arr,
+                marker='*',
+                label='DWD-Netatmo Interpolation %0.2f'
+                % mean_spearman_correlation_dwd_netatmo)
+  
+        ax.set_title('Spearman Correlation Interpolated Rainfall from DWD or Netatmo or DWD-Netatmo\n '
+                       
+                     'Precipitation of %s Intense Events \n'
+                     'Events with Improvemnts with OK Netatmo no Filter %d / %d, Percentage %0.0f'
+                     '\nEvents with Improvemnts with OK DWD-Netatmo %d / %d,'
+                     ' Percentage %0.0f\n'
+                       
+                     % (temp_freq, stations_with_improvements_netatmo,
+                        df_improvements.spearman_corr_netatmo_.shape[0],
+                        percent_of_improvment_netatmo,
+                         stations_with_improvements,
+                         df_improvements.spearman_corr_dwd_netatmo.shape[0],
+                        percent_of_improvment ))
+  
+        plt.setp(ax.get_xticklabels(), rotation=90)
+        ax.grid(alpha=0.25)
+        ax.set_yticks(np.arange(0, 1.05, .10))
+        ax.set_xlabel('DWD Stations')
+        ax.legend(loc='lower left')
+        ax.set_ylabel('Spearman Correlation')
+  
+        plt.savefig((main_dir / r'ppt_cross_valid_RH_60min' / (
+             r'ppt_spatial_spr_corr_%s_events_%s.png'
+                                  % (temp_freq, used_data_acc ))),
+                    papertype='a4', bbox_inches='tight', pad_inches=.2)
+        plt.close()
 # #===============================================================================
 #===============================================================================
