@@ -48,7 +48,6 @@ Plot everything in the dataframe using a different script
 Especially the change of correlation with distance
 """
 
-
 __author__ = "Abbas El Hachem"
 __copyright__ = 'Institut fuer Wasser- und Umweltsystemmodellierung - IWS'
 __email__ = "abbas.el-hachem@iws.uni-stuttgart.de"
@@ -84,8 +83,8 @@ from _00_additional_functions import (resample_intersect_2_dfs,
 register_matplotlib_converters()
 
 # get working directory
-main_dir = Path(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes')
-os.chdir(main_dir)
+# main_dir = Path(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes')
+# os.chdir(main_dir)
 
 use_reduced_sample_dwd = False
 # =============================================================================
@@ -149,42 +148,47 @@ out_save_dir_orig = (main_dir /
 
 '''
 
+data_dir = Path(
+    r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz/')
 
+main_dir = data_dir
+
+# r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz"
 path_to_ppt_netatmo_data_csv = (
-    r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz'
-    r'\ppt_all_netatmo_rh_hourly_no_freezing_5deg.csv')
+    data_dir / r'ppt_all_netatmo_rh_hourly_no_freezing_5deg.csv')
 assert os.path.exists(path_to_ppt_netatmo_data_csv), 'wrong NETATMO Ppt file'
 
 
 path_to_ppt_netatmo_data_feather = (
-    r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz'
-    r'\ppt_all_netatmo_rh_hourly_no_freezing_5deg.fk')
+    data_dir /
+    r'ppt_all_netatmo_rh_hourly_no_freezing_5deg.fk')
 assert os.path.exists(
     path_to_ppt_netatmo_data_feather), 'wrong NETATMO Ppt file'
 
 
 # HOURLY DATA
 path_to_ppt_dwd_data = (
-    r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz'
-    r'\ppt_dwd_2014_2019_60min_no_freezing_5deg.fk')
+    data_dir /
+    r'ppt_dwd_2014_2019_60min_no_freezing_5deg.fk')
 assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
 
 
 path_to_dwd_coords_df_file = Path(
-    r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\dwd_coords_in_around_RH_utm32.csv")
+    data_dir /
+    r"dwd_coords_in_around_RH_utm32.csv")
 assert os.path.exists(path_to_dwd_coords_df_file), 'wrong DWD coords file'
 
 
 distance_matrix_netatmo_dwd_df_file = (
-    r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz'
-    r'\distance_mtx_in_m_Netatmo_DWD.csv')
+    data_dir /
+    r'distance_mtx_in_m_Netatmo_DWD.csv')
 
 assert os.path.exists(
     distance_matrix_netatmo_dwd_df_file), 'wrong Distance MTX  file'
 
 path_to_netatmo_coords_df_file = (
-    r"X:\staff\elhachem\Data\Netatmo_data\rain_Rheinland-Pfalz_1hour\netatmo_Rheinland-Pfalz_1hour_coords.csv")
-
+    data_dir /
+    r"netatmo_Rheinland-Pfalz_1hour_coords_wgs84.csv")  # wgs84
 
 path_to_netatmo_gd_stns_file = (
     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes"
@@ -201,7 +205,8 @@ path_to_shpfile = (r'F:\data_from_exchange\Netatmo'
 # out_save_dir_orig = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
 #                      r'\plots_NetAtmo_ppt_DWD_ppt_correlation_reduced')
 out_save_dir_orig = (
-    r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\indicator_correlation')
+    data_dir /
+    r'indicator_correlation')
 
 if not os.path.exists(out_save_dir_orig):
     os.mkdir(out_save_dir_orig)
@@ -738,15 +743,15 @@ if __name__ == '__main__':
                 # call this function to get the df, one containing
                 # df_correlations comparing correlations
 
-                path_to_df_correlations = os.path.join(
-                    out_save_dir_orig,
-                    'new_method_pearson_year_allyears_df_comparing_correlations_max_sep_dist_%d_'
-                    'freq_%s_dwd_netatmo_upper_%s_percent_data_considered'
-                    '_neighbor_%d_.csv'  # filtered_95
-                    % (min_dist_thr_ppt, temp_freq,
-                        str(lower_percentile_val).replace('.', '_'),
-                       neighbor_to_chose))
-
+#                 path_to_df_correlations = os.path.join(
+#                     out_save_dir_orig,
+#                     'new_method_pearson_year_allyears_df_comparing_correlations_max_sep_dist_%d_'
+#                     'freq_%s_dwd_netatmo_upper_%s_percent_data_considered'
+#                     '_neighbor_%d_.csv'  # filtered_95
+#                     % (min_dist_thr_ppt, temp_freq,
+#                         str(lower_percentile_val).replace('.', '_'),
+#                        neighbor_to_chose))
+                path_to_df_correlations = ''
                 if (not os.path.exists(path_to_df_correlations)):
 
                     print('\n Data frames do not exist, creating them\n')

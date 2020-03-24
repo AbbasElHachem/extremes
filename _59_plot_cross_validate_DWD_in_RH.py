@@ -36,7 +36,7 @@ plot_rmse_per_stn = True
 
 plot_results_per_event = True
 plot_rmse_per_event = True
-used_data_acc = r'99_20_5'
+used_data_acc = r'99_5_0'
 
 
 
@@ -245,10 +245,10 @@ if plot_results_per_stn:
         # 
         #=======================================================================
         # RMSE OK with dwd-netatmo
-        stations_with_improvements_dwd_netatmo_rmse= sum(i >= j for (i, j) in zip(
+        stations_with_improvements_dwd_netatmo_rmse= sum(i <= j for (i, j) in zip(
             df_improvements.rmse_netatmo_dwd_.values,
             df_improvements.rmse_dwd_.values))
-        stations_without_improvements_dwd_netatmo_rmse = sum(i < j for (i, j) in zip(
+        stations_without_improvements_dwd_netatmo_rmse = sum(i > j for (i, j) in zip(
             df_improvements.rmse_netatmo_dwd_.values,
             df_improvements.rmse_dwd_.values))
         percent_of_improvment_dwd_netatmo_rmse= 100 * (
@@ -256,10 +256,10 @@ if plot_results_per_stn:
             df_improvements.pearson_corr_dwd_netatmo.shape[0])
         
         # RMSE OK with netatmo
-        stations_with_improvements_netatmo_rmse= sum(i >= j for (i, j) in zip(
+        stations_with_improvements_netatmo_rmse= sum(i <= j for (i, j) in zip(
             df_improvements.rmse_netatmo_.values,
             df_improvements.rmse_dwd_.values))
-        stations_without_improvements_netatmo_rmse = sum(i < j for (i, j) in zip(
+        stations_without_improvements_netatmo_rmse = sum(i > j for (i, j) in zip(
             df_improvements.rmse_netatmo_.values,
             df_improvements.rmse_dwd_.values))
         percent_of_improvment_netatmo_rmse= 100 * (
@@ -665,10 +665,10 @@ if plot_results_per_event:
         # 
         #=======================================================================
         # RMSE OK with dwd-netatmo
-        stations_with_improvements_dwd_netatmo_rmse= sum(i >= j for (i, j) in zip(
+        stations_with_improvements_dwd_netatmo_rmse= sum(i <= j for (i, j) in zip(
             df_compare.rmse_netatmo_dwd_.values,
             df_compare.rmse_dwd_.values))
-        stations_without_improvements_dwd_netatmo_rmse = sum(i < j for (i, j) in zip(
+        stations_without_improvements_dwd_netatmo_rmse = sum(i > j for (i, j) in zip(
             df_compare.rmse_netatmo_dwd_.values,
             df_compare.rmse_dwd_.values))
         percent_of_improvment_dwd_netatmo_rmse= 100 * (
@@ -676,10 +676,10 @@ if plot_results_per_event:
             df_compare.pearson_corr_dwd_netatmo.shape[0])
         
         # RMSE OK with netatmo
-        stations_with_improvements_netatmo_rmse= sum(i >= j for (i, j) in zip(
+        stations_with_improvements_netatmo_rmse= sum(i <= j for (i, j) in zip(
             df_compare.rmse_netatmo_.values,
             df_compare.rmse_dwd_.values))
-        stations_without_improvements_netatmo_rmse = sum(i < j for (i, j) in zip(
+        stations_without_improvements_netatmo_rmse = sum(i > j for (i, j) in zip(
             df_compare.rmse_netatmo_.values,
             df_compare.rmse_dwd_.values))
         percent_of_improvment_netatmo_rmse= 100 * (
