@@ -17,6 +17,7 @@ from pandas.plotting import register_matplotlib_converters
 
 from _00_additional_functions import (select_df_within_period,
                                       resampleDf)
+from _08_combine_all_netatmo_into_one_df import max_ppt_thr
 
 register_matplotlib_converters()
 
@@ -37,8 +38,23 @@ path_to_daily_dwd_ppt = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\all
 # path_to_hourly_netatmo_ppt = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new_no_freezing.csv"
 # path_to_hourly_dwd_ppt = r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\all_dwd_hourly_ppt_data_combined_2014_2019_.csv"
 
-path_to_hourly_netatmo_ppt = r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\ppt_all_netatmo_rh_2014_2019_60min_no_freezing_5deg.csv"
-path_to_hourly_dwd_ppt = r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\ppt_dwd_2014_2019_60min_no_freezing_5deg.csv"
+# path_to_hourly_netatmo_ppt = r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\ppt_all_netatmo_rh_2014_2019_60min_no_freezing_5deg.csv"
+# path_to_hourly_dwd_ppt = r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\ppt_dwd_2014_2019_60min_no_freezing_5deg.csv"
+
+path_to_hourly_netatmo_ppt = (
+    r'/run/media/abbas/EL Hachem 2019/home_office'
+    r'/2020_10_03_Rheinland_Pfalz/ppt_all_netatmo_rh_2014_2019_60min_no_freezing_5deg.csv')
+    
+path_to_hourly_dwd_ppt = (
+    r'/run/media/abbas/EL Hachem 2019/home_office'
+    r'/2020_10_03_Rheinland_Pfalz/ppt_dwd_2014_2019_60min_no_freezing_5deg.csv'
+    )
+
+# path to stns in RH
+path_to_hourly_dwd_coords_in_rh = (
+    r'/run/media/abbas/EL Hachem 2019/home_office'
+    r'/2020_10_03_Rheinland_Pfalz/dwd_coords_only_in_RH.csv'
+    )
 
 # if True, stations how measure high value consecutively
 # are investigated and removed if often high values seen
@@ -74,6 +90,12 @@ df_netatmo_hourly = select_df_within_period(df_netatmo_hourly,
 df_dwd_hourly = select_df_within_period(df_dwd_hourly,
                                         start_date,
                                         end_date)
+
+# dwd in RH coords
+df_dwd_coords_in_rh = pd.read_csv(
+    path_to_hourly_dwd_coords_in_rh, 
+    sep=';', index_col=0)
+
 # if resample_data:
 #     for agg_freq in resample_frequencies:
 #         print('DWD stations resampling for', agg_freq)
@@ -144,6 +166,15 @@ df_dwd_hourly = select_df_within_period(df_dwd_hourly,
 #==============================================================================
 #
 #==============================================================================
+# df_netatmo_hourly200 = df_netatmo_hourly[df_netatmo_hourly < 200]
+# df_netatmo_hourly200 = df_netatmo_hourly.copy()
+# for istn, stn in enumerate(df_netatmo_hourly.columns):
+#     for ix, vals in enumerate(df_netatmo_hourly[stn].values):
+#         if vals > 200:
+#             df_netatmo_hourly200.iloc[ix, istn] = np.nan
+# 
+# df_netatmo_hourly200.to_csv(path_to_hourly_netatmo_ppt, sep=';', float_format='%0.2f')
+
 netatmo_maximum_hrs_dates = df_netatmo_hourly.max(axis=1).sort_values()[::-1]
 netatmo_max_100_hours = netatmo_maximum_hrs_dates[:100].sort_index()
 netatmo_max_100_hours = pd.DataFrame(data=netatmo_max_100_hours.values,
@@ -167,8 +198,12 @@ bad_stns = df_many_duplicates_per_stn['Station Id'].values
 # bad_hours = stns_netatmo[stns_netatmo.duplicated()]
 # good_hours = stns_netatmo[~stns_netatmo.duplicated()]
 
+# select stns in RH
+df_dwd_hourly = df_dwd_hourly.loc[
+    :,df_dwd_coords_in_rh.index]
+
 dwd_maximum_hrs_dates = df_dwd_hourly.max(axis=1).sort_values()[::-1]
-dwd_max_100_hours = dwd_maximum_hrs_dates[:300].sort_index()
+dwd_max_100_hours = dwd_maximum_hrs_dates[:100].sort_index()
 dwd_max_100_hours = pd.DataFrame(data=dwd_max_100_hours.values,
                                  index=dwd_max_100_hours.index)
 stns_dwd = df_dwd_hourly.loc[dwd_max_100_hours.index, :].idxmax(
@@ -189,11 +224,20 @@ dwd_max_100_hours['Station Id'] = stns_dwd.values
 # dwd_max_100_hours.to_csv(
 #     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\dwd_hourly_maximum_100_hours.csv",
 #     sep=';', header=False)
-
+# for RH
 # dwd_max_100_hours.to_csv(
 #     r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\dwd_hourly_maximum_100_hours.csv",
 #     sep=';', header=False)
 
+# dwd_max_100_hours.to_csv(
+<<<<<<< HEAD
+#     r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\dwd_hourly_maximum_100_hours.csv",
+#     sep=';', header=False)
+
+=======
+#    r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\dwd_hourly_maximum_100_hours_in_rh.csv",
+#    sep=';', header=False)
+>>>>>>> branch 'master' of https://github.com/AbbasElHachem/extremes.git
 #==============================================================================
 # # daily data
 #==============================================================================

@@ -23,7 +23,7 @@ import osr
 
 import numpy as np
 import pandas as pd
-import seaborn as sn
+#import seaborn as sn
 # import wradlib as wrl
 
 import scipy.spatial as spatial
@@ -32,7 +32,7 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 # import scipy.stats
 from matplotlib import path
-from adjustText import adjust_text
+#from adjustText import adjust_text
 from scipy.optimize import curve_fit
 from scipy.stats import spearmanr as spr
 from scipy.stats import pearsonr as pears
@@ -373,7 +373,7 @@ def resampleDf(df, agg, closed='right', label='right',
     if leave_nan == True:
         # for max_nan == 0, the code runs faster if implemented as follows
         if max_nan == 0:
-            print('Resampling')
+            # print('Resampling')
             # Fill the nan values with values very great negative values and later
             # get the out again, if the sum is still negative
             df = df.fillna(-100000000000.)
@@ -547,11 +547,11 @@ def resample_intersect_2_dfs(df1,  # first dataframe to resample
     """
     df_resample1 = resampleDf(df=df1, agg=temp_freq)
     df_resample2 = resampleDf(df=df2, agg=temp_freq)
-    print('\n+++ Done resampling each df, finding intersection+++')
+    # print('\n+++ Done resampling each df, finding intersection+++')
     idx_common = df_resample1.index.intersection(df_resample2.index)
 
     if idx_common.shape[0] > 0:
-        print('\n********\n common index is found, interescting dataframes')
+        # print('\n********\n common index is found, interescting dataframes')
         try:
             df_common1 = df_resample1.loc[idx_common, :]
             df_common2 = df_resample2.loc[idx_common, :]
@@ -564,15 +564,15 @@ def resample_intersect_2_dfs(df1,  # first dataframe to resample
                                   data=df_common1.values)
         df_common2 = pd.DataFrame(index=df_common2.index,
                                   data=df_common2.values)
-        print('\n********\n After resampling sum of NaN values is')
-        print('first station has ', df_common1.isna().sum(), 'NaN values')
-        print('second station has ', df_common2.isna().sum(), 'NaN values')
+        # print('\n********\n After resampling sum of NaN values is')
+        # print('first station has ', df_common1.isna().sum(), 'NaN values')
+        # print('second station has ', df_common2.isna().sum(), 'NaN values')
 
         try:
             if df_common1.isna().sum()[0] > 0:
                 ix_df1_nans = df_common1.index[np.where(df_common1.isna())[0]]
                 print('first station has Nans on ', len(ix_df1_nans), ' dates')
-                df_common1.dropna(inplace=True)
+                df_common1.dropna(axis=0, inplace=True)
         except IndexError:
             df_common1 = df_common1
 
@@ -1144,10 +1144,10 @@ def calc_plot_contingency_table_2_stations(
             ax = fig.add_subplot(111)
             ax2 = ax.twinx()
             ax.set_aspect(1)
-
-            _ = sn.heatmap(conf_arr, annot=True,
-                           vmin=0.0, cmap=plt.get_cmap('jet'),
-                           vmax=100.0, fmt='.2f')
+            # TODO: install seaborn
+            #_ = sn.heatmap(conf_arr, annot=True,
+            #               vmin=0.0, cmap=plt.get_cmap('jet'),
+            #               vmax=100.0, fmt='.2f')
 
             ax.set_title(
                 'Contingency table \n '
@@ -1298,8 +1298,9 @@ def plt_on_map_agreements(
     ax.set_xlabel('Longitude')
     ax.set_ylabel('Latitude')
     ax.set_aspect(1.0)
-    adjust_text(texts, ax=ax,
-                arrowprops=dict(arrowstyle='->', color='red', lw=0.25))
+    # TODO: install adjust text
+#    adjust_text(texts, ax=ax,
+#                arrowprops=dict(arrowstyle='->', color='red', lw=0.25))
 
     plt.savefig(
         os.path.join(
@@ -1392,18 +1393,25 @@ def func(x, a, b, c, d):
     return a * x**3 + b * x**2 + c * x + d
 
 
-def fit_curve_get_vals_below_curve(x, y, func, stns, shift_per=0.15):
+#def func(x, a):
+#    """ 3degree polynomial function used for fitting and as filter"""
+#    return np.exp(-a * x)
+
+def fit_curve_get_vals_below_curve(x, y, stns, func=func, shift_per=0.15):
     """ fit function to data and shifted 10% downwards
     return all data above and below function with 
     corresponding distance and correlation values and station ids
     """
 
     # bounds=[[a1,b1],[a2,b2]]
-
+    #x = np.insert(x, 0,0)
+    #y = np.insert(y, 1,0)
+    
+    
     popt, _ = curve_fit(
         func, x, y)
 
-    print('fitted parameters are ', popt[0], popt[1], popt[2])  # , popt[3])
+    print('fitted parameters are ', popt)  # , popt[3])
     y_fitted = func(x, *popt)
 
     lower_bound = y_fitted.max() * shift_per
@@ -1422,8 +1430,51 @@ def fit_curve_get_vals_below_curve(x, y, func, stns, shift_per=0.15):
     return (y_fitted_shifted, xvals_below_curve, yvals_below_curve,
             xvals_above_curve, yvals_above_curve, stns_below_curve,
             stns_above_curve)
+#===============================================================================
+# 
+#===============================================================================
 
 
+def exp_func(x, b): 
+    return  np.exp(-x*b)
+
+
+def fit_exp_fct_get_vals_below_abv(x, y, exp_func, stns, shift_factor=1):
+    """ fit exponential function to data and shifted 10% downwards
+    return all data above and below function with 
+    corresponding distance and correlation values and station ids
+    """
+
+    # bounds=[[a1,b1],[a2,b2]]
+    #x = np.insert(x, 0,0)
+    #y = np.insert(y, 1,0)
+    
+    x_arr = np.linspace(0, max(x), x.size)
+    x_scaled = x_arr / max(x)
+    
+    popt, _ = curve_fit(exp_func, x_scaled, y)
+    
+    
+    print('fitted parameters are %.2f' % popt)  # , popt[3])
+    #y_fitted = exp_func(x_scaled, *popt)
+
+    shifted_param = popt * shift_factor
+    y_fitted_shifted = exp_func(x_scaled, *shifted_param)
+    #y_fitted_shifted = y_fitted - lower_bound
+
+    xvals_below_curve = x[np.where(y <= y_fitted_shifted)]
+    yvals_below_curve = y[np.where(y <= y_fitted_shifted)]
+
+    stns_below_curve = stns[np.where(y <= y_fitted_shifted)]
+
+    xvals_above_curve = x[np.where(y > y_fitted_shifted)]
+    yvals_above_curve = y[np.where(y > y_fitted_shifted)]
+
+    stns_above_curve = stns[np.where(y > y_fitted_shifted)]
+
+    return (y_fitted_shifted, xvals_below_curve, yvals_below_curve,
+            xvals_above_curve, yvals_above_curve, stns_below_curve,
+            stns_above_curve)
 #==============================================================================
 #
 #==============================================================================
@@ -1434,21 +1485,21 @@ def gen_path_df_file(main_path, start_path_acc, time_freq,
     """ use this funtion to get the path to the dfs for different neighbors"""
 
     if use_filtered_data is False:
-        return main_path / (
+        return os.path.join(main_path, 
             r'%sfreq_%s_%s_netatmo_upper_%s_percent_data_considered_neighbor_%d_.csv'
             % (start_path_acc, time_freq, data_source, percent, neighbor))
 
-    else:
-        return main_path / (
-            r'%sfreq_%s_%s_netatmo_upper_%s_percent_data_considered_neighbor_%d_filtered_%s.csv'
-            % (start_path_acc, time_freq, data_source, percent, neighbor, filter_percent))
+    #else:
+    #    return main_path / (
+    #        r'%sfreq_%s_%s_netatmo_upper_%s_percent_data_considered_neighbor_%d_filtered_%s.csv'
+    #        % (start_path_acc, time_freq, data_source, percent, neighbor, filter_percent))
 
 #==============================================================================
 #
 #==============================================================================
 
 
-def read_filter_df_corr_return_stns_x_y_vals(df_file, thr_low=0, thr_high=1,
+def read_filter_df_corr_return_stns_x_y_vals(df_file, thr_low=0.001, thr_high=1,
                                              x_col_name='Distance to neighbor',
                                              y_col_name='Bool_Spearman_Correlation'):
     """ read df with correlation values, select all between 0 and 1 and 
