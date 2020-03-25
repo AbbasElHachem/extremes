@@ -211,7 +211,6 @@ stns_dwd = df_dwd_hourly.loc[dwd_max_100_hours.index, :].idxmax(
 dwd_max_100_hours['Station Id'] = stns_dwd.values
 
 
-pass
 # netatmo_max_100_hours.to_csv(
 #     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\netatmo_%s_maximum_100_event.csv" % (
 #         agg_freq),
