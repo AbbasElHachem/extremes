@@ -373,7 +373,7 @@ def resampleDf(df, agg, closed='right', label='right',
     if leave_nan == True:
         # for max_nan == 0, the code runs faster if implemented as follows
         if max_nan == 0:
-            print('Resampling')
+            # print('Resampling')
             # Fill the nan values with values very great negative values and later
             # get the out again, if the sum is still negative
             df = df.fillna(-100000000000.)
@@ -547,11 +547,11 @@ def resample_intersect_2_dfs(df1,  # first dataframe to resample
     """
     df_resample1 = resampleDf(df=df1, agg=temp_freq)
     df_resample2 = resampleDf(df=df2, agg=temp_freq)
-    print('\n+++ Done resampling each df, finding intersection+++')
+    # print('\n+++ Done resampling each df, finding intersection+++')
     idx_common = df_resample1.index.intersection(df_resample2.index)
 
     if idx_common.shape[0] > 0:
-        print('\n********\n common index is found, interescting dataframes')
+        # print('\n********\n common index is found, interescting dataframes')
         try:
             df_common1 = df_resample1.loc[idx_common, :]
             df_common2 = df_resample2.loc[idx_common, :]
@@ -564,9 +564,9 @@ def resample_intersect_2_dfs(df1,  # first dataframe to resample
                                   data=df_common1.values)
         df_common2 = pd.DataFrame(index=df_common2.index,
                                   data=df_common2.values)
-        print('\n********\n After resampling sum of NaN values is')
-        print('first station has ', df_common1.isna().sum(), 'NaN values')
-        print('second station has ', df_common2.isna().sum(), 'NaN values')
+        # print('\n********\n After resampling sum of NaN values is')
+        # print('first station has ', df_common1.isna().sum(), 'NaN values')
+        # print('second station has ', df_common2.isna().sum(), 'NaN values')
 
         try:
             if df_common1.isna().sum()[0] > 0:

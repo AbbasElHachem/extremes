@@ -75,7 +75,7 @@ data_dir_Netamto_dfs = (r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03
 
 
 data_dir_DWD_dfs = data_dir_Netamto_dfs
-netatmo_path_acc_b4 = r'pearson_year_allyears_df_comparing_correlations_max_sep_dist_1000000_'
+netatmo_path_acc_b4 = r'2pearson_year_allyears_df_comparing_correlations_max_sep_dist_1000000_'
 
 netatmo_path_acc = r'pearson_year_allyears_df_comparing_correlations_max_sep_dist_1000000_'
 
@@ -93,8 +93,8 @@ remove_upper_limit = False
 
 plot_dwd_on_top = True
 
-shift_factor = 5
-shift_by_percent = 0
+shift_factor = 10
+shift_by_percent = 10
 #==============================================================================
     
 #==============================================================================
@@ -462,7 +462,7 @@ plt.tight_layout()
 #               percent, time_freq))
 
 plt.savefig(os.path.join(save_dir,  # filtered_2_neighbors_data
-            (r'_%s_%s_%s_fit_exp_fct_%s_shift_%dperc_%dfact_.png'
+            (r'_%s_%s_%s_fit_exp_fct_%s_shift_%dperc_%dfact_2.png'
              % (data_source0, data_source,
                  percent, time_freq, shift_by_percent,
                  shift_factor))),
