@@ -190,9 +190,9 @@ dwd_max_100_hours['Station Id'] = stns_dwd.values
 #     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\dwd_hourly_maximum_100_hours.csv",
 #     sep=';', header=False)
 
-dwd_max_100_hours.to_csv(
-    r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\dwd_hourly_maximum_100_hours.csv",
-    sep=';', header=False)
+# dwd_max_100_hours.to_csv(
+#     r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\dwd_hourly_maximum_100_hours.csv",
+#     sep=';', header=False)
 
 #==============================================================================
 # # daily data
