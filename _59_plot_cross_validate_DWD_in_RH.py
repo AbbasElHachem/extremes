@@ -36,9 +36,7 @@ plot_rmse_per_stn = True
 
 plot_results_per_event = True
 plot_rmse_per_event = True
-used_data_acc = r'99_5_0'
-
-
+used_data_acc = r'99_10_0'
 
 if plot_results_per_stn:
     # , '60min' '180min', '360min', '720min', '1440min']:
