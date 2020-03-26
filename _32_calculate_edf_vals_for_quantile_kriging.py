@@ -40,10 +40,10 @@ plt.ioff()
 # def values to replace edf of ppt=0
 ppt_min_thr_0_vals = 0.1  # everything below it gets value of P0
 
-netatmo_data = False
+netatmo_data = True
 use_good_netatmo_stns = False
 
-dwd_data = True
+dwd_data = False
 resample_data = True
 
 # select data only within this period (same as netatmo / dwd)
@@ -150,6 +150,7 @@ if resample_data:
 
         all_stns = df_stn0.columns.to_list()
 
+        print('Dataframe has %d stations' % len(all_stns))
         data_mtx = np.zeros(shape=(df_stn0.index.shape[0],
                                    len(all_stns))).astype('float')
         data_mtx[data_mtx == 0] = np.nan
@@ -169,6 +170,8 @@ if resample_data:
                     x0, y0 = build_edf_fr_vals(stn_df_no_nans.values)
 
                     y0[np.where(x0 <= 0.1)] = p0 / 2
+                    # replace edf=1 with 0.999999
+                    y0[np.where(y0 == 1)] = 0.9999999999
                     # TODO: Check again
                     df_stn_ = pd.DataFrame(data=stn_df_no_nans.values,
                                            index=stn_df_no_nans.index,

@@ -168,8 +168,9 @@ for stn_mac in in_df_netatmo_coords.index:
         continue
 
 df_distance.to_csv(os.path.join(out_save_dir,  # 'distance_mtx_in_m_NetAtmo_DWD.csv'),
-                                'distance_mtx_in_m_Netatmo_DWD.csv'),
-                   # distance_mtx_in_m_NetAtmo_ppt_DWD_temp
+                                'distance_mtx_in_m_Netatmo_DWD_temp.csv'),
+                   # 'distance_mtx_in_m_Netatmo_DWD.csv'),
+
                    sep=';', float_format='%.4f')
 
 print('Done with everything')

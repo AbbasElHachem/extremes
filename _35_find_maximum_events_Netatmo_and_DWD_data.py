@@ -230,8 +230,14 @@ dwd_max_100_hours['Station Id'] = stns_dwd.values
 #     sep=';', header=False)
 
 # dwd_max_100_hours.to_csv(
+<<<<<<< HEAD
+#     r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\dwd_hourly_maximum_100_hours.csv",
+#     sep=';', header=False)
+
+=======
 #    r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\dwd_hourly_maximum_100_hours_in_rh.csv",
 #    sep=';', header=False)
+>>>>>>> branch 'master' of https://github.com/AbbasElHachem/extremes.git
 #==============================================================================
 # # daily data
 #==============================================================================
