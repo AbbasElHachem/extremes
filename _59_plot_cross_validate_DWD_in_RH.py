@@ -36,46 +36,36 @@ plot_rmse_per_stn = True
 
 plot_results_per_event = True
 plot_rmse_per_event = True
-used_data_acc = r'99_5_0'
+used_data_acc = r'99_gd'  # r'98_20_5'
 
 if plot_results_per_stn:
     # , '60min' '180min', '360min', '720min', '1440min']:
     for temp_freq in ['60min']:
         print(temp_freq)
 
-        path_to_netatmo_interpolation = (main_dir / r'ppt_cross_valid_RH_60min' /
+        path_to_netatmo_interpolation = (
+            main_dir / r'ppt_cross_valid_RH_60min' /
             (r'df_interpolated_netatmo_only_%s_data_%s.csv' % (
                 temp_freq, used_data_acc)))
 
         path_to_dwd_interpolation = (main_dir / 
              r'ppt_cross_valid_RH_60min' /
-            (r'df_interpolated_dwd_only_%s_data_%s.csv' %(
+            (r'df_interpolated_dwd_only_%s_data_%s.csv' % (
                  temp_freq, used_data_acc)))
         
         path_to_dwd_netatmo_interpolation = (main_dir /
              r'ppt_cross_valid_RH_60min' /
             (r'df_interpolated_dwd_netatmos_comb_%s_data_%s.csv' %(
                  temp_freq, used_data_acc)))
-                
+        #======================================================================
+        # 
+        #======================================================================
 
         path_dwd_ppt_data = main_dir / (
             r"ppt_dwd_2014_2019_%s_no_freezing_5deg.csv" % temp_freq)
         df_dwd_ppt = pd.read_csv(path_dwd_ppt_data, sep=';', index_col=0,
                                  parse_dates=True, infer_datetime_format=True)
         # df_dwd_edf.dropna(inplace=True)
-
-        df_improvements = pd.DataFrame(
-            index=df_dwd_ppt.columns,
-            columns=['pearson_corr_dwd_',
-                     'spearman_corr_dwd_',
-                     'pearson_corr_netatmo_',
-                     'spearman_corr_netatmo_',
-                     'pearson_corr_dwd_netatmo',
-                     'spearman_corr_dwd_netatmo',
-                     ])
-
-        min_orig_qnt_thr = 0.
-
 
         #======================================================================
         #
@@ -93,21 +83,32 @@ if plot_results_per_stn:
                                      sep=';', index_col=0,
                                      parse_dates=True,
                                      infer_datetime_format=True)
-
+#         df_netatmo_dwd2 = pd.read_csv(path_to_dwd_netatmo_interpolation,
+#                                      sep=';', index_col=0,
+#                                      parse_dates=True,
+#                                      infer_datetime_format=True)
         print(df_netatmo_dwd.isna().sum().max())
 
-
+        df_improvements = pd.DataFrame(
+            index=df_dwd.columns,
+            columns=['pearson_corr_dwd_',
+                     'spearman_corr_dwd_',
+                     'pearson_corr_netatmo_',
+                     'spearman_corr_netatmo_',
+                     'pearson_corr_dwd_netatmo',
+                     'spearman_corr_dwd_netatmo',
+                     ])
         try:
 
-            for stn_ in df_dwd_ppt.columns:
-                #                 if stn_ == '00384':
-                #                     raise Exception
+            for stn_ in df_dwd.columns:
+#                 if stn_ == 'P1072':
+#                     raise Exception
                 #                     pass
                 #                     print(stn_)
                 df_compare = pd.DataFrame(index=df_dwd.index)
 
                 # :
-                for event_date in df_dwd.index.intersection(df_dwd_ppt.index):
+                for event_date in df_dwd.index:
                     # print(event_date)
 
                     # event_date = '2019-07-27 20:00:00'
@@ -116,12 +117,12 @@ if plot_results_per_stn:
                     ppt_stn_interp_netatmo = df_netatmo.loc[event_date, stn_]
                     ppt_stn_interp_netatmo_dwd = df_netatmo_dwd.loc[event_date, stn_]
 #                     edf_stn_interp_netatmo_dwd_unc05perc = df_netatmo_dwd_unc05perc.loc[
-#                         event_date, stn_]
-                    if ((ppt_stn_orig >= 0) and
+#                         event_date, stn_] ppt_stn_orig
+                    if ((ppt_stn_orig >= 0 and
                         (ppt_stn_interp_dwd >= 0) and
-                            (ppt_stn_interp_netatmo >= 0 and
-                             (ppt_stn_interp_netatmo_dwd >= 0)
-                             )):
+                           (ppt_stn_interp_netatmo >= 0 and
+                            (ppt_stn_interp_netatmo_dwd >= 0)
+                             ))):
                         # and(edf_stn_interp_netatmo_dwd_unc05perc >= 0)
                         df_compare.loc[
                             event_date,
@@ -150,7 +151,7 @@ if plot_results_per_stn:
                         df_compare.loc[event_date,
                                        'interpolated_quantile_netatmo_dwd'] = np.nan
 
-                df_compare = df_compare[df_compare > 0]
+                df_compare = df_compare[df_compare >= 0]
                 df_compare.dropna(how='any', inplace=True)
                 
                 if df_compare.values.shape[0] > 1:  # at least 20evnts
@@ -221,8 +222,9 @@ if plot_results_per_stn:
             df_improvements.pearson_corr_dwd_netatmo.values,
             df_improvements.pearson_corr_dwd_.values))
 
-        percent_of_improvment = 100 * (stations_with_improvements /
-                                       df_improvements.pearson_corr_dwd_netatmo.shape[0])
+        percent_of_improvment = 100 * (
+            stations_with_improvements /
+               df_improvements.pearson_corr_dwd_.shape[0])
 
         id_stns_no_impv = [id_stn for (id_stn, i, j) in zip(
             df_improvements.index,
@@ -238,7 +240,7 @@ if plot_results_per_stn:
             df_improvements.pearson_corr_dwd_.values))
         percent_of_improvment_netatmo= 100 * (
             stations_with_improvements_netatmo /
-            df_improvements.pearson_corr_dwd_netatmo.shape[0])
+            df_improvements.pearson_corr_dwd_.shape[0])
         #=======================================================================
         # 
         #=======================================================================
@@ -251,7 +253,7 @@ if plot_results_per_stn:
             df_improvements.rmse_dwd_.values))
         percent_of_improvment_dwd_netatmo_rmse= 100 * (
             stations_with_improvements_dwd_netatmo_rmse /
-            df_improvements.pearson_corr_dwd_netatmo.shape[0])
+            df_improvements.pearson_corr_dwd_.shape[0])
         
         # RMSE OK with netatmo
         stations_with_improvements_netatmo_rmse= sum(i <= j for (i, j) in zip(
@@ -262,7 +264,7 @@ if plot_results_per_stn:
             df_improvements.rmse_dwd_.values))
         percent_of_improvment_netatmo_rmse= 100 * (
             stations_with_improvements_netatmo_rmse /
-            df_improvements.pearson_corr_dwd_netatmo.shape[0])
+            df_improvements.pearson_corr_dwd_.shape[0])
         
         ######################################################
         mean_pearson_correlation_dwd_only = df_improvements.pearson_corr_dwd_.mean()
@@ -277,7 +279,7 @@ if plot_results_per_stn:
         df_improvements.iloc[np.where(
             df_improvements.pearson_corr_dwd_.isna())]
         plt.ioff()
-        fig = plt.figure(figsize=(32, 12), dpi=150)
+        fig = plt.figure(figsize=(16, 10), dpi=150)
 
         ax = fig.add_subplot(111)
 
@@ -317,7 +319,7 @@ if plot_results_per_stn:
                         df_improvements.pearson_corr_netatmo_.shape[0],
                         percent_of_improvment_netatmo,
                          stations_with_improvements,
-                         df_improvements.pearson_corr_dwd_netatmo.shape[0],
+                         df_improvements.pearson_corr_dwd_.shape[0],
                         percent_of_improvment ))
 
         plt.setp(ax.get_xticklabels(), rotation=90)
@@ -347,7 +349,7 @@ if plot_results_per_stn:
 
         percent_of_improvment = 100 * (
             stations_with_improvements /
-           df_improvements.spearman_corr_dwd_netatmo.shape[0])
+           df_improvements.pearson_corr_dwd_.shape[0])
 
         id_stns_no_impv = [id_stn for (id_stn, i, j) in zip(
             df_improvements.index,
@@ -363,7 +365,7 @@ if plot_results_per_stn:
             df_improvements.spearman_corr_dwd_.values))
         percent_of_improvment_netatmo= 100 * (
             stations_with_improvements_netatmo /
-            df_improvements.spearman_corr_dwd_netatmo.shape[0])
+            df_improvements.pearson_corr_dwd_.shape[0])
 
         ####
         mean_spearman_correlation_dwd_only = df_improvements.spearman_corr_dwd_.mean()
@@ -374,7 +376,7 @@ if plot_results_per_stn:
         #########################################################
 
         plt.ioff()
-        fig = plt.figure(figsize=(32, 12), dpi=150)
+        fig = plt.figure(figsize=(16, 10), dpi=150)
 
         ax = fig.add_subplot(111)
 
@@ -413,7 +415,7 @@ if plot_results_per_stn:
                         df_improvements.spearman_corr_netatmo_.shape[0],
                         percent_of_improvment_netatmo,
                          stations_with_improvements,
-                         df_improvements.spearman_corr_dwd_netatmo.shape[0],
+                         df_improvements.pearson_corr_dwd_.shape[0],
                         percent_of_improvment ))
 
         plt.setp(ax.get_xticklabels(), rotation=90)
@@ -434,7 +436,7 @@ if plot_results_per_stn:
     #===========================================================================
     if plot_rmse_per_stn:
         plt.ioff()
-        fig = plt.figure(figsize=(32, 12), dpi=150)
+        fig = plt.figure(figsize=(16, 10), dpi=150)
 
         ax = fig.add_subplot(111)
 
@@ -505,7 +507,7 @@ if plot_results_per_event:
 
         path_to_dwd_interpolation = (main_dir / 
              r'ppt_cross_valid_RH_60min' /
-            (r'df_interpolated_dwd_only_%s_data_%s.csv' %(
+            (r'df_interpolated_dwd_only_%s_data_%s.csv' % (
                  temp_freq, used_data_acc)))
         
         path_to_dwd_netatmo_interpolation = (main_dir /
@@ -696,7 +698,7 @@ if plot_results_per_event:
         #########################################################
 
         plt.ioff()
-        fig = plt.figure(figsize=(32, 12), dpi=150)
+        fig = plt.figure(figsize=(16, 10), dpi=150)
 
         ax = fig.add_subplot(111)
 
@@ -801,7 +803,7 @@ if plot_results_per_event:
         #########################################################
   
         plt.ioff()
-        fig = plt.figure(figsize=(32, 12), dpi=150)
+        fig = plt.figure(figsize=(16, 10), dpi=150)
   
         ax = fig.add_subplot(111)
   

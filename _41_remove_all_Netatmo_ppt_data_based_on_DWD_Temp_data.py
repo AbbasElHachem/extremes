@@ -22,29 +22,64 @@ import time
 import pandas as pd
 import numpy as np
 
+from scipy.spatial import cKDTree
+
 from _00_additional_functions import resample_Humidity_Df
 #==============================================================================
 #
 #==============================================================================
-
+# for RH
+# path_to_DWD_temp_data = (
+#     r'x:\exchange\ElHachem\DWD_Reutlingen_Temperature\dwd_reutlingen_temp_2014_2019.csv')
+# 
+# path_to_DWD_temp_data = (
+#     r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\temp_dwd_2014_2019_60min.csv")
+# 
+# path_to_DWD_ppt_data = (
+#     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
+#     r"\all_dwd_hourly_ppt_data_combined_2015_2019_.csv")
+# 
+# path_to_Netatmo_ppt_data = (
+#     r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\ppt_all_netatmo_rh_hourly.csv")
+# # ppt_dwd_2014_2019_60min
+# # path_to_distance_mtx_Netatmo_ppt_DWD_temp = (
+# #     r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\distance_mtx_in_m_Netatmo_DWD_temp.csv")
+# 
+# path_to_distance_mtx_Netatmo_ppt_DWD_temp = (
+#     r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\distance_mtx_in_m_Netatmo_DWD_temp.csv")
+#==============================================================================
+# 
+#==============================================================================
+# for BW
 # path_to_DWD_temp_data = (
 #     r'x:\exchange\ElHachem\DWD_Reutlingen_Temperature\dwd_reutlingen_temp_2014_2019.csv')
 
 path_to_DWD_temp_data = (
-    r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\temp_dwd_2014_2019_60min.csv")
+    r"/run/media/abbas/EL Hachem 2019/DWD_download_Temperature_data"
+    "/all_dwd_daily_temp_data_combined_2014_2019.csv")
 
 path_to_DWD_ppt_data = (
-    r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
-    r"\all_dwd_hourly_ppt_data_combined_2015_2019_.csv")
+    r"/run/media/abbas/EL Hachem 2019/home_office/NetAtmo_BW"
+    r"/all_dwd_hourly_ppt_data_combined_2015_2019_.csv")
 
-path_to_Netatmo_ppt_data = (
-    r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\ppt_all_netatmo_rh_hourly.csv")
+# path_to_Netatmo_ppt_data = (
+#    r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\ppt_all_netatmo_rh_hourly.csv")
 # ppt_dwd_2014_2019_60min
 # path_to_distance_mtx_Netatmo_ppt_DWD_temp = (
 #     r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\distance_mtx_in_m_Netatmo_DWD_temp.csv")
 
-path_to_distance_mtx_Netatmo_ppt_DWD_temp = (
-    r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\distance_mtx_in_m_Netatmo_DWD_temp.csv")
+# path to Netatmo ppt coords
+path_to_Netatmo_ppt_coords = (
+    r"/run/media/abbas/EL Hachem 2019/home_office/NetAtmo_BW"
+    r"/netatmo_bw_1hour_coords_utm32.csv")
+# dwd temp coords
+path_to_DWD_temp_coords = (
+    r"/run/media/abbas/EL Hachem 2019/DWD_download_Temperature_data"
+    r"/Dwd_temperature_stations_coords_in_BW_utm32.csv")
+
+path_to_DWD_ppt_coords = (
+    r"/run/media/abbas/EL Hachem 2019/home_office/NetAtmo_BW"
+    r"/station_coordinates_names_hourly_only_in_BW_utm32.csv")
 
 freezing_temp = 5  # below 5 degrees it is snow
 
@@ -77,20 +112,53 @@ in_df_dwd_temp_data_daily = resample_Humidity_Df(in_df_dwd_temp_data,
                                                  temp_freq='D')
 # read Netatmo ppt data
 in_df_netatmo_ppt_data = pd.read_csv(
-    path_to_Netatmo_ppt_data,
+    path_to_DWD_ppt_data,  # path_to_Netatmo_ppt_data,
     sep=';', index_col=0,
     engine='c')
 in_df_netatmo_ppt_data.index = pd.to_datetime(in_df_netatmo_ppt_data.index,
                                               format='%Y-%m-%d %H:%M:%S')
 
+# read Netatmo ppt coords
+in_netatmo_df_coords_utm32 = pd.read_csv(
+    path_to_DWD_ppt_coords,  # path_to_Netatmo_ppt_coords
+    sep=';', index_col=0,
+    engine='c')
+in_netatmo_df_coords_utm32.index = in_df_netatmo_ppt_data.columns
+# # read DWD ppt data
+# in_df_dwd_ppt_data = pd.read_csv(
+#     path_to_DWD_ppt_data,
+#     sep=';', index_col=0,
+#     engine='c')
+# in_df_dwd_ppt_data.index = pd.to_datetime(in_df_dwd_ppt_data.index,
+#                                               format='%Y-%m-%d %H:%M:%S')
+
+# read DWD temp coords
+in_df_dwd_temp_coords = pd.read_csv(
+    path_to_DWD_temp_coords,
+    sep=';', index_col=0,
+    engine='c')
+in_df_dwd_temp_coords.index = ['0' * (5 - len(str(ix))) + str(ix)
+                                for ix in in_df_dwd_temp_coords.index]
+
+in_df_dwd_temp_coords = in_df_dwd_temp_coords.loc[
+    in_df_dwd_temp_coords.index.intersection(
+        in_netatmo_df_coords_utm32.index).intersection(
+        in_df_dwd_temp_data.columns), :]
+dwd_coords_xy = [(x, y) for x, y in zip(
+        in_df_dwd_temp_coords.loc[:, 'X'].values,
+        in_df_dwd_temp_coords.loc[:, 'Y'].values)]
+    
+# create a tree from coordinates
+dwd_points_tree = cKDTree(dwd_coords_xy)
+dwd_stns_ids = in_df_dwd_temp_coords.index   
 # read distance matrix dwd-netamot ppt
-in_df_distance_netatmo_dwd = pd.read_csv(
-    path_to_distance_mtx_Netatmo_ppt_DWD_temp,
-    sep=';', index_col=0)
+# in_df_distance_netatmo_dwd = pd.read_csv(
+#     path_to_distance_mtx_Netatmo_ppt_DWD_temp,
+#     sep=';', index_col=0)
 
 # keep only stations in BW with data from (2014-2019)
-in_df_distance_netatmo_dwd_bw = in_df_distance_netatmo_dwd.loc[
-    in_df_netatmo_ppt_data.columns, in_df_dwd_temp_data_daily.columns]
+# in_df_distance_netatmo_dwd_bw = in_df_distance_netatmo_dwd.loc[
+#     in_df_netatmo_ppt_data.columns, in_df_dwd_temp_data_daily.columns]
 
 # in_df_distance_netatmo_dwd_bw = in_df_distance_netatmo_dwd
 
@@ -103,9 +171,19 @@ for netatmo_stn in in_df_netatmo_ppt_data.columns:
     print('Netatmo station is', netatmo_stn)
     netatmo_stn_df = in_df_netatmo_ppt_data.loc[:, netatmo_stn].dropna()
 
-    distance_to_dwd_stns = in_df_distance_netatmo_dwd_bw.loc[netatmo_stn, :]
-    min_distance = distance_to_dwd_stns.sort_values()[0]
-    dwd_stn_id = distance_to_dwd_stns.sort_values().index[0]
+    # find distance to all dwd stations, sort them, select minimum
+    (xnetatmo, ynetamto) = (
+        in_netatmo_df_coords_utm32.loc[netatmo_stn, 'X'],
+        in_netatmo_df_coords_utm32.loc[netatmo_stn, 'Y'])
+    # This finds the index of all points within
+
+    distances, indices = dwd_points_tree.query(
+        np.array([xnetatmo, ynetamto]),
+               k=2)
+#             coords_nearest_nbr = dwd_coords_xy[indices[neighbor_to_chose]]
+    dwd_stn_id = dwd_stns_ids[indices[0]]
+    min_distance = np.round(distances[0], 2)
+
 
     print('Distance to DWD Temp station', np.round(min_distance, 2))
     dwd_temp_data = in_df_dwd_temp_data_daily.loc[:, dwd_stn_id].dropna()
@@ -151,16 +229,27 @@ for netatmo_stn in in_df_netatmo_ppt_data.columns:
 
 print('\nSaving new df')
 
+# netatmo_stn_df_no_freezing_vals.to_csv(
+#     r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz'
+#     r'\ppt_all_netatmo_rh_2014_2019_60min_no_freezing_5deg.csv',
+#     sep=';', float_format='%0.2f')
+# # \ppt_dwd_2014_2019_60min_no_freezing_5deg.csv'
+# netatmo_stn_df_no_freezing_vals.reset_index(inplace=True)
+# netatmo_stn_df_no_freezing_vals.rename(columns={'index': 'Time'}, inplace=True)
+# netatmo_stn_df_no_freezing_vals.to_feather(
+#     os.path.join(r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz'
+#                  r'\ppt_all_netatmo_rh_2014_2019_60min_no_freezing_5deg.fk'))
+
 netatmo_stn_df_no_freezing_vals.to_csv(
-    r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz'
-    r'\ppt_all_netatmo_rh_2014_2019_60min_no_freezing_5deg.csv',
+    r"/run/media/abbas/EL Hachem 2019/home_office/NetAtmo_BW"
+    r"/all_dwd_hourly_ppt_data_combined_2015_2019_no_freezing_5deg_.csv",
     sep=';', float_format='%0.2f')
 # \ppt_dwd_2014_2019_60min_no_freezing_5deg.csv'
 netatmo_stn_df_no_freezing_vals.reset_index(inplace=True)
 netatmo_stn_df_no_freezing_vals.rename(columns={'index': 'Time'}, inplace=True)
 netatmo_stn_df_no_freezing_vals.to_feather(
-    os.path.join(r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz'
-                 r'\ppt_all_netatmo_rh_2014_2019_60min_no_freezing_5deg.fk'))
+    os.path.join(r"/run/media/abbas/EL Hachem 2019/home_office/NetAtmo_BW"
+    r"/all_dwd_hourly_ppt_data_combined_2015_2019_no_freezing_5deg_.fk"))
 STOP = timeit.default_timer()  # Ending time
 print(('\n****Done with everything on %s.\nTotal run time was'
        ' about %0.4f seconds ***' % (time.asctime(), STOP - START)))
