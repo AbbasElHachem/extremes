@@ -70,6 +70,7 @@ from scipy.spatial import cKDTree
 from _00_additional_functions import (resample_intersect_2_dfs,
                                       select_convective_season,
                                       select_df_within_period,
+                                      select_df_within_period_year_basis,
                                       get_cdf_part_abv_thr,
                                       plt_on_map_agreements,
                                       plt_correlation_with_distance
@@ -496,8 +497,49 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                             columns=[stn_2_dwd])
                         
                         # shift netatmo by 1 hour
-                        df_netatmo_cmn_shifted = df_netatmo_cmn.shift(1)
+                        df_netatmo_cmn_shifted = df_netatmo_cmn.shift(-1)
                         
+                        #======================================================
+                        # # shift only part
+                        #======================================================
+                        
+                        in_df_april_mid_oct = select_df_within_period_year_basis(
+                            df_netatmo_cmn)
+    
+                        # shift by one hour forward
+                        in_df_april_mid_oct = in_df_april_mid_oct.shift(1)
+                        
+                        idx_to_keep = [
+                            ix for ix in df_netatmo_cmn.index
+                             if ix not in in_df_april_mid_oct.index]
+                        in_df_mid_oct_mars = df_netatmo_cmn.loc[idx_to_keep, :]
+                        
+                        time_arr = pd.date_range(start=df_netatmo_cmn.index[0],
+                                                end=df_netatmo_cmn.index[-1],
+                                                freq='H')
+                        
+                        df_shifted = pd.DataFrame(index=time_arr,
+                                                columns=['sum_rain'])
+                        df_shifted.loc[
+                            in_df_april_mid_oct.index,
+                             'sum_rain'
+                             ] = in_df_april_mid_oct.values.ravel()
+                             
+                        df_shifted.loc[
+                            in_df_mid_oct_mars.index,
+                            'sum_rain'] = in_df_mid_oct_mars.values.ravel()
+                                                 
+                        df_shifted.dropna(inplace=True, how='all')
+                        
+                        df_netatmo_cmn_shifted = df_shifted 
+                        cmn_idx = df_dwd_cmn.index.intersection(
+                            df_netatmo_cmn_shifted.index)
+                        df_dwd_cmn = df_dwd_cmn.loc[cmn_idx, :]
+                        
+                        df_netatmo_cmn = df_netatmo_cmn.loc[cmn_idx, :]
+                        #======================================================
+                        # 
+                        #======================================================
                         # get coordinates of netatmo station for plotting
                         # lon_stn_netatmo = in_netatmo_df_coords.loc[
                         #    ppt_stn_id_name_orig, x_col_name]

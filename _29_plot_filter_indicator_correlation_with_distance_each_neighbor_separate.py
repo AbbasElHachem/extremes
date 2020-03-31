@@ -466,7 +466,7 @@ plt.tight_layout()
 #               percent, time_freq))
 
 plt.savefig(os.path.join(save_dir,  # filtered_2_neighbors_data
-            (r'_%s_%s_%s_fit_exp_fct_%s_shift_%dperc_%dfact_2.png'
+            (r'_%s_%s_%s_fit_exp_fct_%s_shift_%dperc_%dfact_4.png'
              % (data_source0, data_source,
                  percent, time_freq, shift_by_percent,
                  shift_factor))),
