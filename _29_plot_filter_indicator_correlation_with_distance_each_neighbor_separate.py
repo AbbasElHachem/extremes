@@ -75,7 +75,7 @@ data_dir_Netamto_dfs = (r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03
 
 
 data_dir_DWD_dfs = data_dir_Netamto_dfs
-netatmo_path_acc_b4 = r'2pearson_year_allyears_df_comparing_correlations_max_sep_dist_1000000_'
+netatmo_path_acc_b4 = r'pearson_year_allyears_df_comparing_correlations_max_sep_dist_1000000_'
 
 netatmo_path_acc = r'pearson_year_allyears_df_comparing_correlations_max_sep_dist_1000000_'
 
@@ -322,6 +322,8 @@ x0_abv_2 = in_df0.loc[stnabove0,
 y0_abv_2 = in_df0.loc[stnabove0,
                       'Bool_Spearman_Correlation'].dropna().values
 
+y0_shifted = in_df0.loc[s0,
+                      'Bool_Spearman_Correlation_Shifted'].dropna().values
 #==============================================================================
 #
 #==============================================================================
@@ -392,6 +394,8 @@ fig, axs = plt.subplots(1, 2, sharex=True, sharey=True,
 # plt.figure(figsize=(12, 8), dpi=300)
 
 axs[0].scatter(x0, y0, c='r', alpha=0.75, marker='x', s=34)
+axs[0].scatter(x0, y0_shifted, c='b', alpha=0.75, marker='o', s=34)
+
 # axs[0].scatter(x1_abv_2_new, y1_abv_2_new, c='b', alpha=0.75, marker='x', s=34)
 # axs[0].scatter(x2_abv_2, y2_abv_2, c='g', alpha=0.75, marker='x', s=34)
 

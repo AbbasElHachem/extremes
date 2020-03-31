@@ -32,7 +32,9 @@ from _00_additional_functions import (list_all_full_path,
 # rain_bw_1hour'
 # dfs_loc = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\rain_bw_5min'
 # dfs_loc = r'X:\staff\elhachem\Data\Netatmo_data\rain_Reutlingen_5min'
-dfs_loc = r'X:\staff\elhachem\Data\Netatmo_data\rain_Rheinland-Pfalz_1hour'
+# dfs_loc = r'X:\staff\elhachem\Data\Netatmo_data\rain_Rheinland-Pfalz_1hour'
+
+dfs_loc = r'/run/media/abbas/EL Hachem 2019/home_office/Data/Netatmo_data/rain_Rheinland-Pfalz_1hour/'
 # dfs_loc = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\rain_UK_1hour'
 # dfs_loc = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\temperature_bw_1hour'
 
@@ -88,14 +90,23 @@ for df_file in dfs_list_ppt:
     in_df.dropna(inplace=True)
 
     in_df_april_mid_oct = select_df_within_period_year_basis(in_df)
-    # shift by one year forward
-    in_df_april_mid_oct = in_df_april_mid_oct.shift(periods=1, freq='60min')
-
+    
+    # shift by one hour forward
+    in_df_april_mid_oct = in_df_april_mid_oct.shift(1)
+    
     idx_to_keep = [
         ix for ix in in_df.index if ix not in in_df_april_mid_oct.index]
     in_df_mid_oct_mars = in_df.loc[idx_to_keep, :]
-
-    in_df_new = pd.concat([in_df_april_mid_oct, in_df_mid_oct_mars])
+    
+    time_arr = pd.date_range(start=in_df.index[0],
+                            end=in_df.index[-1],
+                            freq='H')
+    df_empty = pd.DataFrame(index=time_arr,
+                            columns=['sum_rain'])
+    df_empty.loc[in_df_april_mid_oct.index, 'sum_rain'] = in_df_april_mid_oct.values.ravel()
+    df_empty.loc[in_df_mid_oct_mars.index, 'sum_rain'] = in_df_mid_oct_mars.values.ravel()
+    df_empty.dropna(inplace=True, how='all')
+    in_df_new = df_empty  # pd.concat([in_df_april_mid_oct, in_df_mid_oct_mars])
 
     if in_df_new.values.shape[0] >= minimal_number_of_vals:
         print('Data has the following shape', in_df.values.shape)

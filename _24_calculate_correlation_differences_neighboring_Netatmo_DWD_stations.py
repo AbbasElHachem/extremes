@@ -65,6 +65,7 @@ from pandas.plotting import register_matplotlib_converters
 
 from scipy.stats import spearmanr as spr
 from scipy.stats import pearsonr as pears
+from scipy.spatial import cKDTree
 
 from _00_additional_functions import (resample_intersect_2_dfs,
                                       select_convective_season,
@@ -108,7 +109,7 @@ use_reduced_sample_dwd = False
 
 path_to_ppt_netatmo_data_csv = (
     r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz/'
-    r'/ppt_all_netatmo_rh_hourly_no_freezing_5deg.csv')
+    r'/ppt_all_netatmo_rh_2014_2019_60min_no_freezing_5deg.csv')
 assert os.path.exists(path_to_ppt_netatmo_data_csv), 'wrong NETATMO Ppt file'
 
 # for reading ppt data station by station
@@ -126,7 +127,7 @@ assert os.path.exists(path_to_ppt_netatmo_data_csv), 'wrong NETATMO Ppt file'
 
 path_to_ppt_netatmo_data_feather = (
     r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz'
-    r'/ppt_all_netatmo_rh_hourly_no_freezing_5deg.fk')
+    r'/ppt_all_netatmo_rh_2014_2019_60min_no_freezing_5deg.fk')
 assert os.path.exists(
     path_to_ppt_netatmo_data_feather), 'wrong NETATMO Ppt file'
 
@@ -191,6 +192,15 @@ path_to_shpfile = (r'F:\data_from_exchange\Netatmo'
 
 # assert os.path.exists(path_to_shpfile), 'wrong shapefile path'
 
+# COORDINATES
+path_to_dwd_coords_utm32 = (
+    r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz'
+    r'/dwd_coords_in_around_RH_utm32.csv')
+ 
+path_to_netatmo_coords_utm32 = (
+    r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz'
+    r'/netatmo_Rheinland-Pfalz_1hour_coords_utm32.csv')
+
 # out_save_dir_orig = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
 #                      r'\plots_NetAtmo_ppt_DWD_ppt_correlation_reduced')
 out_save_dir_orig = (
@@ -222,8 +232,7 @@ min_dist_thr_ppt = 100 * 1e4  # 5000  # m
 max_ppt_thr = 200.  # ppt above this value are not considered
 
 # only highest x% of the values are selected
-lower_percentile_val_lst = [99.0, 99.5]  # [80, 85, 90, 95, 99]
-
+lower_percentile_val_lst = [99.0]  # [80, 85, 90, 95, 99]
 
 # ['10min', '60min', '120min', '480min', '720min', '1440min']
 aggregation_frequencies = ['60min']
@@ -231,7 +240,7 @@ aggregation_frequencies = ['60min']
 # temporal aggregation of df
 
 # [0, 1, 2, 3, 4]  # refers to DWD neighbot (0=first)
-neighbors_to_chose_lst = [0, 1, 2]
+neighbors_to_chose_lst = [0]
 # 30 days * 24 hours * 2month
 # minimum hourly values that should be available per station
 min_req_ppt_vals = 10  # 30 * 24 * 2
@@ -245,7 +254,7 @@ plot_figures = False
 date_fmt = '%Y-%m-%d %H:%M:%S'
 
 # select data only within this period (same as netatmo)
-start_date = '2014-01-01 00:00:00'
+start_date = '2015-01-01 00:00:00'
 end_date = '2019-12-30 00:00:00'
 
 #==============================================================================
@@ -265,7 +274,9 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
         min_dist_thr_ppt,  # distance threshold when selecting dwd neigbours
         temp_freq_resample,  # temp freq to resample dfs
         val_thr_percent,  # value in percentage, select all values above it
-        min_req_ppt_vals  # threshold, minimum ppt values per station
+        min_req_ppt_vals,  # threshold, minimum ppt values per station
+        path_to_netatmo_coords_utm32,  # path_to_netatmo_coords_utm32
+        path_to_dwd_coords_utm32,  # path_to_dwd_coords_utm32
 ):
     '''
      Find then for the netatmo station the neighboring DWD station
@@ -301,6 +312,23 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
     stns_ppt_ids = [stn_id for stn_id in in_df_distance_netatmo_dwd.index]
 
     # read netatmo good stns df
+    in_netatmo_df_coords_utm32 = pd.read_csv(
+        path_to_netatmo_coords_utm32, sep=';',
+        index_col=0, engine='c')
+    
+    in_dwd_df_coords_utm32 = pd.read_csv(
+        path_to_dwd_coords_utm32, sep=';',
+        index_col=0, engine='c')
+    
+    dwd_coords_xy = [(x, y) for x, y in zip(
+        in_dwd_df_coords_utm32.loc[:, 'X'].values,
+        in_dwd_df_coords_utm32.loc[:, 'Y'].values)]
+    
+    # create a tree from coordinates
+    dwd_points_tree = cKDTree(dwd_coords_xy)
+    dwd_stns_ids = in_dwd_df_coords_utm32.index
+    # get all station names for netatmo
+    stns_ppt_ids = [stn_id for stn_id in in_netatmo_df_coords_utm32.index]
 
 #     in_df_stns = pd.read_csv(path_netatmo_gd_stns, index_col=0,
 #                              sep=';')
@@ -327,10 +355,19 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
         ppt_stn_id_name_orig = ppt_stn_id.replace('_', ':')
         try:
             # read first netatmo station
-            netatmo_ppt_stn1 = pd.read_feather(path_netatmo_ppt_df_feather,
+            try:
+                netatmo_ppt_stn1 = pd.read_feather(path_netatmo_ppt_df_feather,
                                                columns=['Time', ppt_stn_id],
                                                use_threads=True)
-            netatmo_ppt_stn1.set_index('Time', inplace=True)
+            
+                netatmo_ppt_stn1.set_index('Time', inplace=True)
+            except Exception as msg:
+                    # print('error reading dwd', msg)
+                netatmo_ppt_stn1 = pd.read_feather(path_netatmo_ppt_df_feather,
+                                         columns=['index', ppt_stn_id],
+                                         use_threads=True)
+                netatmo_ppt_stn1.set_index('index', inplace=True)
+                
             netatmo_ppt_stn1.index = pd.to_datetime(
                 netatmo_ppt_stn1.index, format=date_fmt)
 
@@ -366,22 +403,41 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                                                        end_date)
 
             # find distance to all dwd stations, sort them, select minimum
-            distances_dwd_to_stn1 = in_df_distance_netatmo_dwd.loc[
-                ppt_stn_id, :]
-            sorted_distances_ppt_dwd = distances_dwd_to_stn1.sort_values(
-                ascending=True)
+            
+            # find distance to all dwd stations, sort them, select minimum
+            (xnetatmo, ynetamto) = (
+                in_netatmo_df_coords_utm32.loc[ppt_stn_id, 'X'],
+                in_netatmo_df_coords_utm32.loc[ppt_stn_id, 'Y'])
+            # This finds the index of all points within
+                # radius
+#             idxs_neighbours = dwd_points_tree.query_ball_point(
+#                     np.array((xnetatmo, ynetamto)), min_dist_thr_ppt)
+            
+            distances, indices = dwd_points_tree.query(
+                np.array([xnetatmo, ynetamto]),
+                       k=5)
+#             coords_nearest_nbr = dwd_coords_xy[indices[neighbor_to_chose]]
+            stn_near = dwd_stns_ids[indices[neighbor_to_chose]]
+            # for BW
+            # stn_near = '0' * (5 - len(str(stn_near))) + str(stn_near)
+            min_dist_ppt_dwd = np.round(distances[neighbor_to_chose], 2)
+            
+#             distances_dwd_to_stn1 = in_df_distance_netatmo_dwd.loc[
+#                 ppt_stn_id, :]
+#             sorted_distances_ppt_dwd = distances_dwd_to_stn1.sort_values(
+#                 ascending=True)
 
-            # select only from neighbor to chose
-            sorted_distances_ppt_dwd = sorted_distances_ppt_dwd.iloc[
-                neighbor_to_chose:]
+#             select only from neighbor to chose
+#             sorted_distances_ppt_dwd = sorted_distances_ppt_dwd.iloc[
+#                 neighbor_to_chose:]
 
             # select the DWD station neighbor
-            min_dist_ppt_dwd = np.round(
-                sorted_distances_ppt_dwd.values[0], 2)
+#             min_dist_ppt_dwd = np.round(
+#                 sorted_distances_ppt_dwd.values[0], 2)
 
             if min_dist_ppt_dwd <= min_dist_thr_ppt:
                 # check if dwd station is near, select and read dwd stn
-                stn_2_dwd = sorted_distances_ppt_dwd.index[0]
+                stn_2_dwd = stn_near  # sorted_distances_ppt_dwd.index[0]
                 # TODO: FIX add TIME
                 try:
                     df_dwd = pd.read_feather(path_to_dwd_data,
@@ -438,12 +494,15 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                             data=df_dwd_cmn.values,
                             index=df_dwd_cmn.index,
                             columns=[stn_2_dwd])
-
+                        
+                        # shift netatmo by 1 hour
+                        df_netatmo_cmn_shifted = df_netatmo_cmn.shift(1)
+                        
                         # get coordinates of netatmo station for plotting
-                        lon_stn_netatmo = in_netatmo_df_coords.loc[
-                            ppt_stn_id_name_orig, x_col_name]
-                        lat_stn_netatmo = in_netatmo_df_coords.loc[
-                            ppt_stn_id_name_orig, y_col_name]
+                        # lon_stn_netatmo = in_netatmo_df_coords.loc[
+                        #    ppt_stn_id_name_orig, x_col_name]
+                        # lat_stn_netatmo = in_netatmo_df_coords.loc[
+                        #    ppt_stn_id_name_orig, y_col_name]
 
                         #======================================================
                         # look for agreements, correlation between all values
@@ -481,6 +540,10 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
 
                         df_netatmo_cmn_Bool = (
                             df_netatmo_cmn > netatmo_ppt_thr_per).astype(int)
+                            
+                        df_netatmo_cmn_Bool_shifted = (
+                            df_netatmo_cmn_shifted > netatmo_ppt_thr_per).astype(int)
+
                         df_dwd_cmn_Bool = (
                             df_dwd_cmn > dwd_ppt_thr_per).astype(int)
 
@@ -488,8 +551,12 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
 
                         bool_pears_corr = np.round(
                             pears(df_dwd_cmn_Bool.values.ravel(),
-                                  df_netatmo_cmn_Bool.values.ravel())[0], 2)
-
+                                  df_netatmo_cmn_Bool.values.ravel())[0], 4)
+                        
+                        bool_pears_corr_shifted = np.round(
+                            pears(df_dwd_cmn_Bool.values.ravel(),
+                                  df_netatmo_cmn_Bool_shifted.values.ravel())[0], 4)
+                        
 #                         bool_spr_corr = np.round(
 #                             spr(df_dwd_cmn_Bool.values.ravel(),
 #                                 df_netatmo_cmn_Bool.values.ravel())[0], 2)
@@ -497,10 +564,10 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                         #======================================================
                         # append the result to df_correlations, for each stn
                         #======================================================
-                        df_results_correlations.loc[ppt_stn_id,
-                                                    'lon'] = lon_stn_netatmo
-                        df_results_correlations.loc[ppt_stn_id,
-                                                    'lat'] = lat_stn_netatmo
+#                         df_results_correlations.loc[ppt_stn_id,
+#                                                     'lon'] = lon_stn_netatmo
+#                         df_results_correlations.loc[ppt_stn_id,
+#                                                     'lat'] = lat_stn_netatmo
                         df_results_correlations.loc[
                             ppt_stn_id,
                             'Distance to neighbor'] = min_dist_ppt_dwd
@@ -530,6 +597,11 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                         df_results_correlations.loc[
                             ppt_stn_id,
                             'Bool_Spearman_Correlation'] = bool_pears_corr
+                            
+                        df_results_correlations.loc[
+                            ppt_stn_id,
+                            'Bool_Spearman_Correlation_Shifted'
+                            ] = bool_pears_corr_shifted
 
                         print('\n********\n ADDED DATA TO DF RESULTS')
                     else:
@@ -604,7 +676,9 @@ if __name__ == '__main__':
                         min_dist_thr_ppt=min_dist_thr_ppt,
                         temp_freq_resample=temp_freq,
                         val_thr_percent=lower_percentile_val,
-                        min_req_ppt_vals=min_req_ppt_vals)
+                        min_req_ppt_vals=min_req_ppt_vals,
+                        path_to_netatmo_coords_utm32=path_to_netatmo_coords_utm32,
+                        path_to_dwd_coords_utm32=path_to_dwd_coords_utm32)
                 else:
                     print('\n Data frames exist, not creating them\n')
                     df_results_correlations = pd.read_csv(path_to_df_correlations,
