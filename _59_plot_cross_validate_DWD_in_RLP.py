@@ -38,6 +38,8 @@ plot_results_per_event = True
 plot_rmse_per_event = True
 used_data_acc = r'99_gd199'  # r'98_20_5'
 
+figsize = (32, 12)
+
 if plot_results_per_stn:
     # , '60min' '180min', '360min', '720min', '1440min']:
     for temp_freq in ['60min']:
@@ -279,7 +281,7 @@ if plot_results_per_stn:
         df_improvements.iloc[np.where(
             df_improvements.pearson_corr_dwd_.isna())]
         plt.ioff()
-        fig = plt.figure(figsize=(16, 10), dpi=150)
+        fig = plt.figure(figsize=figsize, dpi=150)
 
         ax = fig.add_subplot(111)
 
@@ -376,7 +378,7 @@ if plot_results_per_stn:
         #########################################################
 
         plt.ioff()
-        fig = plt.figure(figsize=(16, 10), dpi=150)
+        fig = plt.figure(figsize=figsize, dpi=150)
 
         ax = fig.add_subplot(111)
 
@@ -698,7 +700,7 @@ if plot_results_per_event:
         #########################################################
 
         plt.ioff()
-        fig = plt.figure(figsize=(16, 10), dpi=150)
+        fig = plt.figure(figsize=figsize, dpi=150)
 
         ax = fig.add_subplot(111)
 
@@ -803,7 +805,7 @@ if plot_results_per_event:
         #########################################################
   
         plt.ioff()
-        fig = plt.figure(figsize=(16, 10), dpi=150)
+        fig = plt.figure(figsize=figsize, dpi=150)
   
         ax = fig.add_subplot(111)
   
@@ -867,7 +869,7 @@ if plot_results_per_event:
     #===========================================================================
     if plot_rmse_per_event:
         plt.ioff()
-        fig = plt.figure(figsize=(32, 12), dpi=150)
+        fig = plt.figure(figsize=figsize, dpi=150)
 
         ax = fig.add_subplot(111)
 
