@@ -165,13 +165,12 @@ assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
 #     r"\netatmo_bw_1hour_coords.csv")
 # assert os.path.exists(path_to_netatmo_coords_df_file), 'wrong DWD coords file'
 
-
-distance_matrix_netatmo_dwd_df_file = (
-    #r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz'
-    r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz'
-    r'/distance_mtx_in_m_Netatmo_DWD.csv')
-assert os.path.exists(
-    distance_matrix_netatmo_dwd_df_file), 'wrong Distance MTX  file'
+# distance_matrix_netatmo_dwd_df_file = (
+#     #r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz'
+#     r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz'
+#     r'/distance_mtx_in_m_Netatmo_DWD.csv')
+# assert os.path.exists(
+#     distance_matrix_netatmo_dwd_df_file), 'wrong Distance MTX  file'
 
 # path_to_netatmo_coords_df_file = (
 #     r"X:\staff\elhachem\Data\Netatmo_data\rain_Rheinland-Pfalz_1hour"
@@ -181,15 +180,14 @@ path_to_netatmo_coords_df_file = (
     r"/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz"
     r"/netatmo_Rheinland-Pfalz_1hour_coords_wgs84.csv")
 
-path_to_netatmo_gd_stns_file = (
-    r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes"
-    r"\plots_NetAtmo_ppt_DWD_ppt_correlation_"
-    r"\keep_stns_all_neighbor_99_0_per_60min_s0_comb.csv")
+# path_to_netatmo_gd_stns_file = (
+#     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes"
+#     r"\plots_NetAtmo_ppt_DWD_ppt_correlation_"
+#     r"\keep_stns_all_neighbor_99_0_per_60min_s0_comb.csv")
 #assert os.path.exists(path_to_netatmo_gd_stns_file), 'wrong netatmo stns file'
 
-path_to_shpfile = (r'F:\data_from_exchange\Netatmo'
-                   r'\Landesgrenze_ETRS89\Landesgrenze_10000_ETRS89_lon_lat.shp')
-
+# path_to_shpfile = (r'F:\data_from_exchange\Netatmo'
+#                    r'\Landesgrenze_ETRS89\Landesgrenze_10000_ETRS89_lon_lat.shp')
 
 # assert os.path.exists(path_to_shpfile), 'wrong shapefile path'
 
@@ -205,7 +203,8 @@ path_to_netatmo_coords_utm32 = (
 # out_save_dir_orig = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
 #                      r'\plots_NetAtmo_ppt_DWD_ppt_correlation_reduced')
 out_save_dir_orig = (
-    r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz/indicator_correlation')
+    r'/run/media/abbas/EL Hachem 2019/home_office'
+    r'/2020_10_03_Rheinland_Pfalz/indicator_correlation')
 #     r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\indicator_correlation')
 
 if not os.path.exists(out_save_dir_orig):
@@ -213,11 +212,11 @@ if not os.path.exists(out_save_dir_orig):
 
 #==============================================================================
 
-if use_reduced_sample_dwd:
-    # path to DWD reduced station size
-    distance_matrix_netatmo_dwd_df_file = Path(
-        r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes"
-        r"\NetAtmo_BW\distance_mtx_in_m_NetAtmo_DWD_reduced.csv")
+# if use_reduced_sample_dwd:
+#     # path to DWD reduced station size
+#     distance_matrix_netatmo_dwd_df_file = Path(
+#         r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes"
+#         r"\NetAtmo_BW\distance_mtx_in_m_NetAtmo_DWD_reduced.csv")
 
 #==============================================================================
 #
@@ -268,10 +267,10 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
         path_netatmo_ppt_df_feather,  # path to df of all netatmo ppt stations
         pth_to_netatmo_cols_df_csv,  # path to csv file, get all columns
         path_to_dwd_data,  # path to dwd ppt hdf5 data
-        path_netatmo_gd_stns,  # path to netatmo stns with high rank correls
+        # path_netatmo_gd_stns,  # path to netatmo stns with high rank correls
         netatmo_ppt_coords_df,  # path to netatmo ppt coords df
         neighbor_to_chose,  # which DWD station neighbor to chose
-        distance_matrix_netatmo_ppt_dwd_ppt,  # distance all netatmo-dwd stns
+        # distance_matrix_netatmo_ppt_dwd_ppt,  # distance all netatmo-dwd stns
         min_dist_thr_ppt,  # distance threshold when selecting dwd neigbours
         temp_freq_resample,  # temp freq to resample dfs
         val_thr_percent,  # value in percentage, select all values above it
@@ -292,31 +291,16 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
     '''
     print('\n######\n getting all station names, reading dfs \n#######\n')
 
-    # get all station names for netatmo
-#     stns_ppt_ids = pd.read_csv(
-#         pth_to_netatmo_cols_df_csv, nrows=0, sep=';', engine='c',
-#         memory_map=True).columns.tolist()
-#     try:
-#         stns_ppt_ids = list(filter(lambda x: x != 'Unnamed: 0', stns_ppt_ids))
-#     except Exception as msg:
-#         print(msg)
-
-    # read distance matrix dwd-netamot ppt
-    in_df_distance_netatmo_dwd = pd.read_csv(
-        distance_matrix_netatmo_ppt_dwd_ppt, sep=';', index_col=0)
 
     # read netatmo ppt coords df (for plotting)
     in_netatmo_df_coords = pd.read_csv(netatmo_ppt_coords_df, sep=';',
                                        index_col=0, engine='c')
 
-    # get all station names for netatmo
-    stns_ppt_ids = [stn_id for stn_id in in_df_distance_netatmo_dwd.index]
-
     # read netatmo good stns df
     in_netatmo_df_coords_utm32 = pd.read_csv(
         path_to_netatmo_coords_utm32, sep=';',
         index_col=0, engine='c')
-    
+        
     in_dwd_df_coords_utm32 = pd.read_csv(
         path_to_dwd_coords_utm32, sep=';',
         index_col=0, engine='c')
@@ -328,6 +312,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
     # create a tree from coordinates
     dwd_points_tree = cKDTree(dwd_coords_xy)
     dwd_stns_ids = in_dwd_df_coords_utm32.index
+    
     # get all station names for netatmo
     stns_ppt_ids = [stn_id for stn_id in in_netatmo_df_coords_utm32.index]
 
@@ -419,22 +404,12 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                        k=5)
 #             coords_nearest_nbr = dwd_coords_xy[indices[neighbor_to_chose]]
             stn_near = dwd_stns_ids[indices[neighbor_to_chose]]
+            
             # for BW
             # stn_near = '0' * (5 - len(str(stn_near))) + str(stn_near)
-            min_dist_ppt_dwd = np.round(distances[neighbor_to_chose], 2)
             
-#             distances_dwd_to_stn1 = in_df_distance_netatmo_dwd.loc[
-#                 ppt_stn_id, :]
-#             sorted_distances_ppt_dwd = distances_dwd_to_stn1.sort_values(
-#                 ascending=True)
+            min_dist_ppt_dwd = np.round(distances[neighbor_to_chose], 2)
 
-#             select only from neighbor to chose
-#             sorted_distances_ppt_dwd = sorted_distances_ppt_dwd.iloc[
-#                 neighbor_to_chose:]
-
-            # select the DWD station neighbor
-#             min_dist_ppt_dwd = np.round(
-#                 sorted_distances_ppt_dwd.values[0], 2)
 
             if min_dist_ppt_dwd <= min_dist_thr_ppt:
                 # check if dwd station is near, select and read dwd stn
@@ -711,10 +686,10 @@ if __name__ == '__main__':
                         path_netatmo_ppt_df_feather=path_to_ppt_netatmo_data_feather,
                         pth_to_netatmo_cols_df_csv=path_to_ppt_netatmo_data_csv,
                         path_to_dwd_data=path_to_ppt_dwd_data,
-                        path_netatmo_gd_stns=path_to_netatmo_gd_stns_file,
+                        # path_netatmo_gd_stns=path_to_netatmo_gd_stns_file,
                         netatmo_ppt_coords_df=path_to_netatmo_coords_df_file,
                         neighbor_to_chose=neighbor_to_chose,
-                        distance_matrix_netatmo_ppt_dwd_ppt=distance_matrix_netatmo_dwd_df_file,
+                        # distance_matrix_netatmo_ppt_dwd_ppt=distance_matrix_netatmo_dwd_df_file,
                         min_dist_thr_ppt=min_dist_thr_ppt,
                         temp_freq_resample=temp_freq,
                         val_thr_percent=lower_percentile_val,
