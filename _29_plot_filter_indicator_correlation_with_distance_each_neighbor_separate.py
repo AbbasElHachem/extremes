@@ -91,9 +91,9 @@ data_source = 'dwd'  # compare to station 'netatmo'
 
 remove_upper_limit = False
 
-plot_dwd_on_top = False
+plot_dwd_on_top = True
 
-shift_factor = 10
+shift_factor = 20
 shift_by_percent = 10
 #==============================================================================
     
@@ -171,7 +171,17 @@ if plot_dwd_on_top:
     in_df0_dwd = pd.read_csv(df0_dwd, index_col=0, sep=';').dropna(how='all')
     in_df1_dwd = pd.read_csv(df1_dwd, index_col=0, sep=';').dropna(how='all')
     in_df2_dwd = pd.read_csv(df2_dwd, index_col=0, sep=';').dropna(how='all')
-
+    x0_dwd = in_df0_dwd.loc[:, 'Distance to neighbor'].values.ravel()
+    x1_dwd = in_df1_dwd.loc[:, 'Distance to neighbor'].values.ravel()
+    x2_dwd = in_df2_dwd.loc[:, 'Distance to neighbor'].values.ravel()
+    
+    # x3_dwd0 = in_df3_dwd.loc[:, 'Distance to neighbor'].values.ravel()
+    # x4_dwd0 = in_df4_dwd.loc[:, 'Distance to neighbor'].values.ravel()
+    # x5_dwd0 = in_df5_dwd.loc[:, 'Distance to neighbor'].values.ravel()
+    
+    y0_dwd = in_df0_dwd.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
+    y1_dwd = in_df1_dwd.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
+    y2_dwd = in_df2_dwd.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
 #==============================================================================
 
 # %% apply filter for every neighbor seperatly
@@ -391,7 +401,7 @@ fig, axs = plt.subplots(1, 2, sharex=True, sharey=True,
 # plt.figure(figsize=(12, 8), dpi=300)
 
 axs[0].scatter(x0, y0, c='r', alpha=0.75, marker='x', s=34)
-axs[0].scatter(x0, y0_shifted, c='b', alpha=0.75, marker='o', s=34)
+# axs[0].scatter(x0, y0_shifted, c='b', alpha=0.75, marker='o', s=34)
 
 # axs[0].scatter(x1_abv_2_new, y1_abv_2_new, c='b', alpha=0.75, marker='x', s=34)
 # axs[0].scatter(x2_abv_2, y2_abv_2, c='g', alpha=0.75, marker='x', s=34)
@@ -426,7 +436,13 @@ axs[1].scatter(xvals_above_curve0, yvals_above_curve0,
 if plot_dwd_on_top:
     axs[1].scatter(x0_dwd, y0_dwd, c='k', alpha=0.5,
                marker='o', s=34)
-
+    
+    axs[1].scatter(x1_dwd, y1_dwd, c='k', alpha=0.5,
+               marker='o', s=34)
+    
+#     axs[1].scatter(x2_dwd, y2_dwd, c='k', alpha=0.5,
+#                marker='o', s=34)
+    
 #axs[1].scatter(x0_abv_2, y0_abv_2, c='k', alpha=0.75, marker='x', s=34)
 # axs[1].scatter(x2_after, y2_after, c='g', alpha=0.75, marker='x', s=34)
 
@@ -463,7 +479,7 @@ plt.tight_layout()
 #               percent, time_freq))
 
 plt.savefig(os.path.join(save_dir,  # filtered_2_neighbors_data
-            (r'_%s_%s_%s_fit_exp_fct_%s_shift_%dperc_%dfact_4.png'
+            (r'4_%s_%s_%s_fit_exp_fct_%s_shift_%dperc_%dfact_4.png'
              % (data_source0, data_source,
                  percent, time_freq, shift_by_percent,
                  shift_factor))),

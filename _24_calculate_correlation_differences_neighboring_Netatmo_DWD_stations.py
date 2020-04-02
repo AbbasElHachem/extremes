@@ -388,21 +388,17 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                                                        start_date,
                                                        end_date)
 
-            # find distance to all dwd stations, sort them, select minimum
             
             # find distance to all dwd stations, sort them, select minimum
             (xnetatmo, ynetamto) = (
                 in_netatmo_df_coords_utm32.loc[ppt_stn_id, 'X'],
                 in_netatmo_df_coords_utm32.loc[ppt_stn_id, 'Y'])
             # This finds the index of all points within
-                # radius
-#             idxs_neighbours = dwd_points_tree.query_ball_point(
-#                     np.array((xnetatmo, ynetamto)), min_dist_thr_ppt)
             
             distances, indices = dwd_points_tree.query(
                 np.array([xnetatmo, ynetamto]),
                        k=5)
-#             coords_nearest_nbr = dwd_coords_xy[indices[neighbor_to_chose]]
+            
             stn_near = dwd_stns_ids[indices[neighbor_to_chose]]
             
             # for BW
@@ -475,33 +471,34 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                         # # shift only part
                         #======================================================
                         
-                        in_df_april_mid_oct = select_df_within_period_year_basis(
-                            df_netatmo_cmn)
-    
-                        # shift by one hour forward
-                        in_df_april_mid_oct = in_df_april_mid_oct.shift(-1)
-                        
-                        idx_to_keep = [
-                            ix for ix in df_netatmo_cmn.index
-                             if ix not in in_df_april_mid_oct.index]
-                        in_df_mid_oct_mars = df_netatmo_cmn.loc[idx_to_keep, :]
-                        
-                        time_arr = pd.date_range(start=df_netatmo_cmn.index[0],
-                                                end=df_netatmo_cmn.index[-1],
-                                                freq='H')
-                        
-                        df_shifted = pd.DataFrame(index=time_arr,
-                                                columns=['sum_rain'])
-                        df_shifted.loc[
-                            in_df_april_mid_oct.index,
-                             'sum_rain'
-                             ] = in_df_april_mid_oct.values.ravel()
-                             
-                        df_shifted.loc[
-                            in_df_mid_oct_mars.index,
-                            'sum_rain'] = in_df_mid_oct_mars.values.ravel()
-                                                 
-                        df_shifted.dropna(inplace=True, how='all')
+#                         in_df_april_mid_oct = select_df_within_period_year_basis(
+#                             df_netatmo_cmn)
+#     
+#                         # shift by one hour forward
+#                         in_df_april_mid_oct = in_df_april_mid_oct.shift(1)
+#                         
+#                         idx_to_keep = [
+#                             ix for ix in df_netatmo_cmn.index
+#                              if ix not in in_df_april_mid_oct.index]
+#                         in_df_mid_oct_mars = df_netatmo_cmn.loc[idx_to_keep, :]
+#                         
+#                         time_arr = pd.date_range(start=df_netatmo_cmn.index[0],
+#                                                 end=df_netatmo_cmn.index[-1],
+#                                                 freq='H')
+#                         
+#                         df_shifted = pd.DataFrame(index=time_arr,
+#                                                 columns=['sum_rain'])
+#                         df_shifted.loc[
+#                             in_df_april_mid_oct.index,
+#                              'sum_rain'
+#                              ] = in_df_april_mid_oct.values.ravel()
+#                              
+#                         df_shifted.loc[
+#                             in_df_mid_oct_mars.index,
+#                             'sum_rain'] = in_df_mid_oct_mars.values.ravel()
+#                                                  
+#                         df_shifted.dropna(inplace=True, how='all')
+                        df_shifted = df_netatmo_cmn.shift(1)
                         
                         df_netatmo_cmn_shifted = df_shifted 
                         cmn_idx = df_dwd_cmn.index.intersection(
@@ -633,7 +630,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
     df_results_correlations.dropna(how='all', inplace=True)
     df_results_correlations.to_csv(
         os.path.join(out_save_dir_orig,
-                     '1pearson_year_allyears_df_comparing_correlations_max_sep_dist_%d_'
+                     '4pearson_year_allyears_df_comparing_correlations_max_sep_dist_%d_'
                      'freq_%s_dwd_netatmo_upper_%s_percent_data_considered'
                      '_neighbor_%d_.csv'  # filtered_95
                      % (min_dist_thr_ppt, temp_freq_resample,

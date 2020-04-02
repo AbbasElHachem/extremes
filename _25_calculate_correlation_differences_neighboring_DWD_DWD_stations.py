@@ -90,27 +90,30 @@ os.chdir(main_dir)
 # assert os.path.exists(coords_df_file), 'wrong DWD coords file'
 
 # for RH
+
+main_dir = Path(
+    r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz')
+
+# r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz"
 path_to_ppt_dwd_data = (
-    r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz"
-    r"\ppt_dwd_2014_2019_60min_no_freezing_5deg.fk")
+    main_dir / 
+    r"ppt_dwd_2014_2019_60min_no_freezing_5deg.fk")
 assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
 
 path_to_ppt_csv_data = (
-    r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz"
-    r"\ppt_dwd_2014_2019_60min.csv")
+    main_dir / 
+    r"ppt_dwd_2014_2019_60min_no_freezing_5deg.csv")
 
 assert os.path.exists(path_to_ppt_csv_data), 'wrong DWD Ppt file'
 
-coords_df_file = (r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz"
-                  r"\dwd_coords_in_around_RH_utm32.csv")
+coords_df_file = (main_dir / 
+                  r"dwd_coords_in_around_RH_utm32.csv")
 assert os.path.exists(coords_df_file), 'wrong DWD coords file'
 
-
-path_to_shpfile = (r"P:\2020_DFG_Netatmo\02_WPs\02_WP2\00_shapefiles"
-                   r"\BW_Landesgrenze_WGS84_UTM32N\Landesgrenze_WGS84.shp")
-
-assert os.path.exists(path_to_shpfile), 'wrong shapefile path'
-
+# path_to_shpfile = (r"P:\2020_DFG_Netatmo\02_WPs\02_WP2\00_shapefiles"
+#                    r"\BW_Landesgrenze_WGS84_UTM32N\Landesgrenze_WGS84.shp")
+# 
+# assert os.path.exists(path_to_shpfile), 'wrong shapefile path'
 
 # out_save_dir_orig = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
 #                      r'\plots_DWD_ppt_DWD_ppt_correlation_')
@@ -118,8 +121,7 @@ assert os.path.exists(path_to_shpfile), 'wrong shapefile path'
 # out_save_dir_orig = (r'X:\staff\elhachem\Netatmo_2020\pwsflt_testdata'
 #                      r'\plots_DWD_ppt_DWD_ppt_correlation_')
 
-out_save_dir_orig = (
-    r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\indicator_correlation')
+out_save_dir_orig = (main_dir / r'indicator_correlation')
 if not os.path.exists(out_save_dir_orig):
     os.mkdir(out_save_dir_orig)
 
@@ -134,8 +136,7 @@ x_col_name = 'X'
 y_col_name = 'Y'
 
 # only highest x% of the values are selected
-lower_percentile_val_lst = [95.0, 98.0, 99.0, 99.5]  # 80, 85, 90,
-
+lower_percentile_val_lst = [99.0]  # 80, 85, 90,
 
 # temporal aggregation of df
 # , '120min', '480min', '720min', '1440min']
@@ -155,7 +156,7 @@ max_dist_thr = 100 * 1e4  # 20km
 min_req_ppt_vals = 30  # stations minimum required ppt values
 
 # select data only within this period (same as netatmo)
-start_date = '2014-01-01 00:00:00'
+start_date = '2015-01-01 00:00:00'
 end_date = '2019-12-30 00:00:00'
 
 date_fmt = '%Y-%m-%d %H:%M:%S'
@@ -333,12 +334,12 @@ def calc_indicator_correlatione_two_dwd_stns(
 
                     # calculate pearson and spearman between original values
                     orig_pears_corr = np.round(
-                        pears(df_common1.values,
-                              df_common2.values)[0], 2)
+                        pears(df_common1.values.ravel(),
+                              df_common2.values.ravel())[0], 2)
 
                     orig_spr_corr = np.round(
-                        spr(df_common1.values,
-                            df_common2.values)[0], 2)
+                        spr(df_common1.values.ravel(),
+                            df_common2.values.ravel())[0], 2)
 
                     #==========================================================
                     # select only upper tail of values of both dataframes
@@ -346,14 +347,14 @@ def calc_indicator_correlatione_two_dwd_stns(
                     val_thr_float = val_thr_percent / 100
 
                     dwd1_cdf_x, dwd1_cdf_y = get_cdf_part_abv_thr(
-                        df_common1.values, -0.1)
+                        df_common1.values.ravel(), -0.1)
 
                     # get dwd1 ppt thr from cdf
                     dwd1_ppt_thr_per = dwd1_cdf_x[np.where(
                         dwd1_cdf_y >= val_thr_float)][0]
 
                     dwd2_cdf_x, dwd2_cdf_y = get_cdf_part_abv_thr(
-                        df_common2.values, -0.1)
+                        df_common2.values.ravel(), -0.1)
 
                     # get dwd2 ppt thr from cdf
                     dwd2_ppt_thr_per = dwd2_cdf_x[np.where(
@@ -458,27 +459,27 @@ if __name__ == '__main__':
                     val_thr_percent=lower_percentile_val,
                     min_req_ppt_vals=min_req_ppt_vals)
 
-                if plt_figures:
-                    print('Plotting figures')
-                    plt_correlation_with_distance(
-                        df_correlations=df_results_correlations,
-                        dist_col_to_plot='Distance to neighbor',
-                        corr_col_to_plot='Bool_Spearman_Correlation',
-                        temp_freq=temp_freq,
-                        out_dir=out_save_dir_orig,
-                        year_vals='all_years',
-                        val_thr_percent=lower_percentile_val,
-                        neighbor_nbr=neighbor_to_chose)
-
-                    plt_on_map_agreements(
-                        df_correlations=df_results_correlations,
-                        col_to_plot='Bool_Spearman_Correlation',
-                        shp_de_file=path_to_shpfile,
-                        temp_freq=temp_freq,
-                        out_dir=out_save_dir_orig,
-                        year_vals=('all_years_neighbor_%d_'
-                                   % (neighbor_to_chose)),
-                        val_thr_percent=lower_percentile_val)
+#                 if plt_figures:
+#                     print('Plotting figures')
+#                     plt_correlation_with_distance(
+#                         df_correlations=df_results_correlations,
+#                         dist_col_to_plot='Distance to neighbor',
+#                         corr_col_to_plot='Bool_Spearman_Correlation',
+#                         temp_freq=temp_freq,
+#                         out_dir=out_save_dir_orig,
+#                         year_vals='all_years',
+#                         val_thr_percent=lower_percentile_val,
+#                         neighbor_nbr=neighbor_to_chose)
+# 
+#                     plt_on_map_agreements(
+#                         df_correlations=df_results_correlations,
+#                         col_to_plot='Bool_Spearman_Correlation',
+#                         shp_de_file=path_to_shpfile,
+#                         temp_freq=temp_freq,
+#                         out_dir=out_save_dir_orig,
+#                         year_vals=('all_years_neighbor_%d_'
+#                                    % (neighbor_to_chose)),
+#                         val_thr_percent=lower_percentile_val)
 
     STOP = timeit.default_timer()  # Ending time
     print(('\n****Done with everything on %s.\nTotal run time was'

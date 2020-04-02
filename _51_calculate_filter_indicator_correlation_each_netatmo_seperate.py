@@ -68,6 +68,7 @@ from pathlib import Path
 from pandas.plotting import register_matplotlib_converters
 
 from scipy.stats import pearsonr as pears
+from scipy.spatial import cKDTree
 
 # own functions
 from _00_additional_functions import (resample_intersect_2_dfs,
@@ -155,13 +156,13 @@ main_dir = data_dir
 
 # r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz"
 path_to_ppt_netatmo_data_csv = (
-    data_dir / r'ppt_all_netatmo_rh_hourly_no_freezing_5deg.csv')
+    data_dir / r'ppt_all_netatmo_rh_2014_2019_60min_no_freezing_5deg.csv')
 assert os.path.exists(path_to_ppt_netatmo_data_csv), 'wrong NETATMO Ppt file'
 
 
 path_to_ppt_netatmo_data_feather = (
     data_dir /
-    r'ppt_all_netatmo_rh_hourly_no_freezing_5deg.fk')
+    r'ppt_all_netatmo_rh_2014_2019_60min_no_freezing_5deg.fk')
 assert os.path.exists(
     path_to_ppt_netatmo_data_feather), 'wrong NETATMO Ppt file'
 
@@ -188,17 +189,25 @@ assert os.path.exists(
 
 path_to_netatmo_coords_df_file = (
     data_dir /
-    r"netatmo_Rheinland-Pfalz_1hour_coords_wgs84.csv")  # wgs84
+    r"netatmo_Rheinland-Pfalz_1hour_coords.csv")  # wgs84
 
-path_to_netatmo_gd_stns_file = (
-    r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes"
-    r"\plots_NetAtmo_ppt_DWD_ppt_correlation_"
-    r"\keep_stns_all_neighbor_99_0_per_60min_s0_comb.csv")
+# RLP coords in utm32
+path_to_dwd_coords_utm32 = (
+    r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz'
+    r'/dwd_coords_in_around_RH_utm32.csv')
+
+path_to_netatmo_coords_utm32 = (
+    data_dir / 
+    r'netatmo_Rheinland-Pfalz_1hour_coords_utm32.csv')
+
+# path_to_netatmo_gd_stns_file = (
+#     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes"
+#     r"\plots_NetAtmo_ppt_DWD_ppt_correlation_"
+#     r"\keep_stns_all_neighbor_99_0_per_60min_s0_comb.csv")
 #assert os.path.exists(path_to_netatmo_gd_stns_file), 'wrong netatmo stns file'
 
-path_to_shpfile = (r'F:\data_from_exchange\Netatmo'
-                   r'\Landesgrenze_ETRS89\Landesgrenze_10000_ETRS89_lon_lat.shp')
-
+# path_to_shpfile = (r'F:\data_from_exchange\Netatmo'
+#                    r'\Landesgrenze_ETRS89\Landesgrenze_10000_ETRS89_lon_lat.shp')
 
 # assert os.path.exists(path_to_shpfile), 'wrong shapefile path'
 
@@ -270,7 +279,7 @@ aggregation_frequencies = ['60min']
 #                            '360min', '720min', '1440min'
 
 # [0, 1, 2, 3, 4]  # refers to DWD neighbot (0=first)
-neighbors_to_chose_lst = [0, 1, 2]  # , 1, 2, 3]  # 4, 5, 6, 7
+neighbors_to_chose_lst = [0]  # , 1, 2, 3]  # 4, 5, 6, 7
 
 # Note: used Netatmo stations, are those with more than 2months of data
 # this is done before when combining dfs
@@ -297,14 +306,17 @@ end_date = '2019-12-30 00:00:00'
 def compare_netatmo_dwd_indicator_correlations(
         path_netatmo_ppt_df_feather,  # path to df of all netatmo ppt stations
         path_to_dwd_data,  # path to dwd ppt hdf5 data
-        path_netatmo_gd_stns,  # path to netatmo stns with high rank correls
+        # path_netatmo_gd_stns,  # path to netatmo stns with high rank correls
         netatmo_ppt_coords_df,  # path to netatmo ppt coords df
         neighbor_to_chose,  # which DWD station neighbor to chose
         distance_matrix_netatmo_ppt_dwd_ppt,  # distance all netatmo-dwd stns
         min_dist_thr_ppt,  # distance threshold when selecting dwd neigbours
         temp_freq_resample,  # temp freq to resample dfs
         val_thr_percent,  # value in percentage, select all values above it
-        min_req_ppt_vals  # threshold, minimum ppt values per station
+        min_req_ppt_vals,  # threshold, minimum ppt values per station
+        path_to_dwd_coords_utm32,  # path_to_dwd_coords_utm32
+        path_to_netatmo_coords_utm32  # path_to_netatmo_coords_utm32
+
 ):
     '''
      Find then for the netatmo station the neighboring DWD station
@@ -319,16 +331,36 @@ def compare_netatmo_dwd_indicator_correlations(
     print('\n######\n getting all station names, reading dfs \n#######\n')
 
     # read distance matrix dwd-netamot ppt
-    in_df_distance_netatmo_dwd = pd.read_csv(
-        distance_matrix_netatmo_ppt_dwd_ppt, sep=';', index_col=0)
+    #in_df_distance_netatmo_dwd = pd.read_csv(
+    #    distance_matrix_netatmo_ppt_dwd_ppt, sep=';', index_col=0)
 
     # read netatmo ppt coords df (for plotting)
     in_netatmo_df_coords = pd.read_csv(netatmo_ppt_coords_df, sep=';',
                                        index_col=0, engine='c')
 
     # get all station names for netatmo
-    stns_ppt_ids = [stn_id for stn_id in in_df_distance_netatmo_dwd.index]
-
+    #stns_ppt_ids = [stn_id for stn_id in in_df_distance_netatmo_dwd.index]
+    
+    # read netatmo good stns df
+    in_netatmo_df_coords_utm32 = pd.read_csv(
+        path_to_netatmo_coords_utm32, sep=';',
+        index_col=0, engine='c')
+        
+    in_dwd_df_coords_utm32 = pd.read_csv(
+        path_to_dwd_coords_utm32, sep=';',
+        index_col=0, engine='c')
+    
+    dwd_coords_xy = [(x, y) for x, y in zip(
+        in_dwd_df_coords_utm32.loc[:, 'X'].values,
+        in_dwd_df_coords_utm32.loc[:, 'Y'].values)]
+    
+    # create a tree from coordinates
+    dwd_points_tree = cKDTree(dwd_coords_xy)
+    dwd_stns_ids = in_dwd_df_coords_utm32.index
+    
+    # get all station names for netatmo
+    stns_ppt_ids = [stn_id for stn_id in in_netatmo_df_coords_utm32.index]
+    
     # Note: why is this here?
     # read netatmo good stns df
     # could be used to check how does a filtered dataset performs on other
@@ -394,20 +426,35 @@ def compare_netatmo_dwd_indicator_correlations(
                 ppt_stn_id_name_orig, x_col_name]
             lat_stn_netatmo = in_netatmo_df_coords.loc[
                 ppt_stn_id_name_orig, y_col_name]
+            
+            # find distance to all dwd stations, sort them, select minimum
+            (xnetatmo, ynetamto) = (
+                in_netatmo_df_coords_utm32.loc[ppt_stn_id, 'X'],
+                in_netatmo_df_coords_utm32.loc[ppt_stn_id, 'Y'])
 
-            # find distance to all DWD stations, sort them, select minimum
-            distances_dwd_to_stn1 = in_df_distance_netatmo_dwd.loc[
-                ppt_stn_id, :]
-            sorted_distances_ppt_dwd = distances_dwd_to_stn1.sort_values(
-                ascending=True)
+            distances, indices = dwd_points_tree.query(
+                np.array([xnetatmo, ynetamto]),
+                       k=5)
+            
+            try:
+                stn_near = dwd_stns_ids[indices[neighbor_to_chose]]
+            except Exception:
+                print('get neighbot')
+            min_dist_ppt_dwd = np.round(distances[neighbor_to_chose], 2)
 
-            # select only from neighbors to chose, defined at the begining
-            sorted_distances_ppt_dwd = sorted_distances_ppt_dwd.iloc[
-                neighbor_to_chose:]  # this will keep the neighbor only
-
-            # get the distances to the neighboring DWD station
-            min_dist_ppt_dwd = np.round(sorted_distances_ppt_dwd.values[0], 2)
-
+#             # find distance to all DWD stations, sort them, select minimum
+#             distances_dwd_to_stn1 = in_df_distance_netatmo_dwd.loc[
+#                 ppt_stn_id, :]
+#             sorted_distances_ppt_dwd = distances_dwd_to_stn1.sort_values(
+#                 ascending=True)
+# 
+#             # select only from neighbors to chose, defined at the begining
+#             sorted_distances_ppt_dwd = sorted_distances_ppt_dwd.iloc[
+#                 neighbor_to_chose:]  # this will keep the neighbor only
+# 
+#             # get the distances to the neighboring DWD station
+#             min_dist_ppt_dwd = np.round(sorted_distances_ppt_dwd.values[0], 2)
+            
             # check if dwd station is near, if yes continue
             if min_dist_ppt_dwd <= min_dist_thr_ppt:
 
@@ -416,7 +463,7 @@ def compare_netatmo_dwd_indicator_correlations(
                 # =============================================================
 
                 # this will get the ID of the DWD station
-                stn_2_dwd = sorted_distances_ppt_dwd.index[0]
+                stn_2_dwd = stn_near  # sorted_distances_ppt_dwd.index[0]
 
                 # TODO: FIX add TIME
                 try:
@@ -690,21 +737,22 @@ def compare_netatmo_dwd_indicator_correlations(
                                         'Bool_Pearson_Correlation_DWD_DWD'] = bool_pears_corr_dwd
                                 else:
                                     pass
-                                    #print('Removing Netatmo')
+                                    print('Removing Netatmo')
 #                         print('\n********\n ADDED DATA TO DF RESULTS')
                     else:
                         pass
-                        # print('After intersecting dataframes not enough data')
+                        print('After intersecting dataframes not enough data')
                 else:
                     pass
-                    # print('DWD Station is near but not enough data')
+                    print('DWD Station is near but not enough data')
             else:
                 pass
-                # print('\n********\n DWD station is not near')
+                print('\n********\n DWD station is not near')
 
         except Exception as msg:
             print('error while finding neighbours ', msg)
-            continue
+            raise Exception
+            # continue
     assert alls_stns_len == 0, 'not all stations were considered'
 
     df_results_correlations.dropna(how='all', inplace=True)
@@ -760,14 +808,17 @@ if __name__ == '__main__':
                      ) = compare_netatmo_dwd_indicator_correlations(
                         path_netatmo_ppt_df_feather=path_to_ppt_netatmo_data_feather,
                         path_to_dwd_data=path_to_ppt_dwd_data,
-                        path_netatmo_gd_stns=path_to_netatmo_gd_stns_file,
+                        # path_netatmo_gd_stns=path_to_netatmo_gd_stns_file,
                         netatmo_ppt_coords_df=path_to_netatmo_coords_df_file,
                         neighbor_to_chose=neighbor_to_chose,
                         distance_matrix_netatmo_ppt_dwd_ppt=distance_matrix_netatmo_dwd_df_file,
                         min_dist_thr_ppt=min_dist_thr_ppt,
                         temp_freq_resample=temp_freq,
                         val_thr_percent=lower_percentile_val,
-                        min_req_ppt_vals=min_req_ppt_vals)
+                        min_req_ppt_vals=min_req_ppt_vals,
+                        path_to_dwd_coords_utm32=path_to_dwd_coords_utm32,
+                        path_to_netatmo_coords_utm32=path_to_netatmo_coords_utm32
+                        )
                 else:
                     print('\n Data frames exist, not creating them\n')
                     df_results_correlations = pd.read_csv(path_to_df_correlations,
