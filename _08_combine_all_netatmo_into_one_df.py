@@ -88,33 +88,33 @@ for df_file in dfs_list_ppt:
     in_df = select_df_within_period(df=in_df, start=date_range[0],
                                     end=date_range[-1])
     in_df.dropna(inplace=True)
-
-    in_df_april_mid_oct = select_df_within_period_year_basis(in_df)
-
-    # shift by one hour forward
-    in_df_april_mid_oct = in_df_april_mid_oct.shift(1).dropna()
-
-    idx_to_keep = [
-        ix for ix in in_df.index if ix not in in_df_april_mid_oct.index]
-
-    # cmn_idx = in_df.index.intersection(idx_to_keep)
-
-    in_df_mid_oct_mars = in_df.loc[idx_to_keep, :]
-
-#     time_arr = pd.date_range(start=in_df_april_mid_oct.index[0],
-#                              end=in_df_mid_oct_mars.index[-1],
-#                              freq='H')
-    df_empty = pd.DataFrame(index=date_range,
-                            columns=['sum_rain'])
-    df_empty.loc[
-        in_df_april_mid_oct.index,
-        'sum_rain'] = in_df_april_mid_oct.values.ravel()
-    df_empty.loc[
-        in_df_mid_oct_mars.index,
-        'sum_rain'] = in_df_mid_oct_mars.values.ravel()
-    df_empty.dropna(inplace=True, how='all')
-    # pd.concat([in_df_april_mid_oct, in_df_mid_oct_mars])
-    in_df_new = df_empty
+#
+#     in_df_april_mid_oct = select_df_within_period_year_basis(in_df)
+#
+#     # shift by one hour forward
+#     in_df_april_mid_oct = in_df_april_mid_oct.shift(1).dropna()
+#
+#     idx_to_keep = [
+#         ix for ix in in_df.index if ix not in in_df_april_mid_oct.index]
+#
+#     # cmn_idx = in_df.index.intersection(idx_to_keep)
+#
+#     in_df_mid_oct_mars = in_df.loc[idx_to_keep, :]
+#
+# #     time_arr = pd.date_range(start=in_df_april_mid_oct.index[0],
+# #                              end=in_df_mid_oct_mars.index[-1],
+# #                              freq='H')
+#     df_empty = pd.DataFrame(index=date_range,
+#                             columns=['sum_rain'])
+#     df_empty.loc[
+#         in_df_april_mid_oct.index,
+#         'sum_rain'] = in_df_april_mid_oct.values.ravel()
+#     df_empty.loc[
+#         in_df_mid_oct_mars.index,
+#         'sum_rain'] = in_df_mid_oct_mars.values.ravel()
+#     df_empty.dropna(inplace=True, how='all')
+#     # pd.concat([in_df_april_mid_oct, in_df_mid_oct_mars])
+    in_df_new = in_df
 
     if in_df_new.values.shape[0] >= minimal_number_of_vals:
         print('Data has the following shape', in_df.values.shape)
