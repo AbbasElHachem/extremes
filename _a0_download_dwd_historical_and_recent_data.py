@@ -42,7 +42,7 @@ ppt_act = 'nieder'  # nieder 'rr' 'RR' 'RR'
 
 stn_name_len = 5  # length of dwd stns Id, ex: 00023
 
-year_period = '2016'  # fpr 1_minute data
+year_period = '2017'  # fpr 1_minute data
 
 start_date = '%s-01-01 00:00:00' % year_period
 end_date = '%s-12-30 23:00:00' % year_period
