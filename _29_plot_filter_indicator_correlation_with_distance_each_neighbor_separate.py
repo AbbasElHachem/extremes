@@ -75,7 +75,7 @@ data_dir_Netamto_dfs = (r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03
 
 
 data_dir_DWD_dfs = data_dir_Netamto_dfs
-netatmo_path_acc_b4 = r'pearson_year_allyears_df_comparing_correlations_max_sep_dist_1000000_'
+netatmo_path_acc_b4 = r'1pearson_year_allyears_df_comparing_correlations_max_sep_dist_1000000_'
 
 netatmo_path_acc = r'pearson_year_allyears_df_comparing_correlations_max_sep_dist_1000000_'
 

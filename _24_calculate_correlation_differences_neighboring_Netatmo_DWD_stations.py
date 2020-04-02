@@ -636,7 +636,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
     df_results_correlations.dropna(how='all', inplace=True)
     df_results_correlations.to_csv(
         os.path.join(out_save_dir_orig,
-                     'pearson_year_allyears_df_comparing_correlations_max_sep_dist_%d_'
+                     '1pearson_year_allyears_df_comparing_correlations_max_sep_dist_%d_'
                      'freq_%s_dwd_netatmo_upper_%s_percent_data_considered'
                      '_neighbor_%d_.csv'  # filtered_95
                      % (min_dist_thr_ppt, temp_freq_resample,
@@ -701,42 +701,42 @@ if __name__ == '__main__':
                     df_results_correlations = pd.read_csv(path_to_df_correlations,
                                                           sep=';', index_col=0)
 
-                if plot_figures:
-                    print('\n********\n Plotting Correlation with distance')
-                    plt_correlation_with_distance(
-                        df_correlations=df_results_correlations,
-                        dist_col_to_plot='Distance to neighbor',
-                        corr_col_to_plot='Bool_Spearman_Correlation',
-                        temp_freq=temp_freq,
-                        out_dir=out_save_dir_orig,
-                        year_vals='all_years',
-                        val_thr_percent=lower_percentile_val,
-                        neighbor_nbr=neighbor_to_chose)
-
-                    plt_correlation_with_distance(
-                        df_correlations=df_results_correlations,
-                        dist_col_to_plot='Distance to neighbor',
-                        corr_col_to_plot='Orig_Spearman_Correlation',
-                        temp_freq=temp_freq,
-                        out_dir=out_save_dir_orig,
-                        year_vals='all_years',
-                        val_thr_percent=lower_percentile_val,
-                        neighbor_nbr=neighbor_to_chose)
-
-                    print('\n********\n Plotting Correlation maps')
-                    for col_label in df_results_correlations.columns:
-                        if ('Correlation' in col_label):
-                                # and 'Bool_Spearman' in col_label):
-                            # plot the results of df_results_correlations
-                            plt_on_map_agreements(
-                                df_correlations=df_results_correlations,
-                                col_to_plot=col_label,
-                                shp_de_file=path_to_shpfile,
-                                temp_freq=temp_freq,
-                                out_dir=out_save_dir_orig,
-                                year_vals=('all_years_%d_m_distance_neighbor_%d_'
-                                           % (min_dist_thr_ppt, neighbor_to_chose)),
-                                val_thr_percent=lower_percentile_val)
+#                 if plot_figures:
+#                     print('\n********\n Plotting Correlation with distance')
+#                     plt_correlation_with_distance(
+#                         df_correlations=df_results_correlations,
+#                         dist_col_to_plot='Distance to neighbor',
+#                         corr_col_to_plot='Bool_Spearman_Correlation',
+#                         temp_freq=temp_freq,
+#                         out_dir=out_save_dir_orig,
+#                         year_vals='all_years',
+#                         val_thr_percent=lower_percentile_val,
+#                         neighbor_nbr=neighbor_to_chose)
+# 
+#                     plt_correlation_with_distance(
+#                         df_correlations=df_results_correlations,
+#                         dist_col_to_plot='Distance to neighbor',
+#                         corr_col_to_plot='Orig_Spearman_Correlation',
+#                         temp_freq=temp_freq,
+#                         out_dir=out_save_dir_orig,
+#                         year_vals='all_years',
+#                         val_thr_percent=lower_percentile_val,
+#                         neighbor_nbr=neighbor_to_chose)
+# 
+#                     print('\n********\n Plotting Correlation maps')
+#                     for col_label in df_results_correlations.columns:
+#                         if ('Correlation' in col_label):
+#                                 # and 'Bool_Spearman' in col_label):
+#                             # plot the results of df_results_correlations
+#                             plt_on_map_agreements(
+#                                 df_correlations=df_results_correlations,
+#                                 col_to_plot=col_label,
+#                                 shp_de_file=path_to_shpfile,
+#                                 temp_freq=temp_freq,
+#                                 out_dir=out_save_dir_orig,
+#                                 year_vals=('all_years_%d_m_distance_neighbor_%d_'
+#                                            % (min_dist_thr_ppt, neighbor_to_chose)),
+#                                 val_thr_percent=lower_percentile_val)
 
     STOP = timeit.default_timer()  # Ending time
     print(('\n****Done with everything on %s.\nTotal run time was'
