@@ -470,10 +470,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                             data=df_dwd_cmn.values,
                             index=df_dwd_cmn.index,
                             columns=[stn_2_dwd])
-                        
-                        # shift netatmo by 1 hour
-                        df_netatmo_cmn_shifted = df_netatmo_cmn.shift(-1)
-                        
+                                                
                         #======================================================
                         # # shift only part
                         #======================================================
@@ -482,7 +479,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                             df_netatmo_cmn)
     
                         # shift by one hour forward
-                        in_df_april_mid_oct = in_df_april_mid_oct.shift(1)
+                        in_df_april_mid_oct = in_df_april_mid_oct.shift(-1)
                         
                         idx_to_keep = [
                             ix for ix in df_netatmo_cmn.index

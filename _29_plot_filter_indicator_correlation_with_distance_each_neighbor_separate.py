@@ -91,7 +91,7 @@ data_source = 'dwd'  # compare to station 'netatmo'
 
 remove_upper_limit = False
 
-plot_dwd_on_top = True
+plot_dwd_on_top = False
 
 shift_factor = 10
 shift_by_percent = 10
@@ -148,9 +148,6 @@ df2_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
 save_dir = data_dir_Netamto_dfs
 #==============================================================================
 
-in_df0_dwd = pd.read_csv(df0_dwd, index_col=0, sep=';').dropna(how='all')
-in_df1_dwd = pd.read_csv(df1_dwd, index_col=0, sep=';').dropna(how='all')
-in_df2_dwd = pd.read_csv(df2_dwd, index_col=0, sep=';').dropna(how='all')
 
 s0, x0, y0, in_df0 = read_filter_df_corr_return_stns_x_y_vals(df0_b4)
 # s1, x1, y1, in_df1 = read_filter_df_corr_return_stns_x_y_vals(df1)
@@ -171,10 +168,10 @@ s0, x0, y0, in_df0 = read_filter_df_corr_return_stns_x_y_vals(df0_b4)
 # s7, x7, y7, in_df7 = read_filter_df_corr_return_stns_x_y_vals(df7)
 
 if plot_dwd_on_top:
-    s0_dwd, x0_dwd, y0_dwd, in_df0_dwd = read_filter_df_corr_return_stns_x_y_vals(
-        df0_dwd)
-    s1_dwd, x1_dwd, y1_dwd, in_df1_dwd = read_filter_df_corr_return_stns_x_y_vals(
-        df1_dwd)
+    in_df0_dwd = pd.read_csv(df0_dwd, index_col=0, sep=';').dropna(how='all')
+    in_df1_dwd = pd.read_csv(df1_dwd, index_col=0, sep=';').dropna(how='all')
+    in_df2_dwd = pd.read_csv(df2_dwd, index_col=0, sep=';').dropna(how='all')
+
 #==============================================================================
 
 # %% apply filter for every neighbor seperatly
@@ -426,8 +423,8 @@ axs[1].scatter(xvals_below_curve0, yvals_below_curve0,
 axs[1].scatter(xvals_above_curve0, yvals_above_curve0,
                c='r', alpha=0.75, marker='x', s=34)
 
-
-axs[1].scatter(x0_dwd, y0_dwd, c='k', alpha=0.5,
+if plot_dwd_on_top:
+    axs[1].scatter(x0_dwd, y0_dwd, c='k', alpha=0.5,
                marker='o', s=34)
 
 #axs[1].scatter(x0_abv_2, y0_abv_2, c='k', alpha=0.75, marker='x', s=34)

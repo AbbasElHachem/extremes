@@ -92,7 +92,7 @@ for df_file in dfs_list_ppt:
     in_df_april_mid_oct = select_df_within_period_year_basis(in_df)
 
     # shift by one hour forward
-    in_df_april_mid_oct = in_df_april_mid_oct.shift(-1).dropna()
+    in_df_april_mid_oct = in_df_april_mid_oct.shift(1).dropna()
 
     idx_to_keep = [
         ix for ix in in_df.index if ix not in in_df_april_mid_oct.index]

@@ -28,7 +28,6 @@ from _00_additional_functions import (list_all_full_path,
 download_data = True
 delete_zip_files = True
 
-
 build_one_df = True
 delete_df_files = True
 
@@ -42,7 +41,7 @@ ppt_act = 'nieder'  # nieder 'rr' 'RR' 'RR'
 
 stn_name_len = 5  # length of dwd stns Id, ex: 00023
 
-year_period = '2017'  # fpr 1_minute data
+year_period = '2016'  # fpr 1_minute data
 
 start_date = '%s-01-01 00:00:00' % year_period
 end_date = '%s-12-30 23:00:00' % year_period
@@ -261,8 +260,8 @@ if build_one_df:
         print('\n##\n Station ID is \n##\n', stn_name)
         in_df = pd.read_csv(df_txt_file, sep=';', index_col=1, engine='c')
 
-        assert int(stn_name) == in_df.loc[:, stn_id_col_name].values[0]
-        assert stn_name in final_df_combined.columns, 'assertion error'
+        # assert int(stn_name) == in_df.loc[:, stn_id_col_name].values[0]
+        # assert stn_name in final_df_combined.columns, 'assertion error'
 
         if temporal_freq == '10_minutes':
             try:
