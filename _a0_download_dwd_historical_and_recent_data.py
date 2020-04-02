@@ -28,31 +28,32 @@ from _00_additional_functions import (list_all_full_path,
 download_data = True
 delete_zip_files = True
 
-
 build_one_df = True
 delete_df_files = True
 
 make_hdf5_dataset_new = False
 
-temporal_freq = 'hourly'  # '1_minute' '10_minutes' 'hourly' 'daily'
+temporal_freq = '1_minute'  # '1_minute' '10_minutes' 'hourly' 'daily'
 time_period = 'historical'  # 'recent' 'historical'
 temp_accr = 'stundenwerte'  # '1minuten' '10minuten' 'stundenwerte'  'tages'
 
-ppt_act = 'RR'  # nieder 'rr' 'RR' 'RR'
+ppt_act = 'nieder'  # nieder 'rr' 'RR' 'RR'
 
 stn_name_len = 5  # length of dwd stns Id, ex: 00023
 
-start_date = '2014-01-01 00:00:00'
-end_date = '2019-12-30 23:00:00'
+year_period = '2016'  # fpr 1_minute data
 
-temp_freq = 'H'  # '60Min'  # 'Min' '10Min' 'H' 'D'
+start_date = '%s-01-01 00:00:00' % year_period
+end_date = '%s-12-30 23:00:00' % year_period
+
+temp_freq = 'Min'  # '60Min'  # 'Min' '10Min' 'H' 'D'
 
 # '%Y%m%d%H'  # when reading download dwd station df '%Y%m%d%H%M'
-time_fmt = '%Y%m%d%H%M'  # for 10Min data use: '%Y%m%d%H%M:%S'
+time_fmt = '%Y%m%d%H%M'  # for 10Min data use: '%Y%m%d%H%M%S'
 
 # name of station id and rainfall column name in df
 stn_id_col_name = 'STATIONS_ID'
-ppt_col_name = '  R1'  # 'TT_TU'  # RS_01 'RWS_10' '  R1' 'RS'
+ppt_col_name = 'RS_01'  # 'TT_TU'  # RS_01 'RWS_10' '  R1' 'RS'
 
 freqs_list = ['60Min']  # '60Min']  # '1D' '5Min',
 
@@ -66,19 +67,20 @@ date_range = pd.date_range(start=start_date,
 #==============================================================================
 # main_dir = os.path.join(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\download_DWD_data_recent')
 
-main_dir = r'X:\staff\elhachem\Data\DWD_DE_Data'
+main_dir = r'/run/media/abbas/EL Hachem 2019/download_DWD_data_recent/'
 # r'F:\download_DWD_data_recent'
 os.chdir(main_dir)
 
 dwd_in_coords_df = pd.read_csv(
-    r"X:\staff\elhachem\Data\DWD_DE_Data\station_coordinates_names_hourly.csv",
+    #r"X:\staff\elhachem\Data\DWD_DE_Data\station_coordinates_names_hourly.csv",
+    r"file:///run/media/abbas/EL Hachem 2019/home_office/NetAtmo_BW/station_coordinates_names_hourly_only_in_BW.csv",
     sep=',', index_col=0, encoding='latin-1')
 
 # added by Abbas, for DWD stations
 stndwd_ix = ['0' * (5 - len(str(stn_id))) + str(stn_id)
-             if len(str(stn_id)) < 5 else str(stn_id)
-             for stn_id in dwd_in_coords_df.index]
-
+              if len(str(stn_id)) < 5 else str(stn_id)
+              for stn_id in dwd_in_coords_df.index]
+ 
 dwd_in_coords_df.index = stndwd_ix
 dwd_in_coords_df.index = list(map(str, dwd_in_coords_df.index))
 #==============================================================================
@@ -120,22 +122,22 @@ def firstNonNan(listfloats):
 #==============================================================================
 # DOWNLOAD ALL ZIP FILES
 #==============================================================================
-out_dir = os.path.join(main_dir, 'DWD_data_%s_%s_%s'
-                       % (temporal_freq, time_period, temp_accr))
+
+out_dir = os.path.join(main_dir, 'DWD_data_%s_%s_%s_%s'
+                       % (temporal_freq, time_period, temp_accr, year_period))
 if not os.path.exists(out_dir):
     os.mkdir(out_dir)
 
 os.chdir(out_dir)
 
-year_period = '1993'
 
 # generate url
 if download_data:  # download all zip files
 
     # precipitation
     base_url = (r'https://opendata.dwd.de/climate_environment/CDC'
-                r'/observations_germany/climate/%s/precipitation/%s/'  # %s/
-                % (temporal_freq, time_period))  # , year_period))
+                r'/observations_germany/climate/%s/precipitation/%s/%s/'
+                % (temporal_freq, time_period, year_period))
     # r'https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/1_minute/precipitation/historical/1993/'
     r = requests.get(base_url, stream=True)
 
@@ -153,16 +155,27 @@ if download_data:  # download all zip files
         all_urls_zip = [url_zip.split(b'>')[0].replace(
             b'<a', b'').replace(b' href=', b'').strip(b'"').decode('utf-8')
             for url_zip in all_urls if b'.zip' in url_zip]
-
-    for file_name in all_urls_zip:
+    # station namea in BW
+    stns_list = dwd_in_coords_df.index.to_list()
+    
+    # files in BW
+    all_urls_zip_bw = [_file for stn in stns_list 
+                       for _file in all_urls_zip
+                       if str(stn) in _file]
+    # len(all_urls_zip_bw)
+    for file_name in all_urls_zip_bw:
 
         #         if time_period == 'historical':
         #             file_name = file_name.split('=')[1].replace('"', '')
         print('getting data for', file_name)
 
         file_url = base_url + file_name
-        zip_url = requests.get(file_url)
-
+        
+        try:
+            zip_url = requests.get(file_url)
+        except Exception as msg:
+            print(msg)
+            continue
         local_filename = file_url.split('/')[-1]
 
         with open(local_filename, 'wb') as f:
@@ -176,12 +189,12 @@ if download_data:  # download all zip files
     #==========================================================================
     #
     #==========================================================================
-
+    
     # get all zip files as list
     all_zip_files = list_all_full_path('.zip', out_dir)
 
-    out_extract_df_dir = ('DWD_extracted_zip_%s_%s_%s' %
-                          (temporal_freq, time_period, temp_accr))
+    out_extract_df_dir = ('DWD_extracted_zip_%s_%s_%s_%s' % 
+                          (temporal_freq, time_period, temp_accr, year_period))
 
     # extract all zip files, dfs in zip files
     for zip_file in all_zip_files:
@@ -239,16 +252,16 @@ if build_one_df:
     all_files_len = len(all_df_files)
 
     for df_txt_file in all_df_files:
-        print('\n++\n Total number of files is \n++\n', all_files_len)
-
+        print('\n++\n Total number of files is ++', all_files_len, '\n')
+        
         stn_name = df_txt_file.split('_')[-1].split('.')[0]
 #         if stn_name in stations_id_str_lst:
 #             print('\n##\n Stations in BW \n##\n', stns_bw_len)
         print('\n##\n Station ID is \n##\n', stn_name)
         in_df = pd.read_csv(df_txt_file, sep=';', index_col=1, engine='c')
 
-        assert int(stn_name) == in_df.loc[:, stn_id_col_name].values[0]
-        assert stn_name in final_df_combined.columns, 'assertion error'
+        # assert int(stn_name) == in_df.loc[:, stn_id_col_name].values[0]
+        # assert stn_name in final_df_combined.columns, 'assertion error'
 
         if temporal_freq == '10_minutes':
             try:
@@ -299,7 +312,7 @@ if build_one_df:
     #final_df_combined.set_index('Time', inplace=True, drop=True)
     final_df_combined.to_csv(
         os.path.join(out_dir,
-                     'DE_dwd_PPT_data_2014_2019.csv'),
+                     'BW_dwd_PPT_data_%s.csv' % year_period),
         sep=';', float_format='%0.2f')
 #     final_df_combined.reset_index(inplace=True)
 #     final_df_combined.rename({'index': 'Time'}, inplace=True)
