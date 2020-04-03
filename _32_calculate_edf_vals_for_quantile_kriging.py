@@ -47,7 +47,7 @@ dwd_data = False
 resample_data = True
 
 # select data only within this period (same as netatmo / dwd)
-start_date = '2014-01-01 00:00:00'
+start_date = '2015-01-01 00:00:00'
 end_date = '2019-12-30 00:00:00'
 
 resample_frequencies = ['60min', '120min', '180min',
@@ -159,7 +159,7 @@ if resample_data:
                               columns=all_stns,
                               data=data_mtx)
         for stn_ in df_stn0.columns:
-            #print('stn is ', stn_)
+            print('stn is ', stn_)
             # %% transform data to quantiles from cdf
             try:
                 stn_df_no_nans = df_stn0.loc[:, stn_].dropna()
