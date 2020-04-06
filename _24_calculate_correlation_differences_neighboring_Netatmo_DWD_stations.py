@@ -103,15 +103,16 @@ use_reduced_sample_dwd = False
 #     r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new_no_freezing_2.csv')
 # assert os.path.exists(path_to_ppt_netatmo_data_csv), 'wrong NETATMO Ppt file'
 
-# path_to_ppt_netatmo_data_csv = (
-#     r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz'
-#     r'\ppt_all_netatmo_rh_hourly_no_freezing_5deg.csv')
-# assert os.path.exists(path_to_ppt_netatmo_data_csv), 'wrong NETATMO Ppt file'
-
+# for getting station names in RLP
 path_to_ppt_netatmo_data_csv = (
-    r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz/'
-    r'/ppt_all_netatmo_rh_2014_2019_60min_no_freezing_5deg.csv')
+    r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz'
+    r'\ppt_all_netatmo_rh_2014_2019_60min_no_freezing_5deg.csv')
 assert os.path.exists(path_to_ppt_netatmo_data_csv), 'wrong NETATMO Ppt file'
+
+# path_to_ppt_netatmo_data_csv = (
+#     r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz/'
+#     r'/ppt_all_netatmo_rh_2014_2019_60min_no_freezing_5deg.csv')
+# assert os.path.exists(path_to_ppt_netatmo_data_csv), 'wrong NETATMO Ppt file'
 
 # for reading ppt data station by station
 # HOURLY DATA
@@ -120,17 +121,17 @@ assert os.path.exists(path_to_ppt_netatmo_data_csv), 'wrong NETATMO Ppt file'
 #     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
 #     r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new_no_freezing_2.fk')
 
-# path_to_ppt_netatmo_data_feather = (
-#     r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz'
-#     r'\ppt_all_netatmo_rh_hourly_no_freezing_5deg.fk')
-# assert os.path.exists(
-#     path_to_ppt_netatmo_data_feather), 'wrong NETATMO Ppt file'
-
 path_to_ppt_netatmo_data_feather = (
-    r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz'
-    r'/ppt_all_netatmo_rh_2014_2019_60min_no_freezing_5deg.fk')
+    r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz'
+    r'\ppt_all_netatmo_rh_2014_2019_60min_no_freezing_5deg.fk')
 assert os.path.exists(
     path_to_ppt_netatmo_data_feather), 'wrong NETATMO Ppt file'
+
+# path_to_ppt_netatmo_data_feather = (
+#     r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz'
+#     r'/ppt_all_netatmo_rh_2014_2019_60min_no_freezing_5deg.fk')
+# assert os.path.exists(
+#     path_to_ppt_netatmo_data_feather), 'wrong NETATMO Ppt file'
 
 
 # # 10Min DATA
@@ -142,9 +143,9 @@ assert os.path.exists(
 
 # HOURLY DATA
 path_to_ppt_dwd_data = (
-    #r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz'
-    r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz'
-    r'/ppt_dwd_2014_2019_60min_no_freezing_5deg.fk')
+    r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz'
+    #     r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz'
+    r'\ppt_dwd_2014_2019_60min_no_freezing_5deg.fk')
 assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
 
 # 10Min DATA
@@ -176,9 +177,9 @@ assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
 #     r"X:\staff\elhachem\Data\Netatmo_data\rain_Rheinland-Pfalz_1hour"
 #     "\netatmo_Rheinland-Pfalz_1hour_coords.csv")
 
-path_to_netatmo_coords_df_file = (
-    r"/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz"
-    r"/netatmo_Rheinland-Pfalz_1hour_coords_wgs84.csv")
+# path_to_netatmo_coords_df_file = (
+#     r"/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz"
+#     r"/netatmo_Rheinland-Pfalz_1hour_coords_wgs84.csv")
 
 # path_to_netatmo_gd_stns_file = (
 #     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes"
@@ -193,19 +194,21 @@ path_to_netatmo_coords_df_file = (
 
 # COORDINATES
 path_to_dwd_coords_utm32 = (
-    r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz'
-    r'/dwd_coords_in_around_RH_utm32.csv')
- 
+    #r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz'
+    r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz'
+    r'\dwd_coords_in_around_RH_utm32.csv')
+
 path_to_netatmo_coords_utm32 = (
-    r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz'
-    r'/netatmo_Rheinland-Pfalz_1hour_coords_utm32.csv')
+    #r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz'
+    r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz'
+    r'\netatmo_Rheinland-Pfalz_1hour_coords_utm32.csv')
 
 # out_save_dir_orig = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
 #                      r'\plots_NetAtmo_ppt_DWD_ppt_correlation_reduced')
 out_save_dir_orig = (
-    r'/run/media/abbas/EL Hachem 2019/home_office'
-    r'/2020_10_03_Rheinland_Pfalz/indicator_correlation')
-#     r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\indicator_correlation')
+    #     r'/run/media/abbas/EL Hachem 2019/home_office'
+    #     r'/2020_10_03_Rheinland_Pfalz/indicator_correlation')
+    r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\indicator_correlation')
 
 if not os.path.exists(out_save_dir_orig):
     os.mkdir(out_save_dir_orig)
@@ -268,7 +271,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
         pth_to_netatmo_cols_df_csv,  # path to csv file, get all columns
         path_to_dwd_data,  # path to dwd ppt hdf5 data
         # path_netatmo_gd_stns,  # path to netatmo stns with high rank correls
-        netatmo_ppt_coords_df,  # path to netatmo ppt coords df
+        # netatmo_ppt_coords_df,  # path to netatmo ppt coords df
         neighbor_to_chose,  # which DWD station neighbor to chose
         # distance_matrix_netatmo_ppt_dwd_ppt,  # distance all netatmo-dwd stns
         min_dist_thr_ppt,  # distance threshold when selecting dwd neigbours
@@ -276,7 +279,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
         val_thr_percent,  # value in percentage, select all values above it
         min_req_ppt_vals,  # threshold, minimum ppt values per station
         path_to_netatmo_coords_utm32,  # path_to_netatmo_coords_utm32
-        path_to_dwd_coords_utm32,  # path_to_dwd_coords_utm32
+        path_to_dwd_coords_utm32  # path_to_dwd_coords_utm32
 ):
     '''
      Find then for the netatmo station the neighboring DWD station
@@ -287,32 +290,30 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
 
      Add the result to a new dataframe and return it
 
-    # TODO: add documentation
     '''
     print('\n######\n getting all station names, reading dfs \n#######\n')
 
-
     # read netatmo ppt coords df (for plotting)
-    in_netatmo_df_coords = pd.read_csv(netatmo_ppt_coords_df, sep=';',
-                                       index_col=0, engine='c')
+#     in_netatmo_df_coords = pd.read_csv(netatmo_ppt_coords_df, sep=';',
+#                                        index_col=0, engine='c')
 
     # read netatmo good stns df
     in_netatmo_df_coords_utm32 = pd.read_csv(
         path_to_netatmo_coords_utm32, sep=';',
         index_col=0, engine='c')
-        
+
     in_dwd_df_coords_utm32 = pd.read_csv(
         path_to_dwd_coords_utm32, sep=';',
         index_col=0, engine='c')
-    
+
     dwd_coords_xy = [(x, y) for x, y in zip(
         in_dwd_df_coords_utm32.loc[:, 'X'].values,
         in_dwd_df_coords_utm32.loc[:, 'Y'].values)]
-    
+
     # create a tree from coordinates
     dwd_points_tree = cKDTree(dwd_coords_xy)
     dwd_stns_ids = in_dwd_df_coords_utm32.index
-    
+
     # get all station names for netatmo
     stns_ppt_ids = [stn_id for stn_id in in_netatmo_df_coords_utm32.index]
 
@@ -343,29 +344,30 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
             # read first netatmo station
             try:
                 netatmo_ppt_stn1 = pd.read_feather(path_netatmo_ppt_df_feather,
-                                               columns=['Time', ppt_stn_id],
-                                               use_threads=True)
-            
+                                                   columns=[
+                                                       'Time', ppt_stn_id],
+                                                   use_threads=True)
+
                 netatmo_ppt_stn1.set_index('Time', inplace=True)
             except Exception as msg:
                     # print('error reading dwd', msg)
                 netatmo_ppt_stn1 = pd.read_feather(path_netatmo_ppt_df_feather,
-                                         columns=['index', ppt_stn_id],
-                                         use_threads=True)
+                                                   columns=[
+                                                       'index', ppt_stn_id],
+                                                   use_threads=True)
                 netatmo_ppt_stn1.set_index('index', inplace=True)
-                
+
             netatmo_ppt_stn1.index = pd.to_datetime(
                 netatmo_ppt_stn1.index, format=date_fmt)
 
             # drop all index with nan values
             netatmo_ppt_stn1.dropna(axis=0, inplace=True)
-            
 
             # check what happens to nans
 #             nans_idx = []
 #             for ix in netatmo_ppt_stn1.isna().index:
 #                 if netatmo_ppt_stn1.isna().loc[ix].values == True:
-#                     nans_idx.append(ix)                    
+#                     nans_idx.append(ix)
 #             nans_idx = pd.DatetimeIndex(nans_idx)
 
             # count number of zero, should remain the SAME !!!!
@@ -375,7 +377,6 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
 #                         netatmo_ppt_stn1_nona.values)
 #             nbr_zeros1 = (netatmo_ppt_stn1== 0).astype(int).sum(axis=0)
 #             nbr_zeros2 = (netatmo_ppt_stn1_nona == 0).astype(int).sum(axis=0)
-
 
             netatmo_ppt_stn1 = netatmo_ppt_stn1[netatmo_ppt_stn1 < max_ppt_thr]
 
@@ -388,29 +389,27 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                                                        start_date,
                                                        end_date)
 
-            
             # find distance to all dwd stations, sort them, select minimum
             (xnetatmo, ynetamto) = (
                 in_netatmo_df_coords_utm32.loc[ppt_stn_id, 'X'],
                 in_netatmo_df_coords_utm32.loc[ppt_stn_id, 'Y'])
             # This finds the index of all points within
-            
+
             distances, indices = dwd_points_tree.query(
                 np.array([xnetatmo, ynetamto]),
-                       k=5)
-            
+                k=5)
+
             stn_near = dwd_stns_ids[indices[neighbor_to_chose]]
-            
+
             # for BW
             # stn_near = '0' * (5 - len(str(stn_near))) + str(stn_near)
-            
-            min_dist_ppt_dwd = np.round(distances[neighbor_to_chose], 2)
 
+            min_dist_ppt_dwd = np.round(distances[neighbor_to_chose], 2)
 
             if min_dist_ppt_dwd <= min_dist_thr_ppt:
                 # check if dwd station is near, select and read dwd stn
                 stn_2_dwd = stn_near  # sorted_distances_ppt_dwd.index[0]
-                # TODO: FIX add TIME
+                # FIX add TIME
                 try:
                     df_dwd = pd.read_feather(path_to_dwd_data,
                                              columns=['Time', stn_2_dwd],
@@ -466,48 +465,48 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                             data=df_dwd_cmn.values,
                             index=df_dwd_cmn.index,
                             columns=[stn_2_dwd])
-                                                
+
                         #======================================================
                         # # shift only part
                         #======================================================
-                        
+
 #                         in_df_april_mid_oct = select_df_within_period_year_basis(
 #                             df_netatmo_cmn)
-#     
+#
 #                         # shift by one hour forward
 #                         in_df_april_mid_oct = in_df_april_mid_oct.shift(1)
-#                         
+#
 #                         idx_to_keep = [
 #                             ix for ix in df_netatmo_cmn.index
 #                              if ix not in in_df_april_mid_oct.index]
 #                         in_df_mid_oct_mars = df_netatmo_cmn.loc[idx_to_keep, :]
-#                         
+#
 #                         time_arr = pd.date_range(start=df_netatmo_cmn.index[0],
 #                                                 end=df_netatmo_cmn.index[-1],
 #                                                 freq='H')
-#                         
+#
 #                         df_shifted = pd.DataFrame(index=time_arr,
 #                                                 columns=['sum_rain'])
 #                         df_shifted.loc[
 #                             in_df_april_mid_oct.index,
 #                              'sum_rain'
 #                              ] = in_df_april_mid_oct.values.ravel()
-#                              
+#
 #                         df_shifted.loc[
 #                             in_df_mid_oct_mars.index,
 #                             'sum_rain'] = in_df_mid_oct_mars.values.ravel()
-#                                                  
+#
 #                         df_shifted.dropna(inplace=True, how='all')
                         df_shifted = df_netatmo_cmn.shift(1)
-                        
-                        df_netatmo_cmn_shifted = df_shifted 
+
+                        df_netatmo_cmn_shifted = df_shifted
                         cmn_idx = df_dwd_cmn.index.intersection(
                             df_netatmo_cmn_shifted.index)
                         df_dwd_cmn = df_dwd_cmn.loc[cmn_idx, :]
-                        
+
                         df_netatmo_cmn = df_netatmo_cmn.loc[cmn_idx, :]
                         #======================================================
-                        # 
+                        #
                         #======================================================
                         # get coordinates of netatmo station for plotting
                         # lon_stn_netatmo = in_netatmo_df_coords.loc[
@@ -551,7 +550,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
 
                         df_netatmo_cmn_Bool = (
                             df_netatmo_cmn > netatmo_ppt_thr_per).astype(int)
-                            
+
                         df_netatmo_cmn_Bool_shifted = (
                             df_netatmo_cmn_shifted > netatmo_ppt_thr_per).astype(int)
 
@@ -563,11 +562,11 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                         bool_pears_corr = np.round(
                             pears(df_dwd_cmn_Bool.values.ravel(),
                                   df_netatmo_cmn_Bool.values.ravel())[0], 4)
-                        
+
                         bool_pears_corr_shifted = np.round(
                             pears(df_dwd_cmn_Bool.values.ravel(),
                                   df_netatmo_cmn_Bool_shifted.values.ravel())[0], 4)
-                        
+
 #                         bool_spr_corr = np.round(
 #                             spr(df_dwd_cmn_Bool.values.ravel(),
 #                                 df_netatmo_cmn_Bool.values.ravel())[0], 2)
@@ -608,11 +607,11 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                         df_results_correlations.loc[
                             ppt_stn_id,
                             'Bool_Spearman_Correlation'] = bool_pears_corr
-                            
+
                         df_results_correlations.loc[
                             ppt_stn_id,
                             'Bool_Spearman_Correlation_Shifted'
-                            ] = bool_pears_corr_shifted
+                        ] = bool_pears_corr_shifted
 
                         print('\n********\n ADDED DATA TO DF RESULTS')
                     else:
@@ -630,7 +629,7 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
     df_results_correlations.dropna(how='all', inplace=True)
     df_results_correlations.to_csv(
         os.path.join(out_save_dir_orig,
-                     '4pearson_year_allyears_df_comparing_correlations_max_sep_dist_%d_'
+                     'prs_allyears_df_corr_sep_dist_%d_'
                      'freq_%s_dwd_netatmo_upper_%s_percent_data_considered'
                      '_neighbor_%d_.csv'  # filtered_95
                      % (min_dist_thr_ppt, temp_freq_resample,
@@ -681,7 +680,7 @@ if __name__ == '__main__':
                         pth_to_netatmo_cols_df_csv=path_to_ppt_netatmo_data_csv,
                         path_to_dwd_data=path_to_ppt_dwd_data,
                         # path_netatmo_gd_stns=path_to_netatmo_gd_stns_file,
-                        netatmo_ppt_coords_df=path_to_netatmo_coords_df_file,
+                        # netatmo_ppt_coords_df=path_to_netatmo_coords_df_file,
                         neighbor_to_chose=neighbor_to_chose,
                         # distance_matrix_netatmo_ppt_dwd_ppt=distance_matrix_netatmo_dwd_df_file,
                         min_dist_thr_ppt=min_dist_thr_ppt,
@@ -706,7 +705,7 @@ if __name__ == '__main__':
 #                         year_vals='all_years',
 #                         val_thr_percent=lower_percentile_val,
 #                         neighbor_nbr=neighbor_to_chose)
-# 
+#
 #                     plt_correlation_with_distance(
 #                         df_correlations=df_results_correlations,
 #                         dist_col_to_plot='Distance to neighbor',
@@ -716,7 +715,7 @@ if __name__ == '__main__':
 #                         year_vals='all_years',
 #                         val_thr_percent=lower_percentile_val,
 #                         neighbor_nbr=neighbor_to_chose)
-# 
+#
 #                     print('\n********\n Plotting Correlation maps')
 #                     for col_label in df_results_correlations.columns:
 #                         if ('Correlation' in col_label):

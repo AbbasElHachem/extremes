@@ -91,28 +91,29 @@ os.chdir(main_dir)
 
 # for RH
 
-main_dir = Path(
-    r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz')
+main_dir = Path(r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz"
+                )
+# r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz')
 
 # r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz"
 path_to_ppt_dwd_data = (
-    main_dir / 
+    main_dir /
     r"ppt_dwd_2014_2019_60min_no_freezing_5deg.fk")
 assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
 
 path_to_ppt_csv_data = (
-    main_dir / 
+    main_dir /
     r"ppt_dwd_2014_2019_60min_no_freezing_5deg.csv")
 
 assert os.path.exists(path_to_ppt_csv_data), 'wrong DWD Ppt file'
 
-coords_df_file = (main_dir / 
+coords_df_file = (main_dir /
                   r"dwd_coords_in_around_RH_utm32.csv")
 assert os.path.exists(coords_df_file), 'wrong DWD coords file'
 
 # path_to_shpfile = (r"P:\2020_DFG_Netatmo\02_WPs\02_WP2\00_shapefiles"
 #                    r"\BW_Landesgrenze_WGS84_UTM32N\Landesgrenze_WGS84.shp")
-# 
+#
 # assert os.path.exists(path_to_shpfile), 'wrong shapefile path'
 
 # out_save_dir_orig = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
@@ -151,7 +152,7 @@ not_convective_season = []
 
 # starts with one
 # , 2, 3, 4, 5]  # list of which neighbors to chose
-neighbors_to_chose_lst = [1, 2, 3]  # 4, 5, 6, 7, 8]  # 1
+neighbors_to_chose_lst = [1, 2]  # 4, 5, 6, 7, 8]  # 1
 max_dist_thr = 100 * 1e4  # 20km
 min_req_ppt_vals = 30  # stations minimum required ppt values
 
@@ -470,7 +471,7 @@ if __name__ == '__main__':
 #                         year_vals='all_years',
 #                         val_thr_percent=lower_percentile_val,
 #                         neighbor_nbr=neighbor_to_chose)
-# 
+#
 #                     plt_on_map_agreements(
 #                         df_correlations=df_results_correlations,
 #                         col_to_plot='Bool_Spearman_Correlation',

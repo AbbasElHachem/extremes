@@ -51,17 +51,19 @@ plt.rcParams.update({'axes.labelsize': 26})
 #==============================================================================
 #
 #==============================================================================
-main_dir = Path(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes')
+# for BW
+#main_dir = Path(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes')
 
-data_dir_Netamto_dfs = main_dir / r'plots_NetAtmo_ppt_DWD_ppt_correlation_'
+#data_dir_Netamto_dfs = main_dir / r'plots_NetAtmo_ppt_DWD_ppt_correlation_'
 # r'plots_NetAtmo_1Deg_ppt_DWD_ppt_correlation_'
 
-# for RH
-# data_dir_Netamto_dfs = Path(
-#     r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\indicator_correlation')
-
+# for RLP
 data_dir_Netamto_dfs = Path(
-    r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz/indicator_correlation')
+    r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\indicator_correlation')
+
+# data_dir_Netamto_dfs = Path(
+# r'/run/media/abbas/EL Hachem
+# 2019/home_office/2020_10_03_Rheinland_Pfalz/indicator_correlation')
 
 data_dir_DWD_dfs = data_dir_Netamto_dfs
 
@@ -79,7 +81,7 @@ assert data_dir_Netamto_dfs.exists(), 'Wrong Netatmo path'
 
 
 # allyears pearson_  new_method new_method_pearson_
-netatmo_path_acc_b4 = r'pearson_year_allyears_df_comparing_correlations_max_sep_dist_1000000_'
+netatmo_path_acc_b4 = r'prs_allyears_df_corr_sep_dist_1000000_'
 
 # netatmo_path_acc_after = r'new_method_pearson_year_allyears_df_comparing_correlations_max_sep_dist_1000000_'
 
@@ -156,8 +158,8 @@ df0_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
                            data_source, percent, 1)
 df1_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
                            data_source, percent, 2)
-df2_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
-                           data_source, percent, 3)
+# df2_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
+#                            data_source, percent, 3)
 
 
 # df3_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
@@ -211,7 +213,7 @@ save_dir = data_dir_Netamto_dfs
 
 in_df0_dwd = pd.read_csv(df0_dwd, index_col=0, sep=';').dropna(how='all')
 in_df1_dwd = pd.read_csv(df1_dwd, index_col=0, sep=';').dropna(how='all')
-in_df2_dwd = pd.read_csv(df2_dwd, index_col=0, sep=';').dropna(how='all')
+# in_df2_dwd = pd.read_csv(df2_dwd, index_col=0, sep=';').dropna(how='all')
 # in_df3_dwd = pd.read_csv(df3_dwd, index_col=0, sep=';').dropna(how='all')
 # in_df4_dwd = pd.read_csv(df4_dwd, index_col=0, sep=';').dropna(how='all')
 # in_df5_dwd = pd.read_csv(df5_dwd, index_col=0, sep=';').dropna(how='all')
@@ -245,7 +247,7 @@ in_df0_after = pd.read_csv(df0_after, index_col=0, sep=';').dropna(how='all')
 
 x0_dwd0 = in_df0_dwd.loc[:, 'Distance to neighbor'].values.ravel()
 x1_dwd0 = in_df1_dwd.loc[:, 'Distance to neighbor'].values.ravel()
-x2_dwd0 = in_df2_dwd.loc[:, 'Distance to neighbor'].values.ravel()
+# x2_dwd0 = in_df2_dwd.loc[:, 'Distance to neighbor'].values.ravel()
 
 # x3_dwd0 = in_df3_dwd.loc[:, 'Distance to neighbor'].values.ravel()
 # x4_dwd0 = in_df4_dwd.loc[:, 'Distance to neighbor'].values.ravel()
@@ -254,7 +256,7 @@ x2_dwd0 = in_df2_dwd.loc[:, 'Distance to neighbor'].values.ravel()
 
 y0_dwd0 = in_df0_dwd.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
 y1_dwd0 = in_df1_dwd.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
-y2_dwd0 = in_df2_dwd.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
+# y2_dwd0 = in_df2_dwd.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
 
 # y3_dwd0 = in_df3_dwd.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
 # y4_dwd0 = in_df4_dwd.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
@@ -264,12 +266,12 @@ x0_b4 = in_df0_b4.loc[
     :, 'Distance to neighbor'].values.ravel()
 y0_b4 = in_df0_b4.loc[:,
                       'Bool_Spearman_Correlation'].values.ravel()
-# 
+#
 # x1_b4 = in_df1_b4.loc[
 #     :, 'Distance to neighbor'].values.ravel()
 # y1_b4 = in_df1_b4.loc[:,
 #                       'Bool_Spearman_Correlation'].values.ravel()
-# 
+#
 # x2_b4 = in_df2_b4.loc[
 #     :, 'Distance to neighbor'].values.ravel()
 # y2_b4 = in_df2_b4.loc[:,
@@ -279,7 +281,7 @@ in_df0_after = in_df0_after[
     in_df0_after['Bool_Pearson_Correlation_Netatmo_DWD'] > 0.0]
 # in_df1_after = in_df1_after[
 #     in_df1_after['Bool_Pearson_Correlation_Netatmo_DWD'] > 0.0]
-# 
+#
 # in_df2_after = in_df2_after[
 #     in_df2_after['Bool_Pearson_Correlation_Netatmo_DWD'] > 0.0]
 
@@ -298,21 +300,21 @@ stns_keep_all_final_new = in_df0_after.index
 x0_after = in_df0_after.loc[
     stns_keep_all_final_new, 'Distance to neighbor'].values.ravel()
 
-# 
+#
 # x1_after = in_df1_after.loc[
 #     :, 'Distance to neighbor'].values.ravel()
-# 
+#
 # x2_after = in_df2_after.loc[
 #     :, 'Distance to neighbor'].values.ravel()
 
 y0_after = in_df0_after.loc[stns_keep_all_final_new,
                             'Bool_Pearson_Correlation_Netatmo_DWD'].values.ravel()
 
-# 
+#
 # y1_after = in_df1_after.loc[:,
 #                             'Bool_Pearson_Correlation_Netatmo_DWD'].values.ravel()
-# 
-# 
+#
+#
 # y2_after = in_df2_after.loc[:,
 #                             'Bool_Pearson_Correlation_Netatmo_DWD'].values.ravel()
 

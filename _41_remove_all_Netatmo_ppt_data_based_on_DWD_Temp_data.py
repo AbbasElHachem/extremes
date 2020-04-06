@@ -35,9 +35,9 @@ from _00_additional_functions import resample_Humidity_Df
 path_to_DWD_temp_data = (
     r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\temp_dwd_2014_2019_60min.csv")
 
-path_to_DWD_ppt_data = (
-    r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
-    r"\all_dwd_hourly_ppt_data_combined_2015_2019_.csv")
+# path_to_DWD_ppt_data = (
+#     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
+#     r"\all_dwd_hourly_ppt_data_combined_2015_2019_.csv")
 
 path_to_Netatmo_ppt_data = (
     r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\ppt_all_netatmo_rh_hourly.csv")
