@@ -46,7 +46,7 @@ stn_ids = split_df_file_to_get_alls_stn_ids(dfs_list_ppt)
 # 2014-04-01 00:00:00 for ppt
 
 
-date_range = pd.date_range('2015-01-01 00:00:00',
+date_range = pd.date_range('2014-06-01 00:00:00',
                            '2019-12-31 00:00:00',
                            freq='H')  # 'H'
 

@@ -166,11 +166,13 @@ for df_file in Qt_ok_un_first_flt__temp_flt_1st_:
 df_dwd = pd.read_csv(path_interpolated_using_dwd,
                      sep=';', index_col=0, parse_dates=True,
                      infer_datetime_format=True)
-temp_freq = '1440min'
+temp_freq = '60min'  # '1440min'
 intense_events_df_index_lst = pd.read_csv(
-    r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\dwd_%s_maximum_100_event.csv"
-    % temp_freq,
-    index_col=0, sep=';',
+    # r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\dwd_%s_maximum_100_event.csv"
+    #% temp_freq,
+    r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\dwd_60min_special_events_5mm_.csv",
+    # Data_Bardossy\EventsRLP.csv",
+    index_col=0, sep=';',  # ';'
     parse_dates=True,
     infer_datetime_format=True).index.to_list()
 
@@ -224,8 +226,10 @@ except Exception as msg:
                                                        intense_events_df_index_lst,
                                                        temp_freq)
     # TODO: change path
-    df_radar_events_to_keep.to_csv(r'X:\exchange\ElHachem'
-                                   r'\%s_intense_events_radolan_files.csv'
+    df_radar_events_to_keep.to_csv(r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz'
+                                   # r'X:\exchange\ElHachem'
+                                   # r'\%s_intense_events_radolan_files_RLP.csv'
+                                   r'\%s_intense_events_5mm_radolan_files.csv'
                                    % temp_freq,
                                    sep=';')
 
