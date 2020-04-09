@@ -257,7 +257,7 @@ plot_figures = False
 date_fmt = '%Y-%m-%d %H:%M:%S'
 
 # select data only within this period (same as netatmo)
-start_date = '2015-01-01 00:00:00'
+start_date = '2014-06-01 00:00:00'
 end_date = '2019-12-30 00:00:00'
 
 #==============================================================================
