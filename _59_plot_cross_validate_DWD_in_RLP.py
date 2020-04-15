@@ -37,7 +37,7 @@ plot_rmse_per_stn = True
 
 plot_results_per_event = True
 plot_rmse_per_event = True
-used_data_acc = r'99_RLP'  # r'99_gd199'  # r'98_20_5'
+used_data_acc = r'99_RLP_DWD'  # r'99_gd199'  # r'98_20_5'
 
 figsize = (32, 12)
 
@@ -60,7 +60,7 @@ path_to_dwd_interpolation = (main_dir /
 
 path_to_dwd_netatmo_interpolation = (main_dir /
                                      r'ppt_cross_valid_RLP_60min' /
-                                     (r'df_interpolated_dwd_netatmos_comb_%s_data_%s.csv' % (
+                                     (r'2df_interpolated_dwd_netatmos_comb_%s_data_%s.csv' % (
                                          temp_freq, used_data_acc)))
 #======================================================================
 #

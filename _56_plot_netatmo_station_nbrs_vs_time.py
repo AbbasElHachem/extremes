@@ -22,8 +22,8 @@ from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 import matplotlib.dates as md
 
 
-plt.rcParams.update({'font.size': 20})
-plt.rcParams.update({'axes.labelsize': 22})
+plt.rcParams.update({'font.size': 24})
+plt.rcParams.update({'axes.labelsize': 26})
 
 
 from pandas.plotting import register_matplotlib_converters
@@ -110,7 +110,8 @@ df_count = pd.Series(data=number_of_data_per_stn,
 #==============================================================================
 plt.ioff()
 fig, axs = plt.subplots(1, 2, sharex=False, sharey=False,
-                        figsize=(31, 12), dpi=300)
+                        figsize=(32, 16), dpi=300)
+# (31, 12)
 
 bins = [0, 360, 720, 1095, 1460, 1825]
 
@@ -151,7 +152,7 @@ axs[0].set_ylabel(
     'Netatmo Stations in RLP with valid Observations', labelpad=16)  # BW
 # ax.set_xlabel('Time', ha="center")
 axs[0].plot(df3.index, df3.values, color='b',
-            alpha=0.75)
+            alpha=0.95)
 xfmt = md.DateFormatter('%Y')
 
 axs[0].xaxis.set_major_formatter(xfmt)
@@ -167,7 +168,7 @@ axs[0].axvline(x='2019-12-31 00:00:00', color='k', linestyle='--', alpha=0.25)
 
 
 #ax.axvline(x='2019-12-31 00:00:00', color='k', linestyle='--', alpha=0.75)
-axs[0].set_yticks([0, 500, 1000, 1500, 2000, 2500, 3000])
+axs[0].set_yticks([0, 500, 1000, 1500, 2000, 2500])  # 3000
 # np.arange(0, 3200, 250))
 
 axs[0].set_xticks(['2014-06-30 00:00:00',
