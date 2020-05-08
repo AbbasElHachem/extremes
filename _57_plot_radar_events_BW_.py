@@ -21,6 +21,7 @@ from matplotlib.colors import LinearSegmentedColormap
 
 #base_path = r'C:\Users\hachem\Downloads\SF201907\*'
 base_path = r'C:\Users\hachem\Downloads\SF201407.tar\SF201407\*'
+
 state_name = 'Rheinland-Pfalz'
 
 files = glob.glob(base_path)
@@ -28,15 +29,17 @@ files = glob.glob(base_path)
 # hdf5_path = os.path.join(database, 'rain_germany_daily.h5')
 # hf = tables.open_file(hdf5_path, 'r')
 
-ishape = (r"P:\2017_SYNOPSE_II\02_Import\07_Shapefiles\DEU_adm_shp"
-          r"\DEU_adm1.shp")
+# ishape = (r"P:\2017_SYNOPSE_II\02_Import\07_Shapefiles\DEU_adm_shp"
+#           r"\DEU_adm1.shp")
 
-
+ishape = r"X:\staff\elhachem\Shapefiles\Neckar_seperate\Danube.shp"
 #first = ishape.next()
 
 
-shp_objects_all = [shp for shp in list(fiona.open(ishape))
-                   if shp['properties']['NAME_1'] == state_name]
+# shp_objects_all = [shp for shp in list(fiona.open(ishape))
+#                    if shp['properties']['NAME_1'] == state_name]
+
+shp_objects_all = [shp for shp in list(fiona.open(ishape))]
 
 #==============================================================================
 #
