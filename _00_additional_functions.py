@@ -33,6 +33,7 @@ import matplotlib.gridspec as gridspec
 # import scipy.stats
 from matplotlib import path
 #from adjustText import adjust_text
+import scipy.optimize as optimize
 from scipy.optimize import curve_fit
 from scipy.stats import spearmanr as spr
 from scipy.stats import pearsonr as pears
@@ -1393,7 +1394,7 @@ def func(x, a, b, c, d):
     return a * x**3 + b * x**2 + c * x + d
 
 
-#def func(x, a):
+# def func(x, a):
 #    """ 3degree polynomial function used for fitting and as filter"""
 #    return np.exp(-a * x)
 
@@ -1406,8 +1407,7 @@ def fit_curve_get_vals_below_curve(x, y, stns, func=func, shift_per=0.15):
     # bounds=[[a1,b1],[a2,b2]]
     #x = np.insert(x, 0,0)
     #y = np.insert(y, 1,0)
-    
-    
+
     popt, _ = curve_fit(
         func, x, y)
 
@@ -1430,13 +1430,13 @@ def fit_curve_get_vals_below_curve(x, y, stns, func=func, shift_per=0.15):
     return (y_fitted_shifted, xvals_below_curve, yvals_below_curve,
             xvals_above_curve, yvals_above_curve, stns_below_curve,
             stns_above_curve)
-#===============================================================================
-# 
-#===============================================================================
+#=========================================================================
+#
+#=========================================================================
 
 
-def exp_func(x, b): 
-    return  np.exp(-x*b)
+def exp_func(x, b):
+    return np.exp(-x * b)
 
 
 def fit_exp_fct_get_vals_below_abv(x, y, exp_func, stns, shift_factor=1):
@@ -1448,13 +1448,12 @@ def fit_exp_fct_get_vals_below_abv(x, y, exp_func, stns, shift_factor=1):
     # bounds=[[a1,b1],[a2,b2]]
     #x = np.insert(x, 0,0)
     #y = np.insert(y, 1,0)
-    
+
     x_arr = np.linspace(0, max(x), x.size)
     x_scaled = x_arr / max(x)
-    
+
     popt, _ = curve_fit(exp_func, x_scaled, y)
-    
-    
+
     print('fitted parameters are %.2f' % popt)  # , popt[3])
     #y_fitted = exp_func(x_scaled, *popt)
 
@@ -1478,6 +1477,8 @@ def fit_exp_fct_get_vals_below_abv(x, y, exp_func, stns, shift_factor=1):
 #==============================================================================
 #
 #==============================================================================
+
+
 def gen_path_df_file(main_path, start_path_acc, time_freq,
                      data_source, percent, neighbor,
                      use_filtered_data=False,
@@ -1485,11 +1486,11 @@ def gen_path_df_file(main_path, start_path_acc, time_freq,
     """ use this funtion to get the path to the dfs for different neighbors"""
 
     if use_filtered_data is False:
-        return os.path.join(main_path, 
-            r'%sfreq_%s_%s_netatmo_upper_%s_percent_data_considered_neighbor_%d_.csv'
-            % (start_path_acc, time_freq, data_source, percent, neighbor))
+        return os.path.join(main_path,
+                            r'%sfreq_%s_%s_netatmo_upper_%s_percent_data_considered_neighbor_%d_.csv'
+                            % (start_path_acc, time_freq, data_source, percent, neighbor))
 
-    #else:
+    # else:
     #    return main_path / (
     #        r'%sfreq_%s_%s_netatmo_upper_%s_percent_data_considered_neighbor_%d_filtered_%s.csv'
     #        % (start_path_acc, time_freq, data_source, percent, neighbor, filter_percent))
@@ -1644,3 +1645,217 @@ def get_radar_intense_events(radar_files_loc, intense_events_df_index_lst, temp_
 #     mask.dump(r'C:\Users\hachem\Desktop\radar\masked_array_bw')
 #
 #     return mask
+
+#==============================================================================
+#
+#==============================================================================
+import scipy.optimize as opt
+import scipy.stats as stats
+
+
+class FitKernelDensity(object):
+    def __init__(self):
+        pass
+
+    def kernel_gauss(self, t, d):
+        # Gauss-Kernel
+        return 1 / (d * np.sqrt(2 * np.pi)) * np.exp(-t**2. / (2. * d**2.))
+
+    def calc_edf(self, data, threshold=None, decimals=3, plot=False):
+        if threshold is not None:
+            data[data <= threshold] = 0
+        rank_data = stats.rankdata(np.round(data, decimals), method='max')
+        edf = np.unique(rank_data) / np.float(data.shape[0])
+        unique = np.unique(np.round(data, decimals))
+
+        if edf.shape[0] != unique.shape[0]:
+            raise Exception('EDF is not unique!')
+
+        edf, xval = np.array((edf, unique))
+        if plot == True:
+            plt.plot(xval, edf, 'x', label='EDF')
+
+        return edf, xval
+
+    def likelyhood_function(self, d, data, this_kernel, opt_quant):
+        # get the indices of the quantiles
+        q_low = int(data.shape[0] * opt_quant[0])
+        q_up = int(data.shape[0] * opt_quant[1])
+        # Sort the values
+        data_s = np.sort(np.copy(data))
+        # Take the sample for optimization depending on the given quantiles
+        data_s = data_s[q_low:q_up]
+        f_x = np.zeros((data_s.shape[0]))
+        f_x[:] = np.nan
+        for ii, idata in enumerate(data_s):
+            # data without the data equal to the ith xtick
+            # get the indices
+            idx_del = np.where((data_s == idata))[0]
+            data_w = np.delete(data_s, idx_del)
+            n_data_w = np.float(data_w.shape[0])
+            # calculate the probability density
+            if this_kernel == 'gauss':
+                # * np.exp(idata) / np.sum(np.exp(data)))
+                f_x[ii] = 1 / n_data_w * \
+                    np.sum((self.kernel_gauss((idata - data_w), d)))
+        # Calculate neg. logaritmic likelyhood-function
+        # Which is to be minimized
+        return np.sum(-np.log(f_x))
+
+    def kernel_width_optimization(self, data, this_kernel, opt_quant=[0, 1.],
+                                  log=False, verbose=False):
+        """ Optimization of the kernel width
+
+        Parameters
+        ----------
+        data : 1D array
+            Array, which contains the data.
+        this_kernel: string
+            defines the kernel (gauss, beta_0_1, beta_1_1, beta1)
+        opt_quant: list of float [a,b], optional
+            defines the interval of the quantile of the data for
+             which the kernel
+            width is optimized. Default is [0,1], which means all
+            values are
+            considered.
+        log: bool, optional
+            if log is true, the kde is performed in the log-space,
+            default = False
+        Kernel Info
+        -----------
+        gauss: Gauss-Kernel
+        """
+
+        if log:
+            data = np.log(data)
+            data = data[data > 0]
+
+        output = opt.minimize_scalar(self.likelyhood_function,
+                                     args=(data, this_kernel, opt_quant))
+        d_opt = output['x']
+
+        if verbose:
+            print('Optimized width: ', d_opt)
+        return d_opt
+
+    def max_likelyhood_cdf(self, data, d, this_kernel, plot=False, steps=10000,
+                           log=False, limits=None, verbose=False):
+        """ CDF of a kernel density estimation
+
+        Parameters
+        ----------
+        data : 1D array
+            Array, which contains the data.
+        this_kernel: string
+            defines the kernel (gauss, beta_0_1, beta_1_1, beta1)
+        plot: bool, optional
+            if true, the cdf is plotted in the general figure object,
+            default = False
+        steps: float, optional
+            steps of the kde, default is 10000
+        log: bool, optional
+            if log is true, the kde is performed in the log-space,
+            default = False
+        """
+
+        if log:
+            data = data[data > 0]  # added by abbas
+            data = np.log(data)
+
+        if not limits:
+            if this_kernel == 'gauss':
+                # The min and max boundary of the ticks is the lowest/highest
+                # value +/- 1 times the kernel width
+                xmin = data.min() - 1 * d
+                xmax = data.max() + 1 * d
+        else:
+            xmin, xmax = limits
+            if log:
+                xmin = np.log(xmin)
+                xmax = np.log(xmax)
+
+        xticks = np.linspace(xmin, xmax, steps)
+        # Maximum Likely Hood Estimation
+        n_data = np.float(data.shape[0])
+        f_x = np.zeros(xticks.shape[0])
+        f_x[:] = np.nan
+        dx = xticks[1] - xticks[0]
+        for ii, ixtick in enumerate(xticks):
+            if this_kernel == 'gauss':
+                f_x[ii] = 1 / n_data * \
+                    np.sum(self.kernel_gauss(ixtick - data, d))
+
+        F_x = np.cumsum(f_x) * dx
+
+        if verbose:
+            print('{}: {:6.5f}, {:6.5f}'.format(this_kernel, F_x[0], F_x[-1]))
+        # The CDF will not be exactly between 0 and 1, thus
+        # stretch the CDF in order to be between [0,1]
+        F_x = (F_x[:] - F_x[0]) / (F_x[:] - F_x[0])[-1]
+
+        if log:
+            xticks = np.exp(xticks)
+        if plot == True:
+            plt.plot(xticks, F_x, label='KDE_{}'.format(this_kernel))
+        if xmax > 1:
+            "Warning, x values are larger than 1"
+        if xmin < -1:
+            "Warning, x values are smaller than -1"
+        return xticks, F_x
+
+#==============================================================================
+#
+#==============================================================================
+
+
+class KernelDensityEstimate(object):
+
+    def __init__(self, *args, **kwargs):
+        object.__init__(self, *args, **kwargs)
+
+    def gauss_kernel(self, t, d):
+        return (1. / (d * np.sqrt(2. * np.pi))) * \
+            np.exp((-t**2.) / (2. * d**2.))
+
+    def epanechnikov_kernel(self, t, d):
+        if np.abs(t) <= np.sqrt(5) * d:
+            return (3 / 4 * d * np.sqrt(5)) * (1 - (t**2) / (5 * d**2))
+        else:
+            return 0
+
+    def fill_mtx(self, kernel_width, data):
+        out_matx = np.empty((data.shape[0], data.shape[0]))
+        for i, punkte in enumerate(data):
+            for j, daten_wert in enumerate(data):
+                if punkte == daten_wert:
+                    out_matx[i, j] = np.nan
+                else:
+                    out_matx[i, j] = self.gauss_kernel(
+                        punkte - daten_wert, kernel_width)
+        return out_matx
+
+    def leaveOneOut_likelihood(self, kernel_width, data):
+        out_mtx = self.fill_mtx(kernel_width, data)
+        return np.sum([-np.log(np.nanmean(out_mtx[r]))
+                       for r in range(out_mtx.shape[0])
+                       if np.nanmean(out_mtx[r]) != np.empty])
+
+    def optimize_kernel_width(self, data):
+        optimal_width = optimize.minimize_scalar(self.leaveOneOut_likelihood,
+                                                 args=(data))
+
+        return optimal_width
+
+    def fit_kernel_to_data(self, _data):
+        data_points = np.linspace(_data.min(), _data.max(),
+                                  len(_data), endpoint=True, dtype=np.float64)
+
+        out_mtx_cal = np.empty((_data.shape[0], _data.shape[0]))
+        kernel_width = self.optimize_kernel_width(_data)['x']
+        for i, p in enumerate(data_points):
+            for j, v in enumerate(_data):
+                out_mtx_cal[i, j] = self.gauss_kernel(
+                    (p - v), kernel_width)
+        norm_vals = [np.mean(out_mtx_cal[r])
+                     for r in range(out_mtx_cal.shape[0])]
+        return kernel_width, norm_vals, data_points
