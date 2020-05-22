@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 """
-Name:    Plot Spearman Indicator Correlation with Distance
-Purpose: Filter data based on spearman indicator correlation
+Name:    Plot Pearson Indicator Correlation with Distance
+Purpose: Filter PWS data based on Pearson indicator correlation
 
 Created on: 2019-08-10
 

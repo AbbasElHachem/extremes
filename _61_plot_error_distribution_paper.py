@@ -32,8 +32,18 @@ fit_kernel_fct = KernelDensityEstimate()
 register_matplotlib_converters()
 
 plt.ioff()
-plt.rcParams.update({'font.size': 16})
-plt.rcParams.update({'axes.labelsize': 16})
+
+SMALL_SIZE = 12
+MEDIUM_SIZE = 14
+BIGGER_SIZE = 16
+
+plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
+plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
 
 path_to_use = Path(
@@ -290,36 +300,46 @@ for temp_freq in ['60min', '1440min']:
         print(msg)
 
 
+# get start and end date of events, for labeling
+
+strt_ev1_60 = str(pd.to_datetime(events_60min[0]) - pd.Timedelta(hours=1))
+strt_ev2_60 = str(pd.to_datetime(events_60min[1]) - pd.Timedelta(hours=1))
+
+strt_ev1_1440 = str(pd.to_datetime(events_1440min[0]) -
+                    pd.Timedelta(days=1))  # .split(' ')[0]
+strt_ev2_1440 = str(pd.to_datetime(events_1440min[1]) -
+                    pd.Timedelta(days=1))  # .split(' ')[0]
+
 plt.ioff()
 
 
-fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(22, 14), dpi=100
-                                             )
+fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2,
+                                             figsize=(24, 14), dpi=100)
 
 
 ax1.plot(pp_60[events_60min[0]]['C0'][0], no_60[events_60min[0]]['C0'][0],
          c='k',  marker='_', alpha=0.85)
 ax1.plot(pp_60[events_60min[0]]['C1'][0], no_60[events_60min[0]]['C1'][0],
-         c='r',  marker='+', alpha=0.75)
+         c='r',  marker='+', alpha=0.65)
 ax1.plot(pp_60[events_60min[0]]['C2'][0], no_60[events_60min[0]]['C2'][0],
-         c='b',  marker='1', alpha=0.75)
+         c='b',  marker='1', alpha=0.65)
 ax1.plot(pp_60[events_60min[0]]['C3'][0], no_60[events_60min[0]]['C3'][0],
-         c='g',  marker='o', alpha=0.75)
+         c='g',  marker='o', alpha=0.65)
 ax1.plot(pp_60[events_60min[0]]['C4'][0], no_60[events_60min[0]]['C4'][0],
-         c='orange', marker='.', alpha=0.75)
+         c='orange', marker='.', alpha=0.65)
 
 ax1.axvline(x=0, color='k', linestyle='--', alpha=0.35)
 
 ax2.plot(pp_60[events_60min[1]]['C0'][0], no_60[events_60min[1]]['C0'][0],
          c='k',  marker='_', alpha=0.85)
 ax2.plot(pp_60[events_60min[1]]['C1'][0], no_60[events_60min[1]]['C1'][0],
-         c='r', marker='+', alpha=0.75)
+         c='r', marker='+', alpha=0.65)
 ax2.plot(pp_60[events_60min[1]]['C2'][0], no_60[events_60min[1]]['C2'][0],
-         c='b',  marker='1', alpha=0.75)
+         c='b',  marker='1', alpha=0.65)
 ax2.plot(pp_60[events_60min[1]]['C3'][0], no_60[events_60min[1]]['C3'][0],
-         c='g',  marker='o', alpha=0.75)
+         c='g',  marker='o', alpha=0.65)
 ax2.plot(pp_60[events_60min[1]]['C4'][0], no_60[events_60min[1]]['C4'][0],
-         c='orange',  marker='.', alpha=0.75)
+         c='orange',  marker='.', alpha=0.65)
 
 ax2.axvline(x=0, color='k', linestyle='--', alpha=0.35)
 
@@ -328,16 +348,16 @@ ax3.plot(pp_1440[events_1440min[0]]['C0'][0],
          c='k', marker='_', alpha=0.85)
 ax3.plot(pp_1440[events_1440min[0]]['C1'][0],
          no_1440[events_1440min[0]]['C1'][0],
-         c='r',  marker='+', alpha=0.75)
+         c='r',  marker='+', alpha=0.65)
 ax3.plot(pp_1440[events_1440min[0]]['C2'][0],
          no_1440[events_1440min[0]]['C2'][0],
-         c='b',  marker='1', alpha=0.75)
+         c='b',  marker='1', alpha=0.65)
 ax3.plot(pp_1440[events_1440min[0]]['C3'][0],
          no_1440[events_1440min[0]]['C3'][0],
-         c='g',  marker='o', alpha=0.75)
+         c='g',  marker='o', alpha=0.65)
 ax3.plot(pp_1440[events_1440min[0]]['C4'][0],
          no_1440[events_1440min[0]]['C4'][0],
-         c='orange',  marker='.', alpha=0.75)
+         c='orange',  marker='.', alpha=0.65)
 
 ax3.axvline(x=0, color='k', linestyle='--', alpha=0.35)
 
@@ -346,33 +366,40 @@ ax4.plot(pp_1440[events_1440min[1]]['C0'][0],
          c='k', label='C0', marker='_', alpha=0.85)
 ax4.plot(pp_1440[events_1440min[1]]['C1'][0],
          no_1440[events_1440min[1]]['C1'][0],
-         c='r', label='C1', marker='+', alpha=0.75)
+         c='r', label='C1', marker='+', alpha=0.65)
 ax4.plot(pp_1440[events_1440min[1]]['C2'][0],
          no_1440[events_1440min[1]]['C2'][0],
-         c='b', label='C2', marker='1', alpha=0.75)
+         c='b', label='C2', marker='1', alpha=0.65)
 ax4.plot(pp_1440[events_1440min[1]]['C3'][0],
          no_1440[events_1440min[1]]['C3'][0],
-         c='g', label='C3', marker='o', alpha=0.75)
+         c='g', label='C3', marker='o', alpha=0.65)
 ax4.plot(pp_1440[events_1440min[1]]['C4'][0],
          no_1440[events_1440min[1]]['C4'][0],
          c='orange', label='C4', marker='.', alpha=0.5)
 
 ax4.axvline(x=0, color='k', linestyle='-', alpha=0.35)
 
-ax1.title.set_text('Hourly event %s' % events_60min[0])
-ax2.title.set_text('Hourly event %s' % events_60min[1])
-ax3.title.set_text('Daily event %s' % events_1440min[0])
-ax4.title.set_text('Daily event %s' % events_1440min[1])
+ax1.title.set_text('Hourly event between %s and %s'
+                   % (strt_ev1_60, events_60min[0]))
+ax2.title.set_text('Hourly event between %s and %s'
+                   % (strt_ev2_60, events_60min[1]))
+ax3.title.set_text('Daily event between %s and %s'
+                   % (strt_ev1_1440,
+                      events_1440min[0]))  # .split(' ')[0]
+ax4.title.set_text('Daily event between %s and %s'
+                   % (strt_ev2_1440,
+                      events_1440min[1])
+                   )
 
 #'Pears Corr. C0=%0.2f--C3=%.2f'
 #' Spear Corr.C0=%0.2f--C3=%.2f'
 #% (event_date, corr_dwd, corr_dwd_net,
 #   spr_dwd, spr_dwd_net))
 
-ax1.grid(color='k', linestyle='--', alpha=0.25)
-ax2.grid(color='k', linestyle='--', alpha=0.25)
-ax3.grid(color='k', linestyle='--', alpha=0.25)
-ax4.grid(color='k', linestyle='--', alpha=0.25)
+ax1.grid(color='k', linestyle='--', alpha=0.2)
+ax2.grid(color='k', linestyle='--', alpha=0.2)
+ax3.grid(color='k', linestyle='--', alpha=0.2)
+ax4.grid(color='k', linestyle='--', alpha=0.2)
 
 ax1.set_ylabel('Density')
 ax3.set_ylabel('Density')
