@@ -240,6 +240,9 @@ for temp_freq in ['60min', '1440min']:
             d_opt3, no3, pp3 = fit_kernel_fct.fit_kernel_to_data(data_c3)
             d_opt4, no4, pp4 = fit_kernel_fct.fit_kernel_to_data(data_c4)
 
+            #==================================================================
+            # PLOT EACH EVENT
+            #==================================================================
             plt.ioff()
             fig = plt.figure(figsize=(24, 12), dpi=100)
 
@@ -301,7 +304,9 @@ for temp_freq in ['60min', '1440min']:
 
 
 # get start and end date of events, for labeling
-
+#==============================================================================
+# # make Subplot
+#==============================================================================
 strt_ev1_60 = str(pd.to_datetime(events_60min[0]) - pd.Timedelta(hours=1))
 strt_ev2_60 = str(pd.to_datetime(events_60min[1]) - pd.Timedelta(hours=1))
 
