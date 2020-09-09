@@ -70,7 +70,7 @@ for i, stn in enumerate(df.columns):
     first_ix = df.loc[:, stn].notna().idxmax()
     dict_days[first_ix].append(1)
 
-
+# find station for each day
 dict_days2 = {ix: [0] for ix in df.index}
 for ix2 in dict_days2:
     dict_days2[ix2] = sum(dict_days[ix2])

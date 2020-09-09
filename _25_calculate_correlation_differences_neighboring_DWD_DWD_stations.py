@@ -71,45 +71,45 @@ from _00_additional_functions import (convert_coords_fr_wgs84_to_utm32_,
 
 
 # =============================================================================
-main_dir = Path(os.getcwd())
+main_dir = Path(r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes")
 os.chdir(main_dir)
 
-# path_to_ppt_dwd_data = (
-#     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
-#     r"\all_dwd_hourly_ppt_data_combined_2015_2019_.fk")
-# assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
-#
-# path_to_ppt_csv_data = (
-#     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
-#     r"\all_dwd_hourly_ppt_data_combined_2015_2019_.csv")
-#
-# assert os.path.exists(path_to_ppt_csv_data), 'wrong DWD Ppt file'
-#
-# coords_df_file = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
-#                   r"\station_coordinates_names_hourly_only_in_BW_utm32.csv")
-# assert os.path.exists(coords_df_file), 'wrong DWD coords file'
-
-# for RH
-
-main_dir = Path(r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz"
-                )
-# r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz')
-
-# r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz"
 path_to_ppt_dwd_data = (
-    main_dir /
-    r"ppt_dwd_2014_2019_60min_no_freezing_5deg.fk")
+    r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
+    r"\all_dwd_hourly_ppt_data_combined_2015_2019_.fk")
 assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
 
 path_to_ppt_csv_data = (
-    main_dir /
-    r"ppt_dwd_2014_2019_60min_no_freezing_5deg.csv")
+    r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
+    r"\all_dwd_hourly_ppt_data_combined_2015_2019_.csv")
 
 assert os.path.exists(path_to_ppt_csv_data), 'wrong DWD Ppt file'
 
-coords_df_file = (main_dir /
-                  r"dwd_coords_in_around_RH_utm32.csv")
+coords_df_file = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
+                  r"\station_coordinates_names_hourly_only_in_BW_utm32.csv")
 assert os.path.exists(coords_df_file), 'wrong DWD coords file'
+
+# for RH
+#
+# main_dir = Path(r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz"
+#                 )
+# # r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz')
+#
+# # r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz"
+# path_to_ppt_dwd_data = (
+#     main_dir /
+#     r"ppt_dwd_2014_2019_60min_no_freezing_5deg.fk")
+# assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
+#
+# path_to_ppt_csv_data = (
+#     main_dir /
+#     r"ppt_dwd_2014_2019_60min_no_freezing_5deg.csv")
+#
+# assert os.path.exists(path_to_ppt_csv_data), 'wrong DWD Ppt file'
+#
+# coords_df_file = (main_dir /
+#                   r"dwd_coords_in_around_RH_utm32.csv")
+# assert os.path.exists(coords_df_file), 'wrong DWD coords file'
 
 # path_to_shpfile = (r"P:\2020_DFG_Netatmo\02_WPs\02_WP2\00_shapefiles"
 #                    r"\BW_Landesgrenze_WGS84_UTM32N\Landesgrenze_WGS84.shp")
@@ -122,7 +122,7 @@ assert os.path.exists(coords_df_file), 'wrong DWD coords file'
 # out_save_dir_orig = (r'X:\staff\elhachem\Netatmo_2020\pwsflt_testdata'
 #                      r'\plots_DWD_ppt_DWD_ppt_correlation_')
 
-out_save_dir_orig = (main_dir / r'indicator_correlation')
+out_save_dir_orig = (main_dir / r'indic_corr_2019')
 if not os.path.exists(out_save_dir_orig):
     os.mkdir(out_save_dir_orig)
 
@@ -152,12 +152,12 @@ not_convective_season = []
 
 # starts with one
 # , 2, 3, 4, 5]  # list of which neighbors to chose
-neighbors_to_chose_lst = [1, 2]  # 4, 5, 6, 7, 8]  # 1
+neighbors_to_chose_lst = [1]  # 4, 5, 6, 7, 8]  # 1
 max_dist_thr = 100 * 1e4  # 20km
 min_req_ppt_vals = 30  # stations minimum required ppt values
 
 # select data only within this period (same as netatmo)
-start_date = '2015-01-01 00:00:00'
+start_date = '2019-01-01 00:00:00'
 end_date = '2019-12-30 00:00:00'
 
 date_fmt = '%Y-%m-%d %H:%M:%S'

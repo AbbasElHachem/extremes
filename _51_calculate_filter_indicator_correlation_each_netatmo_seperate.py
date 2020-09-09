@@ -84,8 +84,8 @@ from _00_additional_functions import (resample_intersect_2_dfs,
 register_matplotlib_converters()
 
 # get working directory
-# main_dir = Path(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes')
-# os.chdir(main_dir)
+main_dir = Path(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes')
+os.chdir(main_dir)
 
 use_reduced_sample_dwd = False
 # =============================================================================
@@ -97,7 +97,7 @@ use_reduced_sample_dwd = False
 # which saves memory and runs faster, changing from .csv to .fk is quite easy
 
 # for BW
-'''
+
 # netatmo hourly data
 path_to_ppt_netatmo_data_feather = Path(
     main_dir /
@@ -112,7 +112,7 @@ assert os.path.exists(
 # dwd hourly data
 path_to_ppt_dwd_data = Path(
     main_dir /
-    r"NetAtmo_BW\all_dwd_hourly_ppt_data_combined_2014_2019_.fk")
+    r"NetAtmo_BW\all_dwd_hourly_ppt_data_combined_2015_2019_.fk")
 assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Ppt file'
 
 # distance matrix netatmo-dwd
@@ -143,65 +143,76 @@ path_to_netatmo_gd_stns_file = Path(
     r"keep_stns_all_neighbor_99_0_per_60min_s0.csv")
 #assert os.path.exists(path_to_netatmo_gd_stns_file), 'wrong netatmo stns file'
 
+#==============================================================================
+# # coords of stns in utm32 in BW
+#==============================================================================
 
-out_save_dir_orig = (main_dir /
-                     r'plots_NetAtmo_ppt_DWD_ppt_correlation_')
-
-'''
-
-data_dir = Path(
-    r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz"
-    #r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz/'
-)
-
-main_dir = data_dir
-
-# r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz"
-path_to_ppt_netatmo_data_csv = (
-    data_dir / r'ppt_all_netatmo_rh_2014_2019_60min_no_freezing_5deg.csv')
-assert os.path.exists(path_to_ppt_netatmo_data_csv), 'wrong NETATMO Ppt file'
-
-
-path_to_ppt_netatmo_data_feather = (
-    data_dir /
-    r'ppt_all_netatmo_rh_2014_2019_60min_no_freezing_5deg.fk')
-assert os.path.exists(
-    path_to_ppt_netatmo_data_feather), 'wrong NETATMO Ppt file'
-
-
-# HOURLY DATA
-path_to_ppt_dwd_data = (
-    data_dir /
-    r'ppt_dwd_2014_2019_60min_no_freezing_5deg.fk')
-assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
-
-
-path_to_dwd_coords_df_file = Path(
-    data_dir /
-    r"dwd_coords_in_around_RH_utm32.csv")
-assert os.path.exists(path_to_dwd_coords_df_file), 'wrong DWD coords file'
-
-
-# distance_matrix_netatmo_dwd_df_file = (
-#     data_dir /
-#     r'distance_mtx_in_m_Netatmo_DWD.csv')
-#
-# assert os.path.exists(
-#     distance_matrix_netatmo_dwd_df_file), 'wrong Distance MTX  file'
-
-# path_to_netatmo_coords_df_file = (
-#     data_dir /
-#     r"netatmo_Rheinland-Pfalz_1hour_coords.csv")  # wgs84
-
-# RLP coords in utm32
+# COORDINATES
 path_to_dwd_coords_utm32 = (
-    # r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz'
-    data_dir /
-    r'dwd_coords_in_around_RH_utm32.csv')
+    r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
+    r'/station_coordinates_names_hourly_only_in_BW_utm32.csv')
 
 path_to_netatmo_coords_utm32 = (
-    data_dir /
-    r'netatmo_Rheinland-Pfalz_1hour_coords_utm32.csv')
+    r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
+    r'/netatmo_bw_1hour_coords_utm32.csv')
+# out_save_dir_orig = (main_dir /
+#                      r'plots_NetAtmo_ppt_DWD_ppt_correlation_')
+
+
+#
+# data_dir = Path(
+#     r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz"
+#     #r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz/'
+# )
+#
+# main_dir = data_dir
+#
+# # r"X:\staff\elhachem\2020_10_03_Rheinland_Pfalz"
+# path_to_ppt_netatmo_data_csv = (
+#     data_dir / r'ppt_all_netatmo_rh_2014_2019_60min_no_freezing_5deg.csv')
+# assert os.path.exists(path_to_ppt_netatmo_data_csv), 'wrong NETATMO Ppt file'
+#
+#
+# path_to_ppt_netatmo_data_feather = (
+#     data_dir /
+#     r'ppt_all_netatmo_rh_2014_2019_60min_no_freezing_5deg.fk')
+# assert os.path.exists(
+#     path_to_ppt_netatmo_data_feather), 'wrong NETATMO Ppt file'
+#
+#
+# # HOURLY DATA
+# path_to_ppt_dwd_data = (
+#     data_dir /
+#     r'ppt_dwd_2014_2019_60min_no_freezing_5deg.fk')
+# assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
+#
+#
+# path_to_dwd_coords_df_file = Path(
+#     data_dir /
+#     r"dwd_coords_in_around_RH_utm32.csv")
+# assert os.path.exists(path_to_dwd_coords_df_file), 'wrong DWD coords file'
+#
+#
+# # distance_matrix_netatmo_dwd_df_file = (
+# #     data_dir /
+# #     r'distance_mtx_in_m_Netatmo_DWD.csv')
+# #
+# # assert os.path.exists(
+# #     distance_matrix_netatmo_dwd_df_file), 'wrong Distance MTX  file'
+#
+# # path_to_netatmo_coords_df_file = (
+# #     data_dir /
+# #     r"netatmo_Rheinland-Pfalz_1hour_coords.csv")  # wgs84
+#
+# # RLP coords in utm32
+# path_to_dwd_coords_utm32 = (
+#     # r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz'
+#     data_dir /
+#     r'dwd_coords_in_around_RH_utm32.csv')
+#
+# path_to_netatmo_coords_utm32 = (
+#     data_dir /
+#     r'netatmo_Rheinland-Pfalz_1hour_coords_utm32.csv')
 
 # path_to_netatmo_gd_stns_file = (
 #     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes"
@@ -214,11 +225,11 @@ path_to_netatmo_coords_utm32 = (
 
 # assert os.path.exists(path_to_shpfile), 'wrong shapefile path'
 
-# out_save_dir_orig = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-#                      r'\plots_NetAtmo_ppt_DWD_ppt_correlation_reduced')
-out_save_dir_orig = (
-    data_dir /
-    r'indicator_correlation')
+out_save_dir_orig = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
+                     r'\indic_corr_2019')
+# out_save_dir_orig = (
+#     data_dir /
+#     r'indicator_correlation')
 
 if not os.path.exists(out_save_dir_orig):
     os.mkdir(out_save_dir_orig)
@@ -266,8 +277,8 @@ x_col_name = 'lon'
 y_col_name = 'lat'
 
 # min distance threshold used for selecting neighbours
-min_dist_thr_ppt = 100 * 1e4  # in m, for ex: 30km or 50km
-
+min_dist_thr_ppt = 2500  # 100 * 1e4  # in m, for ex: 30km or 50km
+min_dist_thr_ppt_dwd_dwd = 100e4
 # threshold for max ppt value per hour
 max_ppt_thr = 200.  # ppt above this value are not considered
 
@@ -298,7 +309,7 @@ not_convective_season = []  # this means all months are used
 date_fmt = '%Y-%m-%d %H:%M:%S'
 
 # select data only within this period (same as netatmo)
-start_date = '2015-01-01 00:00:00'
+start_date = '2019-01-01 00:00:00'
 end_date = '2019-12-30 00:00:00'
 
 # =============================================================================
@@ -443,6 +454,7 @@ def compare_netatmo_dwd_indicator_correlations(
                 stn_near = dwd_stns_ids[indices[neighbor_to_chose]]
             except Exception:
                 print('get neighbot')
+            stn_near = '0' * (5 - len(str(stn_near))) + str(stn_near)
             min_dist_ppt_dwd = np.round(distances[neighbor_to_chose], 2)
 
 #             # find distance to all DWD stations, sort them, select minimum
@@ -466,7 +478,7 @@ def compare_netatmo_dwd_indicator_correlations(
                 # =============================================================
 
                 # this will get the ID of the DWD station
-                stn_2_dwd = stn_near  # sorted_distances_ppt_dwd.index[0]
+                stn_2_dwd = str(stn_near)  # sorted_distances_ppt_dwd.index[0]
 
                 # TODO: FIX add TIME
                 try:
@@ -570,7 +582,10 @@ def compare_netatmo_dwd_indicator_correlations(
                             df_dwd_cmn > dwd_ppt_thr_per).astype(int)
 
                         # calculate pearson correlations of booleans 1, 0
-
+                        # spearman correlation between the data
+                        orig_spr_corr = np.round(
+                            pears(df_netatmo_cmn.values.ravel(),
+                                  df_dwd_cmn.values.ravel())[0], 2)
                         bool_pears_corr = np.round(
                             pears(df_dwd_cmn_Bool.values.ravel(),
                                   df_netatmo_cmn_Bool.values.ravel())[0], 2)
@@ -628,7 +643,7 @@ def compare_netatmo_dwd_indicator_correlations(
 #                         print('Second DWD Stn Id is', stn_near,
 #                               'distance is', distance_near)
                         # calculate Indicator correlation between DWD-DWD
-                        if distance_near < min_dist_thr_ppt:
+                        if distance_near < min_dist_thr_ppt_dwd_dwd:
                             #                             print('\n resampling data')
 
                             if (df_dwd_cmn.values.ravel().shape[0] >
@@ -686,6 +701,10 @@ def compare_netatmo_dwd_indicator_correlations(
                                 df_dwd2_cmn_Bool = (
                                     df_common2_dwd > dwd2_ppt_thr_per).astype(int)
 
+                                orig_spr_corr_dwd = np.round(
+                                    pears(df_common1_dwd.values.ravel(),
+                                          df_common2_dwd.values.ravel())[0], 2)
+
                                 # calculate pearson correlations of booleans
                                 # 1, 0
 
@@ -731,6 +750,13 @@ def compare_netatmo_dwd_indicator_correlations(
                                         ppt_stn_id,
                                         'DWD_%s_Per_ppt_thr'
                                         % val_thr_percent] = dwd_ppt_thr_per
+
+                                    df_results_correlations.loc[
+                                        ppt_stn_id,
+                                        'Orig_Spearman_Correlation_Netatmo_DWD'] = orig_spr_corr
+                                    df_results_correlations.loc[
+                                        ppt_stn_id,
+                                        'Orig_Spearman_Correlation_DWD_DWD'] = orig_spr_corr_dwd
 
                                     df_results_correlations.loc[
                                         ppt_stn_id,

@@ -98,11 +98,11 @@ use_reduced_sample_dwd = False
 #==============================================================================
 # # for getting station names in BW
 #==============================================================================
-# path_to_ppt_netatmo_data_csv = (
-#     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-#     r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new_no_freezing_2.csv')
-# assert os.path.exists(path_to_ppt_netatmo_data_csv), 'wrong NETATMO Ppt file'
-#
+path_to_ppt_netatmo_data_csv = (
+    r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
+    r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new_no_freezing_2.csv')
+assert os.path.exists(path_to_ppt_netatmo_data_csv), 'wrong NETATMO Ppt file'
+
 # path_to_ppt_netatmo_data_csv = (
 #     r'/run/media/abbas/EL Hachem 2019/home_office'
 #     r'/NetAtmo_BW/ppt_all_netatmo_hourly_stns_combined_new_no_freezing_2.csv')
@@ -116,9 +116,9 @@ use_reduced_sample_dwd = False
 #     r'\ppt_all_netatmo_rh_hourly_no_freezing_5deg.csv')
 # assert os.path.exists(path_to_ppt_netatmo_data_csv), 'wrong NETATMO Ppt file'
 #
-path_to_ppt_netatmo_data_csv = (
-    r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz/'
-    r'/ppt_all_netatmo_rh_2014_2019_60min_no_freezing_5deg.csv')
+# path_to_ppt_netatmo_data_csv = (
+#     r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz/'
+#     r'/ppt_all_netatmo_rh_2014_2019_60min_no_freezing_5deg.csv')
 assert os.path.exists(path_to_ppt_netatmo_data_csv), 'wrong NETATMO Ppt file'
 
 #==============================================================================
@@ -126,14 +126,14 @@ assert os.path.exists(path_to_ppt_netatmo_data_csv), 'wrong NETATMO Ppt file'
 # # HOURLY DATA
 #==============================================================================
 
-# path_to_ppt_netatmo_data_feather = (
-#     r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-#     r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new_no_freezing_2.fk')
+path_to_ppt_netatmo_data_feather = (
+    r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
+    r'\NetAtmo_BW\ppt_all_netatmo_hourly_stns_combined_new_no_freezing_2.fk')
 # path_to_ppt_netatmo_data_feather = (
 #     r'/run/media/abbas/EL Hachem 2019/home_office'
 #     r'/NetAtmo_BW/ppt_all_netatmo_hourly_stns_combined_new_no_freezing_2.fk')
-# assert os.path.exists(
-#     path_to_ppt_netatmo_data_feather), 'wrong NETATMO Ppt file'
+assert os.path.exists(
+    path_to_ppt_netatmo_data_feather), 'wrong NETATMO Ppt file'
 #==============================================================================
 # # for RLP
 #==============================================================================
@@ -143,34 +143,33 @@ assert os.path.exists(path_to_ppt_netatmo_data_csv), 'wrong NETATMO Ppt file'
 # assert os.path.exists(
 #     path_to_ppt_netatmo_data_feather), 'wrong NETATMO Ppt file'
 
-path_to_ppt_netatmo_data_feather = (
-    r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz'
-    r'/ppt_all_netatmo_rh_2014_2019_60min_no_freezing_5deg.fk')
-assert os.path.exists(
-    path_to_ppt_netatmo_data_feather), 'wrong NETATMO Ppt file'
+# path_to_ppt_netatmo_data_feather = (
+#     r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz'
+#     r'/ppt_all_netatmo_rh_2014_2019_60min_no_freezing_5deg.fk')
+# assert os.path.exists(
+#     path_to_ppt_netatmo_data_feather), 'wrong NETATMO Ppt file'
 
 # HOURLY DATA
 
-# path_to_ppt_dwd_data = (
-#     # r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz'
-#     r"/run/media/abbas/EL Hachem 2019/home_office/NetAtmo_BW"
-#     r"/all_dwd_hourly_ppt_data_combined_2015_2019_no_freezing_5deg_.fk")
-# assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
+path_to_ppt_dwd_data = (
+    r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
+    r"\all_dwd_hourly_ppt_data_combined_2015_2019_.fk")
+assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
 
 # for RLP
-path_to_ppt_dwd_data = (
-    # r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz'
-    r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz'
-    r'/ppt_dwd_2014_2019_60min_no_freezing_5deg.fk')
-assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
+# path_to_ppt_dwd_data = (
+#     # r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz'
+#     r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz'
+#     r'/ppt_dwd_2014_2019_60min_no_freezing_5deg.fk')
+# assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
 
 # BW
 
-# path_to_netatmo_coords_df_file = (
-#     r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
-#     r"\rain_bw_1hour"
-#     r"\netatmo_bw_1hour_coords.csv")
-# assert os.path.exists(path_to_netatmo_coords_df_file), 'wrong DWD coords file'
+path_to_netatmo_coords_df_file = (
+    r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
+    r"\rain_bw_1hour"
+    r"\netatmo_bw_1hour_coords.csv")
+assert os.path.exists(path_to_netatmo_coords_df_file), 'wrong DWD coords file'
 
 # path_to_netatmo_coords_df_file = (
 #     r"/run/media/abbas/EL Hachem 2019/home_office/NetAtmo_BW"
@@ -198,33 +197,33 @@ assert os.path.exists(path_to_ppt_dwd_data), 'wrong DWD Csv Ppt file'
 #==============================================================================
 
 # COORDINATES
-# path_to_dwd_coords_utm32 = (
-#     r'/run/media/abbas/EL Hachem 2019/home_office/NetAtmo_BW'
-#     r'/station_coordinates_names_hourly_only_in_BW_utm32.csv')
-#
-# path_to_netatmo_coords_utm32 = (
-#     r'/run/media/abbas/EL Hachem 2019/home_office/NetAtmo_BW'
-#     r'/netatmo_bw_1hour_coords_utm32.csv')
+path_to_dwd_coords_utm32 = (
+    r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
+    r'/station_coordinates_names_hourly_only_in_BW_utm32.csv')
+
+path_to_netatmo_coords_utm32 = (
+    r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW"
+    r'/netatmo_bw_1hour_coords_utm32.csv')
 
 #==============================================================================
 # # coords of stns in utm32 in RH
 #==============================================================================
 
 # COORDINATES
-path_to_dwd_coords_utm32 = (
-    r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz'
-    r'/dwd_coords_in_around_RH_utm32.csv')
+# path_to_dwd_coords_utm32 = (
+#     r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz'
+#     r'/dwd_coords_in_around_RH_utm32.csv')
+#
+# path_to_netatmo_coords_utm32 = (
+#     r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz'
+#     r'/netatmo_Rheinland-Pfalz_1hour_coords_utm32.csv')
 
-path_to_netatmo_coords_utm32 = (
-    r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz'
-    r'/netatmo_Rheinland-Pfalz_1hour_coords_utm32.csv')
-
-# out_save_dir_orig = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
-#                      r'\plots_NetAtmo_ppt_DWD_ppt_correlation_reduced')
-out_save_dir_orig = (
-    # r'/run/media/abbas/EL Hachem
-    # 2019/home_office/indicator_correlation_BW_new')
-    r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz/indicator_correlation')
+out_save_dir_orig = (r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes'
+                     r'\indic_corr_2019')
+# out_save_dir_orig = (
+# r'/run/media/abbas/EL Hachem
+# 2019/home_office/indicator_correlation_BW_new')
+#     r'/run/media/abbas/EL Hachem 2019/home_office/2020_10_03_Rheinland_Pfalz/indicator_correlation')
 #     r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\indicator_correlation')
 
 if not os.path.exists(out_save_dir_orig):
@@ -261,7 +260,7 @@ x_col_name = 'lon'
 y_col_name = 'lat'
 
 # min distance threshold used for selecting neighbours
-min_dist_thr_ppt = 100 * 1e4  # 5000  # m
+min_dist_thr_ppt = 2500  # 5000  # m
 
 # threshold for max ppt value per hour
 max_ppt_thr = 200.  # ppt above this value are not considered
@@ -287,11 +286,11 @@ not_convective_season = []  # oct till april
 date_fmt = '%Y-%m-%d %H:%M:%S'
 
 # select data only within this period (same as netatmo)
-start_date = '2014-01-01 00:00:00'
+start_date = '2019-01-01 00:00:00'
 end_date = '2019-12-30 00:00:00'
 
-nbr_years = 5  # 2015 +4 = 2019
-years = ['2015']  # , '2016', '2017', '2018', '2019']
+nbr_years = 1  # 2015 +4 = 2019
+years = ['2019']  # , '2016', '2017', '2018', '2019']
 #==============================================================================
 #
 #==============================================================================
@@ -510,7 +509,8 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
                                     index=df_dwd_cmn.index,
                                     columns=[stn_2_dwd])
 
-                                # get coordinates of netatmo station for plotting
+                                # get coordinates of netatmo station for
+                                # plotting
 #                                 lon_stn_netatmo = in_netatmo_df_coords.loc[
 #                                     ppt_stn_id_name_orig, x_col_name]
 #                                 lat_stn_netatmo = in_netatmo_df_coords.loc[
@@ -522,13 +522,13 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
 
                                 # calculate pearson and spearman between original
                                 # values
-#                                 orig_pears_corr = np.round(
-#                                     pears(df_dwd_cmn.values.ravel(),
-#                                           df_netatmo_cmn.values.ravel())[0], 2)
-#
-#                                 orig_spr_corr = np.round(
-#                                     spr(df_dwd_cmn.values,
-#                                         df_netatmo_cmn.values)[0], 2)
+                                orig_pears_corr = np.round(
+                                    pears(df_dwd_cmn.values.ravel(),
+                                          df_netatmo_cmn.values.ravel())[0], 2)
+
+                                orig_spr_corr = np.round(
+                                    spr(df_dwd_cmn.values,
+                                        df_netatmo_cmn.values)[0], 2)
 
                                 #==============================================
                                 # select only upper tail of values of both dataframes
@@ -573,38 +573,38 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
 #                                                             'lon'] = lon_stn_netatmo
 #                                 df_results_correlations.loc[ppt_stn_id,
 #                                                             'lat'] = lat_stn_netatmo
-#                                 df_results_correlations.loc[
-#                                     ppt_stn_id,
-#                                     'Distance to neighbor'] = min_dist_ppt_dwd
-#
-#                                 df_results_correlations.loc[
-#                                     ppt_stn_id,
-#                                     'DWD neighbor ID'] = stn_2_dwd
-#
-#                                 df_results_correlations.loc[
-#                                     ppt_stn_id,
-#                                     'Netatmo_%s_Per_ppt_thr'
-#                                     % val_thr_percent] = netatmo_ppt_thr_per
-#
-#                                 df_results_correlations.loc[
-#                                     ppt_stn_id,
-#                                     'DWD_%s_Per_ppt_thr'
-#                                     % val_thr_percent] = dwd_ppt_thr_per
-#
-#                                 df_results_correlations.loc[
-#                                     ppt_stn_id,
-#                                     'Orig_Pearson_Correlation'] = orig_pears_corr
-#
-#                                 df_results_correlations.loc[
-#                                     ppt_stn_id,
-#                                     'Orig_Spearman_Correlation'] = orig_spr_corr
-#
-#                                 df_results_correlations.loc[
-#                                     ppt_stn_id,
-#                                     'Bool_Spearman_Correlation'] = bool_pears_corr
-                                df_results_correlations_yearly.loc[
-                                    year, ppt_stn_id] = [min_dist_ppt_dwd,
-                                                         bool_pears_corr]
+                                df_results_correlations.loc[
+                                    ppt_stn_id,
+                                    'Distance to neighbor'] = min_dist_ppt_dwd
+
+                                df_results_correlations.loc[
+                                    ppt_stn_id,
+                                    'DWD neighbor ID'] = stn_2_dwd
+
+                                df_results_correlations.loc[
+                                    ppt_stn_id,
+                                    'Netatmo_%s_Per_ppt_thr'
+                                    % val_thr_percent] = netatmo_ppt_thr_per
+
+                                df_results_correlations.loc[
+                                    ppt_stn_id,
+                                    'DWD_%s_Per_ppt_thr'
+                                    % val_thr_percent] = dwd_ppt_thr_per
+
+                                df_results_correlations.loc[
+                                    ppt_stn_id,
+                                    'Orig_Pearson_Correlation'] = orig_pears_corr
+
+                                df_results_correlations.loc[
+                                    ppt_stn_id,
+                                    'Orig_Spearman_Correlation'] = orig_spr_corr
+
+                                df_results_correlations.loc[
+                                    ppt_stn_id,
+                                    'Bool_Spearman_Correlation'] = bool_pears_corr
+#                                 df_results_correlations_yearly.loc[
+#                                     year, ppt_stn_id] = [min_dist_ppt_dwd,
+#                                                          bool_pears_corr]
                                 print('\n********\n ADDED DATA TO DF RESULTS')
                             else:
                                 print(
@@ -619,26 +619,26 @@ def compare_netatmo_dwd_p1_or_p5_or_mean_ppt_or_correlations(
             continue
     assert alls_stns_len == 0, 'not all stations were considered'
 
-#     df_results_correlations.dropna(how='all', inplace=True)
-#     df_results_correlations.to_csv(
-#         os.path.join(out_save_dir_orig,
-#                      '2pearson_year_allyears_df_comparing_correlations_max_sep_dist_%d_'
-#                      'freq_%s_dwd_netatmo_upper_%s_percent_data_considered'
-#                      '_neighbor_%d_.csv'  # filtered_95
-#                      % (min_dist_thr_ppt, temp_freq_resample,
-#                         str(val_thr_percent).replace('.', '_'),
-#                          neighbor_to_chose)),
-#         sep=';')
-    df_results_correlations_yearly.dropna(how='all', inplace=True)
-    df_results_correlations_yearly.to_csv(
+    df_results_correlations.dropna(how='all', inplace=True)
+    df_results_correlations.to_csv(
         os.path.join(out_save_dir_orig,
-                     '0pearson_yearly_df_comparing_correlations_max_sep_dist_%d_'
+                     '2pearson_year_allyears_df_comparing_correlations_max_sep_dist_%d_'
                      'freq_%s_dwd_netatmo_upper_%s_percent_data_considered'
                      '_neighbor_%d_.csv'  # filtered_95
                      % (min_dist_thr_ppt, temp_freq_resample,
                         str(val_thr_percent).replace('.', '_'),
                          neighbor_to_chose)),
         sep=';')
+#     df_results_correlations_yearly.dropna(how='all', inplace=True)
+#     df_results_correlations_yearly.to_csv(
+#         os.path.join(out_save_dir_orig,
+#                      '0pearson_yearly_df_comparing_correlations_max_sep_dist_%d_'
+#                      'freq_%s_dwd_netatmo_upper_%s_percent_data_considered'
+#                      '_neighbor_%d_.csv'  # filtered_95
+#                      % (min_dist_thr_ppt, temp_freq_resample,
+#                         str(val_thr_percent).replace('.', '_'),
+#                          neighbor_to_chose)),
+#         sep=';')
     return df_results_correlations_yearly
 
 #==============================================================================

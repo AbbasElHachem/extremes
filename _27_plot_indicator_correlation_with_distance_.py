@@ -52,14 +52,14 @@ plt.rcParams.update({'axes.labelsize': 26})
 #
 #==============================================================================
 # for BW
-#main_dir = Path(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes')
+main_dir = Path(r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes')
 
-#data_dir_Netamto_dfs = main_dir / r'plots_NetAtmo_ppt_DWD_ppt_correlation_'
+data_dir_Netamto_dfs = main_dir / r'indic_corr_2019'
 # r'plots_NetAtmo_1Deg_ppt_DWD_ppt_correlation_'
 
 # for RLP
-data_dir_Netamto_dfs = Path(
-    r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\indicator_correlation')
+# data_dir_Netamto_dfs = Path(
+#     r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz\indicator_correlation')
 
 # data_dir_Netamto_dfs = Path(
 # r'/run/media/abbas/EL Hachem
@@ -116,6 +116,9 @@ df0_b4 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc_b4, time_freq,
                           data_source, percent, 0,
                           use_filtered_data=use_filtered_data,
                           filter_percent=filtered_percent)
+
+df0_b4 = (r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\indic_corr_2019\2pearson_year_allyears_df_comparing_correlations_max_sep_dist_2500_freq_60min_dwd_netatmo_upper_99_0_percent_data_considered_neighbor_0_.csv"
+          )
 # df1_b4 = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc_b4, time_freq,
 #                           data_source, percent, 1,
 #                           use_filtered_data=use_filtered_data,
@@ -130,6 +133,10 @@ df0_after = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc_after, time_
                              data_source, percent, 0,
                              use_filtered_data=use_filtered_data,
                              filter_percent=filtered_percent)
+
+df0_after = (
+    r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\indic_corr_2019\new_method_pearson_year_allyears_df_comparing_correlations_max_sep_dist_2500_freq_60min_dwd_netatmo_upper_99_0_percent_data_considered_neighbor_0_.csv"
+)
 # df1_after = gen_path_df_file(data_dir_Netamto_dfs, netatmo_path_acc_after, time_freq,
 #                              data_source, percent, 1,
 #                              use_filtered_data=use_filtered_data,
@@ -158,6 +165,9 @@ df0_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
                            data_source, percent, 1)
 df1_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
                            data_source, percent, 2)
+
+df0_dwd = (
+    r"X:\hiwi\ElHachem\Prof_Bardossy\Extremes\indic_corr_2019\pearson_year_allyears_df_dwd_correlationsfreq_60min_dwd_netatmo_upper_99_0_percent_data_considered_neighbor_1_.csv")
 # df2_dwd = gen_path_df_file(data_dir_DWD_dfs, dwd_path_Acc, time_freq,
 #                            data_source, percent, 3)
 
@@ -212,7 +222,7 @@ save_dir = data_dir_Netamto_dfs
 
 
 in_df0_dwd = pd.read_csv(df0_dwd, index_col=0, sep=';').dropna(how='all')
-in_df1_dwd = pd.read_csv(df1_dwd, index_col=0, sep=';').dropna(how='all')
+# in_df1_dwd = pd.read_csv(df1_dwd, index_col=0, sep=';').dropna(how='all')
 # in_df2_dwd = pd.read_csv(df2_dwd, index_col=0, sep=';').dropna(how='all')
 # in_df3_dwd = pd.read_csv(df3_dwd, index_col=0, sep=';').dropna(how='all')
 # in_df4_dwd = pd.read_csv(df4_dwd, index_col=0, sep=';').dropna(how='all')
@@ -246,16 +256,16 @@ in_df0_after = pd.read_csv(df0_after, index_col=0, sep=';').dropna(how='all')
 
 
 x0_dwd0 = in_df0_dwd.loc[:, 'Distance to neighbor'].values.ravel()
-x1_dwd0 = in_df1_dwd.loc[:, 'Distance to neighbor'].values.ravel()
+# x1_dwd0 = in_df1_dwd.loc[:, 'Distance to neighbor'].values.ravel()
 # x2_dwd0 = in_df2_dwd.loc[:, 'Distance to neighbor'].values.ravel()
 
 # x3_dwd0 = in_df3_dwd.loc[:, 'Distance to neighbor'].values.ravel()
 # x4_dwd0 = in_df4_dwd.loc[:, 'Distance to neighbor'].values.ravel()
 # x5_dwd0 = in_df5_dwd.loc[:, 'Distance to neighbor'].values.ravel()
 
-
+#   Bool_Spearman_Correlation
 y0_dwd0 = in_df0_dwd.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
-y1_dwd0 = in_df1_dwd.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
+# y1_dwd0 = in_df1_dwd.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
 # y2_dwd0 = in_df2_dwd.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
 
 # y3_dwd0 = in_df3_dwd.loc[:, 'Bool_Spearman_Correlation'].values.ravel()
@@ -276,9 +286,13 @@ y0_b4 = in_df0_b4.loc[:,
 #     :, 'Distance to neighbor'].values.ravel()
 # y2_b4 = in_df2_b4.loc[:,
 #                       'Bool_Spearman_Correlation'].values.ravel()
-
+# Bool_Pearson_Correlation_Netatmo_DWD
 in_df0_after = in_df0_after[
-    in_df0_after['Bool_Pearson_Correlation_Netatmo_DWD'] > 0.0]
+    in_df0_after['Bool_Pearson_Correlation_Netatmo_DWD'] > 0.2]
+#
+in_df0_after = in_df0_after[
+    in_df0_after['Bool_Pearson_Correlation_Netatmo_DWD'] < 1.0]
+
 # in_df1_after = in_df1_after[
 #     in_df1_after['Bool_Pearson_Correlation_Netatmo_DWD'] > 0.0]
 #
@@ -360,7 +374,7 @@ stns_keep_al_sr.to_csv(
 # s0, x0, y0, in_df0 = read_filter_df_corr_return_stns_x_y_vals(df0)
 # =============================================================================
 # max_x = 34
-max_x = max(x0_b4.max(), 2e4)  # x1_b4.max(), x2_b4.max()
+max_x = max(x0_b4.max(), 2500)  # x1_b4.max(), x2_b4.max()
 #
 plt.ioff()
 
@@ -380,7 +394,7 @@ axs[1].scatter(x0_after, y0_after, c='r', alpha=0.75, marker='x', s=34)
 # axs[1].scatter(x2_after, y2_after, c='g', alpha=0.75, marker='x', s=34)
 
 axs[1].scatter(x0_dwd0, y0_dwd0, c='k', alpha=0.5, marker='o', s=34)
-axs[1].scatter(x1_dwd0, y1_dwd0, c='k', alpha=0.5, marker='o', s=34)
+# axs[1].scatter(x1_dwd0, y1_dwd0, c='k', alpha=0.5, marker='o', s=34)
 # axs[1].scatter(x2_dwd0, y2_dwd0, c='k', alpha=0.5, marker='o', s=34)
 
 # axs[1].scatter(x3_dwd0, y3_dwd0, c='k', alpha=0.5, marker='o', s=34)
@@ -430,14 +444,14 @@ axs[1].legend(title='%d pairs' % y0_after.shape[0], loc='upper right',
 axs[0].set_xlim([0, max_x + 300])
 axs[1].set_xlim([0, max_x + 300])
 
-axs[0].set_xticks(np.arange(0, max_x + 300, 5000))
-axs[1].set_xticks(np.arange(0, max_x + 300, 5000))
+axs[0].set_xticks(np.arange(0, max_x + 300, 500))  # 5000
+axs[1].set_xticks(np.arange(0, max_x + 300, 500))
 
 # plt.xticks(np.arange(0, 21000 + 100, 5000))  # x1.max()
 axs[0].set_ylim([-0.1, 1.1])
 axs[0].set_xlabel('Distance [m]', labelpad=14)
 axs[1].set_xlabel('Distance [m]', labelpad=14)
-axs[0].set_ylabel('Indicator Correlation', labelpad=16)
+axs[0].set_ylabel('Rank Correlation', labelpad=16)  # Indicator
 # plt.legend(loc=0)
 axs[0].grid(alpha=.25)
 axs[1].grid(alpha=.25)
