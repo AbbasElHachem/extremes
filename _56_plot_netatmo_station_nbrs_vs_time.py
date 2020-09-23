@@ -31,26 +31,26 @@ register_matplotlib_converters()
 
 # for BW
 # Set base folder
-# basefolder = r'X:\exchange\hespen\05_netatmo'
-# os.chdir(basefolder)
+basefolder = r'X:\exchange\hespen\05_netatmo'
+os.chdir(basefolder)
 #
 # #%%
-# path_netatmo_ppt_data = r"ppt_all_netatmo_bw_hourly_everything.csv"
+path_netatmo_ppt_data = r"ppt_all_netatmo_bw_hourly_everything.csv"
 #
 # path_netatmo_ppt_data_daily = (r"X:\hiwi\ElHachem\Prof_Bardossy"
 #                                r"\Extremes\NetAtmo_BW\ppt_all_netatmo_1440min_.csv")
 
 # for RLP
-basefolder = r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz'
-os.chdir(basefolder)
+# basefolder = r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz'
+# os.chdir(basefolder)
 
 #%%
-path_netatmo_ppt_data = r"ppt_all_netatmo_rh_2014_2019_60min_no_freezing_5deg.csv"
+# path_netatmo_ppt_data = r"ppt_all_netatmo_rh_2014_2019_60min_no_freezing_5deg.csv"
 
-
+print('reading all hourly data, this is slow.....')
 df = pd.read_csv(path_netatmo_ppt_data, sep=';', index_col=0, engine='c',
                  parse_dates=True, infer_datetime_format=True)
-
+print('done reading data')
 df.dropna(how='all', inplace=True)
 
 df = df.loc['2014-06-01 00:00:00':'2019-10-31 23:00:00', :]
@@ -64,13 +64,13 @@ df = df.loc['2014-06-01 00:00:00':'2019-10-31 23:00:00', :]
 #==============================================================================
 df_operation_times = pd.DataFrame(index=df.index)
 dict_days = {ix: [0] for ix in df.index}
-# find first valid idx per station
+print('find first valid idx per station')
 for i, stn in enumerate(df.columns):
-    print(i, '/', len(df.columns))
+    # print(i, '/', len(df.columns))
     first_ix = df.loc[:, stn].notna().idxmax()
     dict_days[first_ix].append(1)
 
-# find station for each day
+print('find station for each day')
 dict_days2 = {ix: [0] for ix in df.index}
 for ix2 in dict_days2:
     dict_days2[ix2] = sum(dict_days[ix2])
@@ -90,7 +90,7 @@ df_netatmo_ppt = pd.read_csv(path_netatmo_ppt_data,
                              parse_dates=True, infer_datetime_format=True)
 df_netatmo_ppt.dropna(how='all', inplace=True)
 
-
+print('find number of valid pws for each day')
 nbr_days_per_stn = []
 for stn in df_netatmo_ppt.columns:
     df_stn = df_netatmo_ppt.loc[:, stn].dropna(how='all')
@@ -108,6 +108,7 @@ df_count = pd.Series(data=number_of_data_per_stn,
 #==============================================================================
 # PLOT
 #==============================================================================
+print('plotting')
 plt.ioff()
 fig, axs = plt.subplots(1, 2, sharex=False, sharey=False,
                         figsize=(32, 16), dpi=300)
@@ -149,7 +150,7 @@ axs[1].grid(color='k', linestyle='--', linewidth=0.1, alpha=0.5)
 #          df3.max().values[0]], color='r', linestyle='--')
 
 axs[0].set_ylabel(
-    'Netatmo Stations in RLP with valid Observations', labelpad=16)  # BW
+    'Netatmo Stations in BW with valid Observations', labelpad=16)  # BW
 # ax.set_xlabel('Time', ha="center")
 axs[0].plot(df3.index, df3.values, color='b',
             alpha=0.95)
@@ -168,7 +169,7 @@ axs[0].axvline(x='2019-12-31 00:00:00', color='k', linestyle='--', alpha=0.25)
 
 
 #ax.axvline(x='2019-12-31 00:00:00', color='k', linestyle='--', alpha=0.75)
-axs[0].set_yticks([0, 500, 1000, 1500, 2000, 2500])  # 3000
+axs[0].set_yticks([0, 500, 1000, 1500, 2000, 2500, 3000])  # 3000
 # np.arange(0, 3200, 250))
 
 axs[0].set_xticks(['2014-06-30 00:00:00',
@@ -176,7 +177,7 @@ axs[0].set_xticks(['2014-06-30 00:00:00',
                    '2016-06-30 00:00:00',
                    '2017-06-30 00:00:00',
                    '2018-06-30 00:00:00',
-                   '2019-06-30 00:00:00'],  # 03 bor BW
+                   '2019-03-30 00:00:00'],  # 03 bor BW
                   minor=False)
 axs[0].set_xlim([df3.index[0] - pd.Timedelta(days=5),
                  df3.index[-1] + pd.Timedelta(days=5)])
@@ -195,7 +196,7 @@ axs[1].legend(title='b)', loc='upper left',
 plt.tight_layout()
 # can also save it as a PDF, JPEG, etc.
 plt.savefig(
-    r"RLP_data.png",
+    r"X:\exchange\ElHachem\python_code_paper_2\pws_stns_with_time.png",
     papertype='a4',
     bbox_inches="tight")
 plt.close('all')
