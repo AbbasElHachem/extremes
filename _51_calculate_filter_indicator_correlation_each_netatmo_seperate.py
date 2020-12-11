@@ -277,7 +277,7 @@ x_col_name = 'lon'
 y_col_name = 'lat'
 
 # min distance threshold used for selecting neighbours
-min_dist_thr_ppt = 2500  # 100 * 1e4  # in m, for ex: 30km or 50km
+min_dist_thr_ppt = 2.5 * 1e4  # in m, for ex: 30km or 50km # 2500
 min_dist_thr_ppt_dwd_dwd = 100e4
 # threshold for max ppt value per hour
 max_ppt_thr = 200.  # ppt above this value are not considered
@@ -309,7 +309,7 @@ not_convective_season = []  # this means all months are used
 date_fmt = '%Y-%m-%d %H:%M:%S'
 
 # select data only within this period (same as netatmo)
-start_date = '2019-01-01 00:00:00'
+start_date = '2015-01-01 00:00:00'
 end_date = '2019-12-30 00:00:00'
 
 # =============================================================================
@@ -767,6 +767,9 @@ def compare_netatmo_dwd_indicator_correlations(
                                 else:
                                     pass
                                     print('Removing Netatmo')
+                                    df_results_correlations.loc[
+                                        ppt_stn_id,
+                                        'Distance to neighbor'] = -999
 #                         print('\n********\n ADDED DATA TO DF RESULTS')
                     else:
                         pass
@@ -785,6 +788,9 @@ def compare_netatmo_dwd_indicator_correlations(
     assert alls_stns_len == 0, 'not all stations were considered'
 
     df_results_correlations.dropna(how='all', inplace=True)
+    df_results_correlations_ = df_results_correlations[df_results_correlations['Distance to neighbor'] > 0]
+
+    # df_results_correlations_.loc[:, 'Distance to neighbor'].max()
     df_results_correlations.to_csv(
         os.path.join(
             out_save_dir_orig,

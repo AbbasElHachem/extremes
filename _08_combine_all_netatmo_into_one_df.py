@@ -30,9 +30,9 @@ from _00_additional_functions import (list_all_full_path,
 #
 #==============================================================================
 # rain_bw_1hour'
-# dfs_loc = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\rain_bw_5min'
+dfs_loc = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\rain_bw_1hour'
 # dfs_loc = r'X:\staff\elhachem\Data\Netatmo_data\rain_Reutlingen_5min'
-dfs_loc = r'X:\staff\elhachem\Data\Netatmo_data\rain_Rheinland-Pfalz_1hour'
+# dfs_loc = r'X:\staff\elhachem\Data\Netatmo_data\rain_Rheinland-Pfalz_1hour'
 
 # dfs_loc = r'/run/media/abbas/EL Hachem 2019/home_office/Data/Netatmo_data/rain_Rheinland-Pfalz_1hour/'
 # dfs_loc = r'X:\hiwi\ElHachem\Prof_Bardossy\Extremes\NetAtmo_BW\rain_UK_1hour'
@@ -45,8 +45,7 @@ dfs_list_ppt = list(filter(lambda x: ('coords' not in x and
 stn_ids = split_df_file_to_get_alls_stn_ids(dfs_list_ppt)
 # 2014-04-01 00:00:00 for ppt
 
-
-date_range = pd.date_range('2014-06-01 00:00:00',
+date_range = pd.date_range('2015-01-01 00:00:00',
                            '2019-12-31 00:00:00',
                            freq='H')  # 'H'
 
@@ -140,7 +139,7 @@ for df_file in dfs_list_ppt:
     all_dfs_len -= 1
 
 print('Saving Dataframe')
-df_all.dropna(how='all', inplace=True)
+df_all.dropna(axis=1, how='all', inplace=True)
 df_all.to_csv(os.path.join(r'X:\staff\elhachem\2020_10_03_Rheinland_Pfalz',
                            r'ppt_all_netatmo_rh_hourly.csv'),  #
               sep=';', float_format='%.2f')  # temperature humidity ppt

@@ -150,7 +150,8 @@ axs[1].grid(color='k', linestyle='--', linewidth=0.1, alpha=0.5)
 #          df3.max().values[0]], color='r', linestyle='--')
 
 axs[0].set_ylabel(
-    'Netatmo Stations in BW with valid Observations', labelpad=16)  # BW
+    'Netatmo Stations in BW with valid Observations', labelpad=16,
+    rotation=-90)  # BW
 # ax.set_xlabel('Time', ha="center")
 axs[0].plot(df3.index, df3.values, color='b',
             alpha=0.95)
