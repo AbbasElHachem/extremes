@@ -6,6 +6,8 @@ GOAL: A combination of differrent functions used along the different scripts
 
 Functions are called in different scripts, refer to the script to know where 
     it is called and what modifications may be needed
+    
+    soome are not used
 """
 
 __author__ = "Abbas El Hachem"
