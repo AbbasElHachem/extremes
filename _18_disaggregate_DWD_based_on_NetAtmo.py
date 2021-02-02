@@ -12,6 +12,8 @@ Check if this gives reasonable Temporal structure or not
 
 Save the daily DWD and NetAtmo sums in a dataframe, use it to find 
 scaling factor between the values
+
+This is not used later on
 """
 
 
