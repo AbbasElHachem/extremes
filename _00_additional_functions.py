@@ -1833,7 +1833,7 @@ class KernelDensityEstimate(object):
                 if punkte == daten_wert:
                     out_matx[i, j] = np.nan
                 else:
-                    out_matx[i, j] = self.gauss_kernel(
+                    out_matx[i, j] = self.epanechnikov_kernel(
                         punkte - daten_wert, kernel_width)
         return out_matx
 
@@ -1857,7 +1857,7 @@ class KernelDensityEstimate(object):
         kernel_width = self.optimize_kernel_width(_data)['x']
         for i, p in enumerate(data_points):
             for j, v in enumerate(_data):
-                out_mtx_cal[i, j] = self.gauss_kernel(
+                out_mtx_cal[i, j] = self.epanechnikov_kernel(
                     (p - v), kernel_width)
         norm_vals = [np.mean(out_mtx_cal[r])
                      for r in range(out_mtx_cal.shape[0])]

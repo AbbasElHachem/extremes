@@ -65,7 +65,7 @@ def list_all_full_path(ext, file_dir):
 
 if plot_filtered:
     # , '180min', '360min', '720min', '1440min']:
-    for temp_freq in ['60min', '180min', '360min', '720min', '1440min']:
+    for temp_freq in ['60min']:
         print(temp_freq)
 
         path_to_Qt_ok_un_first_flt__temp_flt_1st_ = main_dir / (
